@@ -114,7 +114,7 @@ Status: complete. The alignment panel supports preset bridge/tunnel/coastal stud
 Purpose: player-built network. Files: src/ui/construction.*, station-panel.*, picking adapter. Interfaces: previewTrack/buildTrack/buildStation. Behavior: pick controls, smooth preview with validity/cost/grade/span breakdown, confirm/cancel. Acceptance: explicit understandable invalid reasons and no money spent on cancelled preview. Tests: complete browser placement, insufficient funds, tool switching. Depends: UI-001, RAIL-004, STATION-001.
 
 ### UI-003 — Train/routes/finance panels
-Status: active. Compact service and route-profit summaries are live; detailed purchase, assignment, cargo and ledger panels remain.
+Status: complete. The railway office lists consist state, speed, onboard passengers and route result; purchases one-to-three-coach steam consists; creates two-stop shuttle routes; assigns stopped trains; shows town demand, reconciled cash/income/outgoings and recent ledger entries. All mutations use typed commands.
 Purpose: make operations observable and editable. Files: src/ui/train.*, routes.*, finance.*, context.*. Interfaces: typed commands and immutable snapshots. Behavior: buy coaches, assign ordered service, inspect speed/cargo/dwell/income/cost/profit and town demand. Acceptance: user completes passenger loop entirely through UI; reports reconcile. Tests: browser purchase/assignment/selection and ledger totals. Depends: UI-001, TRAIN-004, ECON-002.
 
 ### QA-001 — Norwegian passenger vertical slice gate
