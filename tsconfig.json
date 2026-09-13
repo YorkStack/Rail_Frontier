@@ -8,8 +8,17 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "outDir": "dist"
   },
-  "include": ["src", "tests", "tools/*.ts", "spikes"]
+  "include": [
+    "src",
+    "tests",
+    "tools/*.ts",
+    "spikes",
+    "vite.config.ts",
+    "playwright.config.ts"
+  ]
 }

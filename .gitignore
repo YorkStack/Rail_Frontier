@@ -6,3 +6,5 @@ coverage/
 *.blend2
 assets/source/blender/*.blend
 artifacts/
+test-results/
+playwright-report/

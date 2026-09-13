@@ -1,3 +1,4 @@
+import type { OperationsState } from './operations.js';
 /** Canonical simulation coordinates: metres, right handed, X east, Y up, Z south. */
 export interface Vec3 { x: number; y: number; z: number }
 export type EntityKind = 'node' | 'edge' | 'station' | 'train' | 'route' | 'town' | 'industry' | 'company' | 'transaction';
@@ -33,6 +34,7 @@ export interface CampaignDefinition {
   objectives: { id: string; type: 'connectTowns' | 'deliverPassengers' | 'operatingProfit'; target: number }[];
 }
 export interface GameState {
+  operations:OperationsState;
   tick: number; nextEntityId: number; rngState: number; campaignId: string; campaignVersion: number;
   world: WorldDefinition; railway: RailGraph; stations: Station[]; trains: Train[];
   routes: Route[]; towns: Town[]; industries: Industry[];

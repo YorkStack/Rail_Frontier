@@ -1,9 +1,11 @@
+import type { CubicCurve } from '../domain/model.js';
+import { cubicRoots } from '../domain/curve-math.js';
 export interface TerrainSample { elevationM: number; waterLevelM: number | null; forest: number; rock: number; urban: number }
 export interface Terrain {
   readonly widthM: number; readonly depthM: number;
   sample(x: number, z: number): TerrainSample;
 }
-/** The same bilinear surface is authoritative for planning and terrain mesh vertices. */
+/** Samples the same two triangles used by the runtime mesh (diagonal NW to SE). */
 export class Heightfield implements Terrain {
   readonly widthM: number;
   readonly depthM: number;
@@ -20,7 +22,28 @@ export class Heightfield implements Terrain {
     const ix = Math.min(Math.floor(gx), this.columns - 2), iz = Math.min(Math.floor(gz), this.rows - 2);
     const u = gx - ix, v = gz - iz;
     const at = (dx: number, dz: number) => this.heights[(iz + dz) * this.columns + ix + dx]!;
-    const elevationM = (at(0, 0) * (1 - u) + at(1, 0) * u) * (1 - v) + (at(0, 1) * (1 - u) + at(1, 1) * u) * v;
+    const elevationM = u >= v
+      ? at(0, 0) * (1-u) + at(1, 0) * (u-v) + at(1, 1) * v
+      : at(0, 0) * (1-v) + at(0, 1) * (v-u) + at(1, 1) * u;
     return { elevationM, waterLevelM: this.waterLevelM, forest: 0, rock: 0, urban: 0 };
+  }
+  planeAt(x:number,z:number):{dx:number;dz:number;constant:number} {
+    this.sample(x,z);
+    const ix=Math.min(Math.floor(x/this.cellM),this.columns-2),iz=Math.min(Math.floor(z/this.cellM),this.rows-2);
+    const at=(a:number,b:number)=>this.heights[(iz+b)*this.columns+ix+a]!;
+    const u=x/this.cellM-ix,v=z/this.cellM-iz;
+    const dx=(u>=v?at(1,0)-at(0,0):at(1,1)-at(0,1))/this.cellM;
+    const dz=(u>=v?at(1,1)-at(1,0):at(0,1)-at(0,0))/this.cellM;
+    return {dx,dz,constant:at(0,0)-dx*ix*this.cellM-dz*iz*this.cellM};
+  }
+  /** Crossings with X/Z cell boundaries and the NW–SE triangle diagonals. */
+  curveBreakpoints(curve:CubicCurve):number[] {
+    const points=[curve.p0,curve.p1,curve.p2,curve.p3],result=[0,1];
+    for(const values of [points.map(p=>p.x),points.map(p=>p.z),points.map(p=>p.x-p.z)]) {
+      const min=Math.ceil(Math.min(...values)/this.cellM),max=Math.floor(Math.max(...values)/this.cellM);
+      if(max-min>100000)throw new Error('Alignment exceeds terrain analysis budget');
+      for(let grid=min;grid<=max;grid++)result.push(...cubicRoots(values,grid*this.cellM));
+    }
+    return result.sort((a,b)=>a-b).filter((t,i,all)=>i===0||t-all[i-1]!>1e-9);
   }
 }
