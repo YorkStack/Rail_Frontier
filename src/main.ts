@@ -19,8 +19,50 @@ const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
   <canvas id="world" aria-label="Norwegian fjord landscape. Drag to orbit, right drag to pan, scroll to zoom." tabindex="0"></canvas>
   <div class="vignette" aria-hidden="true"></div>
+  <section id="main-menu" class="main-menu" aria-label="Main menu">
+    <div class="menu-sidebar">
+      <div class="menu-brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 4v32M27 4v32M9 11h22M9 20h22M9 29h22"/></svg><span>RAIL <b>FRONTIER</b><small>THE NORTHERN LINE</small></span></div>
+      <p class="menu-edition">NORWAY · 1900</p>
+      <nav aria-label="Main menu sections">
+        <button data-menu-view="campaign" aria-current="page"><span>01</span>Campaign</button>
+        <button data-menu-view="saves"><span>02</span>Load game</button>
+        <button data-menu-view="settings"><span>03</span>Settings</button>
+        <button data-menu-view="credits"><span>04</span>Credits</button>
+      </nav>
+      <p class="menu-version">EARLY OPERATIONS · BUILD 0.2</p>
+    </div>
+    <div class="menu-stage">
+      <button id="close-menu" class="menu-close" aria-label="Return to railway">×</button>
+      <article id="menu-campaign" class="menu-view">
+        <p class="eyebrow">CAMPAIGN 01 · PASSENGER OPERATIONS</p>
+        <h2>The Northern Line</h2>
+        <p class="menu-lede">Thread a railway between cold water and rising stone. Connect the fjord settlements, carry their first passengers, and make the line pay.</p>
+        <div class="campaign-facts"><span>REGION<strong>Norwegian Fjords</strong></span><span>ERA<strong>1900</strong></span><span>DIFFICULTY<strong>Surveyor</strong></span></div>
+        <div class="campaign-objectives" aria-label="Campaign objectives">
+          <p>FIRST CHARTER</p>
+          <span><i>01</i>Connect two settlements</span><span><i>02</i>Carry 200 passengers</span><span><i>03</i>Earn NOK 10,000 operating profit</span>
+        </div>
+        <div class="menu-actions"><button id="new-game" class="primary-action">Start new company <b>→</b></button><button id="continue-game">Continue latest</button></div>
+      </article>
+      <article id="menu-saves" class="menu-view" hidden>
+        <p class="eyebrow">COMPANY ARCHIVE</p><h2>Saved companies</h2><p class="menu-lede">Resume a railway exactly where its operations stopped.</p>
+        <form id="new-save-slot" class="new-save-slot"><label for="save-name">New manual save</label><div><input id="save-name" maxlength="48" required><button>Save current company</button></div></form>
+        <div id="save-slots" class="save-slots" aria-live="polite"></div><p id="save-error" class="menu-error" role="status"></p>
+      </article>
+      <article id="menu-settings" class="menu-view" hidden>
+        <p class="eyebrow">FIELD SETTINGS</p><h2>Landscape & motion</h2><p class="menu-lede">Tune the survey view for this device.</p>
+        <label class="setting-row"><span>Woodland<small>Show instanced trees across the fjord.</small></span><input id="trees-setting" type="checkbox" checked></label>
+        <div class="setting-row"><span>Reduced motion<small>Follows your operating-system preference.</small></span><output id="motion-setting">Off</output></div>
+        <div class="setting-row"><span>Camera controls<small>Drag to orbit · right drag to pan · scroll to zoom.</small></span><output>Active</output></div>
+      </article>
+      <article id="menu-credits" class="menu-view" hidden>
+        <p class="eyebrow">CREDITS & LICENSES</p><h2>Built for the rails.</h2><p class="menu-lede">Rail Frontier is an original browser strategy prototype created in TypeScript and rendered with Three.js.</p>
+        <dl class="credits-list"><div><dt>Direction & engineering</dt><dd>YorkStack with Codex</dd></div><div><dt>3D runtime</dt><dd>Three.js r186 · MIT</dd></div><div><dt>Typography</dt><dd>DM Sans · Libre Caslon Display</dd></div><div><dt>Rolling stock</dt><dd>Original Blender models</dd></div></dl>
+      </article>
+    </div>
+  </section>
   <header class="masthead">
-    <a class="brand" href="/" aria-label="Rail Frontier home"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 4v32M27 4v32M9 11h22M9 20h22M9 29h22"/></svg><span>RAIL <b>FRONTIER</b><small>THE NORTHERN LINE</small></span></a>
+    <button id="open-menu" class="brand" aria-label="Open main menu"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 4v32M27 4v32M9 11h22M9 20h22M9 29h22"/></svg><span>RAIL <b>FRONTIER</b><small>THE NORTHERN LINE</small></span></button>
     <div class="chapter"><span class="live-dot"></span> ACTIVE COMPANY <span class="chapter-number">01 / NORWAY</span></div>
     <div class="session-tools"><button id="save" aria-label="Save study">Save game</button><button id="load" aria-label="Load study">Load game</button><button id="details" class="square" aria-label="Toggle technical diagnostics" aria-expanded="false">⌘</button></div>
   </header>
@@ -36,6 +78,12 @@ app.innerHTML=`
       <button data-town="2"><i></i><span>Fjellhavn<small>The mountain gateway</small></span><b>↗</b></button>
     </nav>
     <div class="study-note"><span>FIRST SERVICE</span><p id="service-summary">Preparing passenger operations.</p></div>
+  </aside>
+  <aside class="objective-card" aria-label="Campaign objectives">
+    <p class="eyebrow">FIRST CHARTER <span id="objective-count">0 / 3</span></p>
+    <div class="objective-row" data-objective="first-connection"><i></i><span>Connect settlements<small id="objective-connection">0 / 2</small></span></div>
+    <div class="objective-row" data-objective="first-passengers"><i></i><span>Carry passengers<small id="objective-passengers">0 / 200</small></span></div>
+    <div class="objective-row" data-objective="profitable-railway"><i></i><span>Operating profit<small id="objective-profit">NOK 0 / 10,000</small></span></div>
   </aside>
   <div id="map-labels" aria-hidden="true"></div>
   <section id="planner" class="floating-panel" hidden aria-label="Alignment study">
@@ -70,12 +118,16 @@ async function start():Promise<void> {
   const labels=view.labels.map(label=>{const node=document.createElement('span');node.className='map-label';node.textContent=label.name;element('#map-labels').append(node);return node;});
   const syncSpeed=()=>{document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.speed)===game.speed)));element('#run-state').textContent=game.speed===0?'PAUSED':'RUNNING';};
   const setSpeed=(value:Speed)=>{const result=game.dispatch({sequence:game.snapshot().operations.lastCommandSequence+1,command:{type:'setSpeed',speed:value}});if(!result.ok){toast(result.reason);return;}state=game.snapshot();syncSpeed();};
+  const startsInMenu=!new URLSearchParams(location.search).has('skip-menu');if(startsInMenu)game.pauseForVisibility();element('#main-menu').hidden=!startsInMenu;syncSpeed();
   document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>setSpeed(Number(button.dataset.speed) as Speed));
   element('#regional').onclick=()=>view.regional();element('#follow').onclick=()=>{view.followTrain();toast('Following the Fjord Corridor passenger service.');};
   document.querySelectorAll<HTMLButtonElement>('[data-town]').forEach(button=>button.onclick=()=>view.focus(state.towns[Number(button.dataset.town)]!.position));
   element('#details').onclick=()=>{const panel=element('#diagnostics');panel.hidden=!panel.hidden;element('#details').setAttribute('aria-expanded',String(!panel.hidden));};
   element<HTMLInputElement>('#stress').onchange=event=>{view.setStress(structuredClone(state) as GameState,(event.target as HTMLInputElement).checked);view.regional();frames.length=0;};
-  element<HTMLInputElement>('#trees').onchange=event=>view.setTrees((event.target as HTMLInputElement).checked);
+  const setTrees=(visible:boolean)=>{view.setTrees(visible);element<HTMLInputElement>('#trees').checked=visible;element<HTMLInputElement>('#trees-setting').checked=visible;};
+  element<HTMLInputElement>('#trees').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
+  element<HTMLInputElement>('#trees-setting').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
+  element('#motion-setting').textContent=matchMedia('(prefers-reduced-motion: reduce)').matches?'On':'Off';
   let preview:{curve:ReturnType<typeof studyCurve>;cost:number;valid:boolean}|null=null;
   const updatePlanner=()=>{
     const mode=element<HTMLSelectElement>('#alignment').value,height=Number(element<HTMLInputElement>('#elevation').value);
@@ -98,7 +150,34 @@ async function start():Promise<void> {
   const load=async()=>{state=await saves.load('study');syncSpeed();return state.tick;};
   element('#save').onclick=()=>{void save().then(tick=>toast(`Study saved at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not save: ${message(error)}`));};
   element('#load').onclick=()=>{void load().then(tick=>toast(`Study resumed at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not load: ${message(error)}`));};
-  const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();if(event.code==='Escape')togglePlanner(false);};
+  const selectMenuView=(name:string)=>{document.querySelectorAll<HTMLElement>('.menu-view').forEach(view=>view.hidden=view.id!==`menu-${name}`);document.querySelectorAll<HTMLButtonElement>('[data-menu-view]').forEach(button=>button.setAttribute('aria-current',button.dataset.menuView===name?'page':'false'));if(name==='saves')void refreshSaveSlots();};
+  const setMenuError=(error:unknown)=>{element('#save-error').textContent=`The archive could not be opened. ${message(error)} Your running company has not been changed.`;};
+  const closeMenu=()=>{element('#main-menu').hidden=true;element<HTMLCanvasElement>('#world').focus();};
+  const openMenu=()=>{game.pauseForVisibility();syncSpeed();element('#main-menu').hidden=false;selectMenuView('campaign');};
+  const loadSlot=async(id:string)=>{state=await saves.load(id);syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);};
+  const refreshSaveSlots=async()=>{
+    const host=element('#save-slots');host.replaceChildren();element('#save-error').textContent='';
+    try {
+      const slots=await saves.list(),continueButton=element<HTMLButtonElement>('#continue-game');continueButton.disabled=slots.length===0;
+      if(slots.length===0){const empty=document.createElement('div');empty.className='empty-slots';empty.innerHTML='<strong>No saved companies</strong><span>Start a company, then use Save game from the railway view.</span>';host.append(empty);return;}
+      for(const slot of slots) {
+        const row=document.createElement('div');row.className='save-slot';
+        const copy=document.createElement('span'),name=document.createElement('strong'),date=document.createElement('small');name.textContent=slot.name;date.textContent=slot.id==='autosave'?`AUTOSAVE · ${formatDate(slot.modifiedAt)}`:formatDate(slot.modifiedAt);copy.append(name,date);
+        const actions=document.createElement('div'),resume=document.createElement('button'),rename=document.createElement('button'),remove=document.createElement('button');resume.textContent='Resume';rename.textContent='Rename';remove.textContent='Delete';actions.append(resume,rename,remove);row.append(copy,actions);host.append(row);
+        resume.onclick=()=>{void loadSlot(slot.id).catch(setMenuError);};
+        rename.onclick=()=>{const form=document.createElement('form'),input=document.createElement('input'),confirm=document.createElement('button');input.value=slot.name;input.maxLength=48;input.setAttribute('aria-label',`New name for ${slot.name}`);confirm.textContent='Save name';form.append(input,confirm);actions.replaceWith(form);input.focus();input.select();form.onsubmit=event=>{event.preventDefault();void saves.rename(slot.id,input.value).then(refreshSaveSlots).catch(setMenuError);};};
+        remove.onclick=()=>{if(remove.dataset.confirm!=='true'){remove.dataset.confirm='true';remove.textContent='Delete?';return;}void saves.remove(slot.id).then(refreshSaveSlots).catch(setMenuError);};
+      }
+    } catch(error){setMenuError(error);const empty=document.createElement('div');empty.className='empty-slots';empty.innerHTML='<strong>Browser storage is unavailable</strong><span>Private browsing or storage limits may prevent saving on this device.</span>';host.append(empty);}
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-menu-view]').forEach(button=>button.onclick=()=>selectMenuView(button.dataset.menuView!));
+  element<HTMLInputElement>('#save-name').value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;
+  element<HTMLFormElement>('#new-save-slot').onsubmit=event=>{event.preventDefault();const input=element<HTMLInputElement>('#save-name'),id=`manual-${Date.now()}`;void saves.save(id,input.value).then(()=>{input.value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;toast('A new manual save was added.');return refreshSaveSlots();}).catch(setMenuError);};
+  element('#open-menu').onclick=openMenu;element('#close-menu').onclick=closeMenu;
+  element('#new-game').onclick=()=>{game.replaceState(createStudyState());state=game.snapshot();setSpeed(1);view.regional();closeMenu();toast('A new company has taken charge of the Northern Line.');};
+  element('#continue-game').onclick=()=>{void saves.continueLatest().then(next=>{state=next;syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
+  void refreshSaveSlots();
+  const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
   window.addEventListener('keydown',keydown);
   let last=performance.now(),request=0,frameCount=0,lastAutosaveDay=Math.floor(state.tick/1200);const frames:number[]=[],renderTimes:number[]=[],tickTimes:number[]=[];
   const visibility=()=>{last=performance.now();if(document.hidden){game.pauseForVisibility();syncSpeed();toast('Study paused while this tab is in the background.');}};
@@ -108,7 +187,8 @@ async function start():Promise<void> {
     const begin=performance.now(),result=game.advance(delta),afterTick=performance.now();state=result.current;view.update(result.previous,result.current,game.speed===0?1:result.alpha);const day=Math.floor(state.tick/1200);if(day>lastAutosaveDay){lastAutosaveDay=day;void saves.autosave().catch(error=>toast(`Autosave failed: ${message(error)}`));}
     if(delta>0&&!document.hidden){frames.push(delta*1000);renderTimes.push(performance.now()-afterTick);tickTimes.push(afterTick-begin);if(frames.length>1800){frames.shift();renderTimes.shift();tickTimes.shift();}}
     for(let i=0;i<labels.length;i++){const p=view.project(view.labels[i]!.position),label=labels[i]!;label.style.transform=`translate(${p.x}px,${p.y}px)`;label.hidden=!p.visible;}
-    if(++frameCount%15===0){const recent=frames.slice(-60),fps=recent.length?recent.length*1000/recent.reduce((a,b)=>a+b,0):0,stats=view.stats(),service=state.operations.trainServices['train:15'];element('#fps').textContent=`${Math.round(fps)} FPS · LIVE LANDSCAPE`;element('#stats').textContent=`${stats.calls} draw calls · ${Math.round(stats.triangles/1000)}k triangles\n${stats.trees.toLocaleString()} trees · ${stats.buildings} buildings\n${stats.trains} train / proxies · LOD ${stats.lod}\n${stats.geometries} geometries · ${stats.textures} textures\nTerrain error: ${stats.terrainErrorM.toFixed(6)} m\nTick ${state.tick.toLocaleString()} · Three.js r186`;element('#cash').textContent=money(state.company.cash);element('#date').textContent=`Day ${Math.floor(state.tick/1200)+1} · 1900`;element('#passengers').textContent=`${state.operations.delivered.passengers.toLocaleString()} delivered`;const profit=(service?.revenue??0)-(service?.operatingCosts??0);element('#profit').textContent=profit===0?'No result yet':`${profit>=0?'+':''}${money(profit)}`;element('#service-summary').textContent=`${state.trains[0]!.phase} · ${Math.round(state.trains[0]!.speedMps*3.6)} km/h · ${state.trains[0]!.cargo.reduce((sum,lot)=>sum+lot.quantity,0)} aboard`;}request=requestAnimationFrame(frame);
+    if(++frameCount%15===0){const recent=frames.slice(-60),fps=recent.length?recent.length*1000/recent.reduce((a,b)=>a+b,0):0,stats=view.stats(),service=state.operations.trainServices['train:15'];element('#fps').textContent=`${Math.round(fps)} FPS · LIVE LANDSCAPE`;element('#stats').textContent=`${stats.calls} draw calls · ${Math.round(stats.triangles/1000)}k triangles\n${stats.trees.toLocaleString()} trees · ${stats.buildings} buildings\n${stats.trains} train / proxies · LOD ${stats.lod}\n${stats.geometries} geometries · ${stats.textures} textures\nTerrain error: ${stats.terrainErrorM.toFixed(6)} m\nTick ${state.tick.toLocaleString()} · Three.js r186`;element('#cash').textContent=money(state.company.cash);element('#date').textContent=`Day ${Math.floor(state.tick/1200)+1} · 1900`;element('#passengers').textContent=`${state.operations.delivered.passengers.toLocaleString()} delivered`;const profit=(service?.revenue??0)-(service?.operatingCosts??0);element('#profit').textContent=profit===0?'No result yet':`${profit>=0?'+':''}${money(profit)}`;element('#service-summary').textContent=`${state.trains[0]!.phase} · ${Math.round(state.trains[0]!.speedMps*3.6)} km/h · ${state.trains[0]!.cargo.reduce((sum,lot)=>sum+lot.quantity,0)} aboard`;updateObjectives(state);}
+    request=requestAnimationFrame(frame);
   };
   request=requestAnimationFrame(frame);toast('The fjord is ready. Explore the landscape or follow the train.');
   const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);view.dispose();void store.close();};
@@ -119,5 +199,18 @@ async function start():Promise<void> {
   }
 }
 const money=(amount:number)=>new Intl.NumberFormat('en',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(amount/100);
+const formatDate=(value:string)=>{const date=new Date(value);return Number.isNaN(date.valueOf())?'Unknown date':new Intl.DateTimeFormat('en',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(date);};
+function updateObjectives(state:Readonly<GameState>):void {
+  const values:{id:string;value:number;target:number}[]=[
+    {id:'first-connection',value:state.objectiveProgress['first-connection']??0,target:2},
+    {id:'first-passengers',value:state.objectiveProgress['first-passengers']??0,target:200},
+    {id:'profitable-railway',value:state.objectiveProgress['profitable-railway']??0,target:1_000_000}
+  ];
+  element('#objective-connection').textContent=`${Math.min(values[0]!.value,2)} / 2`;
+  element('#objective-passengers').textContent=`${Math.min(values[1]!.value,200).toLocaleString()} / 200`;
+  element('#objective-profit').textContent=`${money(Math.min(values[2]!.value,1_000_000))} / ${money(1_000_000)}`;
+  const completed=new Set(state.operations.completedObjectives);for(const objective of values)element(`[data-objective="${objective.id}"]`).classList.toggle('complete',completed.has(objective.id));
+  element('#objective-count').textContent=`${values.filter(objective=>completed.has(objective.id)).length} / ${values.length}`;
+}
 function message(error:unknown):string {return error instanceof Error?error.message:String(error);}
 void start().catch(error=>{console.error(error);element('#toast').classList.add('visible','error');element('#toast').textContent=`The study could not start: ${message(error)}`;element('#fps').textContent='STARTUP FAILED';});
