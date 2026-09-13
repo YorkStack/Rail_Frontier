@@ -1,0 +1,24 @@
+{
+  "name": "rail-frontier",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "spike": "tsx spikes/core.ts",
+    "validate:assets": "tsx tools/validate-assets.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "zod": "4.6.4"
+  }
+}
