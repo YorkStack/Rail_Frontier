@@ -4,8 +4,9 @@ import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/libre-caslon-display/latin-400.css';
 import './ui/study.css';
-import { createStudyState,studyCurve } from '../spikes/study-state.js';
-import { generateFjordStudy } from './world/fjord-study.js';
+import { createNorwayPreviewState,straightCurve } from './content/norway-preview.js';
+import { norway } from './content/norway.js';
+import { generateWorld,norwayShorelineX } from './world/generator.js';
 import { FjordRenderer } from '../spikes/fjord-renderer.js';
 import type { GameState,Speed,Vec3 } from './domain/model.js';
 import { IndexedDbSaveStore } from './persistence/indexeddb.js';
@@ -72,7 +73,7 @@ app.innerHTML=`
     <h1>Between the<br>mountains<br><em>and the sea.</em></h1>
     <p class="intro">A railway along the edge of the fjord.<br>Survey the land. Follow the first train.</p>
     <div class="rule"></div>
-    <p class="eyebrow route-heading">THE FJORD CORRIDOR <span>2.0 KM</span></p>
+    <p class="eyebrow route-heading">THE FJORD CORRIDOR <span>9.2 KM</span></p>
     <nav class="settlements" aria-label="Focus a settlement">
       <button data-town="0"><i></i><span>Sundvik<small>Harbour settlement</small></span><b>↗</b></button>
       <button data-town="1"><i></i><span>Granli<small>Forest & timber country</small></span><b>↗</b></button>
@@ -135,7 +136,7 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const initial=createStudyState(),terrain=generateFjordStudy(initial.world.seed),game=new RailFrontierGame(initial,terrain),view=new FjordRenderer(element<HTMLCanvasElement>('#world'),terrain,initial),store=new IndexedDbSaveStore(),saves=new GameSaveManager(game,store,{campaignId:initial.campaignId,campaignVersion:initial.campaignVersion,worldGeneratorVersion:initial.world.generatorVersion});let state=game.snapshot();
+  const terrain=generateWorld(norway.world),initial=createNorwayPreviewState(terrain),game=new RailFrontierGame(initial,terrain),view=new FjordRenderer(element<HTMLCanvasElement>('#world'),terrain,initial),store=new IndexedDbSaveStore(),saves=new GameSaveManager(game,store,{campaignId:initial.campaignId,campaignVersion:initial.campaignVersion,worldGeneratorVersion:initial.world.generatorVersion});let state=game.snapshot();
   try {await view.loadAssets();}catch(error){view.dispose();await store.close();throw error;}
   const labels=view.labels.map(label=>{const node=document.createElement('span');node.className='map-label';node.textContent=label.name;element('#map-labels').append(node);return node;});
   const syncSpeed=()=>{document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.speed)===game.speed)));element('#run-state').textContent=game.speed===0?'PAUSED':'RUNNING';};
@@ -150,14 +151,16 @@ async function start():Promise<void> {
   element<HTMLInputElement>('#trees').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
   element<HTMLInputElement>('#trees-setting').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
   element('#motion-setting').textContent=matchMedia('(prefers-reduced-motion: reduce)').matches?'On':'Off';
-  let preview:{curve:ReturnType<typeof studyCurve>;cost:number;valid:boolean}|null=null,freePoints:Vec3[]=[],stationNodeId:string|null=null,interaction:'none'|'free-track'|'station'='none';
+  let preview:{curve:ReturnType<typeof straightCurve>;cost:number;valid:boolean}|null=null,freePoints:Vec3[]=[],stationNodeId:string|null=null,interaction:'none'|'free-track'|'station'='none';
   const updatePlanner=()=>{
     const mode=element<HTMLSelectElement>('#alignment').value,height=Number(element<HTMLInputElement>('#elevation').value);
     element('#elevation-controls').hidden=mode==='free';interaction=mode==='free'?'free-track':'none';
     if(mode==='free'&&freePoints.length<2){preview=null;view.setPreview(null);element('#planner-copy').textContent=freePoints.length===0?'Click the landscape to choose the start of a free alignment.':'Start selected. Click the landscape again to choose its destination.';element('#quote-length').textContent='—';element('#quote-cost').textContent='—';element('#quote-kind').textContent='';element('#quote-valid').textContent='Two map points are required.';element<HTMLButtonElement>('#commit-track').disabled=true;return;}
-    let curve:ReturnType<typeof studyCurve>;
+    let curve:ReturnType<typeof straightCurve>;
     if(mode==='free') {const [a,b]=freePoints,third=(start:number,end:number)=>start+(end-start)/3;curve={p0:{...a!},p1:{x:third(a!.x,b!.x),y:third(a!.y,b!.y),z:third(a!.z,b!.z)},p2:{x:third(b!.x,a!.x),y:third(b!.y,a!.y),z:third(b!.z,a!.z)},p3:{...b!}};element('#planner-copy').textContent='A straight preliminary alignment through the selected terrain.';}
-    else {const [start,end]=mode==='bridge'?[1480,1790]:mode==='tunnel'?[2290,2650]:[970,1240];curve=studyCurve(start!,end!);const offset=mode==='bridge'?-220:220;for(const p of [curve.p0,curve.p1,curve.p2,curve.p3]){p.x+=offset;p.y=height;}element('#planner-copy').textContent='Compare an elevated crossing with a cut through the mountain.';}
+    else if(mode==='bridge'){const z=3200,shore=norwayShorelineX(z,state.world.seed);curve=straightCurve({x:shore-350,y:height,z},{x:shore+350,y:height,z});element('#planner-copy').textContent='A direct crossing from open water into the Sundvik shore.';}
+    else if(mode==='tunnel'){curve=straightCurve({x:3500,y:height,z:6100},{x:5200,y:height,z:6100});element('#planner-copy').textContent='A level bore beneath the Granli mountain spur.';}
+    else {const a=state.towns[0]!.position,b=state.towns[1]!.position;curve=straightCurve({x:a.x+180,y:height,z:a.z+160},{x:b.x+180,y:height,z:b.z-160});element('#planner-copy').textContent='A long shelf following the inhabited side of the fjord.';}
     const geometry=compileCurve(curve),quote=quoteTrack(geometry,terrain),constraints=certifyCurve(curve),valid=quote.valid&&constraints.valid;
     preview={curve,cost:quote.cost,valid};
     view.setPreview(geometry,valid?'#edc879':'#d7795f');
@@ -168,7 +171,7 @@ async function start():Promise<void> {
   };
   const togglePlanner=(open:boolean)=>{element('#planner').hidden=!open;element('#plan').setAttribute('aria-expanded',String(open));if(open){toggleStation(false);toggleOperations(false);updatePlanner();}else{interaction='none';view.setPreview(null);view.setMarker(null);}};
   element('#plan').onclick=()=>togglePlanner(element('#planner').hidden!==false);element('#close-planner').onclick=()=>togglePlanner(false);
-  element('#alignment').onchange=()=>{freePoints=[];view.setMarker(null);updatePlanner();const mode=element<HTMLSelectElement>('#alignment').value;if(mode!=='free')view.focus(studyCurve(mode==='tunnel'?2350:1500,mode==='tunnel'?2600:1750).p1);};
+  element('#alignment').onchange=()=>{freePoints=[];view.setMarker(null);updatePlanner();if(element<HTMLSelectElement>('#alignment').value!=='free'&&preview)view.focus(preview.curve.p1);};
   element('#elevation').oninput=updatePlanner;
   element('#commit-track').onclick=()=>{if(!preview?.valid){toast('This alignment is not buildable.');return;}const result=game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'buildTrack',curve:preview.curve,from:{position:preview.curve.p0},to:{position:preview.curve.p3},expectedRevision:state.railway.revision,quotedCost:preview.cost}});state=game.snapshot();if(result.ok){toast(`Alignment built for ${money(preview.cost)}.`);togglePlanner(false);}else toast(result.reason);};
   function updateStationSelection():void {
@@ -229,7 +232,7 @@ async function start():Promise<void> {
   element<HTMLInputElement>('#save-name').value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;
   element<HTMLFormElement>('#new-save-slot').onsubmit=event=>{event.preventDefault();const input=element<HTMLInputElement>('#save-name'),id=`manual-${Date.now()}`;void saves.save(id,input.value).then(()=>{input.value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;toast('A new manual save was added.');return refreshSaveSlots();}).catch(setMenuError);};
   element('#open-menu').onclick=openMenu;element('#close-menu').onclick=closeMenu;
-  element('#new-game').onclick=()=>{game.replaceState(createStudyState());state=game.snapshot();setSpeed(1);view.regional();closeMenu();toast('A new company has taken charge of the Northern Line.');};
+  element('#new-game').onclick=()=>{game.replaceState(createNorwayPreviewState(terrain));state=game.snapshot();setSpeed(1);view.regional();closeMenu();toast('A new company has taken charge of the Northern Line.');};
   element('#continue-game').onclick=()=>{void saves.continueLatest().then(next=>{state=next;syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
   void refreshSaveSlots();
   const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else if(!element('#operations-panel').hidden)toggleOperations(false);else if(!element('#station-planner').hidden)toggleStation(false);else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
@@ -242,7 +245,7 @@ async function start():Promise<void> {
     const begin=performance.now(),result=game.advance(delta),afterTick=performance.now();state=result.current;view.update(result.previous,result.current,game.speed===0?1:result.alpha);const day=Math.floor(state.tick/1200);if(day>lastAutosaveDay){lastAutosaveDay=day;void saves.autosave().catch(error=>toast(`Autosave failed: ${message(error)}`));}
     if(delta>0&&!document.hidden){frames.push(delta*1000);renderTimes.push(performance.now()-afterTick);tickTimes.push(afterTick-begin);if(frames.length>1800){frames.shift();renderTimes.shift();tickTimes.shift();}}
     for(let i=0;i<labels.length;i++){const p=view.project(view.labels[i]!.position),label=labels[i]!;label.style.transform=`translate(${p.x}px,${p.y}px)`;label.hidden=!p.visible;}
-    if(++frameCount%15===0){const recent=frames.slice(-60),fps=recent.length?recent.length*1000/recent.reduce((a,b)=>a+b,0):0,stats=view.stats(),service=state.operations.trainServices['train:15'];element('#fps').textContent=`${Math.round(fps)} FPS · LIVE LANDSCAPE`;element('#stats').textContent=`${stats.calls} draw calls · ${Math.round(stats.triangles/1000)}k triangles\n${stats.trees.toLocaleString()} trees · ${stats.buildings} buildings\n${stats.trains} train / proxies · LOD ${stats.lod}\n${stats.geometries} geometries · ${stats.textures} textures\nTerrain error: ${stats.terrainErrorM.toFixed(6)} m\nTick ${state.tick.toLocaleString()} · Three.js r186`;element('#cash').textContent=money(state.company.cash);element('#date').textContent=`Day ${Math.floor(state.tick/1200)+1} · 1900`;element('#passengers').textContent=`${state.operations.delivered.passengers.toLocaleString()} delivered`;const profit=(service?.revenue??0)-(service?.operatingCosts??0);element('#profit').textContent=profit===0?'No result yet':`${profit>=0?'+':''}${money(profit)}`;element('#service-summary').textContent=`${state.trains[0]!.phase} · ${Math.round(state.trains[0]!.speedMps*3.6)} km/h · ${state.trains[0]!.cargo.reduce((sum,lot)=>sum+lot.quantity,0)} aboard`;updateObjectives(state);}
+    if(++frameCount%15===0){const recent=frames.slice(-60),fps=recent.length?recent.length*1000/recent.reduce((a,b)=>a+b,0):0,stats=view.stats(),lead=state.trains[0],service=lead?state.operations.trainServices[lead.id]:undefined;element('#fps').textContent=`${Math.round(fps)} FPS · LIVE LANDSCAPE`;element('#stats').textContent=`${stats.calls} draw calls · ${Math.round(stats.triangles/1000)}k triangles\n${stats.trees.toLocaleString()} trees · ${stats.buildings} buildings\n${stats.trains} train / proxies · LOD ${stats.lod}\n${stats.geometries} geometries · ${stats.textures} textures\nTerrain error: ${stats.terrainErrorM.toFixed(6)} m\nTick ${state.tick.toLocaleString()} · Three.js r186`;element('#cash').textContent=money(state.company.cash);element('#date').textContent=`Day ${Math.floor(state.tick/1200)+1} · 1900`;element('#passengers').textContent=`${state.operations.delivered.passengers.toLocaleString()} delivered`;const profit=(service?.revenue??0)-(service?.operatingCosts??0);element('#profit').textContent=profit===0?'No result yet':`${profit>=0?'+':''}${money(profit)}`;element('#service-summary').textContent=lead?`${lead.phase} · ${Math.round(lead.speedMps*3.6)} km/h · ${lead.cargo.reduce((sum,lot)=>sum+lot.quantity,0)} aboard`:'No train commissioned';updateObjectives(state);}
     request=requestAnimationFrame(frame);
   };
   request=requestAnimationFrame(frame);toast('The fjord is ready. Explore the landscape or follow the train.');

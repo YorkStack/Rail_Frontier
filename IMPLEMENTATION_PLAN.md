@@ -118,6 +118,7 @@ Status: complete. The railway office lists consist state, speed, onboard passeng
 Purpose: make operations observable and editable. Files: src/ui/train.*, routes.*, finance.*, context.*. Interfaces: typed commands and immutable snapshots. Behavior: buy coaches, assign ordered service, inspect speed/cargo/dwell/income/cost/profit and town demand. Acceptance: user completes passenger loop entirely through UI; reports reconcile. Tests: browser purchase/assignment/selection and ledger totals. Depends: UI-001, TRAIN-004, ECON-002.
 
 ### QA-001 — Norwegian passenger vertical slice gate
+Status: ready for final gate. The production 16 km world and multi-car train rendering are live; the remaining acceptance work is a separate empty-network UI journey covering construction through saved revenue.
 Purpose: prove actual playable loop. Files: tests/browser/passenger.*, TESTING.md, CURRENT_STATUS.md. Interfaces: user UI only plus read-only assertions. Behavior: start campaign, construct rail/two stations, buy locomotive/coaches, assign route, board/deliver/pay/cost, pause/speed, save/browser-reload/load/continue. Acceptance: all directive section 68 criteria including visible attractive 3D environment, three towns, resumed train and clean console. Tests: automated end-to-end plus visual inspection and sustained performance. Depends: UI-002, UI-003, SAVE-002, ARCH-005.
 
 ### ECON-003 — Timber production and sawmill conversion

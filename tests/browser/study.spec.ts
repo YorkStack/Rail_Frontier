@@ -8,6 +8,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
   await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);
   const assets=await page.evaluate(()=>window.__railProbe.assets);expect(assets).toHaveLength(2);expect(assets[0]!.triangles).toBe(84);expect(assets[1]!.triangles).toBe(36);expect(assets.every(a=>a.normalsFinite)).toBe(true);
+  const production=await page.evaluate(()=>({world:window.__railProbe.snapshot().world,trains:window.__railProbe.snapshot().trains,stats:window.__railProbe.stats()}));expect(production.world.widthM).toBe(16000);expect(production.world.depthM).toBe(16000);expect(production.trains[0]!.vehicleIds).toHaveLength(2);expect(production.stats.trees).toBe(28000);
   expect(await page.evaluate(()=>window.__railProbe.stats().terrainErrorM)).toBeLessThan(.001);
   await page.waitForFunction(()=>window.__railProbe.snapshot().tick>10);
   await page.getByRole('button',{name:'Pause',exact:true}).click();

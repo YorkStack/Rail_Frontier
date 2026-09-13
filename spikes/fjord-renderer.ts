@@ -1,15 +1,16 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import type { GameState, Vec3 } from '../src/domain/model.js';
+import type { GameState,MotionState,Vec3 } from '../src/domain/model.js';
 import type { WorldRenderer } from '../src/application/ports.js';
 import type { Heightfield } from '../src/world/terrain.js';
-import { fjordProfile } from '../src/world/profiles.js';
+import { fjordProfile,type BiomeDefinition } from '../src/world/profiles.js';
+import { norwayBiome } from '../src/world/biome.js';
 import { SeededRandom } from '../src/world/random.js';
 import { shorelineX } from '../src/world/fjord-study.js';
+import { norwayCorridorX,norwayShorelineX } from '../src/world/generator.js';
 import { compileGraph } from '../src/rail/graph.js';
 import { motionPosition } from '../src/simulation/motion.js';
-import { advanceMotion } from '../src/simulation/motion.js';
 import { terrainMesh } from '../src/rendering/terrain-mesh.js';
 import { createTrack } from '../src/rendering/track-mesh.js';
 import { sampleDistance,type TrackGeometry } from '../src/rail/geometry.js';
@@ -18,17 +19,20 @@ export interface RenderStats { calls:number;triangles:number;geometries:number;t
 export interface AssetReport { name:string;sizeM:number[];forward:number[];up:number[];normalsFinite:boolean;materials:number;triangles:number }
 export class FjordRenderer implements WorldRenderer {
   readonly scene=new THREE.Scene();
-  readonly camera=new THREE.PerspectiveCamera(42,1,.5,16000);
+  readonly camera=new THREE.PerspectiveCamera(42,1,.5,50000);
   readonly renderer:THREE.WebGLRenderer;
   readonly controls:OrbitControls;
   readonly landscape:THREE.Mesh;
   readonly assets:AssetReport[]=[];
   readonly labels:{name:string;position:Vec3}[];
   readonly terrain:Heightfield;
+  readonly profile:BiomeDefinition;
   private geometry:ReturnType<typeof compileGraph>;
   private railwayRevision:number;
   private trackGroup=new THREE.Group();
   private train=new THREE.LOD();
+  private trainModels=new Map<string,{group:THREE.Group;cars:THREE.Object3D[];coachLods:THREE.LOD[]}>();
+  private modelState:Readonly<GameState>;
   private water:THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial>;
   private waterfall:THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial>;
   private trees:THREE.Group;
@@ -51,25 +55,25 @@ export class FjordRenderer implements WorldRenderer {
   private readonly controlStart=()=>{this.follow=false;};
 
   constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState) {
-    this.terrain=terrain;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;
+    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
     this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFShadowMap;
-    this.scene.background=new THREE.Color(fjordProfile.palette.haze);this.scene.fog=new THREE.FogExp2(fjordProfile.palette.haze,.00018);
-    const sun=new THREE.DirectionalLight(fjordProfile.lighting.sunColor,3);sun.position.set(-1200,2600,1400);sun.target.position.set(2100,0,1800);sun.castShadow=true;
-    sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-2100;sun.shadow.camera.right=2100;sun.shadow.camera.top=2100;sun.shadow.camera.bottom=-2100;sun.shadow.camera.far=7000;sun.shadow.normalBias=3;
-    this.scene.add(sun,sun.target,new THREE.HemisphereLight(fjordProfile.lighting.skyColor,fjordProfile.lighting.groundColor,2.1));
-    this.landscape=terrainMesh(terrain,fjordProfile);this.scene.add(this.landscape);
+    const scale=terrainSize(terrain)/4000;this.scene.background=new THREE.Color(this.profile.palette.haze);this.scene.fog=new THREE.FogExp2(this.profile.palette.haze,.00018/scale);
+    const sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);sun.position.set(-1200*scale,2600*scale,1400*scale);sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-2100*scale;sun.shadow.camera.right=2100*scale;sun.shadow.camera.top=2100*scale;sun.shadow.camera.bottom=-2100*scale;sun.shadow.camera.far=7000*scale;sun.shadow.normalBias=3;
+    this.scene.add(sun,sun.target,new THREE.HemisphereLight(this.profile.lighting.skyColor,this.profile.lighting.groundColor,2.1));
+    this.landscape=terrainMesh(terrain,this.profile);this.scene.add(this.landscape);
     this.water=this.createWater();this.scene.add(this.water);
     this.waterfall=this.createWaterfall();this.scene.add(this.waterfall);
     this.rebuildTracks(state);
-    this.trees=this.createForest(6500);this.scene.add(this.trees);
-    this.createBuildings(state,90);this.scene.add(this.buildings);
+    this.trees=this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
+    this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);
     this.createPortals();this.createBridgeTrusses();
     this.labels=state.towns.map(town=>({name:town.name,position:town.position}));
     this.controls=new OrbitControls(this.camera,canvas);this.controls.enableDamping=true;this.controls.dampingFactor=.075;
-    this.controls.minDistance=18;this.controls.maxDistance=5500;this.controls.maxPolarAngle=Math.PI*.475;this.controls.minPolarAngle=.15;this.controls.screenSpacePanning=false;
+    this.controls.minDistance=18;this.controls.maxDistance=terrainSize(terrain)*1.45;this.controls.maxPolarAngle=Math.PI*.475;this.controls.minPolarAngle=.15;this.controls.screenSpacePanning=false;
     this.controls.addEventListener('start',this.controlStart);
     this.regional();this.resize();window.addEventListener('resize',this.onResize);
     window.addEventListener('keydown',this.keyDown);window.addEventListener('keyup',this.keyUp);window.addEventListener('blur',this.clearKeys);
@@ -94,8 +98,12 @@ export class FjordRenderer implements WorldRenderer {
       this.assets.push({name:`wagon_probe_lod${i}`,sizeM:dimensions.toArray(),forward:forward.toArray(),up:up.toArray(),normalsFinite,materials:materials.size,triangles});
       this.train.addLevel(group,i===0?0:180,.15);
     }
-    this.train.name='blender-wagon';this.scene.add(this.train);
+    this.train.name='blender-wagon-template';this.syncTrainModels(this.modelState);
   }
+  private locomotiveModel():THREE.Group {const group=new THREE.Group(),dark=new THREE.MeshStandardMaterial({color:'#263a35',roughness:.55,metalness:.25}),red=new THREE.MeshStandardMaterial({color:'#8e382c',roughness:.7}),body=new THREE.Mesh(new THREE.BoxGeometry(2.8,3.1,8.2),dark),boiler=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,6.8,14),dark),cab=new THREE.Mesh(new THREE.BoxGeometry(2.7,3.6,3.2),red),stack=new THREE.Mesh(new THREE.CylinderGeometry(.32,.5,2.2,10),dark);body.position.y=1.8;boiler.rotation.x=Math.PI/2;boiler.position.set(0,2.5,-1.1);cab.position.set(0,2.3,3.2);stack.position.set(0,4.1,-2.3);group.add(body,boiler,cab,stack);group.traverse(item=>{if(item instanceof THREE.Mesh)item.castShadow=true;});return group;}
+  private syncTrainModels(state:Readonly<GameState>):void {if(this.train.levels.length===0)return;for(const model of this.trainModels.values())model.group.visible=false;for(const train of state.trains){if(!this.trainModels.has(train.id)){const group=new THREE.Group(),coachLods=train.vehicleIds.map(()=>this.train.clone(true) as THREE.LOD),cars:THREE.Object3D[]=[this.locomotiveModel(),...coachLods];for(const car of cars)group.add(car);this.scene.add(group);this.trainModels.set(train.id,{group,cars,coachLods});}this.trainModels.get(train.id)!.group.visible=true;}}
+  private behind(motion:MotionState,distanceM:number):{position:Vec3;ahead:Vec3} {let leg=motion.leg,distance=motion.distanceM-distanceM;while(distance<0&&leg>0){leg--;distance+=this.geometry.get(motion.path[leg]!.edgeId)!.lengthM;}distance=Math.max(0,distance);const sample=(offset:number)=>{let sampleLeg=leg,s=distance+offset;while(sampleLeg<motion.path.length-1&&s>this.geometry.get(motion.path[sampleLeg]!.edgeId)!.lengthM){s-=this.geometry.get(motion.path[sampleLeg]!.edgeId)!.lengthM;sampleLeg++;}const traversal=motion.path[sampleLeg]!,geometry=this.geometry.get(traversal.edgeId)!;return sampleDistance(geometry,traversal.reverse?geometry.lengthM-Math.min(s,geometry.lengthM):Math.min(s,geometry.lengthM));};return {position:sample(0),ahead:sample(.25)};}
+  private updateTrainModels(state:Readonly<GameState>):void {this.syncTrainModels(state);for(const train of state.trains){const model=this.trainModels.get(train.id);if(!model)continue;for(let index=0;index<model.cars.length;index++){const offset=index===0?0:13.5+(index-1)*18.4,{position,ahead}=this.behind(train.motion,offset),car=model.cars[index]!;car.position.set(position.x,position.y+.2,position.z);car.rotation.y=Math.atan2(-(ahead.x-position.x),-(ahead.z-position.z));}model.group.visible=true;}}
   private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {
     const material=new THREE.ShaderMaterial({
       uniforms:{time:{value:0},deep:{value:new THREE.Color('#224e5a')},light:{value:new THREE.Color('#618a8b')}},
@@ -111,9 +119,9 @@ export class FjordRenderer implements WorldRenderer {
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(terrainSize(this.terrain),terrainSize(this.terrain)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(this.terrain.widthM/2,.15,this.terrain.depthM/2);return mesh;
   }
   private createWaterfall():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {
-    const z=2470,positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    const production=this.terrain.widthM>4000,z=production?6100:2470,shore=(value:number)=>production?norwayShorelineX(value,140919):shorelineX(value),positions:number[]=[],uv:number[]=[],indices:number[]=[];
     for(let i=0;i<=80;i++) {
-      const x=shorelineX(z)+260-i*3.5;
+      const x=shore(z)+(production?620:260)-i*(production?7.5:3.5);
       for(const side of [-1,1]) {const sampleZ=z+side*(5+3*Math.sin(i/80*Math.PI));positions.push(x,Math.max(.6,this.terrain.sample(x,sampleZ).elevationM+1.3),sampleZ);uv.push((side+1)/2,1-i/80);}
       if(i>0){const a=(i-1)*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
     }
@@ -126,7 +134,8 @@ export class FjordRenderer implements WorldRenderer {
     let placed=0;
     for(let tries=0;placed<count&&tries<count*30;tries++) {
       const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,y=this.terrain.sample(x,z).elevationM;
-      if(y<10||y>fjordProfile.vegetation.treelineM||Math.abs(x-shorelineX(z)-75)<12||Math.abs(z-2470)<18&&Math.abs(x-shorelineX(z)-220)<35)continue;
+      const production=this.terrain.widthM>4000,corridor=production?norwayCorridorX(z):shorelineX(z)+75;
+      if(y<10||y>this.profile.vegetation.treelineM||Math.abs(x-corridor)<24||Math.abs(z-(production?6100:2470))<24)continue;
       const h=9+random.next()*15;dummy.position.set(x,y+h*.58,z);dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.scale.set(h*.27,h,h*.27);dummy.updateMatrix();crowns.setMatrixAt(placed,dummy.matrix);
       color.setHSL(.27+random.next()*.08,.22+random.next()*.2,.18+random.next()*.12);crowns.setColorAt(placed,color);
       dummy.position.y=y+h*.3;dummy.scale.set(h,h*.6,h);dummy.updateMatrix();trunks.setMatrixAt(placed,dummy.matrix);placed++;
@@ -139,8 +148,9 @@ export class FjordRenderer implements WorldRenderer {
     const roof=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,4),new THREE.MeshStandardMaterial({color:'#484f4b',roughness:1}),count);
     const palettes=['#b04f3d','#e2dac0','#be914f','#8b392e','#b8c0b4'];
     for(let i=0;i<count;i++) {
-      const town=state.towns[i%state.towns.length]!,angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*(count>100?400:95);
-      const x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius)),z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius)),y=Math.max(.5,this.terrain.sample(x,z).elevationM);
+      const town=state.towns[i%state.towns.length]!;let x=town.position.x,z=town.position.z;
+      for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*(count>100?400:95);x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(this.terrain.widthM<=4000||Math.abs(x-norwayCorridorX(z))>58)break;}
+      const y=Math.max(.5,this.terrain.sample(x,z).elevationM);
       const w=7+random.next()*5,h=6+random.next()*7,d=9+random.next()*7,rotation=Math.round(random.next()*3)*Math.PI/2;
       dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));
       dummy.position.y=y+h+2;dummy.rotation.y=rotation+Math.PI/4;dummy.scale.set(w*.82,5,d*.82);dummy.updateMatrix();roof.setMatrixAt(i,dummy.matrix);
@@ -179,7 +189,7 @@ export class FjordRenderer implements WorldRenderer {
     const group=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(9,.7,8,36),new THREE.MeshBasicMaterial({color,depthTest:false})),pin=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,16,8),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;pin.position.y=8;group.add(ring,pin);group.position.set(position.x,position.y+1.2,position.z);group.renderOrder=11;this.marker=group;this.scene.add(group);
   }
   setStress(state:GameState,enabled:boolean):void {
-    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.createForest(enabled?20000:6500);this.scene.add(this.trees);
+    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.createForest(enabled?20000:this.profile.vegetation.density);this.scene.add(this.trees);
     disposeObject(this.buildings);this.buildings.clear();this.createBuildings(state,enabled?2000:90);
     if(this.stressTrains){this.scene.remove(this.stressTrains);disposeObject(this.stressTrains);this.stressTrains=null;}
     if(this.stressTrack){this.scene.remove(this.stressTrack);disposeObject(this.stressTrack);this.stressTrack=null;}
@@ -200,14 +210,11 @@ export class FjordRenderer implements WorldRenderer {
   }
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
   followTrain():void {this.focus(this.trainPosition);this.camera.position.copy(this.trainPosition).add(new THREE.Vector3(35,21,45));this.follow=true;}
-  regional():void {this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
+  regional():void {this.follow=false;const production=this.terrain.widthM>4000;this.controls.target.set(production?5200:1850,production?180:80,production?5600:1970);this.camera.position.set(production?13000:3500,production?6500:1750,production?14500:3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    if(current.railway.revision!==this.railwayRevision)this.rebuildTracks(current);
-    const a=motionPosition(previous.trains[0]!.motion,this.geometry),b=motionPosition(current.trains[0]!.motion,this.geometry),old=this.trainPosition.clone();
-    this.trainPosition.set(THREE.MathUtils.lerp(a.x,b.x,alpha),THREE.MathUtils.lerp(a.y,b.y,alpha),THREE.MathUtils.lerp(a.z,b.z,alpha));this.train.position.copy(this.trainPosition);
-    const motion=structuredClone(current.trains[0]!.motion);advanceMotion(motion,.2,this.geometry);const ahead=motionPosition(motion,this.geometry);const dx=ahead.x-b.x,dz=ahead.z-b.z;
-    if(Math.hypot(dx,dz)>.0001)this.train.rotation.y=Math.atan2(-dx,-dz);
+    this.modelState=current;if(current.railway.revision!==this.railwayRevision)this.rebuildTracks(current);this.updateTrainModels(current);
+    const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
     const shift=new THREE.Vector3((this.keys.has('KeyD')?1:0)-(this.keys.has('KeyA')?1:0),0,(this.keys.has('KeyS')?1:0)-(this.keys.has('KeyW')?1:0));
     if(shift.lengthSq()){shift.multiplyScalar(this.camera.position.distanceTo(this.controls.target)*.006);this.camera.position.add(shift);this.controls.target.add(shift);this.follow=false;}
@@ -221,8 +228,8 @@ export class FjordRenderer implements WorldRenderer {
   }
   project(position:Vec3):{x:number;y:number;visible:boolean} {const vector=new THREE.Vector3(position.x,position.y+25,position.z).project(this.camera),rect=this.canvas.getBoundingClientRect();return {x:(vector.x+1)*rect.width/2,y:(1-vector.y)*rect.height/2,visible:vector.z>-1&&vector.z<1&&Math.abs(vector.x)<1&&Math.abs(vector.y)<1};}
   pick(screenX:number,screenY:number):Vec3|null {const rect=this.canvas.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((screenX-rect.left)/rect.width*2-1,-(screenY-rect.top)/rect.height*2+1),this.camera);const point=ray.intersectObject(this.landscape)[0]?.point;return point?{x:point.x,y:point.y,z:point.z}:null;}
-  private verifyTerrain():void {this.landscape.updateMatrixWorld(true);for(const [x,z] of [[2173,1857],[2411,932],[1601,2047],[2809,2991]]){const ray=new THREE.Raycaster(new THREE.Vector3(x!,2000,z!),new THREE.Vector3(0,-1,0));const hit=ray.intersectObject(this.landscape)[0];if(!hit)throw new Error('Terrain raycast missed');this.terrainErrorM=Math.max(this.terrainErrorM,Math.abs(hit.point.y-this.terrain.sample(x!,z!).elevationM));}if(this.terrainErrorM>.001)throw new Error('Rendered terrain differs from simulation');}
-  stats():RenderStats {const info=this.renderer.info;return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressCount,lod:this.train.getCurrentLevel(),terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
+  private verifyTerrain():void {this.landscape.updateMatrixWorld(true);const scale=this.terrain.widthM/4000;for(const [x,z] of [[2173,1857],[2411,932],[1601,2047],[2809,2991]]){const sx=x!*scale,sz=z!*scale,ray=new THREE.Raycaster(new THREE.Vector3(sx,3000,sz),new THREE.Vector3(0,-1,0)),hit=ray.intersectObject(this.landscape)[0];if(!hit)throw new Error('Terrain raycast missed');this.terrainErrorM=Math.max(this.terrainErrorM,Math.abs(hit.point.y-this.terrain.sample(sx,sz).elevationM));}if(this.terrainErrorM>.001)throw new Error('Rendered terrain differs from simulation');}
+  stats():RenderStats {const info=this.renderer.info,first=[...this.trainModels.values()][0]?.coachLods[0];return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressTrains?this.stressCount:this.trainModels.size,lod:first?.getCurrentLevel()??0,terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
   dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);this.renderer.dispose();this.renderer.forceContextLoss();}
 }
 function terrainSize(terrain:Heightfield):number {return Math.max(terrain.widthM,terrain.depthM);}
