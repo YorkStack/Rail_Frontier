@@ -1,21 +1,27 @@
 # Decision log
 
-| ID | Decision | Rationale / status |
+| ID | Decision | Rationale / evidence |
 |---|---|---|
-| D01 | Clone supplied remote into empty requested folder | Verified empty; no pre-existing changes to overwrite; preserve MIT |
-| D02 | Work on architecture/foundation | Isolated source-control milestone; main unchanged |
-| D03 | Pure strict TypeScript core | Browser-friendly, testable independent of unavailable engine |
-| D04 | Do not assume an Astra graphics API or substitute engine | Actual repo contains no engine; identity clarification pending |
-| D05 | Metres, +Y up, +X east, +Z south | Shared graph/terrain/physics coordinates; glTF-friendly, adapter conversion if necessary |
-| D06 | Cubic Bézier + adaptive arc tables | Explicit endpoint tangents, distance-based motion; curvature/transition feasibility still open |
-| D07 | Author track vertical profile independently of terrain | Allows bridges, tunnels and graded earthworks; simple sampled quote is prototype |
-| D08 | 20 Hz fixed simulation, separate compressed economy day | Rendering frame rate must not change outcomes; tested timing foundation |
-| D09 | Integer currency and signed transaction ledger | Reconciliation and exactly-once payment auditing; posting service pending |
-| D10 | Stable typed IDs and strict versioned JSON state | Renderer-independent references and robust persistence |
-| D11 | IndexedDB slots behind SaveStore | Browser durable structured storage; interface only |
-| D12 | Scripted Blender → GLB LOD probes | Reproducible source with small web assets; importer compatibility pending |
-| D13 | Original generated assets, no external media | Clear MIT distribution; no copied proprietary content |
-| D14 | Norway passenger loop before freight/content expansion | Reduces coupled unfinished systems |
-| D15 | No architecture-complete marker while engine gates fail | User requires actual engine experiments before Sol handoff |
+| D01 | Clone supplied remote into empty requested folder | No pre-existing work to overwrite; MIT preserved |
+| D02 | Work on architecture/foundation | Main remains unchanged; local meaningful checkpoints |
+| D03 | Strict TypeScript simulation independent of graphics | Pure core tests, stable serializable boundaries |
+| D04 | Astra/Sol are coding models; choose Three.js r186 | User clarification resolved incorrect engine assumption; actual MIT renderer verified |
+| D05 | Metres, X east/Y up/Z south; no exaggeration | Graph/terrain/physics/imports use one convention |
+| D06 | Cubic Bézier with arc tables and conservative constraints | Tangent control, tested radius/grade/cusp rejection; no initial clothoid dependency |
+| D07 | Track elevation independent of terrain | Bridges/tunnels/earthworks; split at exact triangle and clearance boundaries |
+| D08 | 20 Hz fixed physics and compressed economic calendar | Frame-rate-independent motion; visibility pause; tested saves |
+| D09 | Integer ledger + per-train running-cost remainder | Avoid rounding drift and support auditable revenue/costs |
+| D10 | Typed stable IDs and schema 2 operational state | Explicit v1→v2 migration; references/finance/reservations checked |
+| D11 | IndexedDB atomic slots behind SaveStore | Actual browser reload test; production management UI remains |
+| D12 | Scripted Blender GLB pipeline with two LODs | Real imports validate size, axes, normals/materials and hysteresis |
+| D13 | Original game art + licensed local fonts | No proprietary game assets; runtime notices distributed |
+| D14 | Norway passenger loop before freight/content expansion | Architecture study proves integration without broad unfinished gameplay |
+| D15 | Stop at validated Astra→Sol handoff | User requires explicit pause before routine implementation |
+| D16 | Triangular terrain queries match GPU topology | Eliminates bilinear/mesh discrepancy; <0.001 m raycast agreement |
+| D17 | RailNetwork immutable per-revision adjacency/heap cache | 5k-edge/100-query scale proof; no path compilation per simulation tick |
+| D18 | Prototype composition belongs in spikes/ | Prevent automatic demo shuttling and fixed world becoming production architecture |
+| D19 | Exclusive corridor reservation first, signals later | Simple deterministic anti-collision contract; scheduling implementation pending |
+| D20 | Vite + native DOM; no large UI framework | Small study/control surface; typed application boundary supports later UI growth |
+| D21 | Explicit WebGL context release on complete renderer disposal | Resource test revealed residual texture counter after normal dispose; context release verified directly |
 
-Dependencies: TypeScript Apache-2.0 dev compiler, tsx MIT test runner, Node types MIT, Zod MIT runtime validation. Installed lockfile and local license texts establish exact versions/licenses; THIRD_PARTY_NOTICES.md records distribution obligations. No rendering library or frontend framework chosen yet.
+No open architectural escalation. Known implementation limitations and remaining acceptance gates live in TECH_DEBT.md, RISK_REGISTER.md and IMPLEMENTATION_PLAN.md.

@@ -1,6 +1,10 @@
 # Implementation plan
 
-Read CURRENT_STATUS.md first. Engine identity is unresolved; **do not start routine renderer implementation or claim Astra → Sol handoff**. No model switch is requested yet. Task status reflects actual code and tests, not only planned design.
+Read CURRENT_STATUS.md first. **The user clarified Astra/Sol are Codex models. Three.js is the game renderer. Architecture gates ARCH-001–006 are complete.** Stop at the required handoff; after the user switches to Sol and asks to continue, execute the remaining implementation tasks. Do not restart engine discovery or rebuild the completed technical proofs.
+
+Read ECONOMIC_CONTRACT.md in addition to the architecture/data/save/pipeline documents. The playable study is separate from the unfinished production game. Next implementation sequence: APP-001 integration shell → FIN-001 → APP-002 → WORLD-001 → RAIL-004 → STATION-001 → TRAIN-002/ROUTE-001 → TRAIN-003/004 → ECON-001/002 → SAVE-002/CAM-001 → UI → QA-001.
+
+Completed during architecture: runtime Three.js adapter and camera, actual Blender LOD import, triangular terrain/raycast agreement, seeded fjord scene, certified radius/grade/cusp/tangents, exact cell/water/clearance subdivision, RailNetwork heap/adjacency cache, schema 2 plus 1→2 migration, frozen snapshots, operational/content contracts, IndexedDB backend, and browser/CPU scale tests. These are foundations for the tasks below, not reasons to duplicate them.
 
 ## Completed foundation tasks
 
@@ -11,25 +15,25 @@ Read CURRENT_STATUS.md first. Engine identity is unresolved; **do not start rout
 | TERR-001 | Bilinear sampling; src/world/terrain.ts | Terrain, Heightfield | Finite/bounded queries, copy isolation | CORE-001 | Done |
 | RAIL-001 | Compile curves; src/rail/geometry.ts | CubicCurve, TrackGeometry | Length convergence, distance sampling, degeneracy tests | CORE-001 | Done foundation |
 | RAIL-002 | Weighted graph pathfinding; src/rail/graph.ts | RailGraph, Traversal | Reverse, disconnected and faster-alternative tests | RAIL-001 | Done proof |
-| RAIL-003 | Engineering quote; src/rail/planner.ts | Terrain, TrackGeometry | Ground/bridge/tunnel costs, grade/water tests | TERR-001, RAIL-001 | Done proof |
+| RAIL-003 | Engineering quote; src/rail/planner.ts | Terrain, TrackGeometry | Triangle/classification roots, narrow water, radius/grade tests | TERR-001, RAIL-001 | Done validated kernel |
 | SIM-001 | Fixed time; src/simulation/clock.ts | SimulationClock | Same ticks across frame rates, speeds and catch-up | CORE-001 | Done core |
 | TRAIN-001 | Graph-distance movement; src/simulation/motion.ts | MotionState | Multiple edges, reversed arrival | RAIL-002, SIM-001 | Done proof |
 | SAVE-001 | Strict envelope/refs/reconciliation; src/persistence/save.ts | GameState | Mid-run fixture roundtrip and identical continuation | CORE-001, TRAIN-001 | Done foundation |
-| ASSET-001 | Script two wagon GLBs; tools/blender, tools/validate-assets.ts | glTF 2.0 candidate | Blender CLI/export, bounds/axis/LOD checks | DISC-001 | Done export half |
-| PERF-001 | CPU core baseline; spikes/core.ts | Geometry, Terrain, Clock | Record actual timing and avoid graphics claims | Above core tasks | Done limited |
+| ASSET-001 | Script two wagon GLBs; tools/blender, tools/validate-assets.ts | glTF 2.0 candidate | Blender CLI/export, bounds/axis/LOD checks | DISC-001 | Done export + actual runtime import |
+| PERF-001 | CPU core baseline; spikes/core.ts | Geometry, Terrain, Clock | Record actual timing and avoid graphics claims | Above core tasks | Done CPU + browser scale proofs |
 
-## Architecture gates — continue with Astra
+## Architecture gates — completed technical proofs
 
-Each task is bounded to one technical proof and its documentation. Dependencies order the work; no engine-specific code before ARCH-001.
+All gates below have passed. Their task definitions remain as an audit trail. ARCH-001: Three.js source/license/API inspection. ARCH-002: real GLBs imported and both LODs verified. ARCH-003: spikes/fjord-renderer.ts and study-state.ts plus real browser checks. ARCH-004: constraints.ts, curve-math.ts and triangle-aware planner with adversarial tests. ARCH-005: docs/evidence browser/network reports. ARCH-006: operations/schema 2/command/snapshot contracts and updated documentation. Remaining product acceptance is QA-001, not another architecture gate.
 
 ### ARCH-001 — Establish actual engine
 Purpose: resolve ESC-001. Files: package.json, ASTRA_CAPABILITIES.md, DECISIONS.md, THIRD_PARTY_NOTICES.md. Interfaces: actual installed source/API, no invented methods. Behavior: inspect engine source/license/version and supported browser stack, select explicit adapter. Acceptance: known executable engine package and scene smoke test. Tests: launch/dispose scene, report actual APIs and console. Depends: user engine identity or clarification that Astra means model.
 
 ### ARCH-002 — Import probe and select runtime format
-Purpose: close Blender/runtime compatibility. Files: spikes/asset-import.*, src/rendering/*, ASSET_PIPELINE.md. Interfaces: WorldRenderer proposal, actual engine importer. Behavior: load both wagon LODs, show marker axes, couplers and dimensions. Acceptance: correct metres/up/forward/pivots/materials/normals, unload releases resources. Tests: bounds plus visible lit inspection, repeat load/dispose. Depends: ARCH-001, ASSET-001.
+Purpose: close Blender/runtime compatibility. Files: spikes/fjord-renderer.ts, src/rendering/*, ASSET_PIPELINE.md. Interfaces: WorldRenderer proposal, actual engine importer. Behavior: load both wagon LODs, show marker axes, couplers and dimensions. Acceptance: correct metres/up/forward/pivots/materials/normals, unload releases resources. Tests: bounds plus visible lit inspection, repeat load/dispose. Depends: ARCH-001, ASSET-001.
 
 ### ARCH-003 — Terrain/track technical scene
-Purpose: validate sampling, meshes and camera. Files: spikes/norway-scene.*, src/rendering/*, src/world/*. Interfaces: Terrain, TrackGeometry. Behavior: small seeded fjord with water, steep slopes, trees, waterfall, rail, bridge, tunnel portal and train proxy. Acceptance: picked/rendered terrain agrees with planner, train follows graph path visibly, orbit/zoom stable. Tests: terrain comparison points, console capture and screenshots. Depends: ARCH-002, TRAIN-001.
+Purpose: validate sampling, meshes and camera. Files: spikes/fjord-renderer.ts, spikes/study-state.ts, src/rendering/*, src/world/*. Interfaces: Terrain, TrackGeometry. Behavior: small seeded fjord with water, steep slopes, trees, waterfall, rail, bridge, tunnel portal and train proxy. Acceptance: picked/rendered terrain agrees with planner, train follows graph path visibly, orbit/zoom stable. Tests: terrain comparison points, console capture and screenshots. Depends: ARCH-002, TRAIN-001.
 
 ### ARCH-004 — Railway geometry feasibility
 Purpose: verify physically buildable centerlines. Files: src/rail/geometry.ts, src/rail/planner.ts, tests/geometry.test.ts. Interfaces: CubicCurve/EngineeringQuote. Behavior: tangent-compatible junctions, minimum radius, cusps, grade extrema, terrain-cell/water boundary splits and valid portal transitions. Acceptance: reject adversarial tight/steep/hidden-water alignments without false approval; document easement choice. Tests: analytic/reference curves, narrow-ridge/water fixtures and connected-curve visual. Depends: RAIL-003; visual component ARCH-003.
@@ -45,7 +49,7 @@ Handoff response must begin `ASTRA ARCHITECTURE PHASE COMPLETE`, then state arch
 ## Sol backlog — after explicit handoff and continuation
 
 ### APP-001 — Browser bootstrap and simulation driver
-Purpose: start/stop a coherent game session. Files: src/application/game.ts, src/main.*, browser build config. Interfaces: SimulationClock, WorldRenderer. Behavior: RAF interpolation, fixed ticks, speed and visibility auto-pause. Acceptance: hidden-tab return produces no offline catch-up; dispose removes listeners/GPU resources. Tests: browser pause/speed/restart and console. Depends: ARCH-006.
+Status: browser study driver/camera/speed/visibility is already implemented; integrate those kernels into a production session application. Purpose: start/stop a coherent game session. Files: src/application/game.ts, src/main.*, browser build config. Interfaces: SimulationClock, WorldRenderer. Behavior: RAF interpolation, fixed ticks, speed and visibility auto-pause. Acceptance: hidden-tab return produces no offline catch-up; dispose removes listeners/GPU resources. Tests: browser pause/speed/restart and console. Depends: ARCH-006.
 
 ### FIN-001 — Atomic ledger posting
 Purpose: reliable construction/purchase/revenue accounting. Files: src/simulation/finance.ts, tests/finance.test.ts. Interfaces: Company, Transaction, Money. Behavior: reject invalid/overflow amounts; spending checks funds and posts once. Acceptance: cash reconciles after every command, failed commands leave state identical. Tests: overdraft, boundary integers and duplicate command handling. Depends: ARCH-006.
@@ -60,7 +64,7 @@ Purpose: reproducible playable map. Files: src/world/generator.ts, biome.ts, src
 Purpose: convert approved preview to network. Files: src/application/construction.ts, src/rail/graph.ts. Interfaces: buildTrack, EngineeringQuote, ledger. Behavior: revalidate quote/revision, split graph at connections, persist spans, debit funds. Acceptance: affordable legal routes build atomically; unrelated crossings remain disconnected. Tests: insufficient cash, stale quote, junction/split and save roundtrip. Depends: APP-002, WORLD-001.
 
 ### RAIL-005 — Cache graph/geometry and route invalidation
-Purpose: scale routing. Files: src/rail/cache.ts, graph.ts. Interfaces: graph revision, compiled geometry, Traversal. Behavior: adjacency/heap pathfinding and dirty-edge caching. Acceptance: same paths as reference algorithm; changed graph invalidates affected routes. Tests: generated graphs against reference, 5k-edge timing. Depends: RAIL-004.
+Status: immutable RailNetwork adjacency/min-heap/geometry cache is already implemented and benchmarked. Remaining work is cache ownership/invalidation during actual network edits. Purpose: scale routing. Files: src/rail/cache.ts, graph.ts. Interfaces: graph revision, compiled geometry, Traversal. Behavior: adjacency/heap pathfinding and dirty-edge caching. Acceptance: same paths as reference algorithm; changed graph invalidates affected routes. Tests: generated graphs against reference, 5k-edge timing. Depends: RAIL-004.
 
 ### STATION-001 — Station placement and coverage
 Purpose: connect demand physically/logically. Files: src/application/stations.ts, src/simulation/coverage.ts, station content. Interfaces: buildStation, Station, Terrain spatial buckets. Behavior: valid rail attachment and unique town/industry coverage assignment. Acceptance: no floating stations or duplicate demand capture; construction posts costs. Tests: off-rail rejection, overlap tie-break, funds and persistence. Depends: RAIL-004.
@@ -84,7 +88,7 @@ Purpose: create transportable demand. Files: src/simulation/demand.ts, coverage.
 Purpose: complete first revenue loop. Files: src/simulation/transfer.ts, station-service.ts. Interfaces: CargoLot, demand, consist capacity, ledger. Behavior: board correct-destination passengers, unload once, pay distance-based fare and charge running costs. Acceptance: quantities conserved, no duplicate revenue and route profitability observable. Tests: full/empty capacity, intermediate stops, reload during dwell and exact ledger. Depends: ECON-001, TRAIN-003, FIN-001.
 
 ### SAVE-002 — Transactional IndexedDB slots
-Purpose: durable browser sessions. Files: src/persistence/indexeddb.ts, save.ts. Interfaces: SaveStore, frozen schema/content registry. Behavior: manual/auto slots, rename/delete/list/continue, validated load and content compatibility. Acceptance: browser reload resumes correct train phase and accounts; failed load preserves running state. Tests: fake or real IndexedDB transactions, quota/corrupt/unknown-version cases, browser restart. Depends: APP-002, ECON-002.
+Status: IndexedDbSaveStore and schema 2 migration backend are implemented and browser-tested. Remaining work is production slot UI/autosave/content validation/quota handling. Purpose: durable browser sessions. Files: src/persistence/indexeddb.ts, save.ts. Interfaces: SaveStore, frozen schema/content registry. Behavior: manual/auto slots, rename/delete/list/continue, validated load and content compatibility. Acceptance: browser reload resumes correct train phase and accounts; failed load preserves running state. Tests: fake or real IndexedDB transactions, quota/corrupt/unknown-version cases, browser restart. Depends: APP-002, ECON-002.
 
 ### CAM-001 — Objectives and campaign lifecycle
 Purpose: reward measurable progress. Files: src/simulation/objectives.ts, src/content/norway.ts. Interfaces: objective definitions and progress/reward state. Behavior: connect/deliver/profit goals evaluated on ticks, rewards once. Acceptance: three initial goals progress accurately and survive reload. Tests: reconnection, repeat evaluations, exactly-once reward. Depends: ECON-002.

@@ -1,0 +1,12 @@
+{
+  "node": "v25.8.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "edges": 5000,
+  "compileMs": 49.492541999999986,
+  "routing100Ms": 103.17087499999997,
+  "movement1200TicksMs": 4.082375000000013,
+  "movementPerTick100TrainsMs": 0.0034019791666666777,
+  "includesEconomy": false,
+  "includesOccupancy": false
+}
