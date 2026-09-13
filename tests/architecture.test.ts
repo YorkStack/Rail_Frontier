@@ -12,6 +12,7 @@ import { quoteTrack,engineeringSpans } from '../src/rail/planner.js';
 import { cubicRoots } from '../src/domain/curve-math.js';
 import { RailNetwork } from '../src/rail/graph.js';
 import { snapshotState } from '../src/application/snapshot.js';
+import { emptyOperations } from '../src/domain/operations.js';
 
 test('terrain diagonal interpolation matches triangles rather than bilinear saddle',()=>{
   const terrain=new Heightfield(2,2,10,new Float64Array([0,0,0,10]));assert.equal(terrain.sample(5,5).elevationM,5);assert.equal(terrain.sample(7,3).elevationM,3);assert.equal(terrain.sample(3,7).elevationM,3);
@@ -46,7 +47,7 @@ test('cubic root isolation includes tangent contact with a boundary',()=>{
 });
 test('schema 1 migrates without mutating legacy state; nonadvancing migrations fail',()=>{
   const state=createStudyState(),{operations,...legacyState}=state,legacy={schemaVersion:1,gameVersion:'0.1.0',state:legacyState},json=JSON.stringify(legacy);
-  const loaded=deserialize(json);assert.deepEqual(loaded,state);assert.equal(JSON.stringify(legacy),json);
+  const loaded=deserialize(json);assert.deepEqual(loaded,{...state,operations:emptyOperations()});assert.equal(JSON.stringify(legacy),json);
   const migrate=migrations.get(1)!;migrations.set(1,value=>value);try{assert.throws(()=>deserialize(json),/advance/);}finally{migrations.set(1,migrate);}
 });
 test('save validation rejects conflicting edge reservations',()=>{

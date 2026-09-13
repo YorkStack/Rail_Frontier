@@ -26,6 +26,8 @@ export class FjordRenderer implements WorldRenderer {
   readonly labels:{name:string;position:Vec3}[];
   readonly terrain:Heightfield;
   private geometry:ReturnType<typeof compileGraph>;
+  private railwayRevision:number;
+  private trackGroup=new THREE.Group();
   private train=new THREE.LOD();
   private water:THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial>;
   private waterfall:THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial>;
@@ -48,7 +50,7 @@ export class FjordRenderer implements WorldRenderer {
   private readonly controlStart=()=>{this.follow=false;};
 
   constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState) {
-    this.terrain=terrain;this.geometry=compileGraph(state.railway);
+    this.terrain=terrain;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
@@ -60,7 +62,7 @@ export class FjordRenderer implements WorldRenderer {
     this.landscape=terrainMesh(terrain,fjordProfile);this.scene.add(this.landscape);
     this.water=this.createWater();this.scene.add(this.water);
     this.waterfall=this.createWaterfall();this.scene.add(this.waterfall);
-    for(const track of this.geometry.values())this.scene.add(createTrack(track,terrain));
+    this.rebuildTracks(state);
     this.trees=this.createForest(6500);this.scene.add(this.trees);
     this.createBuildings(state,90);this.scene.add(this.buildings);
     this.createPortals();this.createBridgeTrusses();
@@ -184,11 +186,18 @@ export class FjordRenderer implements WorldRenderer {
     }
   }
   setTrees(visible:boolean):void {this.trees.visible=visible;}
+  private rebuildTracks(state:Readonly<GameState>):void {
+    this.scene.remove(this.trackGroup);disposeObject(this.trackGroup);this.trackGroup=new THREE.Group();
+    this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;
+    for(const track of this.geometry.values())this.trackGroup.add(createTrack(track,this.terrain));
+    this.scene.add(this.trackGroup);
+  }
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
   followTrain():void {this.focus(this.trainPosition);this.camera.position.copy(this.trainPosition).add(new THREE.Vector3(35,21,45));this.follow=true;}
   regional():void {this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
+    if(current.railway.revision!==this.railwayRevision)this.rebuildTracks(current);
     const a=motionPosition(previous.trains[0]!.motion,this.geometry),b=motionPosition(current.trains[0]!.motion,this.geometry),old=this.trainPosition.clone();
     this.trainPosition.set(THREE.MathUtils.lerp(a.x,b.x,alpha),THREE.MathUtils.lerp(a.y,b.y,alpha),THREE.MathUtils.lerp(a.z,b.z,alpha));this.train.position.copy(this.trainPosition);
     const motion=structuredClone(current.trains[0]!.motion);advanceMotion(motion,.2,this.geometry);const ahead=motionPosition(motion,this.geometry);const dx=ahead.x-b.x,dz=ahead.z-b.z;
