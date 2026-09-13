@@ -68,7 +68,7 @@ Status: complete. Live quote/revision revalidation, funds, endpoint snapping/spl
 Purpose: convert approved preview to network. Files: src/application/construction.ts, src/rail/graph.ts. Interfaces: buildTrack, EngineeringQuote, ledger. Behavior: revalidate quote/revision, split graph at connections, persist spans, debit funds. Acceptance: affordable legal routes build atomically; unrelated crossings remain disconnected. Tests: insufficient cash, stale quote, junction/split and save roundtrip. Depends: APP-002, WORLD-001.
 
 ### RAIL-005 — Cache graph/geometry and route invalidation
-Status: immutable RailNetwork adjacency/min-heap/geometry cache is already implemented and benchmarked. Remaining work is cache ownership/invalidation during actual network edits. Purpose: scale routing. Files: src/rail/cache.ts, graph.ts. Interfaces: graph revision, compiled geometry, Traversal. Behavior: adjacency/heap pathfinding and dirty-edge caching. Acceptance: same paths as reference algorithm; changed graph invalidates affected routes. Tests: generated graphs against reference, 5k-edge timing. Depends: RAIL-004.
+Status: complete for the passenger slice. Immutable RailNetwork is benchmarked; train simulation owns one cached network and rebuilds exactly when railway revision changes. Routes retain station IDs and resolve fresh paths at assignment/departure. Purpose: scale routing. Files: src/rail/cache.ts, graph.ts. Interfaces: graph revision, compiled geometry, Traversal. Behavior: adjacency/heap pathfinding and dirty-edge caching. Acceptance: same paths as reference algorithm; changed graph invalidates affected routes. Tests: generated graphs against reference, 5k-edge timing. Depends: RAIL-004.
 
 ### STATION-001 — Station placement and coverage
 Status: complete. Content-priced ground-level rail placement and closest/tie-stable unique town coverage are implemented and tested.
@@ -83,21 +83,26 @@ Status: complete for route validation, reverse-capable graph legs, purchase-stat
 Purpose: assign usable routes. Files: src/application/routes.ts, src/simulation/routing.ts. Interfaces: createRoute, assignRoute, findPath. Behavior: validate all legs; shuttle/loop service and route revision handling. Acceptance: disconnected stops reject clearly; assigned train gets logical traversal. Tests: reversed legs, repeated stops, edited graph. Depends: TRAIN-002, RAIL-005.
 
 ### TRAIN-003 — Traction/braking and station dwell
+Status: complete. Consist physics, signed grade, power/force limits, service braking, exact endpoint arrival, 60-tick dwell and shuttle reversal are tested across render rates.
 Purpose: believable movement. Files: src/simulation/traction.ts, motion.ts, station-service.ts. Interfaces: frozen train physical/phase state. Behavior: grade/mass acceleration, curve/edge speed limits, braking to stop, tick dwell and turnaround. Acceptance: no stop overshoot; heavier trains respond to gradient; movement independent of FPS. Tests: stopping distance, short edges, steep load and pause. Depends: ROUTE-001.
 
 ### TRAIN-004 — Occupancy and consist placement
+Status: edge reservation and deterministic blocked/release behavior are implemented. Rendered coach placement/history remains for the production renderer/UI pass.
 Purpose: avoid collisions and render coaches accurately. Files: src/simulation/occupancy.ts, src/rendering/trains.ts. Interfaces: edge reservations, motion route history, coupler nodes. Behavior: station holds, edge reservations, blocked feedback and coaches sampling travelled path. Acceptance: opposing trains cannot share reserved edges; coaches stay on curves across junctions. Tests: conflict/release/deadlock feedback and visual reversal. Depends: TRAIN-003.
 
 ### ECON-001 — Destination passenger demand
+Status: complete. Deterministic weighted OD allocation, largest-remainder ties, daily cadence, oldest batches and seven-day caps are tested.
 Purpose: create transportable demand. Files: src/simulation/demand.ts, coverage.ts. Interfaces: Town, Station, demand queues, economy tick. Behavior: deterministic capped daily OD generation influenced by population/distance. Acceptance: one source of demand, bounded queues and reproducible totals. Tests: population effects, overlap, caps, cadence/save. Depends: STATION-001.
 
 ### ECON-002 — Passenger loading and delivery
+Status: complete for the simulation loop. Capacity-bound oldest-first boarding, destination-only unload, distance accumulation, exact once-only fares, running/daily costs and monthly reports pass save/dwell continuation tests.
 Purpose: complete first revenue loop. Files: src/simulation/transfer.ts, station-service.ts. Interfaces: CargoLot, demand, consist capacity, ledger. Behavior: board correct-destination passengers, unload once, pay distance-based fare and charge running costs. Acceptance: quantities conserved, no duplicate revenue and route profitability observable. Tests: full/empty capacity, intermediate stops, reload during dwell and exact ledger. Depends: ECON-001, TRAIN-003, FIN-001.
 
 ### SAVE-002 — Transactional IndexedDB slots
 Status: IndexedDbSaveStore and schema 2 migration backend are implemented and browser-tested. Remaining work is production slot UI/autosave/content validation/quota handling. Purpose: durable browser sessions. Files: src/persistence/indexeddb.ts, save.ts. Interfaces: SaveStore, frozen schema/content registry. Behavior: manual/auto slots, rename/delete/list/continue, validated load and content compatibility. Acceptance: browser reload resumes correct train phase and accounts; failed load preserves running state. Tests: fake or real IndexedDB transactions, quota/corrupt/unknown-version cases, browser restart. Depends: APP-002, ECON-002.
 
 ### CAM-001 — Objectives and campaign lifecycle
+Status: objective evaluation is complete for connected towns, delivered passengers and operating profit, including once-only completion state. Production lifecycle/menu presentation remains UI-001.
 Purpose: reward measurable progress. Files: src/simulation/objectives.ts, src/content/norway.ts. Interfaces: objective definitions and progress/reward state. Behavior: connect/deliver/profit goals evaluated on ticks, rewards once. Acceptance: three initial goals progress accurately and survive reload. Tests: reconnection, repeat evaluations, exactly-once reward. Depends: ECON-002.
 
 ### UI-001 — Menu/HUD and strategy camera
