@@ -20,8 +20,10 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Connected-town, delivered-passenger and operating-profit campaign objectives with once-only completion.
 - Transactional save manager covers manual/autosave, list/latest/delete, content compatibility and failure-preserves-session behavior. The browser shell now saves manually and autosaves daily.
 - The visible fjord shell now runs RailFrontierGame rather than the demonstration clock. Live cash, date, passenger delivery, route result, service phase/speed/cargo, speed controls and camera controls read immutable snapshots. Surveyed parallel alignments can be committed through the real construction command and update rendering/cash immediately.
+- A responsive main menu now presents the Norway campaign, new/continue flows, settings and credits. Its company archive creates named manual slots and can resume, rename or confirm-delete any slot; unavailable browser storage produces recovery guidance without changing the running company.
+- The live HUD presents all three campaign goals from authoritative objective progress and marks completed goals directly from persisted completion state.
 - Responsive desktop/mobile layouts were visually checked. The 4 km validated study remains the rendered backdrop while the production 16 km renderer is pending.
-- 66 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
+- 66 Node tests and 3 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -32,13 +34,13 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 2 plus strict 1→2 migration and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **28 core tests and 2 browser tests pass**. Type check, Blender asset checks and production build pass. Current browser tests also fail on console warnings; removed Three.js shadow option was corrected to PCFShadowMap.
+- **66 Node tests and 3 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: finish the main menu and multi-slot save UI, add free pointer construction/station placement, then add train/route/finance management panels. The production renderer must move from the 4 km validated backdrop to the generated 16 km Norway world and render multi-car consists before QA-001.
+Next: add free pointer construction and station placement, then add train, route and finance management panels. The production renderer must move from the 4 km validated backdrop to the generated 16 km Norway world and render multi-car consists before QA-001.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -55,7 +57,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-The study prepares its railway and automatically shuttles a proxy. It is **not the complete playable economic game**. Actual construction commands, station coverage, locomotive/coach purchasing, traction/braking/occupancy, passenger/freight transfers, ledger posting, objectives, reports, production menus and full save-slot/autosave UX remain. QA-001's end-to-end player-action acceptance test is pending. The 16 km Norway campaign and final original art kits also remain.
+The study still prepares its first railway, stations, service and rolling stock automatically. The underlying commands and passenger economy are complete, but players cannot yet place arbitrary track/stations or buy and assign trains entirely through the UI. QA-001's end-to-end player-action acceptance test, the 16 km campaign renderer and final original art kits remain.
 
 Conservative curve rejection, simple procedural art, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 

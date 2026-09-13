@@ -6,7 +6,7 @@ declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[
 
 test('runtime asset, camera, alignment, pause and durable save validation',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
-  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);
+  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);
   const assets=await page.evaluate(()=>window.__railProbe.assets);expect(assets).toHaveLength(2);expect(assets[0]!.triangles).toBe(84);expect(assets[1]!.triangles).toBe(36);expect(assets.every(a=>a.normalsFinite)).toBe(true);
   expect(await page.evaluate(()=>window.__railProbe.stats().terrainErrorM)).toBeLessThan(.001);
   await page.waitForFunction(()=>window.__railProbe.snapshot().tick>10);
@@ -34,7 +34,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
 
 test('scaled scene records honest frame metrics and releases replaced resources',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>120);
+  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>120);
   const initial=await page.evaluate(()=>window.__railProbe.metrics());
   await page.evaluate(()=>{window.__railProbe.setSpeed(8);window.__railProbe.setStress(true);});
   await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>=300,{},{timeout:45000});

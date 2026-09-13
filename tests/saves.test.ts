@@ -19,6 +19,7 @@ test('manual, autosave, list, continue and delete use transactional slots',async
   const {game,store,manager}=setup();await manager.save('manual','Before expansion');game.advance(1);await manager.autosave();
   assert.deepEqual((await manager.list()).map(slot=>slot.id),['autosave','manual']);
   game.advance(1);const restored=await manager.continueLatest();assert.equal(restored.tick,20);
+  await manager.rename('manual','Western branch');assert.equal((await manager.list()).find(slot=>slot.id==='manual')?.name,'Western branch');
   await manager.remove('manual');assert.equal(store.slots.has('manual'),false);
 });
 

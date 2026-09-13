@@ -21,5 +21,9 @@ export class GameSaveManager {
   async continueLatest():Promise<Readonly<GameState>> {
     const latest=(await this.store.list())[0];if(!latest)throw new Error('No saved game is available');return this.load(latest.id);
   }
+  async rename(id:string,name:string):Promise<void> {
+    if(name.trim().length===0)throw new Error('Save name is required');
+    const json=await this.store.read(id);await this.store.write(id,name.trim(),json);
+  }
   remove(id:string){return this.store.remove(id);}
 }
