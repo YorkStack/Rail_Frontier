@@ -7,13 +7,14 @@ import './ui/study.css';
 import { createStudyState,studyCurve } from '../spikes/study-state.js';
 import { generateFjordStudy } from './world/fjord-study.js';
 import { FjordRenderer } from '../spikes/fjord-renderer.js';
-import type { GameState,Speed } from './domain/model.js';
+import type { GameState,Speed,Vec3 } from './domain/model.js';
 import { IndexedDbSaveStore } from './persistence/indexeddb.js';
 import { compileCurve } from './rail/geometry.js';
 import { quoteTrack } from './rail/planner.js';
 import { certifyCurve } from './rail/constraints.js';
 import { RailFrontierGame } from './application/game.js';
 import { GameSaveManager } from './application/saves.js';
+import { stationDefinition } from './content/stations.js';
 
 const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
@@ -88,12 +89,19 @@ app.innerHTML=`
   <div id="map-labels" aria-hidden="true"></div>
   <section id="planner" class="floating-panel" hidden aria-label="Alignment study">
     <div class="panel-title"><span class="eyebrow">ALIGNMENT STUDY</span><button id="close-planner" class="square" aria-label="Close alignment study">×</button></div>
-    <h2>Read the landscape.</h2><p>Compare an elevated crossing with a cut through the mountain.</p>
-    <label for="alignment">Corridor<select id="alignment"><option value="bridge">Fjord inlet crossing</option><option value="tunnel">Mountain spur</option><option value="coast">Coastal shelf</option></select></label>
-    <label for="elevation">Track elevation <output id="elevation-value">15 m</output></label><input id="elevation" type="range" min="-5" max="115" step="1" value="15">
+    <h2>Read the landscape.</h2><p id="planner-copy">Compare an elevated crossing with a cut through the mountain.</p>
+    <label for="alignment">Corridor<select id="alignment"><option value="bridge">Fjord inlet crossing</option><option value="tunnel">Mountain spur</option><option value="coast">Coastal shelf</option><option value="free">Choose two points on the map</option></select></label>
+    <div id="elevation-controls"><label for="elevation">Track elevation <output id="elevation-value">15 m</output></label><input id="elevation" type="range" min="-5" max="115" step="1" value="15"></div>
     <div class="quote-grid"><span>Length<strong id="quote-length"></strong></span><span>Estimated cost<strong id="quote-cost"></strong></span></div>
     <p id="quote-kind"></p><p id="quote-valid" role="status"></p>
     <button id="commit-track" class="commit-button">Build this alignment</button><small class="disclosure">The live quote is recalculated before funds are committed.</small>
+  </section>
+  <section id="station-planner" class="floating-panel" hidden aria-label="Station placement">
+    <div class="panel-title"><span class="eyebrow">STATION SURVEY</span><button id="close-station" class="square" aria-label="Close station placement">×</button></div>
+    <h2>Place a stopping point.</h2><p>Choose a rail node on ground-level track. The closest settlement inside the coverage area will be served.</p>
+    <label for="station-class">Station class<select id="station-class"><option value="rural-halt">Rural halt · NOK 25,000</option><option value="town-station">Town station · NOK 75,000</option></select></label>
+    <div id="station-selection" class="station-selection"><strong>No rail node selected</strong><span>Click close to a track endpoint on the map.</span></div>
+    <p id="station-valid" role="status">Select a rail node to continue.</p><button id="commit-station" class="commit-button" disabled>Build station</button>
   </section>
   <section id="diagnostics" class="floating-panel diagnostics" hidden aria-label="Technical diagnostics">
     <p class="eyebrow">TECHNICAL OBSERVATIONS</p><h2>Behind the landscape.</h2><pre id="stats"></pre>
@@ -102,7 +110,7 @@ app.innerHTML=`
     <p class="disclosure">The scale test includes 2,000 buildings and 5,000 strategic rail segments. It measures rendering, not a complete economy.</p>
   </section>
   <footer class="control-deck">
-    <div class="camera-tools"><button id="regional" class="icon-button" title="Regional view (R)"><span>⌖</span>Regional view</button><button id="follow" class="icon-button" title="Follow train (F)"><span>▰</span>Follow train</button><button id="plan" class="icon-button" aria-expanded="false"><span>⌁</span>Survey track</button></div>
+    <div class="camera-tools"><button id="regional" class="icon-button" title="Regional view (R)"><span>⌖</span>Regional view</button><button id="follow" class="icon-button" title="Follow train (F)"><span>▰</span>Follow train</button><button id="plan" class="icon-button" aria-expanded="false"><span>⌁</span>Survey track</button><button id="place-station" class="icon-button" aria-expanded="false"><span>⌑</span>Place station</button></div>
     <div class="time-control"><span id="run-state">RUNNING</span><div class="speeds" role="group" aria-label="Simulation speed"><button data-speed="0" aria-label="Pause" aria-pressed="false">Ⅱ</button><button data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="4" aria-pressed="false">4×</button><button data-speed="8" aria-pressed="false">8×</button></div></div>
   </footer>
   <aside class="company-strip" aria-label="Company status"><span>Cash<strong id="cash">—</strong></span><span>Date<strong id="date">—</strong></span><span>Passengers<strong id="passengers">0 delivered</strong></span><span>Route result<strong id="profit">No result yet</strong></span></aside>
@@ -128,24 +136,39 @@ async function start():Promise<void> {
   element<HTMLInputElement>('#trees').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
   element<HTMLInputElement>('#trees-setting').onchange=event=>setTrees((event.target as HTMLInputElement).checked);
   element('#motion-setting').textContent=matchMedia('(prefers-reduced-motion: reduce)').matches?'On':'Off';
-  let preview:{curve:ReturnType<typeof studyCurve>;cost:number;valid:boolean}|null=null;
+  let preview:{curve:ReturnType<typeof studyCurve>;cost:number;valid:boolean}|null=null,freePoints:Vec3[]=[],stationNodeId:string|null=null,interaction:'none'|'free-track'|'station'='none';
   const updatePlanner=()=>{
     const mode=element<HTMLSelectElement>('#alignment').value,height=Number(element<HTMLInputElement>('#elevation').value);
-    const [start,end]=mode==='bridge'?[1480,1790]:mode==='tunnel'?[2290,2650]:[970,1240];
-    const curve=studyCurve(start!,end!),offset=mode==='bridge'?-220:220;for(const p of [curve.p0,curve.p1,curve.p2,curve.p3]){p.x+=offset;p.y=height;}
+    element('#elevation-controls').hidden=mode==='free';interaction=mode==='free'?'free-track':'none';
+    if(mode==='free'&&freePoints.length<2){preview=null;view.setPreview(null);element('#planner-copy').textContent=freePoints.length===0?'Click the landscape to choose the start of a free alignment.':'Start selected. Click the landscape again to choose its destination.';element('#quote-length').textContent='—';element('#quote-cost').textContent='—';element('#quote-kind').textContent='';element('#quote-valid').textContent='Two map points are required.';element<HTMLButtonElement>('#commit-track').disabled=true;return;}
+    let curve:ReturnType<typeof studyCurve>;
+    if(mode==='free') {const [a,b]=freePoints,third=(start:number,end:number)=>start+(end-start)/3;curve={p0:{...a!},p1:{x:third(a!.x,b!.x),y:third(a!.y,b!.y),z:third(a!.z,b!.z)},p2:{x:third(b!.x,a!.x),y:third(b!.y,a!.y),z:third(b!.z,a!.z)},p3:{...b!}};element('#planner-copy').textContent='A straight preliminary alignment through the selected terrain.';}
+    else {const [start,end]=mode==='bridge'?[1480,1790]:mode==='tunnel'?[2290,2650]:[970,1240];curve=studyCurve(start!,end!);const offset=mode==='bridge'?-220:220;for(const p of [curve.p0,curve.p1,curve.p2,curve.p3]){p.x+=offset;p.y=height;}element('#planner-copy').textContent='Compare an elevated crossing with a cut through the mountain.';}
     const geometry=compileCurve(curve),quote=quoteTrack(geometry,terrain),constraints=certifyCurve(curve),valid=quote.valid&&constraints.valid;
     preview={curve,cost:quote.cost,valid};
     view.setPreview(geometry,valid?'#edc879':'#d7795f');
     element('#elevation-value').textContent=`${height} m`;element('#quote-length').textContent=`${Math.round(geometry.lengthM)} m`;element('#quote-cost').textContent=new Intl.NumberFormat('en',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(quote.cost/100);
     const lengths={ground:0,bridge:0,tunnel:0};for(const span of quote.intervals)lengths[span.kind]+=span.endM-span.startM;
     element('#quote-kind').textContent=Object.entries(lengths).filter(([,length])=>length>1).map(([kind,length])=>`${Math.round(length)} m ${kind}`).join(' · ');
-    element('#quote-valid').textContent=valid?'✓ Feasible survey alignment':[...quote.reasons,...constraints.reasons].join(' · ');element('#quote-valid').classList.toggle('invalid',!valid);
+    element('#quote-valid').textContent=valid?'✓ Feasible survey alignment':[...quote.reasons,...constraints.reasons].join(' · ');element('#quote-valid').classList.toggle('invalid',!valid);element<HTMLButtonElement>('#commit-track').disabled=!valid;
   };
-  const togglePlanner=(open:boolean)=>{element('#planner').hidden=!open;element('#plan').setAttribute('aria-expanded',String(open));if(open)updatePlanner();else view.setPreview(null);};
+  const togglePlanner=(open:boolean)=>{element('#planner').hidden=!open;element('#plan').setAttribute('aria-expanded',String(open));if(open){toggleStation(false);updatePlanner();}else{interaction='none';view.setPreview(null);view.setMarker(null);}};
   element('#plan').onclick=()=>togglePlanner(element('#planner').hidden!==false);element('#close-planner').onclick=()=>togglePlanner(false);
-  element('#alignment').onchange=()=>{updatePlanner();const mode=element<HTMLSelectElement>('#alignment').value;view.focus(studyCurve(mode==='tunnel'?2350:1500,mode==='tunnel'?2600:1750).p1);};
+  element('#alignment').onchange=()=>{freePoints=[];view.setMarker(null);updatePlanner();const mode=element<HTMLSelectElement>('#alignment').value;if(mode!=='free')view.focus(studyCurve(mode==='tunnel'?2350:1500,mode==='tunnel'?2600:1750).p1);};
   element('#elevation').oninput=updatePlanner;
   element('#commit-track').onclick=()=>{if(!preview?.valid){toast('This alignment is not buildable.');return;}const result=game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'buildTrack',curve:preview.curve,from:{position:preview.curve.p0},to:{position:preview.curve.p3},expectedRevision:state.railway.revision,quotedCost:preview.cost}});state=game.snapshot();if(result.ok){toast(`Alignment built for ${money(preview.cost)}.`);togglePlanner(false);}else toast(result.reason);};
+  function updateStationSelection():void {
+    const status=element('#station-valid'),button=element<HTMLButtonElement>('#commit-station');button.disabled=true;
+    if(!stationNodeId){element('#station-selection').innerHTML='<strong>No rail node selected</strong><span>Click close to a track endpoint on the map.</span>';status.textContent='Select a rail node to continue.';return;}
+    const node=state.railway.nodes.find(candidate=>candidate.id===stationNodeId);if(!node){stationNodeId=null;updateStationSelection();return;}
+    const definition=stationDefinition(element<HTMLSelectElement>('#station-class').value)!,existing=state.stations.some(station=>station.nodeId===node.id),connected=state.railway.edges.some(edge=>edge.from===node.id||edge.to===node.id),ground=terrain.sample(node.position.x,node.position.z).elevationM,town=state.towns.map(item=>({item,distance:Math.hypot(item.position.x-node.position.x,item.position.z-node.position.z)})).sort((a,b)=>a.distance-b.distance)[0];
+    element('#station-selection').innerHTML=`<strong>${node.id.replace(':',' ')}</strong><span>${Math.round(node.position.x)} E · ${Math.round(node.position.z)} S${town&&town.distance<=definition.coverageRadiusM?` · Serves ${town.item.name}`:''}</span>`;
+    const reason=existing?'A station already occupies this rail node.':!connected?'This rail node is not connected to track.':Math.abs(node.position.y-ground)>6?'The selected track is too far above or below ground.':state.company.cash<definition.purchaseCost?'The company cannot afford this station.':'';status.textContent=reason||`✓ Ready · ${money(definition.purchaseCost)}`;status.classList.toggle('invalid',Boolean(reason));button.disabled=Boolean(reason);
+  }
+  function toggleStation(open:boolean):void {element('#station-planner').hidden=!open;element('#place-station').setAttribute('aria-expanded',String(open));if(open){element('#planner').hidden=true;element('#plan').setAttribute('aria-expanded','false');view.setPreview(null);interaction='station';updateStationSelection();}else{if(interaction==='station')interaction='none';view.setMarker(null);}}
+  element('#place-station').onclick=()=>toggleStation(element('#station-planner').hidden!==false);element('#close-station').onclick=()=>toggleStation(false);element('#station-class').onchange=updateStationSelection;
+  element('#commit-station').onclick=()=>{if(!stationNodeId)return;const result=game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'buildStation',nodeId:stationNodeId as `node:${number}`,classId:element<HTMLSelectElement>('#station-class').value}});state=game.snapshot();if(result.ok){toast(`Station built for ${money(stationDefinition(element<HTMLSelectElement>('#station-class').value)!.purchaseCost)}.`);toggleStation(false);}else{toast(result.reason);updateStationSelection();}};
+  const canvas=element<HTMLCanvasElement>('#world'),mapClick=(event:MouseEvent)=>{if(interaction==='none')return;const picked=view.pick(event.clientX,event.clientY);if(!picked){toast('Choose a point on land.');return;}const nearest=state.railway.nodes.map(node=>({node,distance:Math.hypot(node.position.x-picked.x,node.position.z-picked.z)})).sort((a,b)=>a.distance-b.distance)[0];if(interaction==='free-track'){if(freePoints.length>=2)freePoints=[];const selected=nearest&&nearest.distance<=45?nearest.node.position:picked;freePoints.push(structuredClone(selected));view.setMarker(freePoints.length===1?selected:null);updatePlanner();return;}if(!nearest||nearest.distance>90){stationNodeId=null;view.setMarker(picked,'#d7795f');updateStationSelection();element('#station-valid').textContent='No rail node is close enough to that point.';element('#station-valid').classList.add('invalid');return;}stationNodeId=nearest.node.id;view.setMarker(nearest.node.position);updateStationSelection();};canvas.addEventListener('click',mapClick);
   const save=async()=>{state=game.snapshot();await saves.save('study','Norwegian Fjords company');return state.tick;};
   const load=async()=>{state=await saves.load('study');syncSpeed();return state.tick;};
   element('#save').onclick=()=>{void save().then(tick=>toast(`Study saved at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not save: ${message(error)}`));};
@@ -153,7 +176,7 @@ async function start():Promise<void> {
   const selectMenuView=(name:string)=>{document.querySelectorAll<HTMLElement>('.menu-view').forEach(view=>view.hidden=view.id!==`menu-${name}`);document.querySelectorAll<HTMLButtonElement>('[data-menu-view]').forEach(button=>button.setAttribute('aria-current',button.dataset.menuView===name?'page':'false'));if(name==='saves')void refreshSaveSlots();};
   const setMenuError=(error:unknown)=>{element('#save-error').textContent=`The archive could not be opened. ${message(error)} Your running company has not been changed.`;};
   const closeMenu=()=>{element('#main-menu').hidden=true;element<HTMLCanvasElement>('#world').focus();};
-  const openMenu=()=>{game.pauseForVisibility();syncSpeed();element('#main-menu').hidden=false;selectMenuView('campaign');};
+  const openMenu=()=>{game.pauseForVisibility();syncSpeed();togglePlanner(false);toggleStation(false);element('#main-menu').hidden=false;selectMenuView('campaign');};
   const loadSlot=async(id:string)=>{state=await saves.load(id);syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);};
   const refreshSaveSlots=async()=>{
     const host=element('#save-slots');host.replaceChildren();element('#save-error').textContent='';
@@ -177,7 +200,7 @@ async function start():Promise<void> {
   element('#new-game').onclick=()=>{game.replaceState(createStudyState());state=game.snapshot();setSpeed(1);view.regional();closeMenu();toast('A new company has taken charge of the Northern Line.');};
   element('#continue-game').onclick=()=>{void saves.continueLatest().then(next=>{state=next;syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
   void refreshSaveSlots();
-  const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
+  const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else if(!element('#station-planner').hidden)toggleStation(false);else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
   window.addEventListener('keydown',keydown);
   let last=performance.now(),request=0,frameCount=0,lastAutosaveDay=Math.floor(state.tick/1200);const frames:number[]=[],renderTimes:number[]=[],tickTimes:number[]=[];
   const visibility=()=>{last=performance.now();if(document.hidden){game.pauseForVisibility();syncSpeed();toast('Study paused while this tab is in the background.');}};
@@ -191,10 +214,10 @@ async function start():Promise<void> {
     request=requestAnimationFrame(frame);
   };
   request=requestAnimationFrame(frame);toast('The fjord is ready. Explore the landscape or follow the train.');
-  const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);view.dispose();void store.close();};
+  const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);view.dispose();void store.close();};
   if(import.meta.hot)import.meta.hot.dispose(dispose);
   if(import.meta.env.DEV) {
-    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
+    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
     Object.defineProperty(window,'__railProbe',{value:probe,configurable:true});
   }
 }

@@ -34,6 +34,7 @@ export class FjordRenderer implements WorldRenderer {
   private trees:THREE.Group;
   private buildings=new THREE.Group();
   private preview:THREE.Object3D|null=null;
+  private marker:THREE.Object3D|null=null;
   private trainPosition=new THREE.Vector3();
   private follow=false;
   private treeCount=0;
@@ -171,6 +172,11 @@ export class FjordRenderer implements WorldRenderer {
     if(!geometry)return;
     const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));
     this.preview=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color,depthTest:false}));this.preview.renderOrder=10;this.scene.add(this.preview);
+  }
+  setMarker(position:Vec3|null,color='#edc879'):void {
+    if(this.marker){this.scene.remove(this.marker);disposeObject(this.marker);this.marker=null;}
+    if(!position)return;
+    const group=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(9,.7,8,36),new THREE.MeshBasicMaterial({color,depthTest:false})),pin=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,16,8),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;pin.position.y=8;group.add(ring,pin);group.position.set(position.x,position.y+1.2,position.z);group.renderOrder=11;this.marker=group;this.scene.add(group);
   }
   setStress(state:GameState,enabled:boolean):void {
     this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.createForest(enabled?20000:6500);this.scene.add(this.trees);

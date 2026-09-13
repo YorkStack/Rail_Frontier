@@ -110,7 +110,7 @@ Status: complete. The responsive main menu presents the Norway campaign, new/con
 Purpose: usable session controls. Files: src/ui/*, src/rendering/camera.ts. Interfaces: GameApplication, SaveStore, WorldRenderer. Behavior: campaign/new/continue/load/settings/credits; cash/date/speed/objectives; pan/orbit/zoom/tilt/focus/follow/reset. Acceptance: keyboard and mouse input work, labels readable, no terrain clipping or stuck capture. Tests: browser input/accessibility/resize/console. Depends: APP-002, SAVE-002, CAM-001. Apply relevant UI design skills when implementing.
 
 ### UI-002 — Construction/station interaction
-Status: active. The alignment panel displays live feasibility, cost and span breakdown and can commit a revalidated parallel bridge/tunnel/coastal alignment. Free pointer placement and station placement remain.
+Status: complete. The alignment panel supports preset bridge/tunnel/coastal studies and two-point map picking with rail-node snapping, live feasibility/cost/span feedback, confirm and cancel. Station placement picks nearby rail nodes, validates ground/funds/occupancy, previews coverage and commits the selected station class through the command gateway.
 Purpose: player-built network. Files: src/ui/construction.*, station-panel.*, picking adapter. Interfaces: previewTrack/buildTrack/buildStation. Behavior: pick controls, smooth preview with validity/cost/grade/span breakdown, confirm/cancel. Acceptance: explicit understandable invalid reasons and no money spent on cancelled preview. Tests: complete browser placement, insufficient funds, tool switching. Depends: UI-001, RAIL-004, STATION-001.
 
 ### UI-003 — Train/routes/finance panels
