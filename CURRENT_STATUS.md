@@ -24,8 +24,10 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - The live HUD presents all three campaign goals from authoritative objective progress and marks completed goals directly from persisted completion state.
 - Players can now pick two terrain points for a free straight alignment, snap to existing rail nodes, review engineering spans/cost/errors and commit or cancel through the real construction command. A separate map-pick station tool validates rail proximity, ground level, occupancy, funds and settlement coverage before purchase.
 - The railway office now exposes consist purchase, two-stop route creation and stopped-train assignment through the command gateway. It also shows consist/cargo/service state, town demand, per-route result, reconciled cash/income/outgoings and recent ledger entries.
-- Responsive desktop/mobile layouts were visually checked. The 4 km validated study remains the rendered backdrop while the production 16 km renderer is pending.
-- 66 Node tests and 5 real browser tests pass. Asset validation and the production build pass.
+- The visible renderer now uses the deterministic 16 km Norway heightfield, production biome, 28,000 instanced trees, expanded settlement dressing, scaled fog/light/camera bounds and the full three-town corridor. The former 4 km scene remains only as an isolated architecture fixture.
+- Every owned train is rendered. The initial service visibly combines a procedural steam locomotive with two Blender-exported GLB coaches; car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
+- Responsive desktop/mobile layouts were visually checked. The regional and train-follow views were captured against the production world at roughly 56–57 FPS on the current machine.
+- 67 Node tests and 5 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -36,13 +38,13 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 2 plus strict 1→2 migration and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **66 Node tests and 5 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- **67 Node tests and 5 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: move the renderer from the 4 km validated backdrop to the generated 16 km Norway world and render multi-car consists before QA-001.
+Next: execute QA-001 as an empty-network player journey, then begin the first timber production chain.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -59,7 +61,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-The study still prepares its first railway, stations, service and rolling stock automatically, although every passenger-operation command is now exposed through the UI. QA-001's empty-network end-to-end player-action acceptance test, the 16 km campaign renderer and final original art kits remain.
+The preview commissions its first railway, stations, service and rolling stock automatically, although every passenger-operation command is exposed through the UI. QA-001 still needs a separate empty-network player journey. The complete Blender-authored production asset kit also remains; the current locomotive is procedural while the coaches use the validated Blender GLBs.
 
 Conservative curve rejection, simple procedural art, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 

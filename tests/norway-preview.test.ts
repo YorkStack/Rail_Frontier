@@ -1,0 +1,4 @@
+import { test } from 'node:test';import assert from 'node:assert/strict';
+import { norway } from '../src/content/norway.js';import { createNorwayPreviewState } from '../src/content/norway-preview.js';import { generateWorld } from '../src/world/generator.js';import { validateState } from '../src/persistence/save.js';import { quoteTrack } from '../src/rail/planner.js';import { compileCurve } from '../src/rail/geometry.js';
+
+test('production preview commissions a valid three-town passenger corridor',()=>{const terrain=generateWorld(norway.world),state=validateState(createNorwayPreviewState(terrain));assert.equal(state.world.widthM,16000);assert.equal(state.stations.length,3);assert.equal(state.trains[0]!.vehicleIds.length,2);for(const edge of state.railway.edges)assert.equal(quoteTrack(compileCurve(edge.curve),terrain).valid,true);});
