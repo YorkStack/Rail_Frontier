@@ -2,7 +2,7 @@ import type { CommandHandler, CommandHandlers } from './commands.js';
 import type { GameCommand } from './ports.js';
 import { allocateId, type Id, type Train } from '../domain/model.js';
 import { RailNetwork } from '../rail/graph.js';
-import { servicePassengers } from '../simulation/transfer.js';
+import { serviceStop } from '../simulation/transfer.js';
 
 type CreateRoute=Extract<GameCommand,{type:'createRoute'}>;
 type AssignRoute=Extract<GameCommand,{type:'assignRoute'}>;
@@ -35,7 +35,7 @@ export const assignRouteHandler:CommandHandler<AssignRoute>=(state,command)=>{
   const direction:1|-1=route.mode==='shuttle'&&stopIndex===route.stops.length-1?-1:1,nextStopIndex=(stopIndex+direction+route.stops.length)%route.stops.length;
   const destination=state.stations.find(station=>station.id===route.stops[nextStopIndex])!.nodeId,path=new RailNetwork(state.railway).findPath(node,destination);
   if(!path)throw new Error('Route leg is disconnected');
-  train.routeId=route.id;servicePassengers(state,train,route.stops[stopIndex]!);train.motion={path,leg:0,distanceM:0,arrived:false};train.phase='running';train.dwellTicks=0;train.speedMps=0;
+  train.routeId=route.id;serviceStop(state,train,route.stops[stopIndex]!);train.motion={path,leg:0,distanceM:0,arrived:false};train.phase='running';train.dwellTicks=0;train.speedMps=0;
   const service=state.operations.trainServices[train.id];if(!service)throw new Error('Train service state is missing');service.nextStopIndex=nextStopIndex;service.direction=direction;
   return {createdIds:[]};
 };

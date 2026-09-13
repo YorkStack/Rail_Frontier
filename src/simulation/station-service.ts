@@ -1,5 +1,6 @@
 import type { GameState, Id, Train } from '../domain/model.js';
 import { RailNetwork } from '../rail/graph.js';
+import { serviceStop } from './transfer.js';
 
 export const DWELL_TICKS=60;
 
@@ -14,6 +15,7 @@ export function advanceDwell(state:GameState,train:Train,network:RailNetwork):vo
     if(current===route.stops.length-1)service.direction=-1;
     else if(current===0)service.direction=1;
   } else service.direction=1;
+  serviceStop(state,train,route.stops[current]!);
   const next=(current+service.direction+route.stops.length)%route.stops.length;
   const stationNode=(index:number):Id<'node'>=>state.stations.find(station=>station.id===route.stops[index])!.nodeId;
   const path=network.findPath(stationNode(current),stationNode(next));

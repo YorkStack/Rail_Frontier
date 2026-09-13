@@ -2,7 +2,7 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 
-# Current status — passenger implementation, 2026-09-13
+# Current status — passenger and freight implementation, 2026-09-14
 
 Current milestone: architecture is complete and the Sol implementation pass is active. The user continued from IMPLEMENTATION_PLAN.md. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
 
@@ -27,8 +27,10 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - The visible renderer now uses the deterministic 16 km Norway heightfield, production biome, 28,000 instanced trees, expanded settlement dressing, scaled fog/light/camera bounds and the full three-town corridor. The former 4 km scene remains only as an isolated architecture fixture.
 - Every owned train is rendered. The initial service visibly combines a procedural steam locomotive with two Blender-exported GLB coaches; car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
 - QA-001 now passes as a separate empty-network browser journey: Norway selection, camera navigation, free track, two stations, locomotive/coach purchase, route assignment, physical service, passenger delivery, revenue and operating cost, reconciled cash, speed/pause, save, reload, exact load and resumed ticks with a clean console.
+- ECON-003 now supplies the first production chain. Granli Forest creates timber into capped storage; Sundvik Sawmill atomically consumes timber and produces lumber. Covered stations transfer both goods through capacity-bound freight wagons, towns consume delivered lumber, distance-based freight revenue posts once, and blocked partial cargo remains aboard.
+- The commissioned preview begins with a small working stock so a player can buy a freight consist and operate the full Granli–Sundvik chain immediately. A new company starts with empty industries and must wait for production. The railway office shows recipe progress, storage, timber/lumber inventory and typed onboard cargo.
 - Responsive desktop/mobile layouts were visually checked. The regional and train-follow views were captured against the production world at roughly 56–57 FPS on the current machine.
-- 67 Node tests and 6 real browser tests pass. Asset validation and the production build pass.
+- 71 Node tests and 7 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -39,13 +41,13 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 2 plus strict 1→2 migration and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **67 Node tests and 6 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- **71 Node tests and 7 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: begin ECON-003, the first timber production and sawmill conversion chain.
+Next: begin ART-001, the original production Norway asset kit, using the local Blender installation and the validated export pipeline.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -62,7 +64,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-The preview commissions its first railway, stations, service and rolling stock automatically, while “Start new company” begins empty. The first freight chain and complete Blender-authored production asset kit remain; the current locomotive is procedural while the coaches use the validated Blender GLBs.
+The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The complete Blender-authored production asset kit remains; the current locomotive is procedural while coaches and freight wagons use the validated Blender wagon GLBs.
 
 Conservative curve rejection, simple procedural art, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 

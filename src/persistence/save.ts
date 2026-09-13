@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { GameState } from '../domain/model.js';
 import { compileGraph } from '../rail/graph.js';
 import { emptyOperations } from '../domain/operations.js';
+import { industryDefinition } from '../content/industries.js';
 
 const finite=z.number().finite(), integer=z.number().int().safe(), nonnegative=integer.nonnegative();
 const id=<K extends string>(kind:K)=>z.custom<`${K}:${number}`>((v)=>typeof v==='string' && new RegExp(`^${kind}:[1-9][0-9]*$`).test(v) && Number.isSafeInteger(Number(v.split(':')[1])));
@@ -63,6 +64,11 @@ export function validateState(value: unknown): GameState {
   for(const [trainId,service] of Object.entries(state.operations.trainServices)){requireRef(trainId);const train=state.trains.find(t=>t.id===trainId)!;const route=state.routes.find(r=>r.id===train.routeId);if(route&&service.nextStopIndex>=route.stops.length)throw new Error('Invalid service stop');}
   for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){requireRef(edgeId);let end=0;for(const span of infrastructure.spans){if(Math.abs(span.startM-end)>.001||span.endM<=span.startM)throw new Error('Invalid engineering span');end=span.endM;}const edge=state.railway.edges.find(e=>e.id===edgeId)!;if(Math.abs(end-geometry.get(edge.id)!.lengthM)>.01)throw new Error('Engineering spans must cover entire edge');}
   for(const industryId of Object.keys(state.operations.industryCycleTicks))requireRef(industryId);
+  for(const industry of state.industries) {
+    const recipe=industryDefinition(industry.definitionId);if(!recipe)throw new Error(`Unknown industry: ${industry.definitionId}`);
+    const progress=state.operations.industryCycleTicks[industry.id];if(progress===undefined||progress>recipe.cycleTicks)throw new Error('Invalid industry cycle');
+    const stored=Object.values(industry.inventory).reduce((sum,quantity)=>sum+(quantity??0),0);if(stored>recipe.storageCapacity)throw new Error('Industry storage exceeds capacity');
+  }
   if(new Set(state.operations.completedObjectives).size!==state.operations.completedObjectives.length)throw new Error('Duplicate objective completion');
   let cash=state.company.openingCash;
   for(const transaction of state.company.ledger) {cash+=transaction.amount;if(!Number.isSafeInteger(cash)||transaction.tick>state.tick) throw new Error('Invalid ledger');}
