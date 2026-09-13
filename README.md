@@ -2,7 +2,7 @@
 
 Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-**Current milestone: architecture complete, interactive Norway technical study.** The study has a 3D fjord, instanced forest/buildings, bridge/tunnel/waterfall, a Blender wagon following graph-based track, camera controls, engineering previews, speed controls and IndexedDB save/load. The player-built railway, purchases, passenger economy and campaign objectives are the next implementation milestone, not finished features.
+**Current milestone: passenger simulation implemented, production UI in progress.** The browser runs the atomic game application over the validated 3D fjord scene. Construction, stations, vehicle purchase, routes, traction, occupancy, passenger demand/delivery, finance, objectives and transactional saves are implemented in the application/simulation layer. The current visible shell exposes live company status, train service, speed/camera controls, save/load/autosave and commit-ready engineering surveys. Full player-driven station/train/route panels and the generated 16 km renderer remain in progress.
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
@@ -17,7 +17,7 @@ npm run dev
 
 Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, Escape closes the survey. Background tabs pause explicitly. Survey track compares coastal/bridge/tunnel elevation and cost without constructing infrastructure. Save/load persists the study to IndexedDB.
 
-The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. This is an architecture validation application, not the finished game menu/HUD.
+The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an implementation preview, not the finished game menu and management interface.
 
 ## Validate and build
 

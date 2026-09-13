@@ -18,7 +18,10 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Deterministic edge reservations prevent opposing trains from sharing track and expose blocked service state.
 - Destination-weighted daily passenger demand, capacity-bound oldest-first boarding, distance-tracked delivery, exactly-once fares, daily maintenance and monthly capital/operating reports.
 - Connected-town, delivered-passenger and operating-profit campaign objectives with once-only completion.
-- 64 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
+- Transactional save manager covers manual/autosave, list/latest/delete, content compatibility and failure-preserves-session behavior. The browser shell now saves manually and autosaves daily.
+- The visible fjord shell now runs RailFrontierGame rather than the demonstration clock. Live cash, date, passenger delivery, route result, service phase/speed/cargo, speed controls and camera controls read immutable snapshots. Surveyed parallel alignments can be committed through the real construction command and update rendering/cash immediately.
+- Responsive desktop/mobile layouts were visually checked. The 4 km validated study remains the rendered backdrop while the production 16 km renderer is pending.
+- 66 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -35,7 +38,7 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 
 ## Currently working
 
-Next: production save-slot/autosave lifecycle and the actual campaign UI. Edge occupancy is complete; rendered multi-car consist placement remains in TRAIN-004 and will be added with the production renderer. The visible study shell will be replaced by UI-001/UI-002/UI-003, followed by the QA-001 player-action gate.
+Next: finish the main menu and multi-slot save UI, add free pointer construction/station placement, then add train/route/finance management panels. The production renderer must move from the 4 km validated backdrop to the generated 16 km Norway world and render multi-car consists before QA-001.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
