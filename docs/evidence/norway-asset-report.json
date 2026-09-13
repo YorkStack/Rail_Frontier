@@ -1,0 +1,477 @@
+{
+  "formatValidated": true,
+  "engineImportValidated": false,
+  "probe": [
+    {
+      "file": "assets/runtime/models/core/wagon_probe_lod0.glb",
+      "bytes": 11736,
+      "triangles": 84,
+      "materials": 3,
+      "bounds": {
+        "min": [
+          -1.399999976158142,
+          0,
+          -5.100000191479921
+        ],
+        "max": [
+          1.399999976158142,
+          3.200000047683716,
+          5
+        ]
+      },
+      "dimensions": [
+        2.799999952316284,
+        3.200000047683716,
+        10.100000191479921
+      ]
+    },
+    {
+      "file": "assets/runtime/models/core/wagon_probe_lod1.glb",
+      "bytes": 5672,
+      "triangles": 36,
+      "materials": 3,
+      "bounds": {
+        "min": [
+          -1.399999976158142,
+          0.4999999701976776,
+          -5.100000191479921
+        ],
+        "max": [
+          1.399999976158142,
+          3.200000047683716,
+          5
+        ]
+      },
+      "dimensions": [
+        2.799999952316284,
+        2.700000077486038,
+        10.100000191479921
+      ]
+    }
+  ],
+  "pack": {
+    "campaignId": "norwegian-fjords",
+    "generator": {
+      "blender": "4.0.2",
+      "script": "tools/blender/generate_norway_pack.py"
+    },
+    "assets": [
+      {
+        "id": "nord-2-6-0",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/nord-2-6-0_lod0.glb",
+            "bytes": 54104,
+            "triangles": 664,
+            "materials": 5,
+            "bounds": {
+              "min": [
+                -1.5750000476837158,
+                0,
+                -6.900000095367432
+              ],
+              "max": [
+                1.5750000476837158,
+                5.549999833106995,
+                6.900000095367432
+              ]
+            },
+            "dimensions": [
+              3.1500000953674316,
+              5.549999833106995,
+              13.800000190734863
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/nord-2-6-0_lod1.glb",
+            "bytes": 17924,
+            "triangles": 196,
+            "materials": 4,
+            "bounds": {
+              "min": [
+                -1.5750000476837158,
+                0.6450000107288361,
+                -6.900000095367432
+              ],
+              "max": [
+                1.5750000476837158,
+                5.549999833106995,
+                6.900000095367432
+              ]
+            },
+            "dimensions": [
+              3.1500000953674316,
+              4.904999822378159,
+              13.800000190734863
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fjord-passenger-coach",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/fjord-passenger-coach_lod0.glb",
+            "bytes": 42608,
+            "triangles": 404,
+            "materials": 5,
+            "bounds": {
+              "min": [
+                -1.475000023841858,
+                0,
+                -8.75
+              ],
+              "max": [
+                1.475000023841858,
+                4.510000169277191,
+                8.75
+              ]
+            },
+            "dimensions": [
+              2.950000047683716,
+              4.510000169277191,
+              17.5
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/fjord-passenger-coach_lod1.glb",
+            "bytes": 5660,
+            "triangles": 36,
+            "materials": 3,
+            "bounds": {
+              "min": [
+                -1.475000023841858,
+                0.6099999994039536,
+                -8.75
+              ],
+              "max": [
+                1.475000023841858,
+                4.510000169277191,
+                8.75
+              ]
+            },
+            "dimensions": [
+              2.950000047683716,
+              3.9000001698732376,
+              17.5
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fjord-freight-wagon",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/fjord-freight-wagon_lod0.glb",
+            "bytes": 30076,
+            "triangles": 332,
+            "materials": 4,
+            "bounds": {
+              "min": [
+                -1.4099999517202377,
+                0,
+                -5.949999809265137
+              ],
+              "max": [
+                1.4099999517202377,
+                3.174999952316284,
+                5.949999809265137
+              ]
+            },
+            "dimensions": [
+              2.8199999034404755,
+              3.174999952316284,
+              11.899999618530273
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/fjord-freight-wagon_lod1.glb",
+            "bytes": 10232,
+            "triangles": 72,
+            "materials": 3,
+            "bounds": {
+              "min": [
+                -1.4099999517202377,
+                0.5699999779462814,
+                -5.949999809265137
+              ],
+              "max": [
+                1.4099999517202377,
+                3.174999952316284,
+                5.949999809265137
+              ]
+            },
+            "dimensions": [
+              2.8199999034404755,
+              2.6049999743700027,
+              11.899999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-station",
+        "kind": "station",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-station_lod0.glb",
+            "bytes": 24672,
+            "triangles": 220,
+            "materials": 7,
+            "bounds": {
+              "min": [
+                -3.9000000953674316,
+                0,
+                -14
+              ],
+              "max": [
+                10.329171180725098,
+                7.300000190734863,
+                14
+              ]
+            },
+            "dimensions": [
+              14.22917127609253,
+              7.300000190734863,
+              28
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-station_lod1.glb",
+            "bytes": 16824,
+            "triangles": 160,
+            "materials": 5,
+            "bounds": {
+              "min": [
+                -3.9000000953674316,
+                0,
+                -14
+              ],
+              "max": [
+                10.329171180725098,
+                7.300000190734863,
+                14
+              ]
+            },
+            "dimensions": [
+              14.22917127609253,
+              7.300000190734863,
+              28
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house_lod0.glb",
+            "bytes": 13068,
+            "triangles": 100,
+            "materials": 5,
+            "bounds": {
+              "min": [
+                -4.268287420272827,
+                0,
+                -5.5
+              ],
+              "max": [
+                4.268287420272827,
+                9.200000047683716,
+                5.5
+              ]
+            },
+            "dimensions": [
+              8.536574840545654,
+              9.200000047683716,
+              11
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house_lod1.glb",
+            "bytes": 5504,
+            "triangles": 36,
+            "materials": 2,
+            "bounds": {
+              "min": [
+                -4.268287420272827,
+                0,
+                -5.5
+              ],
+              "max": [
+                4.268287420272827,
+                9.068287372589111,
+                5.5
+              ]
+            },
+            "dimensions": [
+              8.536574840545654,
+              9.068287372589111,
+              11
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-spruce",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-spruce_lod0.glb",
+            "bytes": 8964,
+            "triangles": 100,
+            "materials": 3,
+            "bounds": {
+              "min": [
+                -3.2335922718048096,
+                0,
+                -3.4000000953674316
+              ],
+              "max": [
+                3.2335922718048096,
+                14.75,
+                3.4000000953674316
+              ]
+            },
+            "dimensions": [
+              6.467184543609619,
+              14.75,
+              6.800000190734863
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-spruce_lod1.glb",
+            "bytes": 5096,
+            "triangles": 44,
+            "materials": 2,
+            "bounds": {
+              "min": [
+                -3.3147549629211426,
+                0,
+                -3.4000000953674316
+              ],
+              "max": [
+                3.3147549629211426,
+                11.099999904632568,
+                3.0632941722869873
+              ]
+            },
+            "dimensions": [
+              6.629509925842285,
+              11.099999904632568,
+              6.463294267654419
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-bridge-span",
+        "kind": "infrastructure",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-bridge-span_lod0.glb",
+            "bytes": 32096,
+            "triangles": 252,
+            "materials": 1,
+            "bounds": {
+              "min": [
+                -3.5999999046325684,
+                0,
+                -12.189999997615814
+              ],
+              "max": [
+                3.5999999046325684,
+                6.189999997615814,
+                12.189999997615814
+              ]
+            },
+            "dimensions": [
+              7.199999809265137,
+              6.189999997615814,
+              24.37999999523163
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-bridge-span_lod1.glb",
+            "bytes": 20044,
+            "triangles": 156,
+            "materials": 1,
+            "bounds": {
+              "min": [
+                -3.5999999046325684,
+                0,
+                -12.189999997615814
+              ],
+              "max": [
+                3.5999999046325684,
+                6.189999997615814,
+                12.189999997615814
+              ]
+            },
+            "dimensions": [
+              7.199999809265137,
+              6.189999997615814,
+              24.37999999523163
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-tunnel-portal",
+        "kind": "infrastructure",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-tunnel-portal_lod0.glb",
+            "bytes": 11108,
+            "triangles": 84,
+            "materials": 2,
+            "bounds": {
+              "min": [
+                -5.649999797344208,
+                0,
+                -1.25
+              ],
+              "max": [
+                5.649999797344208,
+                8.200000196695328,
+                1.474999949336052
+              ]
+            },
+            "dimensions": [
+              11.299999594688416,
+              8.200000196695328,
+              2.724999949336052
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-tunnel-portal_lod1.glb",
+            "bytes": 4852,
+            "triangles": 36,
+            "materials": 1,
+            "bounds": {
+              "min": [
+                -4.600000023841858,
+                0,
+                -1.25
+              ],
+              "max": [
+                4.600000023841858,
+                8,
+                1.25
+              ]
+            },
+            "dimensions": [
+              9.200000047683716,
+              8,
+              2.5
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
