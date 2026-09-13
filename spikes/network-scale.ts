@@ -1,0 +1,14 @@
+import { performance } from 'node:perf_hooks';
+import { writeFileSync,mkdirSync } from 'node:fs';
+import type { RailGraph,MotionState } from '../src/domain/model.js';
+import { RailNetwork } from '../src/rail/graph.js';
+import { advanceMotion } from '../src/simulation/motion.js';
+const graph:RailGraph={revision:1,nodes:[],edges:[]};
+for(let i=0;i<=5000;i++)graph.nodes.push({id:`node:${i+1}`,position:{x:i*20,y:15,z:0}});
+for(let i=0;i<5000;i++)graph.edges.push({id:`edge:${5002+i}`,from:`node:${i+1}`,to:`node:${i+2}`,curve:{p0:{x:i*20,y:15,z:0},p1:{x:i*20+20/3,y:15,z:0},p2:{x:i*20+40/3,y:15,z:0},p3:{x:(i+1)*20,y:15,z:0}},ownerId:'company:1',speedLimitMps:20});
+let start=performance.now();const network=new RailNetwork(graph),compileMs=performance.now()-start;
+start=performance.now();for(let i=0;i<100;i++)network.findPath(`node:${i+1}`,'node:5001');const routing100Ms=performance.now()-start;
+const path=network.findPath('node:1','node:5001')!,trains:MotionState[]=Array.from({length:100},()=>({path,leg:0,distanceM:0,arrived:false}));
+start=performance.now();for(let tick=0;tick<1200;tick++)for(const train of trains)advanceMotion(train,1,network.geometry);const movement1200TicksMs=performance.now()-start;
+const report={node:process.version,platform:process.platform,arch:process.arch,edges:5000,compileMs,routing100Ms,movement1200TicksMs,movementPerTick100TrainsMs:movement1200TicksMs/1200,includesEconomy:false,includesOccupancy:false};
+mkdirSync('artifacts/evidence',{recursive:true});writeFileSync('artifacts/evidence/network-benchmark.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

@@ -1,4 +1,5 @@
 import type { CampaignDefinition, GameState } from '../domain/model.js';
+import { emptyOperations } from '../domain/operations.js';
 export const norway:CampaignDefinition={
   id:'norwegian-fjords',version:1,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
   world:{seed:140919, widthM:16000,depthM:16000,cellM:25,generatorVersion:1,biomeId:'fjord'},
@@ -11,5 +12,5 @@ export const norway:CampaignDefinition={
 };
 export function createInitialState(campaign:CampaignDefinition=norway):GameState {
   const nextEntityId=Math.max(1,...campaign.towns.map(town=>Number(town.id.split(':')[1])))+1;
-  return {tick:0,nextEntityId,rngState:campaign.world.seed>>>0,campaignId:campaign.id,campaignVersion:campaign.version,world:structuredClone(campaign.world),railway:{nodes:[],edges:[],revision:0},stations:[],trains:[],routes:[],towns:structuredClone(campaign.towns),industries:[],company:{id:'company:1',cash:campaign.startingCash,openingCash:campaign.startingCash,ledger:[]},objectiveProgress:{}};
+  return {operations:emptyOperations(),tick:0,nextEntityId,rngState:campaign.world.seed>>>0,campaignId:campaign.id,campaignVersion:campaign.version,world:structuredClone(campaign.world),railway:{nodes:[],edges:[],revision:0},stations:[],trains:[],routes:[],towns:structuredClone(campaign.towns),industries:[],company:{id:'company:1',cash:campaign.startingCash,openingCash:campaign.startingCash,ledger:[]},objectiveProgress:{}};
 }

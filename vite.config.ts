@@ -1,0 +1,7 @@
+import { defineConfig } from 'vite';
+export default defineConfig({
+  publicDir:'assets/runtime',
+  server:{host:'127.0.0.1',port:5173,strictPort:true},
+  preview:{host:'127.0.0.1',port:4173,strictPort:true},
+  build:{target:'es2022',rollupOptions:{output:{manualChunks:(id:string)=>id.includes('/node_modules/three/')?'three':undefined}}}
+});

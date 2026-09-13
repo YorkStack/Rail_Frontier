@@ -23,7 +23,7 @@ export function fixture():GameState {
   state.company.ledger=[{id:'transaction:14',tick:0,category:'construction',amount:-100000,entityId:'edge:8',description:'Test construction'}];state.company.cash-=100000;
   return state;
 }
-test('bilinear terrain handles exact boundaries and rejects off-map queries',()=>{
+test('triangle terrain handles exact boundaries and rejects off-map queries',()=>{
   const terrain=new Heightfield(2,2,10,new Float64Array([0,10,20,30]));
   assert.equal(terrain.sample(5,5).elevationM,15);assert.equal(terrain.sample(10,10).elevationM,30);
   assert.throws(()=>terrain.sample(-1,0));assert.throws(()=>terrain.sample(NaN,0));
@@ -89,7 +89,7 @@ test('built-state fixture survives mid-run save/reload and deterministic continu
   for(let i=0;i<350;i++){step(state);step(loaded);}assert.deepEqual(loaded,state);assert.equal(loaded.trains[0]!.motion.arrived,true);
 });
 test('save loader rejects future schemas, malformed data and dangling references',()=>{
-  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":1','"schemaVersion":99')));
+  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":2','"schemaVersion":99')));
   assert.throws(()=>deserialize('{'));assert.throws(()=>deserialize(json.replace('station:11','station:999')));
 });
 test('save loader rejects unreconciled finance and stale entity counters',()=>{
