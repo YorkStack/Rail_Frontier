@@ -29,6 +29,7 @@ export class FjordRenderer implements WorldRenderer {
   readonly profile:BiomeDefinition;
   private geometry:ReturnType<typeof compileGraph>;
   private railwayRevision:number;
+  private railwaySignature:string;
   private trackGroup=new THREE.Group();
   private train=new THREE.LOD();
   private trainModels=new Map<string,{group:THREE.Group;cars:THREE.Object3D[];coachLods:THREE.LOD[]}>();
@@ -55,7 +56,7 @@ export class FjordRenderer implements WorldRenderer {
   private readonly controlStart=()=>{this.follow=false;};
 
   constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState) {
-    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;
+    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
@@ -204,7 +205,7 @@ export class FjordRenderer implements WorldRenderer {
   setTrees(visible:boolean):void {this.trees.visible=visible;}
   private rebuildTracks(state:Readonly<GameState>):void {
     this.scene.remove(this.trackGroup);disposeObject(this.trackGroup);this.trackGroup=new THREE.Group();
-    this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;
+    this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
     for(const track of this.geometry.values())this.trackGroup.add(createTrack(track,this.terrain));
     this.scene.add(this.trackGroup);
   }
@@ -213,7 +214,7 @@ export class FjordRenderer implements WorldRenderer {
   regional():void {this.follow=false;const production=this.terrain.widthM>4000;this.controls.target.set(production?5200:1850,production?180:80,production?5600:1970);this.camera.position.set(production?13000:3500,production?6500:1750,production?14500:3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    this.modelState=current;if(current.railway.revision!==this.railwayRevision)this.rebuildTracks(current);this.updateTrainModels(current);
+    this.modelState=current;if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature)this.rebuildTracks(current);this.updateTrainModels(current);
     const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
     const shift=new THREE.Vector3((this.keys.has('KeyD')?1:0)-(this.keys.has('KeyA')?1:0),0,(this.keys.has('KeyS')?1:0)-(this.keys.has('KeyW')?1:0));
@@ -233,6 +234,7 @@ export class FjordRenderer implements WorldRenderer {
   dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);this.renderer.dispose();this.renderer.forceContextLoss();}
 }
 function terrainSize(terrain:Heightfield):number {return Math.max(terrain.widthM,terrain.depthM);}
+function railwayKey(state:Readonly<GameState>):string {return `${state.railway.revision}|${state.railway.nodes.map(node=>`${node.id}:${node.position.x}:${node.position.y}:${node.position.z}`).join(',')}|${state.railway.edges.map(edge=>`${edge.id}:${edge.from}:${edge.to}`).join(',')}`;}
 export function disposeObject(root:THREE.Object3D):void {
   const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();
   root.traverse(object=>{if(object instanceof THREE.Mesh||object instanceof THREE.Line||object instanceof THREE.Points){geometries.add(object.geometry);for(const material of Array.isArray(object.material)?object.material:[object.material])materials.add(material);}if(object instanceof THREE.InstancedMesh)object.dispose();if(object instanceof THREE.DirectionalLight||object instanceof THREE.SpotLight||object instanceof THREE.PointLight)object.shadow.dispose();});
