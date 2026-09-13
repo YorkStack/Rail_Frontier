@@ -1,36 +1,52 @@
-# Rail_Frontier
-Web-based single-player railroad tycoon simulation with beautiful 3D landscapes, campaigns, economy, train routing, savegames and dynamic terrain. Build rail networks through Norwegian fjords, Arizona red-rock country and major river landscapes with bridges, tunnels, cities and industries.
+# Rail Frontier
 
-## Current status
+Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-Architecture foundation only; there is no playable browser application yet. The repository initially contained this README and the MIT license. The intended Astra Engine integration is missing and needs identification before browser/renderer work. See [CURRENT_STATUS.md](CURRENT_STATUS.md).
+**Current milestone: architecture complete, interactive Norway technical study.** The study has a 3D fjord, instanced forest/buildings, bridge/tunnel/waterfall, a Blender wagon following graph-based track, camera controls, engineering previews, speed controls and IndexedDB save/load. The player-built railway, purchases, passenger economy and campaign objectives are the next implementation milestone, not finished features.
 
-Implemented: strict TypeScript domain model, terrain queries, rail curves and graph routing, terrain-aware engineering quotes, fixed-step clock, distance-based train motion proof, validated save serialization and original scripted Blender wagon exports at two LODs.
+Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
-## Reproduce the current foundation
+## Run
 
-Requirements: Node 22+ and npm; Blender 4.0+ for asset regeneration. Tested with Node 25.8.0/npm 11.11.0 and Blender 4.0.2 on macOS arm64.
+Node ≥22.12 and npm required. Tested on Apple M2 Pro with Node 25.8.0, npm 11.11.0 and Chrome 153.
 
 ```sh
 npm ci
+npm run dev
+```
+
+Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, Escape closes the survey. Background tabs pause explicitly. Survey track compares coastal/bridge/tunnel elevation and cost without constructing infrastructure. Save/load persists the study to IndexedDB.
+
+The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. This is an architecture validation application, not the finished game menu/HUD.
+
+## Validate and build
+
+```sh
 npm run check
 npm test
 npm run validate:assets
+npm run test:browser
 npm run spike
+npm run spike:network
+npm run build
+npm run preview
 ```
 
-Small runtime GLBs are included, so Blender is optional for these checks. Regenerate original assets with:
+Browser tests require installed Google Chrome (Playwright channel chrome). They start/reuse the local Vite server. Build emits a static site in dist; preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The 637 KB Three.js chunk produces Vite's normal size advisory; about 160 KB gzip, within the current total download budget.
+
+## Reproduce Blender assets
+
+Blender is optional to run tests because the small runtime GLBs are tracked. Tested generator: Blender 4.0.2 / Python 3.10.13.
 
 ```sh
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_probe.py
+npm run validate:assets
 ```
 
-Use your local Blender executable on other platforms. There is no `npm run dev` or browser build command yet; adding one depends on confirming the engine. No deployment has been configured.
+Use the matching local Blender executable on other platforms. [ASSET_PIPELINE.md](ASSET_PIPELINE.md) defines units, axes, materials, naming, LOD and validation.
 
-## Continue development
+## Continue in Sol
 
-Read [ARCHITECTURE.md](ARCHITECTURE.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [DATA_MODEL.md](DATA_MODEL.md), [SAVEGAME_FORMAT.md](SAVEGAME_FORMAT.md), [DECISIONS.md](DECISIONS.md), [ASSET_PIPELINE.md](ASSET_PIPELINE.md) and [CURRENT_STATUS.md](CURRENT_STATUS.md).
+Read [CURRENT_STATUS.md](CURRENT_STATUS.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DATA_MODEL.md](DATA_MODEL.md), [ECONOMIC_CONTRACT.md](ECONOMIC_CONTRACT.md), [SAVEGAME_FORMAT.md](SAVEGAME_FORMAT.md), [DECISIONS.md](DECISIONS.md) and [ASSET_PIPELINE.md](ASSET_PIPELINE.md). The prepared study is isolated in spikes; reuse validated kernels without treating demonstration code as production simulation.
 
-The required Astra → Sol handoff has **not** been reached. See [ASTRA_ESCALATIONS.md](ASTRA_ESCALATIONS.md). Do not claim engine validation from CPU tests or GLB file inspection. The first product milestone remains the Norwegian passenger vertical slice, followed by timber/lumber freight.
-
-MIT license preserved. Dependency notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Tests: [TESTING.md](TESTING.md). Measured limits: [PERFORMANCE.md](PERFORMANCE.md). Engine evidence: [RENDERING_CAPABILITIES.md](RENDERING_CAPABILITIES.md). Dependency/art attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -1,10 +1,10 @@
 # Data model
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Both are initial foundations, not a released save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 2 is implemented; contracts are stable for the implementation handoff, not a claim of a released gameplay save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
-| WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; actual seeded generator pending |
+| WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; 4 km study generator implemented |
 | RailNode | node:N, position | Graph connectivity |
 | RailEdge | edge:N, from/to, ownerId | Cubic curve and speed limit |
 | Station | station:N, nodeId, optional townId | Coverage connection and cargo storage |
@@ -24,6 +24,6 @@ Money is integer minor currency units, currently displayed conceptually as NOK-l
 
 Motion distance measures metres in traversal direction, so reverse geometry samples `length − distance`. The edge index changes only when its distance is consumed. Arrival clamps to the final endpoint. Idle trains may have no path. Node positions and curve endpoints match within 1 mm. Train fixtures use continuous paths, but normal movement calls assume validated input.
 
-Derived caches (arc tables, route adjacency, scene entities, spatial indices, quote previews, graphics buffers) are not persisted. Rebuild from authoritative state. RNG state is reserved as uint32; seeded random generator algorithm not yet implemented. No Math.random in authoritative simulation.
+Derived caches (arc tables, route adjacency, scene entities, spatial indices, quote previews, graphics buffers) are not persisted. Rebuild from authoritative state. RNG state is uint32; src/world/random.ts implements Mulberry32 with tested continuation. Rendering has an independent seeded stream. No Math.random in authoritative simulation.
 
-Schema additions required before first released save: built engineering spans/costs/maintenance, locomotive/wagon definitions and physical condition, destination demand queues, reservations or deterministic reconstruction, explicit service stop cursor, accounting aggregates, delivered-cargo totals and objective completion/reward flags. Implement these through documented schema evolution before declaring the contracts frozen.
+Schema 2 now includes these records in operations: demand queues; per-train nextStopIndex/direction/age/condition/distance/revenue/operatingCosts/costRemainder; exclusive reservations; built engineering spans/construction cost/daily upkeep; industry cycle tick progress; delivered totals; completed/rewarded objectives; monthly accounts; lastCommandSequence. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Implementing the economic/traction/construction systems is pending. See ECONOMIC_CONTRACT.md and SAVEGAME_FORMAT.md. Any breaking state change needs an explicit migration.

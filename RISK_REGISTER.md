@@ -1,19 +1,19 @@
 # Technical risk register
 
-| ID | Risk and evidence | Mitigation / acceptance | State |
+| ID | Risk | Evidence / mitigation | State |
 |---|---|---|---|
-| R01 | No Astra Engine in actual repository | Obtain identity/source, inspect installed APIs and license, run import/render spike | Blocking architecture |
-| R02 | No browser or renderer exists | Representative scene, console checks, camera/picking and actual GPU metrics | Open |
-| R03 | Curve smoothness alone does not guarantee buildable rail | Derivative/radius/cusp/grade-extrema checks, tangent tests, transition experiments | Open |
-| R04 | Sampled engineering can miss narrow hazards; bilinear terrain can differ from triangles | Split at terrain/water boundaries; terrain mesh/query agreement test | Open |
-| R05 | GLB export does not prove importer coordinates/materials | Compare named markers, dimensions, normals and lit visual at both LODs | Export half validated |
-| R06 | Vegetation/track detail could exhaust draw calls and GPU budget | 20k instanced trees, camera trajectories, renderer stats and LOD test | Untested |
-| R07 | Large graphs may stall browser | Current O(V² + VE)-style scan prototype; cached adjacency and heap; bounded compile jobs | Core microbench only |
-| R08 | Finance/cargo could duplicate earnings or drift | Integer ledger, atomic transfers, destination delivery tests and conservation assertions | Loader checks only |
-| R09 | Partial schema will change during gameplay implementation | No release guarantee yet; add all mandatory fields before v1 release, migration fixtures thereafter | Open |
-| R10 | Trains can collide without occupancy | Whole-edge reservations, station hold, deadlock feedback; multi-train regression | Not implemented |
-| R11 | Hidden browser tabs cause runaway catch-up | Visibility auto-pause, explicit resume, no offline simulation | Clock validated; driver pending |
-| R12 | Browser storage may fail or content versions mismatch | Transactional IndexedDB slots, quota/error handling and content compatibility registry | Not implemented |
-| R13 | Content spread prevents playable loop | Norway only until passenger vertical slice passes; timber second | Enforced scope |
+| R01 | Unidentified engine | User clarified model terminology; Three.js selected and validated | Closed |
+| R02 | Browser/render integration | Actual scene, camera, shaders, picking, GLB and browser tests | Architecture proof passed |
+| R03 | Non-buildable smooth curves | Conservative derivative-hull radius/grade/cusp certificate and tangent checks | Proof passed; preview optimization remains |
+| R04 | Hidden narrow terrain hazards / mesh mismatch | Exact cell/diagonal/classification roots, narrow flood regression, raycast error <0.001 m | Closed for triangle heightfields |
+| R05 | Blender import axes/normals/materials | Both real GLBs imported and visually inspected; close/far LOD tested | Closed for current asset conventions |
+| R06 | Graphics scale / resource growth | Local 20k-tree/2k-building/100-proxy run near 60 FPS; replacement and disposal tests | Proof passed; production/long-session profile pending |
+| R07 | Graph routing scale | Immutable adjacency+heap cache; 5k edges / 100 queries benchmark | Proof passed |
+| R08 | Revenue duplication/cargo drift | Stable operational records, ledger invariant and exact transaction rules; systems still pending | Implementation tests required |
+| R09 | Save compatibility | Schema 2 and validated 1→2 migration; strict invalid-state rejection | Foundation passed; future content version registry needed |
+| R10 | Train conflicts | Exclusive corridor reservation design and persisted reference validation | Scheduling implementation pending |
+| R11 | Hidden-tab catch-up / RAF timestamp | Visibility pause and nonnegative startup delta; browser reload test | Foundation passed |
+| R12 | Browser storage errors | Atomic IndexedDB backend + actual reload test | Quota/multi-tab/import hardening pending |
+| R13 | Scope spreads before playable economy | Norway first; study clearly labeled; stop now for Sol | Controlled |
 
-Do not interpret CPU timing in Node as evidence of 60 FPS graphics performance.
+No remaining blocker requires a new architecture decision before the implementation backlog. Pending risks are explicit acceptance tests, device expansion and bounded implementation tasks, not claims of completed gameplay.

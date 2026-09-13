@@ -1,21 +1,13 @@
 # Astra escalations
 
-## ESC-001 — Rendering engine identity missing
+## ESC-001 — Resolved: terminology, not missing infrastructure
 
-Status: open initial architecture blocker (2026-09-13).
+On 2026-09-13 the user clarified that Astra and Sol refer only to Codex models. The initial assumption of an external Astra rendering engine was incorrect. Three.js 0.186.0 was selected, its MIT license inspected, and real rendering/import/camera/LOD/performance experiments passed. No engine access is needed from the user.
 
-Problem: the directive assumes an existing Astra Engine, but the supplied remote at 66d6bb9 contains only README.md and LICENSE. The initially specified local directory was empty. No package, source, integration, API documentation, scene or asset loader is present.
+## Current escalation status
 
-Affected systems: rendering, mesh/shader/instancing choices, asset import, camera, picking, UI integration, terrain visual/query alignment, browser compatibility and performance budgets.
-
-Current architecture: independent strict TypeScript core with provisional renderer port. No graphics engine is imported. Blender CLI and GLB export are tested; runtime import is not.
-
-Options: (1) obtain the intended engine repository/package/docs and validate it; (2) if Astra meant the coding model, explicitly establish that and select a browser renderer based on the actual requirements. Do not infer a third-party package from the generic name Astra.
-
-Recommendation: clarify engine identity before writing a renderer or claiming architecture complete. A text question has been sent. Continue only independent foundation tasks in the meantime.
-
-Blast radius: limited core impact if rendering adapts to SI coordinates and immutable snapshots; significant impact to browser stack, asset extensions, terrain chunks, LOD and performance if an engine is guessed incorrectly.
+No open architectural blocker. Astra-phase architecture work is complete; Sol may proceed only after the user switches models and asks to continue. Full gameplay is intentionally not claimed complete.
 
 ## Later Sol escalation policy
 
-For a major graph, terrain, timing, save, campaign, rendering or asset-boundary redesign, record problem, evidence, affected systems, current design, options, recommendation and blast radius here; set ASTRA_REVIEW_REQUIRED=true in CURRENT_STATUS.md and recommend Astra review. Ordinary syntax/type errors and isolated implementation bugs do not require escalation. Preserve the requested stop at the eventual Astra → Sol handoff.
+Escalate incompatible subsystem boundaries, major data/save model changes, rail graph/terrain/timing redesign, fundamental performance failure, rendering/asset coordinate redesign or campaign architecture changes. Record problem, evidence, affected systems, current architecture, options, recommendation and estimated blast radius. Set ASTRA_REVIEW_REQUIRED=true in CURRENT_STATUS.md and recommend Astra-level review. Ordinary implementation bugs, type errors, content balancing and local optimizations do not require escalation.

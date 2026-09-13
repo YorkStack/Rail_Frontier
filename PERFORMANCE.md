@@ -1,11 +1,25 @@
-# Performance
+# Performance evidence and budgets
 
-Measured on 2026-09-13, local macOS arm64, Node v25.8.0. One `npm run spike` run compiled 1,000 approximately 1.1 km curves (257,000 samples) in 64.0 ms and performed 100,000 bilinear terrain queries in 25.2 ms. Initial save: 735 bytes. A 10-second 60 FPS clock feed at 8× produced exactly 1,600 simulation steps. Timings are microbenchmarks without GPU, rendering, economy, graph scale, allocations over a long session or trains at target population. Re-run for comparisons; do not use these single-run values as fixed CI thresholds.
+Measured 2026-09-13 on Apple M2 Pro / macOS arm64 / Node v25.8.0. Browser harness: installed Google Chrome 153, headless, 1440×900 CSS pixels, DPR 1, default WebGL2 backend. Also visually inspected in the Codex in-app browser. These are local technical spikes, not a complete supported-hardware matrix or independent GPU timer measurements.
 
-Targets, not results: preferred 60 FPS, minimum 30 on a recorded supported hardware/browser profile; simulation ≤4 ms of a 16.7 ms render-frame budget under normal 1× load. Benchmark 100 trains, 20k vegetation instances, 2k buildings and 5k rail edges at 1× and 8×. Record p50/p95 frame and tick times, draw calls, visible triangles, memory, load times and save latency. Establish actual supported device/browser list with engine discovery.
+## Browser results
 
-Proposed browser budgets: initial compressed application/core content <5 MB, initial Norway pack <25 MB, no future-campaign eager downloads. Current runtime probe assets total 17,408 bytes uncompressed; no application bundle exists. These are targets pending renderer/package selection.
+Detailed output: docs/evidence/browser-benchmark.json; regenerate with npm run test:browser. Normal scene: 6,500 trees, 90 buildings, one GLB train and detailed rail. Scaled scene: 20,000 trees, 2,000 buildings, 100 train bodies (99 instanced proxies), 5,000 strategic rail segments, simulation speed 8×.
 
-Spatial plan: direct cell indexing for terrain, uniform world buckets for construction/coverage/settlement search, engine or chunk frustum culling for graphics. Confirm density before adding more complex indices. Track geometry cached by edge ID + graph revision; adjacency rebuilt incrementally. Background geometry preparation must not mutate simulation asynchronously; commit validated results at command boundary.
+Latest reference run: normal p50/p95 frame time approximately 16.7/16.8 ms (121 samples); stress 16.7/16.8 ms (300 samples, about five seconds). Normal/stress draw calls 36/38; rendered triangles approximately 358k/922k. Stress p95 JavaScript render submission 0.6 ms; fixed-tick batch 0.2 ms. Render submission time is **not GPU execution time**. Frame timing is refresh limited. Initial compilation/camera transitions and longer thermal/resource sessions need later testing.
 
-LOD plan: terrain chunks; instanced tree variants; shared materials; strategic rail simplification; buildings and vehicles selected by projected size. Geometry caches are bounded and disposed on replacement. No GPU or large-vegetation claim is validated yet. The mandatory Norway benchmark must report water, waterfall, bridge, tunnel portal, trees and visibly moving train with production-like camera movement.
+Reverting stress mode returns allocations to baseline: 32 geometries, 3 textures. Browser test checks full disposal reaches zero geometry count and explicitly releases the WebGL context. Three.js retained a texture counter of 1 after normal disposal; actual context release is asserted instead of assuming internal counters must all reset. Asset LOD0→LOD1 transition uses hysteresis. All rendered values are measured, not simulated FPS labels. Hidden-tab frames are excluded; visible slow frames remain in timing samples.
+
+The 5k visual rail segments are a rendering load and do not constitute 5k working constructed routes. The 99 extra train bodies are rendering proxies. Full traction, reservations, cargo and economy are not included in this scene; do not claim the complete 100-train game has been benchmarked.
+
+## Core scale results
+
+npm run spike:network builds an actual 5,000-edge graph snapshot. Reference run: compile ~49.5 ms once; 100 end-to-end shortest-path queries ~103.2 ms total; 100 logical trains advanced for 1,200 ticks in ~4.1 ms total (~0.0034 ms per 100-train tick). These are distance-motion kernels with no economy or occupancy. Retain the cache across queries; do not compile inside the tick loop. Stage large graph rebuilds as application work, then swap at a tick boundary.
+
+Earlier geometry/terrain microbenchmark: 1,000 curves / 257k samples ~64 ms, 100k terrain queries ~25 ms before the interpolation revision. Re-run npm run spike for current comparisons; historical timing is not a CI promise.
+
+## Distribution and future targets
+
+Build is static, fonts bundled locally. Main JS approximately 138 KB / 44 KB gzip; Three.js chunk approximately 637 KB / 160 KB gzip; CSS approximately 10 KB / 3 KB gzip; all font formats together approximately 175 KB; two runtime GLBs total 17,408 bytes. There are no terrain texture downloads or future campaign packs. Build's 500 KB chunk-size advisory remains visible and is acceptable for this initial engine dependency; the complete initial payload is well below the 5 MB goal. Add menu/lazy campaign loading when content grows, not a warning suppression.
+
+Targets remain preferred 60 FPS / minimum 30 on an explicitly tested device profile, simulation ≤4 ms at 1×, initial app/core under 5 MB compressed, Norway pack under 25 MB. Future tests must cover long sessions, real 100-train service/occupancy, weak GPUs, full 16 km terrain, larger saves and graphics-heavy production assets. Use uniform world buckets for coverage/collision, direct cells for terrain and bounded per-revision graph caches. Cluster vegetation spatially if culling becomes limiting; avoid individual object overhead.
