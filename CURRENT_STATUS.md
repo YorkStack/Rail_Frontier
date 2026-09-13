@@ -2,9 +2,19 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 
-# Current status — architecture handoff, 2026-09-13
+# Current status — passenger implementation, 2026-09-13
 
-Current milestone: architecture and technical validation complete. **Stop here for the requested Astra → Sol handoff.** The user clarified Astra and Sol are Codex models; the actual game renderer is Three.js. There is no missing engine dependency.
+Current milestone: architecture is complete and the Sol implementation pass is active. The user continued from IMPLEMENTATION_PLAN.md. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+
+## Implementation completed after handoff
+
+- Production RailFrontierGame and GameSession with ordered atomic command commits, detached frozen snapshots, fixed-tick RAF interpolation, visibility pause, safe load replacement and complete disposal.
+- Safe-integer finance service with ledger reconciliation, category signs, overdraft/overflow rejection, exactly-once command replay behavior and saved fractional train running costs.
+- Versioned 16 km Norway heightfield with deterministic fjord/valley relief, sea, forest/rock/urban masks, authoritative settlement elevations and a stable seeded fingerprint.
+- Construction handler with live terrain quote/revision checks, funds, engineering span persistence, terminal tangent checks, endpoint junction splitting, inherited infrastructure cost/upkeep and disconnected interior crossings.
+- Station content, rail/ground placement and deterministic closest town coverage.
+- Original Norway steam locomotive and coach content, atomic train purchase, connected route validation and route assignment from the train's current station.
+- 51 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -21,13 +31,7 @@ Current milestone: architecture and technical validation complete. **Stop here f
 
 ## Currently working
 
-No active implementation work. Awaiting user model switch and explicit continuation. Do not continue routine gameplay implementation automatically after this handoff.
-
-Next three tasks after switching to Sol:
-
-1. APP-001: adapt the validated study bootstrap/clock/camera into the production game session shell; keep prototype composition in spikes/.
-2. FIN-001: implement atomic ledger posting, spending checks, running-cost remainder and replay/overflow tests using ECONOMIC_CONTRACT.md.
-3. APP-002: implement GameApplication command validation/commit and snapshot flow; then proceed through WORLD-001/RAIL-004 in dependency order.
+Next: TRAIN-003 traction/braking/dwell, followed by ECON-001 destination demand and ECON-002 loading/delivery/revenue. RAIL-005 still needs production cache ownership when repeated routing becomes hot. The visible study shell will be replaced by the production UI in UI-001 after the passenger systems and save lifecycle are ready.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -50,7 +54,7 @@ Conservative curve rejection, simple procedural art, one-chunk terrain/culling, 
 
 ## Git state and reproduction
 
-Branch: architecture/foundation. Remote: https://github.com/YorkStack/Rail_Frontier. Latest code checkpoint: **f712b97**, Validate Three.js fjord study and freeze simulation architecture contracts. This handoff documentation and benchmark evidence are committed immediately afterward. Working tree clean at handoff; no push, deployment or main-branch modification performed.
+Branch: implementation/passenger-slice. Remote: https://github.com/YorkStack/Rail_Frontier. The implementation branch starts from architecture checkpoint **3e65484**. No push, deployment or main-branch modification has been performed.
 
 Development: npm ci; npm run dev → http://127.0.0.1:5173.
 Production preview: npm run build; npm run preview → http://127.0.0.1:4173.

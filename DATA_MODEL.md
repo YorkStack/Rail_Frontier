@@ -4,7 +4,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 
 | Record | Identity/reference | Authority |
 |---|---|---|
-| WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; 4 km study generator implemented |
+| WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; 4 km study and 16 km Norway generators implemented |
 | RailNode | node:N, position | Graph connectivity |
 | RailEdge | edge:N, from/to, ownerId | Cubic curve and speed limit |
 | Station | station:N, nodeId, optional townId | Coverage connection and cargo storage |
@@ -20,7 +20,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 
 IDs use a global monotonically increasing safe-integer counter with a kind prefix; never reuse deleted IDs. The initial company is company:1; initial Norway towns are town:2–4. Campaign initialization advances beyond the highest town number. Content IDs are stable strings and distinct from allocated entity IDs. Reject duplicate or stale IDs on load. Historical transaction association is a descriptive string and may refer to a demolished entity.
 
-Money is integer minor currency units, currently displayed conceptually as NOK-like game credits; no exchange or inflation simulation. Amount signs: income positive, spending negative. Safe integer validation and reconciliation are implemented; pricing and posting services are pending.
+Money is integer minor currency units, currently displayed conceptually as NOK-like game credits; no exchange or inflation simulation. Amount signs: income positive, spending negative. Safe integer validation, reconciliation, atomic posting, overdraft protection and fractional running-cost carry are implemented.
 
 Motion distance measures metres in traversal direction, so reverse geometry samples `length − distance`. The edge index changes only when its distance is consumed. Arrival clamps to the final endpoint. Idle trains may have no path. Node positions and curve endpoints match within 1 mm. Train fixtures use continuous paths, but normal movement calls assume validated input.
 

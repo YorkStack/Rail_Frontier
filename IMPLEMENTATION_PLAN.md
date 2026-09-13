@@ -49,30 +49,37 @@ Handoff response must begin `ASTRA ARCHITECTURE PHASE COMPLETE`, then state arch
 ## Sol backlog — after explicit handoff and continuation
 
 ### APP-001 — Browser bootstrap and simulation driver
-Status: browser study driver/camera/speed/visibility is already implemented; integrate those kernels into a production session application. Purpose: start/stop a coherent game session. Files: src/application/game.ts, src/main.*, browser build config. Interfaces: SimulationClock, WorldRenderer. Behavior: RAF interpolation, fixed ticks, speed and visibility auto-pause. Acceptance: hidden-tab return produces no offline catch-up; dispose removes listeners/GPU resources. Tests: browser pause/speed/restart and console. Depends: ARCH-006.
+Status: production RailFrontierGame/GameSession runtime implemented and tested; the current visible shell remains the architecture study until UI-001 replaces it. Purpose: start/stop a coherent game session. Files: src/application/game.ts, src/main.*, browser build config. Interfaces: SimulationClock, WorldRenderer. Behavior: RAF interpolation, fixed ticks, speed and visibility auto-pause. Acceptance: hidden-tab return produces no offline catch-up; dispose removes listeners/GPU resources. Tests: browser pause/speed/restart and console. Depends: ARCH-006.
 
 ### FIN-001 — Atomic ledger posting
+Status: complete in src/simulation/finance.ts with safe-integer, overdraft, sign, reconciliation and fractional running-cost tests.
 Purpose: reliable construction/purchase/revenue accounting. Files: src/simulation/finance.ts, tests/finance.test.ts. Interfaces: Company, Transaction, Money. Behavior: reject invalid/overflow amounts; spending checks funds and posts once. Acceptance: cash reconciles after every command, failed commands leave state identical. Tests: overdraft, boundary integers and duplicate command handling. Depends: ARCH-006.
 
 ### APP-002 — Command gateway and snapshots
+Status: complete. Ordered commands validate and commit cloned state; failures and replay are byte-stable; published snapshots are detached and deeply frozen.
 Purpose: isolate UI writes. Files: src/application/game.ts, commands.ts. Interfaces: GameApplication, GameCommand, CommandResult. Behavior: ordered command validation, atomic state changes, immutable snapshots. Acceptance: no deep UI mutation and no partial failure. Tests: stale revision, invalid references and attempted snapshot mutation. Depends: APP-001, FIN-001.
 
 ### WORLD-001 — Norway terrain generation
+Status: complete. Versioned 16 km triangle heightfield, water, forest/rock/urban masks, settlement elevations, stable seeded fingerprint and feasible first corridor are tested.
 Purpose: reproducible playable map. Files: src/world/generator.ts, biome.ts, src/content/norway.ts. Interfaces: frozen terrain/biome profiles and seed RNG. Behavior: fjord/valleys/rocks/water/forest masks and three valid settlement sites. Acceptance: same seed/version yields same query results; towns sit on land and plausible corridors exist. Tests: seeded hash, bounds, water/settlement placement. Depends: ARCH-006.
 
 ### RAIL-004 — Commit construction and engineering spans
+Status: complete. Live quote/revision revalidation, funds, endpoint snapping/splitting, span/cost preservation, unrelated crossings and save roundtrip are tested.
 Purpose: convert approved preview to network. Files: src/application/construction.ts, src/rail/graph.ts. Interfaces: buildTrack, EngineeringQuote, ledger. Behavior: revalidate quote/revision, split graph at connections, persist spans, debit funds. Acceptance: affordable legal routes build atomically; unrelated crossings remain disconnected. Tests: insufficient cash, stale quote, junction/split and save roundtrip. Depends: APP-002, WORLD-001.
 
 ### RAIL-005 — Cache graph/geometry and route invalidation
 Status: immutable RailNetwork adjacency/min-heap/geometry cache is already implemented and benchmarked. Remaining work is cache ownership/invalidation during actual network edits. Purpose: scale routing. Files: src/rail/cache.ts, graph.ts. Interfaces: graph revision, compiled geometry, Traversal. Behavior: adjacency/heap pathfinding and dirty-edge caching. Acceptance: same paths as reference algorithm; changed graph invalidates affected routes. Tests: generated graphs against reference, 5k-edge timing. Depends: RAIL-004.
 
 ### STATION-001 — Station placement and coverage
+Status: complete. Content-priced ground-level rail placement and closest/tie-stable unique town coverage are implemented and tested.
 Purpose: connect demand physically/logically. Files: src/application/stations.ts, src/simulation/coverage.ts, station content. Interfaces: buildStation, Station, Terrain spatial buckets. Behavior: valid rail attachment and unique town/industry coverage assignment. Acceptance: no floating stations or duplicate demand capture; construction posts costs. Tests: off-rail rejection, overlap tie-break, funds and persistence. Depends: RAIL-004.
 
 ### TRAIN-002 — Vehicle content and purchase
+Status: complete for the Norway steam locomotive and passenger coach. Mixed invalid consists and purchases are atomic and persistent-state compatible.
 Purpose: owned consist creation. Files: src/content/vehicles.ts, src/application/trains.ts. Interfaces: purchaseTrain, Train, FIN-001. Behavior: locomotive+coaches require available tech/funds and station; derive capacity/mass. Acceptance: one original steam locomotive and coach purchasable with valid IDs and no partial debits. Tests: unavailable year, no station, mixed invalid vehicles, roundtrip. Depends: STATION-001.
 
 ### ROUTE-001 — Ordered station service
+Status: complete for route validation, reverse-capable graph legs, purchase-station assignment and persisted service cursor/direction. Cache ownership remains RAIL-005.
 Purpose: assign usable routes. Files: src/application/routes.ts, src/simulation/routing.ts. Interfaces: createRoute, assignRoute, findPath. Behavior: validate all legs; shuttle/loop service and route revision handling. Acceptance: disconnected stops reject clearly; assigned train gets logical traversal. Tests: reversed legs, repeated stops, edited graph. Depends: TRAIN-002, RAIL-005.
 
 ### TRAIN-003 — Traction/braking and station dwell

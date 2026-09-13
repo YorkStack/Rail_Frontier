@@ -5,14 +5,20 @@ export interface Terrain {
   readonly widthM: number; readonly depthM: number;
   sample(x: number, z: number): TerrainSample;
 }
+export interface TerrainLayers {forest?:Float32Array;rock?:Float32Array;urban?:Float32Array}
 /** Samples the same two triangles used by the runtime mesh (diagonal NW to SE). */
 export class Heightfield implements Terrain {
   readonly widthM: number;
   readonly depthM: number;
   private readonly heights: Float64Array;
-  constructor(readonly columns: number, readonly rows: number, readonly cellM: number, heights: Float64Array, readonly waterLevelM: number | null = null) {
-    if (!Number.isInteger(columns) || !Number.isInteger(rows) || columns < 2 || rows < 2 || !Number.isFinite(cellM) || cellM <= 0 || heights.length !== columns * rows || heights.some(v => !Number.isFinite(v)) || (waterLevelM !== null && !Number.isFinite(waterLevelM))) throw new Error('Invalid heightfield');
+  private readonly forest:Float32Array|null;
+  private readonly rock:Float32Array|null;
+  private readonly urban:Float32Array|null;
+  constructor(readonly columns: number, readonly rows: number, readonly cellM: number, heights: Float64Array, readonly waterLevelM: number | null = null,layers:TerrainLayers={}) {
+    const size=columns*rows,validLayer=(layer:Float32Array|undefined)=>layer===undefined||(layer.length===size&&!layer.some(v=>!Number.isFinite(v)||v<0||v>1));
+    if (!Number.isInteger(columns) || !Number.isInteger(rows) || columns < 2 || rows < 2 || !Number.isFinite(cellM) || cellM <= 0 || heights.length !== size || heights.some(v => !Number.isFinite(v)) || (waterLevelM !== null && !Number.isFinite(waterLevelM))||!validLayer(layers.forest)||!validLayer(layers.rock)||!validLayer(layers.urban)) throw new Error('Invalid heightfield');
     this.heights = heights.slice();
+    this.forest=layers.forest?.slice()??null;this.rock=layers.rock?.slice()??null;this.urban=layers.urban?.slice()??null;
     this.widthM = (columns - 1) * cellM;
     this.depthM = (rows - 1) * cellM;
   }
@@ -21,11 +27,12 @@ export class Heightfield implements Terrain {
     const gx = x / this.cellM, gz = z / this.cellM;
     const ix = Math.min(Math.floor(gx), this.columns - 2), iz = Math.min(Math.floor(gz), this.rows - 2);
     const u = gx - ix, v = gz - iz;
-    const at = (dx: number, dz: number) => this.heights[(iz + dz) * this.columns + ix + dx]!;
-    const elevationM = u >= v
-      ? at(0, 0) * (1-u) + at(1, 0) * (u-v) + at(1, 1) * v
-      : at(0, 0) * (1-v) + at(0, 1) * (v-u) + at(1, 1) * u;
-    return { elevationM, waterLevelM: this.waterLevelM, forest: 0, rock: 0, urban: 0 };
+    const interpolate=(values:Float64Array|Float32Array|null)=>{
+      if(values===null)return 0;
+      const at=(dx:number,dz:number)=>values[(iz+dz)*this.columns+ix+dx]!;
+      return u>=v?at(0,0)*(1-u)+at(1,0)*(u-v)+at(1,1)*v:at(0,0)*(1-v)+at(0,1)*(v-u)+at(1,1)*u;
+    };
+    return {elevationM:interpolate(this.heights),waterLevelM:this.waterLevelM,forest:interpolate(this.forest),rock:interpolate(this.rock),urban:interpolate(this.urban)};
   }
   planeAt(x:number,z:number):{dx:number;dz:number;constant:number} {
     this.sample(x,z);
