@@ -11,6 +11,7 @@ import { compileCurve } from '../rail/geometry.js';
 import { quoteTrack, type EngineeringQuote } from '../rail/planner.js';
 import { SimulationClock } from '../simulation/clock.js';
 import type { Terrain } from '../world/terrain.js';
+import { createSimulationSystems } from '../simulation/systems.js';
 
 export interface GameOptions {
   handlers?:CommandHandlers;
@@ -40,7 +41,7 @@ export class RailFrontierGame implements GameApplication {
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
     this.handlers={...baseCommandHandlers,...constructionCommandHandlers,...stationCommandHandlers,...trainCommandHandlers,...routeCommandHandlers,...options.handlers};
-    this.stepSystems=options.stepSystems??(()=>{});
+    this.stepSystems=options.stepSystems??createSimulationSystems();
     this.runtimeSpeed=options.initialSpeed??1;
     this.clock=new SimulationClock(()=>this.step());
   }

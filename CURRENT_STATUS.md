@@ -14,7 +14,11 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Construction handler with live terrain quote/revision checks, funds, engineering span persistence, terminal tangent checks, endpoint junction splitting, inherited infrastructure cost/upkeep and disconnected interior crossings.
 - Station content, rail/ground placement and deterministic closest town coverage.
 - Original Norway steam locomotive and coach content, atomic train purchase, connected route validation and route assignment from the train's current station.
-- 51 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
+- Physical train simulation with consist mass/power/tractive force, signed grade, service braking, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
+- Deterministic edge reservations prevent opposing trains from sharing track and expose blocked service state.
+- Destination-weighted daily passenger demand, capacity-bound oldest-first boarding, distance-tracked delivery, exactly-once fares, daily maintenance and monthly capital/operating reports.
+- Connected-town, delivered-passenger and operating-profit campaign objectives with once-only completion.
+- 64 Node tests and 2 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -31,7 +35,7 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 
 ## Currently working
 
-Next: TRAIN-003 traction/braking/dwell, followed by ECON-001 destination demand and ECON-002 loading/delivery/revenue. RAIL-005 still needs production cache ownership when repeated routing becomes hot. The visible study shell will be replaced by the production UI in UI-001 after the passenger systems and save lifecycle are ready.
+Next: production save-slot/autosave lifecycle and the actual campaign UI. Edge occupancy is complete; rendered multi-car consist placement remains in TRAIN-004 and will be added with the production renderer. The visible study shell will be replaced by UI-001/UI-002/UI-003, followed by the QA-001 player-action gate.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
