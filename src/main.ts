@@ -5,7 +5,7 @@ import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/libre-caslon-display/latin-400.css';
 import './ui/study.css';
 import { createNorwayPreviewState,straightCurve } from './content/norway-preview.js';
-import { norway } from './content/norway.js';
+import { createInitialState,norway } from './content/norway.js';
 import { generateWorld,norwayShorelineX } from './world/generator.js';
 import { FjordRenderer } from '../spikes/fjord-renderer.js';
 import type { GameState,Speed,Vec3 } from './domain/model.js';
@@ -232,7 +232,7 @@ async function start():Promise<void> {
   element<HTMLInputElement>('#save-name').value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;
   element<HTMLFormElement>('#new-save-slot').onsubmit=event=>{event.preventDefault();const input=element<HTMLInputElement>('#save-name'),id=`manual-${Date.now()}`;void saves.save(id,input.value).then(()=>{input.value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;toast('A new manual save was added.');return refreshSaveSlots();}).catch(setMenuError);};
   element('#open-menu').onclick=openMenu;element('#close-menu').onclick=closeMenu;
-  element('#new-game').onclick=()=>{game.replaceState(createNorwayPreviewState(terrain));state=game.snapshot();setSpeed(1);view.regional();closeMenu();toast('A new company has taken charge of the Northern Line.');};
+  element('#new-game').onclick=()=>{game.replaceState(createInitialState());state=game.snapshot();lastAutosaveDay=0;setSpeed(1);view.regional();closeMenu();toast('A new company charter is ready. Survey the first connection.');};
   element('#continue-game').onclick=()=>{void saves.continueLatest().then(next=>{state=next;syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
   void refreshSaveSlots();
   const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else if(!element('#operations-panel').hidden)toggleOperations(false);else if(!element('#station-planner').hidden)toggleStation(false);else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
