@@ -6,7 +6,7 @@ import { FIXED_DT } from './clock.js';
 import { accrueRunningCost } from './finance.js';
 import { advanceDwell } from './station-service.js';
 import { brakingSpeed, consistPhysics, SERVICE_BRAKE_MPS2, tractionAcceleration } from './traction.js';
-import { servicePassengers } from './transfer.js';
+import { serviceStop } from './transfer.js';
 import { updateReservations } from './occupancy.js';
 
 function remainingDistance(train:Train,network:RailNetwork):number {
@@ -36,7 +36,7 @@ function stepTrain(state:GameState,train:Train,network:RailNetwork,reservedNext:
   try {accrueRunningCost(state,train.id,distanceM,physics.runningCostPerKm);} catch(error) {if(error instanceof Error&&error.message==='Insufficient funds'){train.phase='blocked';train.speedMps=0;return;}throw error;}
   advanceMotion(train.motion,distanceM,network.geometry);train.speedMps=nextSpeed;
   for(const lot of train.cargo)lot.distanceM+=distanceM;
-  if(train.motion.arrived){train.speedMps=0;train.phase='dwelling';train.dwellTicks=0;const service=state.operations.trainServices[train.id],route=train.routeId===null?null:state.routes.find(candidate=>candidate.id===train.routeId);if(service&&route)servicePassengers(state,train,route.stops[service.nextStopIndex]!);}
+  if(train.motion.arrived){train.speedMps=0;train.phase='dwelling';train.dwellTicks=0;const service=state.operations.trainServices[train.id],route=train.routeId===null?null:state.routes.find(candidate=>candidate.id===train.routeId);if(service&&route)serviceStop(state,train,route.stops[service.nextStopIndex]!);}
 }
 
 /** Cache graph geometry exactly once per revision and step trains in stable ID order. */
