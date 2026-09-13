@@ -5,9 +5,9 @@ import type { AssetReport,RenderStats } from '../../spikes/fjord-renderer.js';
 declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[];snapshot():GameState;save():Promise<number>;load():Promise<number>;setSpeed(speed:Speed):void;stats():RenderStats;setStress(enabled:boolean):void;focusTrain():void;regional():void;project(position:Vec3):{x:number;y:number;visible:boolean};metrics():RenderStats&{frames:number[];renderMs:number[];tickMs:number[];userAgent:string;viewport:number[];dpr:number};pick(x:number,y:number):Vec3|null;dispose():void}}}
 
 test('runtime asset, camera, alignment, pause and durable save validation',async({page})=>{
-  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
+  const errors:string[]=[],models:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});page.on('request',request=>{if(request.url().includes('/models/'))models.push(request.url());});
   await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);
-  const assets=await page.evaluate(()=>window.__railProbe.assets);expect(assets).toHaveLength(2);expect(assets[0]!.triangles).toBe(84);expect(assets[1]!.triangles).toBe(36);expect(assets.every(a=>a.normalsFinite)).toBe(true);
+  const assets=await page.evaluate(()=>window.__railProbe.assets);expect(assets).toHaveLength(16);expect(assets.find(asset=>asset.name==='nord-2-6-0'&&asset.lod===0)?.triangles).toBe(664);expect(assets.find(asset=>asset.name==='nord-2-6-0'&&asset.lod===1)?.triangles).toBe(196);expect(new Set(assets.map(asset=>asset.name)).size).toBe(8);expect(assets.every(asset=>asset.normalsFinite)).toBe(true);expect(models).toHaveLength(16);expect(models.every(url=>url.includes('/models/norway/'))).toBe(true);
   const production=await page.evaluate(()=>({world:window.__railProbe.snapshot().world,trains:window.__railProbe.snapshot().trains,stats:window.__railProbe.stats()}));expect(production.world.widthM).toBe(16000);expect(production.world.depthM).toBe(16000);expect(production.trains[0]!.vehicleIds).toHaveLength(2);expect(production.stats.trees).toBe(28000);
   expect(await page.evaluate(()=>window.__railProbe.stats().terrainErrorM)).toBeLessThan(.001);
   await page.waitForFunction(()=>window.__railProbe.snapshot().tick>10);
@@ -27,6 +27,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/train-close.png'});
   await page.getByRole('button',{name:'Regional view'}).click();await page.waitForFunction(()=>window.__railProbe.stats().lod===1);
   await page.screenshot({path:'artifacts/evidence/norway-desktop.png'});
+  await page.getByRole('button',{name:/Sundvik Harbour/}).click();await page.screenshot({path:'artifacts/evidence/station-close.png'});
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/evidence/norway-mobile.png'});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'1×',exact:true}).click();await page.waitForFunction(tick=>window.__railProbe.snapshot().tick>tick+10,saved.tick);

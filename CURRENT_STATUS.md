@@ -4,7 +4,7 @@ ASTRA_REVIEW_REQUIRED=false
 
 # Current status — passenger and freight implementation, 2026-09-14
 
-Current milestone: architecture is complete and the Sol implementation pass is active. The user continued from IMPLEMENTATION_PLAN.md. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+Current milestone: the Norway passenger, freight and production-asset implementation gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
 
 ## Implementation completed after handoff
 
@@ -25,11 +25,13 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 - Players can now pick two terrain points for a free straight alignment, snap to existing rail nodes, review engineering spans/cost/errors and commit or cancel through the real construction command. A separate map-pick station tool validates rail proximity, ground level, occupancy, funds and settlement coverage before purchase.
 - The railway office now exposes consist purchase, two-stop route creation and stopped-train assignment through the command gateway. It also shows consist/cargo/service state, town demand, per-route result, reconciled cash/income/outgoings and recent ledger entries.
 - The visible renderer now uses the deterministic 16 km Norway heightfield, production biome, 28,000 instanced trees, expanded settlement dressing, scaled fog/light/camera bounds and the full three-town corridor. The former 4 km scene remains only as an isolated architecture fixture.
-- Every owned train is rendered. The initial service visibly combines a procedural steam locomotive with two Blender-exported GLB coaches; car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
+- Every owned train is rendered from the Blender Norway pack. The initial service visibly combines the authored Nord 2-6-0 with two passenger coaches; passenger and freight car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
 - QA-001 now passes as a separate empty-network browser journey: Norway selection, camera navigation, free track, two stations, locomotive/coach purchase, route assignment, physical service, passenger delivery, revenue and operating cost, reconciled cash, speed/pause, save, reload, exact load and resumed ticks with a clean console.
 - ECON-003 now supplies the first production chain. Granli Forest creates timber into capped storage; Sundvik Sawmill atomically consumes timber and produces lumber. Covered stations transfer both goods through capacity-bound freight wagons, towns consume delivered lumber, distance-based freight revenue posts once, and blocked partial cargo remains aboard.
 - The commissioned preview begins with a small working stock so a player can buy a freight consist and operate the full Granli–Sundvik chain immediately. A new company starts with empty industries and must wait for production. The railway office shows recipe progress, storage, timber/lumber inventory and typed onboard cargo.
-- Responsive desktop/mobile layouts were visually checked. The regional and train-follow views were captured against the production world at roughly 56–57 FPS on the current machine.
+- The original Blender 4.0.2 Norway pack now supplies two LODs each for the Nord 2-6-0, passenger coach, freight wagon, station, house, spruce, bridge span and tunnel portal. Its versioned campaign manifest loads 16 GLBs totaling about 336 KB; no unrelated model pack is requested.
+- Three.js renders the authored rolling stock and stations as LOD objects and batches authored spruces, houses and bridge pieces with instancing. The production scene measures 146 draw calls after bridge batching, versus 2,704 in the rejected per-span clone pass, while preserving about 60 FPS in the local normal and scale runs.
+- Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
 - 71 Node tests and 7 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
@@ -47,7 +49,7 @@ Current milestone: architecture is complete and the Sol implementation pass is a
 
 ## Currently working
 
-Next: begin ART-001, the original production Norway asset kit, using the local Blender installation and the validated export pipeline.
+Next: the planned Norway gates are complete. Any Arizona/River expansion, additional content depth or release/deployment work should start as a separately scoped milestone.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -64,9 +66,9 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The complete Blender-authored production asset kit remains; the current locomotive is procedural while coaches and freight wagons use the validated Blender wagon GLBs.
+The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack. Industry-specific forest-yard and sawmill structures remain represented by their landscape context and office data rather than dedicated world models.
 
-Conservative curve rejection, simple procedural art, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
+Conservative curve rejection, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 
 ## Git state and reproduction
 

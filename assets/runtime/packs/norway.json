@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "campaignId": "norwegian-fjords",
+  "generator": {
+    "blender": "4.0.2",
+    "script": "tools/blender/generate_norway_pack.py"
+  },
+  "assets": [
+    {
+      "id": "nord-2-6-0",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        7,
+        17
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/nord-2-6-0_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/nord-2-6-0_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "fjord-passenger-coach",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        6,
+        20
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/fjord-passenger-coach_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/fjord-passenger-coach_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "fjord-freight-wagon",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        5,
+        14
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/fjord-freight-wagon_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/fjord-freight-wagon_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-station",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side"
+      ],
+      "maxDimensionsM": [
+        16,
+        10,
+        31
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-station_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/norway-station_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        11,
+        13
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/norway-house_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-spruce",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        9,
+        16,
+        9
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-spruce_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/norway-spruce_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-bridge-span",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "span_start",
+        "span_end"
+      ],
+      "maxDimensionsM": [
+        9,
+        8,
+        26
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-bridge-span_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/norway-bridge-span_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-tunnel-portal",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "track_center"
+      ],
+      "maxDimensionsM": [
+        12,
+        10,
+        4
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-tunnel-portal_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/norway-tunnel-portal_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    }
+  ]
+}
