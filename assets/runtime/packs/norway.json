@@ -6,7 +6,7 @@
     "script": "tools/blender/generate_norway_pack.py",
     "sceneryScript": "tools/blender/generate_norway_scenery.py",
     "architectureScript": "tools/blender/generate_norway_architecture.py",
-    "rollingStockDetail": "GFX-006B+VEHICLE-002"
+    "rollingStockDetail": "GFX-006B+VEHICLE-002+VEHICLE-003"
   },
   "assets": [
     {
@@ -639,6 +639,33 @@
       ]
     },
     {
+      "id": "nord-el-1",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        7.5,
+        14.5
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/nord-el-1_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/nord-el-1_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
       "id": "nord-di-3b",
       "kind": "vehicle",
       "requiredNodes": [
@@ -1009,6 +1036,46 @@
     },
     {
       "materialPrefix": "RF_Diesel_Grille",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Electric_Paint",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Electric_Running",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Electric_Dark",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Electric_Trim",
       "map": "rolling-metal-base",
       "normalMap": "rolling-metal-normal",
       "roughnessMap": "rolling-metal-roughness",

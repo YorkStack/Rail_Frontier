@@ -9,6 +9,7 @@ const line=(p0:Vec3,p3:Vec3):CubicCurve=>({p0,p1:{x:(2*p0.x+p3.x)/3,y:(2*p0.y+p3
 function operationalState():GameState {
   const state=createInitialState(),a={x:20,y:0,z:100},b={x:220,y:0,z:100};
   state.railway={revision:1,nodes:[{id:'node:5',position:a},{id:'node:6',position:b}],edges:[{id:'edge:7',from:'node:5',to:'node:6',curve:line(a,b),speedLimitMps:20,ownerId:'company:1'}]};
+  state.operations.infrastructure['edge:7']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
   state.stations=[{id:'station:8',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[]},{id:'station:9',nodeId:'node:6',townId:null,classId:'rural-halt',storage:[]}];state.nextEntityId=10;
   return state;
 }
@@ -30,6 +31,23 @@ test('vehicle purchase uses the persisted campaign year and rejects future stock
   state.startingYear=1960;const available=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(available.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-di-3b',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(available.snapshot().trains[0]!.locomotiveId,'nord-di-3b');
 });
 
+test('El 1 purchase requires its 1922 era and powered station track',()=>{
+  const state=operationalState();state.startingYear=1921;let instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());
+  assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  state.startingYear=1922;instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));before=JSON.stringify(instance.snapshot());
+  assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'Electric traction requires electrified track at the purchase station'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  state.operations.infrastructure['edge:7']!.electrified=true;state.operations.infrastructure['edge:7']!.electrificationCost=3_600_000;state.operations.infrastructure['edge:7']!.electrificationMaintenancePerDay=144;
+  instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(instance.snapshot().trains[0]!.locomotiveId,'nord-el-1');
+});
+
+test('El 1 cannot enter a route until every traversed edge is electrified',()=>{
+  const state=operationalState(),middle=state.railway.nodes[1]!.position,end={x:420,y:0,z:100};state.startingYear=1922;
+  state.railway.nodes.push({id:'node:10',position:end});state.railway.edges.push({id:'edge:11',from:'node:6',to:'node:10',curve:line(middle,end),speedLimitMps:20,ownerId:'company:1'});state.operations.infrastructure['edge:11']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};state.operations.infrastructure['edge:7']!.electrified=true;state.operations.infrastructure['edge:7']!.electrificationCost=3_600_000;state.operations.infrastructure['edge:7']!.electrificationMaintenancePerDay=144;state.stations[1]!.nodeId='node:10';state.nextEntityId=12;
+  const instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(instance.dispatch({sequence:2,command:{type:'createRoute',stops:['station:8','station:9'],mode:'shuttle'}}).ok,true);
+  const before=JSON.stringify(instance.snapshot()),routeId=instance.snapshot().routes[0]!.id,trainId=instance.snapshot().trains[0]!.id;assert.deepEqual(instance.dispatch({sequence:3,command:{type:'assignRoute',trainId,routeId}}),{ok:false,reason:'Electric traction requires a fully electrified route'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  assert.equal(instance.dispatch({sequence:3,command:{type:'electrifyRoute',routeId}}).ok,true);assert.equal(instance.dispatch({sequence:4,command:{type:'assignRoute',trainId,routeId}}).ok,true);
+});
+
 test('train purchase creates an idle consist and one capital transaction',()=>{
   const instance=game();
   assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach','fjord-passenger-coach'],stationId:'station:8'}}),{ok:true,createdIds:['train:10']});
@@ -42,7 +60,7 @@ test('route creation validates repeated and disconnected stops',()=>{
   const instance=game(),before=JSON.stringify(instance.snapshot());
   assert.deepEqual(instance.dispatch({sequence:1,command:{type:'createRoute',stops:['station:8','station:8'],mode:'shuttle'}}),{ok:false,reason:'A route cannot repeat a station'});
   assert.equal(JSON.stringify(instance.snapshot()),before);
-  const state=operationalState();state.railway.edges=[];
+  const state=operationalState();state.railway.edges=[];state.operations.infrastructure={};
   const disconnected=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));
   assert.deepEqual(disconnected.dispatch({sequence:1,command:{type:'createRoute',stops:['station:8','station:9'],mode:'shuttle'}}),{ok:false,reason:'Route contains disconnected stops'});
 });

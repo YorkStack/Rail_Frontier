@@ -10,7 +10,8 @@ test('compressed calendar derives day and year from the persisted campaign epoch
   state.tick=ECONOMY_INTERVAL_TICKS*DAYS_PER_YEAR;assert.equal(dayOfYear(state),1);assert.equal(currentYear(state),1923);
 });
 
-test('vehicle catalogue unlocks the Di 3B in 1960 with its measured dimensions and power',()=>{
-  assert.deepEqual(availableVehicles(1959,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0']);assert.deepEqual(availableVehicles(1960,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0','nord-di-3b']);
+test('vehicle catalogue unlocks researched electric and diesel locomotives in their eras',()=>{
+  assert.deepEqual(availableVehicles(1921,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0']);assert.deepEqual(availableVehicles(1922,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0','nord-el-1']);assert.deepEqual(availableVehicles(1959,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0','nord-el-1']);assert.deepEqual(availableVehicles(1960,'locomotive').map(vehicle=>vehicle.id),['nord-2-6-0','nord-el-1','nord-di-3b']);
+  const electric=vehicleDefinition('nord-el-1')!;assert.equal(electric.traction,'electric');assert.equal(electric.lengthM,12.7);assert.equal(electric.massKg,61_300);assert.equal(electric.powerW,690_000);assert.equal(electric.tractiveForceN,157_000);assert.equal(electric.maxSpeedMps,19.44);
   const diesel=vehicleDefinition('nord-di-3b')!;assert.equal(diesel.traction,'diesel');assert.equal(diesel.lengthM,18.9);assert.equal(diesel.massKg,103_000);assert.equal(diesel.powerW,1_305_000);assert.equal(diesel.maxSpeedMps,39.72);
 });
