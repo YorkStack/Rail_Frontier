@@ -2,9 +2,9 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 
-# Current status — passenger and freight implementation, 2026-09-14
+# Current status — Norway economy implementation, 2026-09-14
 
-Current milestone: the Norway passenger, freight, production-asset and world-inspection gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+Current milestone: the Norway passenger, freight, production-asset, world-inspection and first city-economy gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
 
 ## Implementation completed after handoff
 
@@ -33,8 +33,11 @@ Current milestone: the Norway passenger, freight, production-asset and world-ins
 - Three.js renders the authored rolling stock and stations as LOD objects and batches authored spruces, houses and bridge pieces with instancing. The production scene measures 146 draw calls after bridge batching, versus 2,704 in the rejected per-span clone pass, while preserving about 60 FPS in the local normal and scale runs.
 - The renderer now lives at the production boundary in `src/rendering/fjord-renderer.ts`. Trains and stations carry ephemeral pick identities; town and industry map labels use the same `WorldSelection` contract. A live contextual card reports authoritative state for all four entity kinds and follows a selected moving train.
 - Station catchment, industry-site and rail-traffic overlays are available from the strategy toolbar. Overlay geometry rebuilds only when the relevant station, industry or reservation signature changes, and map labels yield pointer input while a construction tool is active.
+- Schema 3 adds one economy record per town with local lumber demand and delivery, waiting mail, activity, service duration and fractional population growth. A pure 2→3 migration initializes these values while preserving all prior operations; schema 1 still migrates sequentially through schema 2.
+- Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
+- Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 71 Node tests and 8 real browser tests pass. Asset validation and the production build pass.
+- 75 Node tests and 9 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -44,25 +47,25 @@ Current milestone: the Norway passenger, freight, production-asset and world-ins
 - Actual Blender 4.0.2 → GLB → Three.js pipeline proven: axes, metres, pivots, couplers, finite normals, materials and close/far LOD with hysteresis.
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
-- Schema 2 plus strict 1→2 migration and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **71 Node tests and 8 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- Schema 3 plus strict sequential 1→2→3 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
+- **75 Node tests and 9 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: city growth and local goods demand are the next Norway simulation milestone. Arizona/River expansion and release/deployment work remain separately scoped.
+Next: company and route reporting is the next Norway management milestone. Mail transport, additional station classes, Arizona/River expansion and release/deployment work remain separately scoped.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
 ## Stable contracts
 
-- src/domain/model.ts + operations.ts: SI state, typed IDs, command sequence, operational/cargo/finance/content records.
+- src/domain/model.ts + operations.ts: SI state, typed IDs, command sequence, operational/cargo/finance/content and town-economy records.
 - src/application/ports.ts + snapshot.ts: UI command/storage/render boundary and detached frozen state.
 - src/world/terrain.ts + domain/curve-math.ts: triangle surface and exact crossing rules.
 - src/rail/geometry.ts, constraints.ts, planner.ts, graph.ts: cubic/arc/traversal/quote/cache rules.
 - src/simulation/clock.ts: 20 Hz fixed steps, preserved time debt and compressed calendar contract.
-- src/persistence/save.ts: schema 2 and versioned migrations; indexeddb.ts: atomic slot backend.
+- src/persistence/save.ts: schema 3 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
 
 Do not casually change units/axes, graph identity/connectivity, tick cadence/order, typed IDs, command atomicity or saved operational semantics. A genuine redesign follows ASTRA_ESCALATIONS.md; there is no open escalation now.
 

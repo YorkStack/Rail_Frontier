@@ -2,7 +2,7 @@
 
 Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-**Current milestone: the Norway passenger and timber-freight loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, inspect live trains/stations/towns/industries, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
+**Current milestone: the Norway passenger, timber-freight and first town-economy loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, grow connected towns, inspect live trains/stations/towns/industries, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 

@@ -6,7 +6,7 @@
 | TD02 | Resolved: triangle-exact crossings and persisted engineered spans are used by production construction | Narrow water and construction regressions pass | Extend biome cost masks only with new content | Closed |
 | TD03 | Resolved: physical fixed-tick traction, braking, dwell and service replace demonstration motion | Passenger and freight end-to-end tests pass | Keep the small motion fixture isolated | Closed |
 | TD04 | Conservative cubic certificate may reject some feasible curves; no easements | Preview can be strict; repeated marginal cases may cost ~0.2 s | Keep conservative validity; bounded worker/preview debounce; optimize only with reference tests | Medium |
-| TD05 | Resolved: schema 2 operational fields drive released Norway systems | Mid-run save continuation is deterministic | Add an explicit migration for future city-state fields | Closed |
+| TD05 | Resolved: schema 3 persists Norway operations and town economies through sequential migrations | Mid-run save continuation is deterministic | Preserve v2 and v3 fixtures at release | Closed |
 | TD06 | Save limit is characters, not byte/entity/array counts | Potential expensive malicious payload | Bound entities/geometry before public save import | High before import |
 | TD07 | Resolved: production renderer handles graph edits, all owned consists/stations, selection and overlays | Renderer no longer imports from `spikes/` | Split campaign composition only when a second biome is implemented | Closed |
 | TD08 | Resolved for Norway: original Blender LOD pack replaces vehicle/station/scenery/infrastructure proxies | Industry buildings still use landscape context | Add dedicated industry structures with later content depth | Low |

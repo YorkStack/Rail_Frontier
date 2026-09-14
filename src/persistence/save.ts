@@ -1,23 +1,25 @@
 import { z } from 'zod';
 import type { GameState } from '../domain/model.js';
 import { compileGraph } from '../rail/graph.js';
-import { emptyOperations } from '../domain/operations.js';
+import { emptyOperations,initialTownEconomy } from '../domain/operations.js';
 import { industryDefinition } from '../content/industries.js';
 
 const finite=z.number().finite(), integer=z.number().int().safe(), nonnegative=integer.nonnegative();
 const id=<K extends string>(kind:K)=>z.custom<`${K}:${number}`>((v)=>typeof v==='string' && new RegExp(`^${kind}:[1-9][0-9]*$`).test(v) && Number.isSafeInteger(Number(v.split(':')[1])));
 const vec=z.strictObject({x:finite,y:finite,z:finite});
 const cargo=z.strictObject({kind:z.enum(['passengers','timber','lumber']),quantity:nonnegative,destinationId:id('station'),originId:id('station'),loadedTick:nonnegative,distanceM:finite.nonnegative()});
+const operationsV2Schema=z.strictObject({
+  demand:z.array(z.strictObject({originTownId:id('town'),destinationTownId:id('town'),quantity:nonnegative,generatedTick:nonnegative})),
+  trainServices:z.record(id('train'),z.strictObject({nextStopIndex:nonnegative,direction:z.union([z.literal(1),z.literal(-1)]),ageDays:nonnegative,condition:finite.min(0).max(1),distanceM:finite.nonnegative(),revenue:nonnegative,operatingCosts:nonnegative,costRemainder:finite.min(0).lt(1)})),
+  reservations:z.array(z.strictObject({edgeId:id('edge'),trainId:id('train')})),
+  infrastructure:z.record(id('edge'),z.strictObject({spans:z.array(z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['ground','bridge','tunnel'])})),constructionCost:nonnegative,maintenancePerDay:nonnegative})),
+  industryCycleTicks:z.record(id('industry'),nonnegative),
+  delivered:z.strictObject({passengers:nonnegative,timber:nonnegative,lumber:nonnegative}),completedObjectives:z.array(z.string()),
+  monthlyAccounts:z.array(z.strictObject({month:nonnegative,revenue:nonnegative,operatingCost:nonnegative,capitalCost:nonnegative})),lastCommandSequence:nonnegative
+});
+const operationsSchema=operationsV2Schema.extend({townEconomy:z.record(id('town'),z.strictObject({lumberDemand:nonnegative,lumberDelivered:nonnegative,lumberReceivedToday:nonnegative,mailWaiting:nonnegative,economicActivity:integer.min(0).max(100),connectedDays:nonnegative,growthRemainder:finite.min(0).lt(1),lastPopulationChange:nonnegative}))});
 const stateSchema=z.strictObject({
-  operations:z.strictObject({
-    demand:z.array(z.strictObject({originTownId:id('town'),destinationTownId:id('town'),quantity:nonnegative,generatedTick:nonnegative})),
-    trainServices:z.record(id('train'),z.strictObject({nextStopIndex:nonnegative,direction:z.union([z.literal(1),z.literal(-1)]),ageDays:nonnegative,condition:finite.min(0).max(1),distanceM:finite.nonnegative(),revenue:nonnegative,operatingCosts:nonnegative,costRemainder:finite.min(0).lt(1)})),
-    reservations:z.array(z.strictObject({edgeId:id('edge'),trainId:id('train')})),
-    infrastructure:z.record(id('edge'),z.strictObject({spans:z.array(z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['ground','bridge','tunnel'])})),constructionCost:nonnegative,maintenancePerDay:nonnegative})),
-    industryCycleTicks:z.record(id('industry'),nonnegative),
-    delivered:z.strictObject({passengers:nonnegative,timber:nonnegative,lumber:nonnegative}),completedObjectives:z.array(z.string()),
-    monthlyAccounts:z.array(z.strictObject({month:nonnegative,revenue:nonnegative,operatingCost:nonnegative,capitalCost:nonnegative})),lastCommandSequence:nonnegative
-  }),
+  operations:operationsSchema,
   tick:nonnegative,nextEntityId:integer.positive(),rngState:integer.min(0).max(4294967295),campaignId:z.string().min(1),campaignVersion:integer.positive(),
   world:z.strictObject({seed:integer,widthM:finite.positive(),depthM:finite.positive(),cellM:finite.positive(),generatorVersion:integer.positive(),biomeId:z.string().min(1)}),
   railway:z.strictObject({revision:nonnegative,nodes:z.array(z.strictObject({id:id('node'),position:vec})),edges:z.array(z.strictObject({id:id('edge'),from:id('node'),to:id('node'),curve:z.strictObject({p0:vec,p1:vec,p2:vec,p3:vec}),speedLimitMps:finite.positive(),ownerId:id('company')}))}),
@@ -29,7 +31,9 @@ const stateSchema=z.strictObject({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))}),
   objectiveProgress:z.record(z.string(),nonnegative)
 }) satisfies z.ZodType<GameState>;
-const envelope=z.strictObject({schemaVersion:z.literal(2),gameVersion:z.literal('0.2.0'),state:stateSchema});
+const stateV2Schema=stateSchema.extend({operations:operationsV2Schema});
+const envelope=z.strictObject({schemaVersion:z.literal(3),gameVersion:z.literal('0.3.0'),state:stateSchema});
+const versionTwoEnvelope=z.strictObject({schemaVersion:z.literal(2),gameVersion:z.literal('0.2.0'),state:stateV2Schema});
 const legacyEnvelope=z.strictObject({schemaVersion:z.literal(1),gameVersion:z.literal('0.1.0'),state:stateSchema.omit({operations:true})});
 export function validateState(value: unknown): GameState {
   const state=stateSchema.parse(value), geometry=compileGraph(state.railway);
@@ -69,20 +73,28 @@ export function validateState(value: unknown): GameState {
     const progress=state.operations.industryCycleTicks[industry.id];if(progress===undefined||progress>recipe.cycleTicks)throw new Error('Invalid industry cycle');
     const stored=Object.values(industry.inventory).reduce((sum,quantity)=>sum+(quantity??0),0);if(stored>recipe.storageCapacity)throw new Error('Industry storage exceeds capacity');
   }
+  const townEconomyIds=Object.keys(state.operations.townEconomy).sort(),townIds=state.towns.map(town=>town.id).sort();if(townEconomyIds.join('|')!==townIds.join('|'))throw new Error('Town economy records must match towns');
+  for(const town of state.towns) {
+    const economy=state.operations.townEconomy[town.id]!;if(economy.lumberReceivedToday>economy.lumberDelivered)throw new Error('Invalid town economy');
+  }
   if(new Set(state.operations.completedObjectives).size!==state.operations.completedObjectives.length)throw new Error('Duplicate objective completion');
   let cash=state.company.openingCash;
   for(const transaction of state.company.ledger) {cash+=transaction.amount;if(!Number.isSafeInteger(cash)||transaction.tick>state.tick) throw new Error('Invalid ledger');}
   if(cash!==state.company.cash) throw new Error('Ledger does not reconcile');
   return state;
 }
-export const migrations=new Map<number,(value:unknown)=>unknown>([[1,(value)=>{const legacy=legacyEnvelope.parse(value);return {schemaVersion:2,gameVersion:'0.2.0',state:{...legacy.state,operations:emptyOperations()}};}]]);
-export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:2,gameVersion:'0.2.0',state:validateState(state)}); }
+const emptyVersionTwoOperations=()=>{const {townEconomy:_,...previous}=emptyOperations();return previous;};
+export const migrations=new Map<number,(value:unknown)=>unknown>([
+  [1,(value)=>{const legacy=legacyEnvelope.parse(value);return {schemaVersion:2,gameVersion:'0.2.0',state:{...legacy.state,operations:emptyVersionTwoOperations()}};}],
+  [2,(value)=>{const previous=versionTwoEnvelope.parse(value);return {schemaVersion:3,gameVersion:'0.3.0',state:{...previous.state,operations:{...previous.state.operations,townEconomy:initialTownEconomy(previous.state.towns)}}};}]
+]);
+export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:3,gameVersion:'0.3.0',state:validateState(state)}); }
 export function deserialize(json:string):GameState {
   if(json.length>20_000_000) throw new Error('Save exceeds 20 MB limit');
   let value:unknown=JSON.parse(json);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
-  if(version>2) throw new Error('Save was created by a newer game');
-  while(version<2) {const migrate=migrations.get(version);if(!migrate) throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
+  if(version>3) throw new Error('Save was created by a newer game');
+  while(version<3) {const migrate=migrations.get(version);if(!migrate) throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
   return validateState(envelope.parse(value).state);
 }

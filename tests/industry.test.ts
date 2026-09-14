@@ -53,8 +53,15 @@ test('freight chain conserves stock, pays each delivery once, and survives reloa
   const loaded=deserialize(serialize(state)),loadedTrain=loaded.trains[0]!;assert.deepEqual(loaded,state);
   loadedTrain.cargo[0]!.distanceM=2000;serviceFreight(loaded,loadedTrain,'station:8');
   assert.equal(loaded.operations.delivered.lumber,7);assert.equal(loaded.company.ledger.filter(entry=>entry.category==='freight').length,2);
+  assert.equal(loaded.operations.townEconomy['town:2']!.lumberDelivered,7);assert.equal(loaded.operations.townEconomy['town:2']!.lumberDemand,21);
   assert.equal(loaded.company.ledger[1]!.amount,350);assert.equal(loaded.company.cash,loaded.company.openingCash+2350);
   const cash=loaded.company.cash;serviceFreight(loaded,loadedTrain,'station:8');assert.equal(loaded.company.cash,cash);
+});
+
+test('towns accept only requested lumber and retain excess cargo aboard',()=>{
+  const state=freightState(),train=state.trains[0]!,economy=state.operations.townEconomy['town:2']!;economy.lumberDemand=3;train.cargo=[{kind:'lumber',quantity:7,destinationId:'station:8',originId:'station:9',loadedTick:0,distanceM:2000}];
+  serviceFreight(state,train,'station:8');assert.equal(economy.lumberDemand,0);assert.equal(economy.lumberDelivered,3);assert.equal(economy.lumberReceivedToday,3);assert.equal(state.operations.delivered.lumber,3);assert.equal(train.cargo[0]?.quantity,4);
+  const cash=state.company.cash;serviceFreight(state,train,'station:8');assert.equal(state.company.cash,cash);assert.equal(train.cargo[0]?.quantity,4);
 });
 
 test('a full sawmill only accepts available space and retains the remainder aboard',()=>{
