@@ -18,6 +18,7 @@ import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
 import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
+import {norwayV2FjordAtZ,norwayV2Landforms,norwayV2ValleyX} from '../world/norway-landforms.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -70,6 +71,8 @@ export class FjordRenderer implements WorldRenderer {
   private readonly controlStart=()=>{this.follow=false;};
 
   private readonly ownsRenderer:boolean;
+  private readonly terrainSurfaceMaterial:THREE.Material;
+  private terrainBlockoutMaterial:THREE.MeshStandardMaterial|null=null;
   constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,sharedRenderer?:THREE.WebGLRenderer) {
     this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
     this.ownsRenderer=sharedRenderer===undefined;this.renderer=sharedRenderer??createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);
@@ -77,7 +80,7 @@ export class FjordRenderer implements WorldRenderer {
     const sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);sun.position.set(-1200*scale,2600*scale,1400*scale);sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);sun.castShadow=true;
     sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-2100*scale;sun.shadow.camera.right=2100*scale;sun.shadow.camera.top=2100*scale;sun.shadow.camera.bottom=-2100*scale;sun.shadow.camera.far=7000*scale;sun.shadow.normalBias=3;
     this.scene.add(sun,sun.target,new THREE.HemisphereLight(this.profile.lighting.skyColor,this.profile.lighting.groundColor,2.1));
-    this.landscape=terrainMesh(terrain,this.profile);this.scene.add(this.landscape);
+    this.landscape=terrainMesh(terrain,this.profile);this.terrainSurfaceMaterial=this.landscape.material as THREE.Material;this.scene.add(this.landscape);
     this.water=this.createWater();this.scene.add(this.water);
     this.waterfall=this.createWaterfall();this.scene.add(this.waterfall);
     this.rebuildTracks(state);
@@ -123,12 +126,12 @@ export class FjordRenderer implements WorldRenderer {
   }
   private authoredForest(count:number):THREE.Group {
     const random=new SeededRandom(708),placements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();
-    for(let tries=0;placements.length<count&&tries<count*30;tries++) {const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,y=this.terrain.sample(x,z).elevationM,corridor=norwayCorridorX(z);if(y<10||y>this.profile.vegetation.treelineM||Math.abs(x-corridor)<24||Math.abs(z-6100)<24)continue;const scale=.72+random.next()*.62;dummy.position.set(x,y,z);dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.scale.setScalar(scale);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
+    for(let tries=0;placements.length<count&&tries<count*30;tries++) {const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,y=this.terrain.sample(x,z).elevationM,corridor=this.corridorX(z);if(y<10||y>this.profile.vegetation.treelineM||Math.abs(x-corridor)<24||Math.abs(z-6100)<24)continue;const scale=.72+random.next()*.62;dummy.position.set(x,y,z);dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.scale.setScalar(scale);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
     this.treeCount=placements.length;return this.instancedAsset('norway-spruce',1,placements);
   }
   private authoredBuildings(state:Readonly<GameState>,count:number):THREE.Group {
     const random=new SeededRandom(144),placements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();
-    for(let index=0;index<count;index++){const town=state.towns[index%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*400;x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-norwayCorridorX(z))>58)break;}dummy.position.set(x,Math.max(.5,this.terrain.sample(x,z).elevationM),z);dummy.rotation.set(0,Math.round(random.next()*3)*Math.PI/2,0);dummy.scale.setScalar(.72+random.next()*.48);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
+    for(let index=0;index<count;index++){const town=state.towns[index%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*400;x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-this.corridorX(z))>58)break;}dummy.position.set(x,Math.max(.5,this.terrain.sample(x,z).elevationM),z);dummy.rotation.set(0,Math.round(random.next()*3)*Math.PI/2,0);dummy.scale.setScalar(.72+random.next()*.48);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
     this.buildingCount=count;return this.instancedAsset('norway-house',0,placements);
   }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
@@ -161,15 +164,16 @@ export class FjordRenderer implements WorldRenderer {
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(terrainSize(this.terrain),terrainSize(this.terrain)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(this.terrain.widthM/2,.15,this.terrain.depthM/2);return mesh;
   }
   private createWaterfall():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {
-    const production=this.terrain.widthM>4000,z=production?6100:2470,shore=(value:number)=>production?norwayShorelineX(value,140919):shorelineX(value),positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    const production=this.terrain.widthM>4000,v2=production&&this.modelState.world.generatorVersion===2,z=v2?norwayV2Landforms.waterfall.z:production?6100:2470,shore=(value:number)=>v2?(()=>{const fjord=norwayV2FjordAtZ(value);return fjord.centerX+fjord.halfWidthM;})():production?norwayShorelineX(value,140919):shorelineX(value),offset=v2?norwayV2Landforms.waterfall.offsetFromEastShoreM:production?620:260,positions:number[]=[],uv:number[]=[],indices:number[]=[];
     for(let i=0;i<=80;i++) {
-      const x=shore(z)+(production?620:260)-i*(production?7.5:3.5);
+      const x=shore(z)+offset-i*(production?7.5:3.5);
       for(const side of [-1,1]) {const sampleZ=z+side*(5+3*Math.sin(i/80*Math.PI));positions.push(x,Math.max(.6,this.terrain.sample(x,sampleZ).elevationM+1.3),sampleZ);uv.push((side+1)/2,1-i/80);}
       if(i>0){const a=(i-1)*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
     }
     const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{time:{value:0}},vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:`varying vec2 vUv; uniform float time; void main(){float streak=.65+.35*sin(vUv.x*80.0+sin(vUv.y*15.0-time*6.0));float fade=sin(vUv.x*3.14159);gl_FragColor=vec4(.76,.91,.91,fade*streak*.86);}`});
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex(indices);return new THREE.Mesh(geometry,material);
   }
+  private corridorX(z:number):number {return this.modelState.world.generatorVersion===2?norwayV2ValleyX(z):norwayCorridorX(z);}
   private createForest(count:number):THREE.Group {
     const group=new THREE.Group(),random=new SeededRandom(708),mat=new THREE.MeshStandardMaterial({color:'#e7eedc',roughness:1});
     const crowns=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,5,1),mat,count),trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.05,.07,1,4),new THREE.MeshStandardMaterial({color:'#574d39'}),count),dummy=new THREE.Object3D(),color=new THREE.Color();
@@ -271,6 +275,7 @@ export class FjordRenderer implements WorldRenderer {
     }
   }
   setTrees(visible:boolean):void {this.trees.visible=visible;}
+  setTerrainBlockout(enabled:boolean):void {if(enabled){this.terrainBlockoutMaterial??=new THREE.MeshStandardMaterial({color:'#8b9188',roughness:1,metalness:0});this.landscape.material=this.terrainBlockoutMaterial;}else{this.landscape.material=this.terrainSurfaceMaterial;this.terrainBlockoutMaterial?.dispose();this.terrainBlockoutMaterial=null;}}
   private rebuildTracks(state:Readonly<GameState>):void {
     this.scene.remove(this.trackGroup);disposeObject(this.trackGroup);this.trackGroup=new THREE.Group();
     this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
@@ -302,7 +307,7 @@ export class FjordRenderer implements WorldRenderer {
   pickEntity(screenX:number,screenY:number):WorldSelection|null {const rect=this.canvas.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((screenX-rect.left)/rect.width*2-1,-(screenY-rect.top)/rect.height*2+1),this.camera);const roots=[...this.trainModels.values()].map(item=>item.group as THREE.Object3D).concat([...this.stationModels.values()]);for(const hit of ray.intersectObjects(roots,true)){let object:THREE.Object3D|null=hit.object;while(object){if(object.userData.selection)return object.userData.selection as WorldSelection;object=object.parent;}}return null;}
   private verifyTerrain():void {this.landscape.updateMatrixWorld(true);const scale=this.terrain.widthM/4000;for(const [x,z] of [[2173,1857],[2411,932],[1601,2047],[2809,2991]]){const sx=x!*scale,sz=z!*scale,ray=new THREE.Raycaster(new THREE.Vector3(sx,3000,sz),new THREE.Vector3(0,-1,0)),hit=ray.intersectObject(this.landscape)[0];if(!hit)throw new Error('Terrain raycast missed');this.terrainErrorM=Math.max(this.terrainErrorM,Math.abs(hit.point.y-this.terrain.sample(sx,sz).elevationM));}if(this.terrainErrorM>.001)throw new Error('Rendered terrain differs from simulation');}
   stats():RenderStats {const info=this.renderer.info,first=[...this.trainModels.values()][0]?.cars[0];return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressTrains?this.stressCount:this.trainModels.size,lod:first?.getCurrentLevel()??0,terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
-  dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);if(this.ownsRenderer){this.renderer.dispose();this.renderer.forceContextLoss();}}
+  dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();if(this.terrainBlockoutMaterial){this.landscape.material=this.terrainSurfaceMaterial;this.terrainBlockoutMaterial.dispose();this.terrainBlockoutMaterial=null;}disposeObject(this.scene);if(this.ownsRenderer){this.renderer.dispose();this.renderer.forceContextLoss();}}
 }
 export class FjordRenderHost {
   readonly renderer:THREE.WebGLRenderer;

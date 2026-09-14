@@ -6,7 +6,7 @@ test('captures the fixed GFX-001 V1 comparison views',async({page})=>{
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',message=>{if(message.type()==='error'||message.type()==='warning')errors.push(message.text());});
-  await page.goto('/?skip-menu=1');
+  await page.goto('/?skip-menu=1&world=v1');
   await page.waitForFunction(()=>window.__railProbe?.ready===true);
   await page.evaluate(()=>window.__railProbe!.setSpeed(0));
   mkdirSync('artifacts/evidence/gfx-001',{recursive:true});
