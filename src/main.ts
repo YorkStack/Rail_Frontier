@@ -9,7 +9,7 @@ import { norway } from './content/norway.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { vehicleDefinition } from './content/vehicles.js';
 import { generateWorld,norwayShorelineX } from './world/generator.js';
-import { FjordRenderer } from './rendering/fjord-renderer.js';
+import { FjordRenderHost } from './rendering/fjord-renderer.js';
 import type { GameState,Speed,Vec3 } from './domain/model.js';
 import { IndexedDbSaveStore } from './persistence/indexeddb.js';
 import { compileCurve } from './rail/geometry.js';
@@ -23,6 +23,8 @@ import { connectedTowns } from './simulation/city.js';
 import type { MapOverlay,WorldSelection } from './application/ports.js';
 import { companyReport } from './simulation/accounting.js';
 import type {NorwayCameraPresetId} from './rendering/norway-camera-presets.js';
+import {campaignContentRegistry} from './content/registry.js';
+import {ActiveSessionHost} from './application/session-host.js';
 
 const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
@@ -162,8 +164,9 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const terrain=generateWorld(norway.world),initial=createNorwayPreviewState(terrain),game=new RailFrontierGame(initial,terrain),view=new FjordRenderer(element<HTMLCanvasElement>('#world'),terrain,initial),store=new IndexedDbSaveStore(),saves=new GameSaveManager(game,store,{campaignId:initial.campaignId,campaignVersion:initial.campaignVersion,worldGeneratorVersion:initial.world.generatorVersion});let state=game.snapshot();
-  try {await view.loadAssets();}catch(error){view.dispose();await store.close();throw error;}
+  const terrain=generateWorld(norway.world),initial=createNorwayPreviewState(terrain),store=new IndexedDbSaveStore(),renderHost=new FjordRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  await sessionHost.initialize(initial);
+  let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store),state=game.snapshot(),switchingSession=false;
   let selection:WorldSelection|null=null;
   const labels=view.labels.map(label=>{const node=document.createElement('button');node.className=`map-label ${label.selection.kind}`;node.textContent=label.name;node.onclick=()=>selectWorld(label.selection,true);element('#map-labels').append(node);return node;});
   const syncSpeed=()=>{document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.speed)===game.speed)));element('#run-state').textContent=game.speed===0?'PAUSED':'RUNNING';};
@@ -260,15 +263,16 @@ async function start():Promise<void> {
   element<HTMLFormElement>('#purchase-train').onsubmit=event=>{event.preventDefault();const cars=Number(element<HTMLSelectElement>('#coach-count').value),kind=element<HTMLSelectElement>('#consist-kind').value,vehicleId=kind==='freight'?'fjord-freight-wagon':'fjord-passenger-coach',stationId=element<HTMLSelectElement>('#purchase-station').value as `station:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:Array<string>(cars).fill(vehicleId),stationId}}),`${kind==='freight'?'Freight':'Passenger'} steam consist purchased.`);};
   element<HTMLFormElement>('#create-route').onsubmit=event=>{event.preventDefault();const from=element<HTMLSelectElement>('#route-from').value as `station:${number}`,to=element<HTMLSelectElement>('#route-to').value as `station:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'createRoute',stops:[from,to],mode:'shuttle'}}),'Shuttle route created.');};
   element<HTMLFormElement>('#assign-route').onsubmit=event=>{event.preventDefault();const trainId=element<HTMLSelectElement>('#assign-train').value as `train:${number}`,routeId=element<HTMLSelectElement>('#assign-route-select').value as `route:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'assignRoute',trainId,routeId}}),'Train assigned to service.');};
+  const activateSession=async(candidate:GameState)=>{switchingSession=true;try{await saves.drain();state=await sessionHost.replace(candidate);game=sessionHost.game;view=sessionHost.renderer;saves=new GameSaveManager(game,store);selection=null;syncSpeed();selectOverlay('none');toggleContext(false);view.regional();return state;}finally{switchingSession=false;last=performance.now();}};
   const save=async()=>{state=game.snapshot();await saves.save('study','Norwegian Fjords company');return state.tick;};
-  const load=async()=>{state=await saves.load('study');syncSpeed();return state.tick;};
+  const load=async()=>{const candidate=await saves.read('study');state=await activateSession(candidate);return state.tick;};
   element('#save').onclick=()=>{void save().then(tick=>toast(`Study saved at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not save: ${message(error)}`));};
   element('#load').onclick=()=>{void load().then(tick=>toast(`Study resumed at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not load: ${message(error)}`));};
   const selectMenuView=(name:string)=>{document.querySelectorAll<HTMLElement>('.menu-view').forEach(view=>view.hidden=view.id!==`menu-${name}`);document.querySelectorAll<HTMLButtonElement>('[data-menu-view]').forEach(button=>button.setAttribute('aria-current',button.dataset.menuView===name?'page':'false'));if(name==='saves')void refreshSaveSlots();};
   const setMenuError=(error:unknown)=>{element('#save-error').textContent=`The archive could not be opened. ${message(error)} Your running company has not been changed.`;};
   const closeMenu=()=>{element('#main-menu').hidden=true;element<HTMLCanvasElement>('#world').focus();};
   const openMenu=()=>{game.pauseForVisibility();syncSpeed();togglePlanner(false);toggleStation(false);toggleOperations(false);toggleOverlays(false);toggleContext(false);element('#main-menu').hidden=false;selectMenuView('campaign');};
-  const loadSlot=async(id:string)=>{state=await saves.load(id);syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);};
+  const loadSlot=async(id:string)=>{state=await activateSession(await saves.read(id));closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);};
   const refreshSaveSlots=async()=>{
     const host=element('#save-slots');host.replaceChildren();element('#save-error').textContent='';
     try {
@@ -288,8 +292,8 @@ async function start():Promise<void> {
   element<HTMLInputElement>('#save-name').value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;
   element<HTMLFormElement>('#new-save-slot').onsubmit=event=>{event.preventDefault();const input=element<HTMLInputElement>('#save-name'),id=`manual-${Date.now()}`;void saves.save(id,input.value).then(()=>{input.value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;toast('A new manual save was added.');return refreshSaveSlots();}).catch(setMenuError);};
   element('#open-menu').onclick=openMenu;element('#close-menu').onclick=closeMenu;
-  element('#new-game').onclick=()=>{game.replaceState(createNorwayGameState());state=game.snapshot();lastAutosaveDay=0;selectOverlay('none');toggleContext(false);setSpeed(1);view.regional();closeMenu();toast('A new company charter is ready. Survey the first connection.');};
-  element('#continue-game').onclick=()=>{void saves.continueLatest().then(next=>{state=next;syncSpeed();view.regional();closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
+  element('#new-game').onclick=()=>{void activateSession(createNorwayGameState()).then(()=>{lastAutosaveDay=0;setSpeed(1);closeMenu();toast('A new company charter is ready. Survey the first connection.');}).catch(setMenuError);};
+  element('#continue-game').onclick=()=>{void saves.readLatest().then(activateSession).then(next=>{state=next;closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
   void refreshSaveSlots();
   const keydown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;if(event.code==='Escape'){if(!element('#main-menu').hidden)closeMenu();else if(!element('#context-panel').hidden)toggleContext(false);else if(!element('#overlay-panel').hidden)toggleOverlays(false);else if(!element('#operations-panel').hidden)toggleOperations(false);else if(!element('#station-planner').hidden)toggleStation(false);else togglePlanner(false);return;}if(!element('#main-menu').hidden)return;if(event.code==='Space'){event.preventDefault();setSpeed(game.speed===0?1:0);}if(event.code==='KeyR')view.regional();if(event.code==='KeyF')view.followTrain();};
   window.addEventListener('keydown',keydown);
@@ -298,14 +302,14 @@ async function start():Promise<void> {
   document.addEventListener('visibilitychange',visibility);
   const frame=(now:number)=>{
     const delta=Math.max(0,(now-last)/1000);last=now;
-    const begin=performance.now(),result=game.advance(delta),afterTick=performance.now();state=result.current;view.update(result.previous,result.current,game.speed===0?1:result.alpha);const day=Math.floor(state.tick/1200);if(day>lastAutosaveDay){lastAutosaveDay=day;void saves.autosave().catch(error=>toast(`Autosave failed: ${message(error)}`));}
+    const begin=performance.now(),result=game.advance(delta),afterTick=performance.now();state=result.current;view.update(result.previous,result.current,game.speed===0?1:result.alpha);const day=Math.floor(state.tick/1200);if(!switchingSession&&day>lastAutosaveDay){lastAutosaveDay=day;void saves.autosave().catch(error=>toast(`Autosave failed: ${message(error)}`));}
     if(delta>0&&!document.hidden){frames.push(delta*1000);renderTimes.push(performance.now()-afterTick);tickTimes.push(afterTick-begin);if(frames.length>1800){frames.shift();renderTimes.shift();tickTimes.shift();}}
     for(let i=0;i<labels.length;i++){const p=view.project(view.labels[i]!.position),label=labels[i]!;label.style.transform=`translate(${p.x}px,${p.y}px)`;label.hidden=!p.visible;}
     if(++frameCount%15===0){const recent=frames.slice(-60),fps=recent.length?recent.length*1000/recent.reduce((a,b)=>a+b,0):0,stats=view.stats(),lead=state.trains[0],report=companyReport(state);element('#fps').textContent=`${Math.round(fps)} FPS · LIVE LANDSCAPE`;element('#stats').textContent=`${stats.calls} draw calls · ${Math.round(stats.triangles/1000)}k triangles\n${stats.trees.toLocaleString()} trees · ${stats.buildings} buildings\n${stats.trains} train / proxies · LOD ${stats.lod}\n${stats.geometries} geometries · ${stats.textures} textures\nTerrain error: ${stats.terrainErrorM.toFixed(6)} m\nTick ${state.tick.toLocaleString()} · Three.js r186`;element('#cash').textContent=money(state.company.cash);element('#date').textContent=`Day ${Math.floor(state.tick/1200)+1} · 1900`;element('#passengers').textContent=`${state.operations.delivered.passengers.toLocaleString()} delivered`;element('#profit').textContent=report.operatingProfit===0?'No result yet':`${report.operatingProfit>=0?'+':''}${money(report.operatingProfit)}`;element('#service-summary').textContent=lead?`${lead.phase} · ${Math.round(lead.speedMps*3.6)} km/h · ${lead.cargo.reduce((sum,lot)=>sum+lot.quantity,0)} aboard`:'No train commissioned';updateObjectives(state);if(!element('#operations-panel').hidden)renderOperations();if(!element('#context-panel').hidden)renderContext();}
     request=requestAnimationFrame(frame);
   };
   request=requestAnimationFrame(frame);toast('The fjord is ready. Explore the landscape or follow the train.');
-  const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);view.dispose();void store.close();};
+  const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);sessionHost.dispose();void store.close();};
   if(import.meta.hot)import.meta.hot.dispose(dispose);
   if(import.meta.env.DEV) {
     const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),cameraPreset:(id:NorwayCameraPresetId)=>view.setCameraPreset(id),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
