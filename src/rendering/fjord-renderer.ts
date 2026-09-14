@@ -20,11 +20,14 @@ import { industryName } from '../content/industries.js';
 import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
 import {norwayV2FjordAtZ,norwayV2Landforms,norwayV2ValleyX} from '../world/norway-landforms.js';
 import {generateNorwayScenery} from './scenery-placement.js';
+import {generateNorwaySettlements} from './settlement-placement.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
 interface PackAsset {id:string;kind:'vehicle'|'station'|'building'|'vegetation'|'rock'|'infrastructure';lods:{path:string}[]}
-interface PackManifest {version:number;campaignId:string;assets:PackAsset[]}
+interface PackTexture {id:string;path:string;role:'baseColor'|'normal'|'roughness';colorSpace:'srgb'|'linear'}
+interface PackBinding {materialPrefix:string;map:string;normalMap:string;roughnessMap:string;repeat:[number,number]}
+interface PackManifest {version:number;campaignId:string;assets:PackAsset[];textures?:PackTexture[];materialBindings?:PackBinding[]}
 export class FjordRenderer implements WorldRenderer {
   readonly scene=new THREE.Scene();
   readonly camera=new THREE.PerspectiveCamera(42,1,.5,50000);
@@ -103,13 +106,15 @@ export class FjordRenderer implements WorldRenderer {
   async loadAssets():Promise<void> {
     const response=await fetch('/packs/norway.json');if(!response.ok)throw new Error('Norway asset manifest could not be loaded');
     const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error('Norway asset manifest is incompatible');
-    const loader=new GLTFLoader(),loadedAssets=await Promise.all(manifest.assets.map(async asset=>({asset,loaded:await Promise.all(asset.lods.map(lod=>loader.loadAsync(lod.path)))})));
+    const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader(),textures=new Map<string,THREE.Texture>();
+    await Promise.all((manifest.textures??[]).map(async definition=>{const value=await textureLoader.loadAsync(definition.path);value.colorSpace=definition.colorSpace==='srgb'?THREE.SRGBColorSpace:THREE.NoColorSpace;value.wrapS=value.wrapT=THREE.RepeatWrapping;value.userData.assetLibrary=true;textures.set(definition.id,value);}));
+    const loadedAssets=await Promise.all(manifest.assets.map(async asset=>({asset,loaded:await Promise.all(asset.lods.map(lod=>loader.loadAsync(lod.path)))})));
     for(const {asset,loaded} of loadedAssets) {
       if(asset.lods.length!==2)throw new Error(`Asset ${asset.id} is missing an LOD`);
       const levels:THREE.Object3D[]=[];
       for(let lod=0;lod<loaded.length;lod++) {
         const group=loaded[lod]!.scene;group.updateMatrixWorld(true);const dimensions=new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3());let normalsFinite=true,triangles=0;const materials=new Set<THREE.Material>();
-        group.traverse(object=>{if(object instanceof THREE.Mesh){object.castShadow=true;object.receiveShadow=true;const normal=object.geometry.getAttribute('normal');if(!normal)normalsFinite=false;else for(let index=0;index<normal.count;index++)if(!Number.isFinite(normal.getX(index)+normal.getY(index)+normal.getZ(index)))normalsFinite=false;triangles+=(object.geometry.index?.count??object.geometry.getAttribute('position').count)/3;for(const material of Array.isArray(object.material)?object.material:[object.material])materials.add(material);}});
+        group.traverse(object=>{if(object instanceof THREE.Mesh){object.castShadow=true;object.receiveShadow=true;const normal=object.geometry.getAttribute('normal');if(!normal)normalsFinite=false;else for(let index=0;index<normal.count;index++)if(!Number.isFinite(normal.getX(index)+normal.getY(index)+normal.getZ(index)))normalsFinite=false;triangles+=(object.geometry.index?.count??object.geometry.getAttribute('position').count)/3;for(const material of Array.isArray(object.material)?object.material:[object.material]){const binding=(manifest.materialBindings??[]).find(item=>material.name.startsWith(item.materialPrefix));if(binding&&material instanceof THREE.MeshStandardMaterial){material.map=textures.get(binding.map)??null;material.normalMap=textures.get(binding.normalMap)??null;material.roughnessMap=textures.get(binding.roughnessMap)??null;material.normalScale.set(.22,.22);for(const texture of [material.map,material.normalMap,material.roughnessMap])texture?.repeat.set(...binding.repeat);material.needsUpdate=true;}materials.add(material);}}});
         if(!normalsFinite)throw new Error(`Asset ${asset.id} has invalid normals`);this.assets.push({name:asset.id,lod,sizeM:dimensions.toArray(),normalsFinite,materials:materials.size,triangles});levels.push(group);this.assetLibrary.add(group);
       }
       if(asset.kind==='vehicle') {const front=levels[0]!.getObjectByName('forward_probe')?.getWorldPosition(new THREE.Vector3()),up=levels[0]!.getObjectByName('up_probe')?.getWorldPosition(new THREE.Vector3());if(!front||!up||front.z>=0||Math.abs(up.y-2)>.001)throw new Error(`Asset ${asset.id} has invalid runtime axes`);}
@@ -135,14 +140,22 @@ export class FjordRenderer implements WorldRenderer {
     for(const record of records){const tile=`${Math.floor(record.x/4000)}:${Math.floor(record.z/4000)}`,key=`${tile}:${record.assetId}:${record.lod}`,batch=batches.get(key)??{id:record.assetId,lod:record.lod,matrices:[]};dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();batch.matrices.push(dummy.matrix.clone());batches.set(key,batch);}
     const group=new THREE.Group();for(const batch of batches.values())group.add(this.instancedAsset(batch.id,batch.lod,batch.matrices));this.treeCount=records.filter(record=>record.category==='tree').length;return group;
   }
-  private authoredBuildings(state:Readonly<GameState>,count:number):THREE.Group {
+  private legacyAuthoredBuildings(state:Readonly<GameState>,count:number):THREE.Group {
     const random=new SeededRandom(144),placements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();
     for(let index=0;index<count;index++){const town=state.towns[index%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*400;x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-this.corridorX(z))>58)break;}dummy.position.set(x,Math.max(.5,this.terrain.sample(x,z).elevationM),z);dummy.rotation.set(0,Math.round(random.next()*3)*Math.PI/2,0);dummy.scale.setScalar(.72+random.next()*.48);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
     this.buildingCount=count;return this.instancedAsset('norway-house',0,placements);
   }
+  private authoredSettlements(state:Readonly<GameState>):THREE.Group {
+    const records=generateNorwaySettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
+    for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
+    for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
+    const pathMaterial=new THREE.MeshStandardMaterial({color:'#81765d',roughness:1}),pathGeometry=new THREE.BoxGeometry(1,1,1);
+    for(let index=0;index<state.towns.length;index++){const town=state.towns[index]!,path=new THREE.Mesh(pathGeometry.clone(),pathMaterial.clone()),length=index===1?310:360;path.position.set(town.position.x,town.position.y+.22,town.position.z);path.rotation.y=index===0?Math.PI/2:(index===1 ? .62 : 0);path.scale.set(3.2,.1,length);path.receiveShadow=true;group.add(path);}
+    this.buildingCount=records.length;return group;
+  }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
     this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);
-    this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=this.authoredBuildings(state,360);this.scene.add(this.buildings);
+    this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=this.assetLevels.has('norway-house-red-white')?this.authoredSettlements(state):this.legacyAuthoredBuildings(state,360);this.scene.add(this.buildings);
   }
   private syncStationModels(state:Readonly<GameState>):void {
     if(!this.assetLevels.has('norway-station'))return;for(const model of this.stationModels.values())model.visible=false;
@@ -270,7 +283,7 @@ export class FjordRenderer implements WorldRenderer {
   }
   setStress(state:GameState,enabled:boolean):void {
     this.scene.remove(this.trees);disposeObject(this.trees);this.trees=enabled?(this.assetLevels.has('norway-spruce')?this.authoredForest(20000):this.createForest(20000)):(this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.assetLevels.has('norway-spruce')?this.authoredForest(this.profile.vegetation.density):this.createForest(this.profile.vegetation.density));this.scene.add(this.trees);
-    this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=new THREE.Group();if(this.assetLevels.has('norway-house'))this.buildings=this.authoredBuildings(state,enabled?2000:360);else this.createBuildings(state,enabled?2000:90);this.scene.add(this.buildings);
+    this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=new THREE.Group();if(enabled&&this.assetLevels.has('norway-house'))this.buildings=this.legacyAuthoredBuildings(state,2000);else if(!enabled&&this.assetLevels.has('norway-house-red-white'))this.buildings=this.authoredSettlements(state);else if(this.assetLevels.has('norway-house'))this.buildings=this.legacyAuthoredBuildings(state,360);else this.createBuildings(state,enabled?2000:90);this.scene.add(this.buildings);
     if(this.stressTrains){this.scene.remove(this.stressTrains);disposeObject(this.stressTrains);this.stressTrains=null;}
     if(this.stressTrack){this.scene.remove(this.stressTrack);disposeObject(this.stressTrack);this.stressTrack=null;}
     this.stressCount=enabled?100:1;
@@ -327,9 +340,9 @@ function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {retu
 function configureWebGLRenderer(renderer:THREE.WebGLRenderer):void {renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;}
 function terrainSize(terrain:Heightfield):number {return Math.max(terrain.widthM,terrain.depthM);}
 function railwayKey(state:Readonly<GameState>):string {return `${state.railway.revision}|${state.railway.nodes.map(node=>`${node.id}:${node.position.x}:${node.position.y}:${node.position.z}`).join(',')}|${state.railway.edges.map(edge=>`${edge.id}:${edge.from}:${edge.to}`).join(',')}`;}
-export function disposeObject(root:THREE.Object3D):void {
+export function disposeObject(root:THREE.Object3D,disposeSharedTextures=root instanceof THREE.Scene):void {
   const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();
   root.traverse(object=>{if(object instanceof THREE.Mesh||object instanceof THREE.Line||object instanceof THREE.Points){geometries.add(object.geometry);for(const material of Array.isArray(object.material)?object.material:[object.material])materials.add(material);}if(object instanceof THREE.InstancedMesh)object.dispose();if(object instanceof THREE.DirectionalLight||object instanceof THREE.SpotLight||object instanceof THREE.PointLight)object.shadow.dispose();});
   const textures=new Set<THREE.Texture>();for(const material of materials)for(const value of Object.values(material))if(value instanceof THREE.Texture)textures.add(value);
-  geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());materials.forEach(m=>m.dispose());
+  geometries.forEach(g=>g.dispose());textures.forEach(t=>{if(disposeSharedTextures||!t.userData.assetLibrary)t.dispose();});materials.forEach(m=>m.dispose());
 }
