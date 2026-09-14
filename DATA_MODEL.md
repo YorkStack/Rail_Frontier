@@ -1,6 +1,6 @@
 # Data model
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 2 is implemented; contracts are stable for the implementation handoff, not a claim of a released gameplay save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 3 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
@@ -13,6 +13,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 | MotionState | ordered edge traversal IDs | Current leg, distance along traversal, arrival |
 | CargoLot | origin/destination station IDs | Integer quantity and carried distance |
 | Town | town:N | Position, name, population |
+| TownEconomyState | keyed by town:N | Lumber demand/supply, mail, activity, service days and growth carry |
 | Industry | industry:N, definitionId | Typed inventory |
 | Company | company:N | Opening/current cash and ledger |
 | Transaction | transaction:N | Tick, signed integer amount, category, audit association |
@@ -26,4 +27,4 @@ Motion distance measures metres in traversal direction, so reverse geometry samp
 
 Derived caches (arc tables, route adjacency, scene entities, spatial indices, quote previews, graphics buffers) are not persisted. Rebuild from authoritative state. RNG state is uint32; src/world/random.ts implements Mulberry32 with tested continuation. Rendering has an independent seeded stream. No Math.random in authoritative simulation.
 
-Schema 2 now includes these records in operations: demand queues; per-train nextStopIndex/direction/age/condition/distance/revenue/operatingCosts/costRemainder; exclusive reservations; built engineering spans/construction cost/daily upkeep; industry cycle tick progress; delivered totals; completed/rewarded objectives; monthly accounts; lastCommandSequence. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Implementing the economic/traction/construction systems is pending. See ECONOMIC_CONTRACT.md and SAVEGAME_FORMAT.md. Any breaking state change needs an explicit migration.
+Schema 3 includes demand queues; per-train service and financial state; exclusive reservations; built engineering spans and upkeep; industry cycles; per-town economy state; delivered totals; completed objectives; monthly accounts; and command sequence. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Any breaking state change needs an explicit migration.

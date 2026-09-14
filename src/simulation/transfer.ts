@@ -47,7 +47,7 @@ function freightDestination(state:GameState,routeStops:Id<'station'>[],current:I
   for(const stationId of routeStops) {
     if(stationId===current)continue;
     if(kind==='timber'&&state.industries.some(industry=>industry.definitionId==='sawmill'&&coverage.get(industry.id)===stationId))return stationId;
-    const station=state.stations.find(candidate=>candidate.id===stationId);if(kind==='lumber'&&station?.townId!=null)return stationId;
+    const station=state.stations.find(candidate=>candidate.id===stationId);if(kind==='lumber'&&station?.townId!=null&&(state.operations.townEconomy[station.townId]?.lumberDemand??0)>0)return stationId;
   }
   return undefined;
 }
@@ -73,7 +73,10 @@ export function serviceFreight(state:GameState,train:Train,stationId:Id<'station
       const recipe=industryDefinition(sawmill.definitionId)!;
       delivered=Math.min(lot.quantity,Math.max(0,recipe.storageCapacity-inventoryTotal(sawmill)));
       if(delivered>0)sawmill.inventory.timber=(sawmill.inventory.timber??0)+delivered;
-    } else if(lot.kind==='lumber'&&station.townId!==null)delivered=lot.quantity;
+    } else if(lot.kind==='lumber'&&station.townId!==null) {
+      const economy=state.operations.townEconomy[station.townId];if(!economy)throw new Error('Town economy is missing');
+      delivered=Math.min(lot.quantity,economy.lumberDemand);if(!Number.isSafeInteger(economy.lumberDelivered+delivered)||!Number.isSafeInteger(economy.lumberReceivedToday+delivered))throw new Error('Town delivery exceeds range');economy.lumberDemand-=delivered;economy.lumberDelivered+=delivered;economy.lumberReceivedToday+=delivered;
+    }
     if(delivered>0)postFreightDelivery(state,train,stationId,lot.kind,delivered,lot.distanceM);
     if(delivered<lot.quantity)retained.push({...lot,quantity:lot.quantity-delivered});
   }

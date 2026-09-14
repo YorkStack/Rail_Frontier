@@ -1,6 +1,6 @@
 # Economic and command implementation contract
 
-These are fixed initial rules for Sol to implement, not features already running in the study. Values are data-driven balance defaults and may be tuned without redesigning state or transaction semantics.
+These are the implemented initial economic rules. Values are data-driven balance defaults and may be tuned without redesigning state or transaction semantics.
 
 ## Calendar and demand
 
