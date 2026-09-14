@@ -1,5 +1,9 @@
 # Performance evidence and budgets
 
+## GFX-007 Norway production scene
+
+Measured 2026-09-14 on the same Apple M2 Pro with installed headless Chrome 153 at 1440×900, DPR 1. A continuous 60-second regional-to-train camera path produced 16.8 ms frame p95 at 1× and 16.7 ms at 8×. CPU render submission p95 was 1.4/1.0 ms; fixed-tick batch p95 was 0.8/9.8 ms. The four fixed normal views measured 187–226 calls and 1.45–1.77 million triangles. The existing 20k-tree/2k-building/100-proxy scale fixture measured 79 calls, 2.29 million triangles and 16.8 ms frame p95. Full evidence and limitations: [GFX007_COMPOSITION_PERFORMANCE.md](docs/art/GFX007_COMPOSITION_PERFORMANCE.md).
+
 Measured 2026-09-13 on Apple M2 Pro / macOS arm64 / Node v25.8.0. Browser harness: installed Google Chrome 153, headless, 1440×900 CSS pixels, DPR 1, default WebGL2 backend. Also visually inspected in the Codex in-app browser. These are local technical spikes, not a complete supported-hardware matrix or independent GPU timer measurements.
 
 ## Browser results

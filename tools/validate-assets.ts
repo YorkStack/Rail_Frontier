@@ -35,8 +35,9 @@ assert.ok(probeResults[1]!.triangles<probeResults[0]!.triangles);
 
 const pack=packSchema.parse(JSON.parse(readFileSync('assets/runtime/packs/norway.json','utf8'))),packResults=[];
 assert.equal(new Set(pack.assets.map(asset=>asset.id)).size,pack.assets.length);assert.equal(pack.assets.length,32);assert.equal(pack.assets.filter(asset=>asset.kind==='vegetation').length,7);assert.equal(pack.assets.filter(asset=>asset.kind==='rock').length,5);assert.equal(pack.assets.filter(asset=>asset.kind==='building').length,14);
-const textureIds=new Set<string>();for(const texture of pack.textures??[]){assert.equal(textureIds.has(texture.id),false);textureIds.add(texture.id);assert.equal(texture.role==='baseColor'?texture.colorSpace:'linear',texture.colorSpace);const bytes=readFileSync(`assets/runtime${texture.path}`);assert.deepEqual([...bytes.subarray(0,8)],[137,80,78,71,13,10,26,10]);}
+const textureIds=new Set<string>();let decodedTextureBytes=0;for(const texture of pack.textures??[]){assert.equal(textureIds.has(texture.id),false);textureIds.add(texture.id);assert.equal(texture.role==='baseColor'?texture.colorSpace:'linear',texture.colorSpace);const bytes=readFileSync(`assets/runtime${texture.path}`);assert.deepEqual([...bytes.subarray(0,8)],[137,80,78,71,13,10,26,10]);decodedTextureBytes+=Math.ceil(bytes.readUInt32BE(16)*bytes.readUInt32BE(20)*4*4/3);}
 assert.equal(textureIds.size,12);for(const binding of pack.materialBindings??[])for(const id of [binding.map,binding.normalMap,binding.roughnessMap])assert.ok(textureIds.has(id),`Unknown texture binding ${id}`);
+assert.ok(decodedTextureBytes<=128*1024*1024,`Decoded pack textures exceed 128 MiB: ${decodedTextureBytes}`);
 for(const asset of pack.assets) {
   const inspected=asset.lods.map(lod=>{
     const file=`assets/runtime${lod.path}`,result=inspect(file);assert.ok(result.bytes<=lod.maxBytes,`${asset.id} exceeds byte budget`);assert.ok(result.triangles<=lod.maxTriangles,`${asset.id} exceeds triangle budget`);assert.ok(result.materials<=8,`${asset.id} exceeds material budget`);
@@ -55,4 +56,4 @@ for(const asset of pack.assets) {
   }
   packResults.push({id:asset.id,kind:asset.kind,lods:inspected.map(({nodes:_,...result})=>result)});
 }
-console.log(JSON.stringify({formatValidated:true,engineImportValidated:false,probe:probeResults,pack:{campaignId:pack.campaignId,generator:pack.generator,assets:packResults}},null,2));
+console.log(JSON.stringify({formatValidated:true,engineImportValidated:false,probe:probeResults,pack:{campaignId:pack.campaignId,generator:pack.generator,decodedTextureBytes,assets:packResults}},null,2));
