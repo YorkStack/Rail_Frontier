@@ -5,8 +5,9 @@ import { industryCoverage, townCoverage } from './coverage.js';
 import { postIncome } from './finance.js';
 
 const passengerCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>sum+(vehicleDefinition(id)?.capacity.passengers??0),0);
+const mailCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>sum+(vehicleDefinition(id)?.capacity.mail??0),0);
 const freightCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>{const capacity=vehicleDefinition(id)?.capacity;return sum+Math.max(capacity?.timber??0,capacity?.lumber??0);},0);
-const inventoryTotal=(industry:Industry)=>(industry.inventory.timber??0)+(industry.inventory.lumber??0)+(industry.inventory.passengers??0);
+const inventoryTotal=(industry:Industry)=>Object.values(industry.inventory).reduce((sum,quantity)=>sum+(quantity??0),0);
 
 /** Unload payable destinations once, then board oldest valid OD queues. */
 export function servicePassengers(state:GameState,train:Train,stationId:Id<'station'>):void {
@@ -35,6 +36,44 @@ export function servicePassengers(state:GameState,train:Train,stationId:Id<'stat
     queue.quantity-=boarded;free-=boarded;if(free===0)break;
   }
   state.operations.demand=state.operations.demand.filter(queue=>queue.quantity>0);
+}
+
+function mailDestination(state:GameState,routeStops:readonly Id<'station'>[],current:Id<'station'>,originTownId:Id<'town'>):Id<'station'>|undefined {
+  const origin=state.towns.find(town=>town.id===originTownId);if(!origin)return undefined;
+  const coverage=townCoverage(state),destinations=routeStops.filter(stationId=>stationId!==current).flatMap(stationId=>state.towns.filter(town=>coverage.get(town.id)===stationId).map(town=>({stationId,town,distance:Math.hypot(town.position.x-origin.position.x,town.position.z-origin.position.z)})));
+  destinations.sort((a,b)=>b.distance-a.distance||a.town.id.localeCompare(b.town.id)||a.stationId.localeCompare(b.stationId));
+  return destinations[0]?.stationId;
+}
+
+/** Deliver addressed mail once, then fill the train's separate mail compartments with local outbound bags. */
+export function serviceMail(state:GameState,train:Train,stationId:Id<'station'>):void {
+  const route=train.routeId===null?null:state.routes.find(candidate=>candidate.id===train.routeId);if(!route)return;
+  const delivered=train.cargo.filter(lot=>lot.kind==='mail'&&lot.destinationId===stationId);
+  let fare:Money=0,quantity=0;
+  for(const lot of delivered) {
+    const unit=Math.max(800,Math.round(lot.distanceM/1000*18)),amount=lot.quantity*unit;
+    if(!Number.isSafeInteger(amount)||!Number.isSafeInteger(fare+amount))throw new Error('Mail fare exceeds finance range');
+    fare+=amount;quantity+=lot.quantity;
+  }
+  const service=state.operations.trainServices[train.id];if(!service)throw new Error('Train service state is missing');
+  if(!Number.isSafeInteger(service.revenue+fare)||!Number.isSafeInteger(state.operations.delivered.mail+quantity))throw new Error('Mail totals exceed range');
+  if(fare>0)postIncome(state,'mail',fare,train.id,`Mail delivery at ${stationId}`);
+  if(delivered.length>0)train.cargo=train.cargo.filter(lot=>!delivered.includes(lot));
+  service.revenue+=fare;state.operations.delivered.mail+=quantity;
+
+  let free=mailCapacity(train)-train.cargo.filter(lot=>lot.kind==='mail').reduce((sum,lot)=>sum+lot.quantity,0);
+  if(free<=0)return;
+  const coverage=townCoverage(state),origins=state.towns.filter(town=>coverage.get(town.id)===stationId).sort((a,b)=>a.id.localeCompare(b.id));
+  for(const town of origins) {
+    const economy=state.operations.townEconomy[town.id];if(!economy)throw new Error('Town economy is missing');
+    const destination=mailDestination(state,route.stops,stationId,town.id),loaded=Math.min(free,economy.mailWaiting);
+    if(!destination||loaded<=0)continue;
+    economy.mailWaiting-=loaded;
+    const existing=train.cargo.find(lot=>lot.kind==='mail'&&lot.destinationId===destination&&lot.originId===stationId&&lot.distanceM===0);
+    if(existing)existing.quantity+=loaded;
+    else train.cargo.push({kind:'mail',quantity:loaded,destinationId:destination,originId:stationId,loadedTick:state.tick,distanceM:0});
+    free-=loaded;if(free===0)break;
+  }
 }
 
 function industriesAtStation(state:GameState,stationId:Id<'station'>):Industry[] {
@@ -99,5 +138,6 @@ export function serviceFreight(state:GameState,train:Train,stationId:Id<'station
 
 export function serviceStop(state:GameState,train:Train,stationId:Id<'station'>):void {
   servicePassengers(state,train,stationId);
+  serviceMail(state,train,stationId);
   serviceFreight(state,train,stationId);
 }

@@ -1,7 +1,7 @@
 import { industryDefinition } from '../content/industries.js';
 import type { CargoKind, GameState, Industry } from '../domain/model.js';
 
-const kinds:CargoKind[]=['passengers','timber','lumber'];
+const kinds:CargoKind[]=['passengers','mail','timber','lumber'];
 const totalInventory=(industry:Industry)=>kinds.reduce((sum,kind)=>sum+(industry.inventory[kind]??0),0);
 
 function canComplete(industry:Industry,inputs:Partial<Record<CargoKind,number>>,outputs:Partial<Record<CargoKind,number>>,capacity:number):boolean {

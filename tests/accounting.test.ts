@@ -21,10 +21,10 @@ function assets():GameState {
   return state;
 }
 
-test('monthly reports separate capital, operating cost and revenue',()=>{
-  const state=createInitialState();postExpense(state,'construction',100,'edge:test','Build');postExpense(state,'maintenance',30,'edge:test','Maintain');postIncome(state,'passenger',80,'train:test','Fares');
+test('monthly reports separate capital, operating cost and all revenue categories',()=>{
+  const state=createInitialState();postExpense(state,'construction',100,'edge:test','Build');postExpense(state,'maintenance',30,'edge:test','Maintain');postIncome(state,'passenger',80,'train:test','Fares');postIncome(state,'mail',20,'train:test','Mail');
   state.tick=30*ECONOMY_INTERVAL_TICKS;postIncome(state,'freight',25,'train:test','Freight');rebuildMonthlyAccounts(state);
-  assert.deepEqual(state.operations.monthlyAccounts,[{month:0,revenue:80,operatingCost:30,capitalCost:100},{month:1,revenue:25,operatingCost:0,capitalCost:0}]);
+  assert.deepEqual(state.operations.monthlyAccounts,[{month:0,revenue:100,operatingCost:30,capitalCost:100},{month:1,revenue:25,operatingCost:0,capitalCost:0}]);
 });
 
 test('daily maintenance posts one charge per owned asset and updates train service',()=>{

@@ -4,7 +4,7 @@ import { createInitialState } from '../src/content/norway.js';
 import type { CubicCurve, GameState, Vec3 } from '../src/domain/model.js';
 import { ECONOMY_INTERVAL_TICKS } from '../src/simulation/clock.js';
 import { dailyPassengerAllocations, generateDailyDemand } from '../src/simulation/demand.js';
-import { servicePassengers } from '../src/simulation/transfer.js';
+import { serviceMail, servicePassengers } from '../src/simulation/transfer.js';
 import { createTrainSimulation } from '../src/simulation/trains.js';
 import { deserialize, serialize } from '../src/persistence/save.js';
 
@@ -62,6 +62,32 @@ test('boarding consumes oldest eligible queues first with stable destinations',(
   servicePassengers(state,train,'station:10');
   assert.deepEqual(train.cargo.map(lot=>[lot.destinationId,lot.quantity]),[['station:11',30],['station:12',18]]);
   assert.deepEqual(state.operations.demand.map(queue=>[queue.destinationTownId,queue.quantity]),[['town:4',12]]);
+});
+
+test('mail uses a separate coach compartment and pays once at its deterministic destination',()=>{
+  const state=passengerState(),train=state.trains[0]!,economy=state.operations.townEconomy['town:2']!;
+  economy.mailWaiting=70;
+  train.cargo=[{kind:'passengers',quantity:48,destinationId:'station:12',originId:'station:10',loadedTick:0,distanceM:0}];
+  serviceMail(state,train,'station:10');
+  assert.equal(economy.mailWaiting,46);
+  assert.deepEqual(train.cargo.map(lot=>[lot.kind,lot.quantity,lot.destinationId]),[['passengers',48,'station:12'],['mail',24,'station:12']]);
+  train.cargo.find(lot=>lot.kind==='mail')!.distanceM=2000;
+  serviceMail(state,train,'station:11');
+  assert.equal(state.operations.delivered.mail,0);assert.equal(state.company.ledger.length,0);
+  serviceMail(state,train,'station:12');
+  assert.equal(state.operations.delivered.mail,24);assert.equal(train.cargo.filter(lot=>lot.kind==='mail'&&lot.originId==='station:10').length,0);assert.deepEqual(train.cargo.filter(lot=>lot.kind==='mail').map(lot=>[lot.quantity,lot.originId]),[[24,'station:12']]);
+  assert.equal(state.company.ledger[0]!.category,'mail');assert.equal(state.company.ledger[0]!.amount,24*800);
+  assert.equal(state.operations.trainServices['train:14']!.revenue,24*800);
+  const cash=state.company.cash;serviceMail(state,train,'station:12');assert.equal(state.company.cash,cash);assert.equal(state.company.ledger.length,1);
+});
+
+test('mail cargo and exactly-once income survive save and reload',()=>{
+  const state=passengerState(),train=state.trains[0]!;state.operations.townEconomy['town:2']!.mailWaiting=10;
+  serviceMail(state,train,'station:10');train.cargo[0]!.distanceM=3000;
+  const loaded=deserialize(serialize(state)),loadedTrain=loaded.trains[0]!;
+  assert.deepEqual(loaded,state);serviceMail(loaded,loadedTrain,'station:12');
+  const paid=loaded.company.cash;assert.equal(loaded.operations.delivered.mail,10);assert.equal(loaded.company.ledger.filter(entry=>entry.category==='mail').length,1);
+  serviceMail(loaded,loadedTrain,'station:12');assert.equal(loaded.company.cash,paid);assert.equal(loaded.company.ledger.filter(entry=>entry.category==='mail').length,1);
 });
 
 test('save during destination dwell preserves exactly-once delivery and deterministic continuation',()=>{

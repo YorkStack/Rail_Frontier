@@ -47,7 +47,7 @@ function accountReport(transactions:readonly Transaction[]):AccountReport {
   let revenue=0,operatingCost=0,capitalCost=0;
   for(const transaction of transactions) {
     const amount=Math.abs(transaction.amount);
-    if(transaction.category==='passenger'||transaction.category==='freight')revenue=checkedAdd(revenue,transaction.amount,'Revenue');
+    if(transaction.category==='passenger'||transaction.category==='mail'||transaction.category==='freight')revenue=checkedAdd(revenue,transaction.amount,'Revenue');
     else if(transaction.category==='maintenance')operatingCost=checkedAdd(operatingCost,amount,'Operating cost');
     else capitalCost=checkedAdd(capitalCost,amount,'Capital cost');
   }
@@ -87,7 +87,7 @@ export function rebuildMonthlyAccounts(state:GameState):void {
   const accounts=new Map<number,{month:number;revenue:Money;operatingCost:Money;capitalCost:Money}>();
   for(const transaction of state.company.ledger) {
     const month=accountingMonth(transaction.tick),entry=accounts.get(month)??{month,revenue:0,operatingCost:0,capitalCost:0},amount=Math.abs(transaction.amount);
-    if(transaction.category==='passenger'||transaction.category==='freight')entry.revenue+=transaction.amount;
+    if(transaction.category==='passenger'||transaction.category==='mail'||transaction.category==='freight')entry.revenue+=transaction.amount;
     else if(transaction.category==='maintenance')entry.operatingCost+=amount;
     else entry.capitalCost+=amount;
     if(!Number.isSafeInteger(entry.revenue)||!Number.isSafeInteger(entry.operatingCost)||!Number.isSafeInteger(entry.capitalCost))throw new Error('Monthly accounts exceed finance range');

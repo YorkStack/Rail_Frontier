@@ -1,12 +1,12 @@
 # Save game format
 
-Current experimental format: `{ "schemaVersion": 3, "gameVersion": "0.3.0", "state": GameState }`. See src/persistence/save.ts for exact runtime validation and src/domain/model.ts + operations.ts for records. Game is pre-release; future released-save compatibility must preserve explicit migrations.
+Current experimental format: `{ "schemaVersion": 4, "gameVersion": "0.4.0", "state": GameState }`. See src/persistence/save.ts for exact runtime validation and src/domain/model.ts + operations.ts for records. Game is pre-release; future released-save compatibility must preserve explicit migrations.
 
 Authoritative state includes tick/ID counter/RNG, campaign/content/generator versions, rail graph, stations, trains/cargo/route state, towns, industries, finance ledger, objectives and **operations**. Operations holds OD demand, service direction/stop cursor/condition/cost remainder, exclusive reservations, built engineering spans/costs/upkeep, industry cycles, per-town economy state, delivered totals, completed objectives, monthly accounts and command sequence.
 
 Strict schema rejects unknown fields, nonfinite values, invalid IDs/quantities, future versions and malformed JSON. Semantic validation rejects dangling IDs, duplicate/stale IDs, disconnected train paths, invalid arrival distance, future cargo/demand/transaction timestamps, self-demand, duplicate reservations/objective completions, invalid service stops, noncontiguous/incomplete engineering spans and cash-ledger mismatch.
 
-Schema 1 (0.1.0 foundation) → 2 validates the old strict shape and initializes the original operational state. Schema 2 (0.2.0 Norway operations) → 3 adds deterministic economy records for every saved town while preserving prior operations. A registry supplies sequential pure migrations; each advances exactly one version. Regression tests cover both old formats, preserve their input values and reject a nonadvancing migration. Future schemas fail clearly.
+Schema 1 (0.1.0 foundation) → 2 validates the old strict shape and initializes the original operational state. Schema 2 (0.2.0 Norway operations) → 3 adds deterministic economy records for every saved town while preserving prior operations. Schema 3 (0.3.0 town economy) → 4 adds `delivered.mail = 0`; old cargo and ledger values are validated against their historical enums before migration. A registry supplies sequential pure migrations; each advances exactly one version. Regression tests cover all old formats, preserve their input values and reject a nonadvancing migration. Future schemas fail clearly.
 
 The IndexedDB backend uses database rail-frontier, version 1, slots keyed by id. Each record has id/name/modifiedAt/json. Metadata and payload write atomically in one transaction. The browser exposes named manual saves, daily autosave, continue-latest, rename and confirmed deletion.
 
