@@ -6,7 +6,15 @@ On 2026-09-13 the user clarified that Astra and Sol refer only to Codex models. 
 
 ## Current escalation status
 
-No open architectural blocker. Astra-phase architecture work is complete; Sol may proceed only after the user switches models and asks to continue. Full gameplay is intentionally not claimed complete.
+No open architectural blocker. Initial architecture and the 2026-09-14 graphics planning are complete; Sol may proceed only after the user switches models and asks to continue. Full gameplay and graphics implementation are not claimed complete.
+
+## GFX architecture review — resolved by plan, implementation pending
+
+The user requested real Norway references and a Blender scenery enhancement before mail transport. Inspection found that replacing V1 terrain in place would invalidate saved railway elevations, and the current state-only load path cannot change the readonly game terrain or renderer terrain. Reviewed alternatives: visual materials/models only (preserves saves but retains the artificial large landforms); replace V1 in place (breaks existing worlds); versioned V2 plus matching session replacement (selected).
+
+Decision: freeze V1 generation and old campaign content, introduce V2 only for new worlds, keep schema 3 unless a genuinely new persisted field becomes necessary, and resolve saves through a version-aware content/session host. Use one owned WebGL renderer with staged scene replacement and explicit shared asset lifetime. Reject unsupported world definitions and retain the current session on load failure. Original Blender assets improve both versions. Blast radius: content registry, world generation dispatch, game/bootstrap/save session ownership, renderer lifetime, scenery placement, asset pipeline and related tests; rail geometry, money, tick cadence and existing saved semantics remain protected.
+
+Exact work packages, reference sources and acceptance gates: [docs/art/NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md). This record approves an implementation direction; it does not claim V2 or cross-version loading has been implemented or tested. Pause for the requested model switch.
 
 ## Later Sol escalation policy
 

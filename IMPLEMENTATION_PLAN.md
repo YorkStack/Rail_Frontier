@@ -1,5 +1,11 @@
 # Implementation plan
 
+## Current priority override — Norway graphics
+
+On 2026-09-14 the user requested a map/photo-informed Norway landscape enhancement with local Blender before further gameplay. Planning is complete; implementation has not started. **Pause for the user to switch to Sol and request continuation.** Then follow [NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md): GFX-001 baseline/V1 isolation → GFX-002 safe session replacement → GFX-003 V2 landforms → GFX-004 materials/light → GFX-005 rocks/vegetation → GFX-006 settlements → GFX-007 performance/composition → GFX-008 full visual/gameplay regression.
+
+Completed gameplay checkpoint: `fb0abf4` (FIN-002). Resume mail transport only after the graphics pass is accepted against its documented gates. The historical task sequence below remains an audit trail; it does not override this new priority. Do not restart completed gameplay work.
+
 Read CURRENT_STATUS.md first. **The user clarified Astra/Sol are Codex models. Three.js is the game renderer. Architecture gates ARCH-001–006 are complete.** Stop at the required handoff; after the user switches to Sol and asks to continue, execute the remaining implementation tasks. Do not restart engine discovery or rebuild the completed technical proofs.
 
 Read ECONOMIC_CONTRACT.md in addition to the architecture/data/save/pipeline documents. The playable study is separate from the unfinished production game. Next implementation sequence: APP-001 integration shell → FIN-001 → APP-002 → WORLD-001 → RAIL-004 → STATION-001 → TRAIN-002/ROUTE-001 → TRAIN-003/004 → ECON-001/002 → SAVE-002/CAM-001 → UI → QA-001.
