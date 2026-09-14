@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const tuple=z.tuple([z.number().finite(),z.number().finite(),z.number().finite()]);
 const gltfSchema=z.object({asset:z.object({version:z.literal('2.0')}),nodes:z.array(z.object({name:z.string().optional(),translation:tuple.optional(),rotation:z.array(z.number().finite()).length(4).optional(),scale:tuple.optional(),mesh:z.number().int().optional()})),meshes:z.array(z.object({primitives:z.array(z.object({attributes:z.object({POSITION:z.number().int(),NORMAL:z.number().int()}),indices:z.number().int()}))})),accessors:z.array(z.object({count:z.number().int(),min:z.array(z.number().finite()).optional(),max:z.array(z.number().finite()).optional()})),materials:z.array(z.unknown())});
-const packSchema=z.object({version:z.literal(1),campaignId:z.literal('norwegian-fjords'),generator:z.object({blender:z.string(),script:z.string()}),assets:z.array(z.object({id:z.string(),kind:z.enum(['vehicle','station','building','vegetation','infrastructure']),requiredNodes:z.array(z.string()),maxDimensionsM:tuple,lods:z.array(z.object({path:z.string(),maxTriangles:z.number().int().positive(),maxBytes:z.number().int().positive()})).length(2)}))});
+const packSchema=z.object({version:z.literal(1),campaignId:z.literal('norwegian-fjords'),generator:z.object({blender:z.string(),script:z.string(),sceneryScript:z.string().optional()}),assets:z.array(z.object({id:z.string(),kind:z.enum(['vehicle','station','building','vegetation','rock','infrastructure']),requiredNodes:z.array(z.string()),maxDimensionsM:tuple,lods:z.array(z.object({path:z.string(),maxTriangles:z.number().int().positive(),maxBytes:z.number().int().positive()})).length(2)}))});
 
 interface Inspection {file:string;bytes:number;triangles:number;materials:number;bounds:{min:number[];max:number[]};dimensions:number[];nodes:Map<string,number[]>}
 function inspect(file:string):Inspection {
@@ -34,7 +34,7 @@ for(const lod of [0,1]) {
 assert.ok(probeResults[1]!.triangles<probeResults[0]!.triangles);
 
 const pack=packSchema.parse(JSON.parse(readFileSync('assets/runtime/packs/norway.json','utf8'))),packResults=[];
-assert.equal(new Set(pack.assets.map(asset=>asset.id)).size,pack.assets.length);assert.equal(pack.assets.length,8);
+assert.equal(new Set(pack.assets.map(asset=>asset.id)).size,pack.assets.length);assert.equal(pack.assets.length,19);assert.equal(pack.assets.filter(asset=>asset.kind==='vegetation').length,7);assert.equal(pack.assets.filter(asset=>asset.kind==='rock').length,5);
 for(const asset of pack.assets) {
   const inspected=asset.lods.map(lod=>{
     const file=`assets/runtime${lod.path}`,result=inspect(file);assert.ok(result.bytes<=lod.maxBytes,`${asset.id} exceeds byte budget`);assert.ok(result.triangles<=lod.maxTriangles,`${asset.id} exceeds triangle budget`);assert.ok(result.materials<=8,`${asset.id} exceeds material budget`);
