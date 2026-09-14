@@ -2,7 +2,7 @@
 
 Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-**Current milestone: the Norway passenger, timber-freight and first town-economy loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, grow connected towns, inspect live trains/stations/towns/industries, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
+**Current milestone: the Norway passenger, timber-freight, first town-economy and management-reporting loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, grow connected towns, inspect live trains/stations/towns/industries, compare company/train/route profitability, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, and Escape closes the active panel. Map labels and rendered trains/stations open live detail cards. The Overlays panel shows station catchments, industry sites and current track reservations. Background tabs pause explicitly. Save/load persists the company to IndexedDB.
+Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, and Escape closes the active panel. Map labels and rendered trains/stations open live detail cards. The Operations panel reports cash, monthly results, infrastructure and owned-asset value, plus train and route profitability. The Overlays panel shows station catchments, industry sites and current track reservations. Background tabs pause explicitly. Save/load persists the company to IndexedDB.
 
 The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an implementation preview, not the finished game menu and management interface.
 
