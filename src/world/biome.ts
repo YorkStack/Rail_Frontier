@@ -6,7 +6,7 @@ export const norwaySettlementSites=norwayV1SettlementSites;
 export const norwayBiome:Readonly<BiomeDefinition>=Object.freeze({
   id:'fjord',
   terrain:Object.freeze({widthM:norwayV1WorldProfile.widthM,depthM:norwayV1WorldProfile.depthM,cellM:norwayV1WorldProfile.cellM,peakM:norwayV1WorldProfile.peakM,seaLevelM:norwayV1WorldProfile.seaLevelM}),
-  palette:Object.freeze({water:'#235864',lowland:'#74855c',forest:'#254c39',rock:'#7f8578',snow:'#dedfd4',haze:'#c5d3cd'}),
-  lighting:Object.freeze({sunColor:'#ffedcb',sunIntensity:3,skyColor:'#c1d8e0',groundColor:'#566446'}),
+  palette:Object.freeze({water:'#234f59',lowland:'#66795b',forest:'#294a3b',rock:'#747670',snow:'#d9ddd8',haze:'#afbfbd'}),
+  lighting:Object.freeze({sunColor:'#fff0d5',sunIntensity:2.25,skyColor:'#b8ced0',groundColor:'#465445'}),
   vegetation:Object.freeze({density:28000,minHeightM:9,maxHeightM:24,treelineM:650})
 });
