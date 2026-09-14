@@ -5,7 +5,7 @@ import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/libre-caslon-display/latin-400.css';
 import './ui/study.css';
 import { createNorwayPreviewState,straightCurve } from './content/norway-preview.js';
-import { norway } from './content/norway.js';
+import { norway,norwayV1 } from './content/norway.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { vehicleDefinition } from './content/vehicles.js';
 import { generateWorld,norwayShorelineX } from './world/generator.js';
@@ -164,14 +164,14 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const terrain=generateWorld(norway.world),initial=createNorwayPreviewState(terrain),store=new IndexedDbSaveStore(),renderHost=new FjordRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,terrain=generateWorld(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new FjordRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
   await sessionHost.initialize(initial);
   let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store),state=game.snapshot(),switchingSession=false;
   let selection:WorldSelection|null=null;
   const labels=view.labels.map(label=>{const node=document.createElement('button');node.className=`map-label ${label.selection.kind}`;node.textContent=label.name;node.onclick=()=>selectWorld(label.selection,true);element('#map-labels').append(node);return node;});
   const syncSpeed=()=>{document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.speed)===game.speed)));element('#run-state').textContent=game.speed===0?'PAUSED':'RUNNING';};
   const setSpeed=(value:Speed)=>{const result=game.dispatch({sequence:game.snapshot().operations.lastCommandSequence+1,command:{type:'setSpeed',speed:value}});if(!result.ok){toast(result.reason);return;}state=game.snapshot();syncSpeed();};
-  const startsInMenu=!new URLSearchParams(location.search).has('skip-menu');if(startsInMenu)game.pauseForVisibility();element('#main-menu').hidden=!startsInMenu;syncSpeed();
+  const startsInMenu=!query.has('skip-menu');if(startsInMenu)game.pauseForVisibility();element('#main-menu').hidden=!startsInMenu;syncSpeed();
   document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>setSpeed(Number(button.dataset.speed) as Speed));
   element('#regional').onclick=()=>view.regional();element('#follow').onclick=()=>{view.followTrain();toast('Following the Fjord Corridor passenger service.');};
   document.querySelectorAll<HTMLButtonElement>('[data-town]').forEach(button=>button.onclick=()=>{const town=state.towns[Number(button.dataset.town)];if(town)selectWorld({kind:'town',id:town.id},true);});
@@ -312,7 +312,7 @@ async function start():Promise<void> {
   const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);sessionHost.dispose();void store.close();};
   if(import.meta.hot)import.meta.hot.dispose(dispose);
   if(import.meta.env.DEV) {
-    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),cameraPreset:(id:NorwayCameraPresetId)=>view.setCameraPreset(id),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
+    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),cameraPreset:(id:NorwayCameraPresetId)=>view.setCameraPreset(id),setTerrainBlockout:(enabled:boolean)=>view.setTerrainBlockout(enabled),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
     Object.defineProperty(window,'__railProbe',{value:probe,configurable:true});
   }
 }

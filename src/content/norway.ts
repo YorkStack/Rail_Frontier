@@ -1,8 +1,10 @@
 import type { CampaignDefinition, GameState } from '../domain/model.js';
 import { emptyOperations } from '../domain/operations.js';
 import { norwayElevation } from '../world/generator.js';
+import {norwayV2Elevation,norwayV2WorldProfile} from '../world/norway-v2.js';
 const seed=140919;
-export const norway:CampaignDefinition={
+const objectives:CampaignDefinition['objectives']=[{id:'first-connection',type:'connectTowns',target:2},{id:'first-passengers',type:'deliverPassengers',target:200},{id:'profitable-railway',type:'operatingProfit',target:1000000}];
+export const norwayV1:CampaignDefinition={
   id:'norwegian-fjords',version:1,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
   world:{seed, widthM:16000,depthM:16000,cellM:25,generatorVersion:1,biomeId:'fjord'},
   towns:[
@@ -10,8 +12,18 @@ export const norway:CampaignDefinition={
     {id:'town:3',name:'Granli',position:{x:4700,y:norwayElevation(4700,4900,seed),z:4900},population:1250},
     {id:'town:4',name:'Fjellhavn',position:{x:8500,y:norwayElevation(8500,7800,seed),z:7800},population:3200}
   ],
-  objectives:[{id:'first-connection',type:'connectTowns',target:2},{id:'first-passengers',type:'deliverPassengers',target:200},{id:'profitable-railway',type:'operatingProfit',target:1000000}]
+  objectives
 };
+export const norwayV2:CampaignDefinition={
+  id:'norwegian-fjords',version:2,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
+  world:{seed,widthM:norwayV2WorldProfile.widthM,depthM:norwayV2WorldProfile.depthM,cellM:norwayV2WorldProfile.cellM,generatorVersion:2,biomeId:norwayV2WorldProfile.biomeId},
+  towns:[
+    {id:'town:2',name:'Sundvik',position:{x:2200,y:norwayV2Elevation(2200,3200,seed),z:3200},population:1800},
+    {id:'town:3',name:'Granli',position:{x:4700,y:norwayV2Elevation(4700,4900,seed),z:4900},population:1250},
+    {id:'town:4',name:'Fjellhavn',position:{x:8500,y:norwayV2Elevation(8500,7800,seed),z:7800},population:3200}
+  ],objectives
+};
+export const norway=norwayV2;
 export function createInitialState(campaign:CampaignDefinition=norway):GameState {
   const nextEntityId=Math.max(1,...campaign.towns.map(town=>Number(town.id.split(':')[1])))+1;
   return {operations:emptyOperations(campaign.towns),tick:0,nextEntityId,rngState:campaign.world.seed>>>0,campaignId:campaign.id,campaignVersion:campaign.version,world:structuredClone(campaign.world),railway:{nodes:[],edges:[],revision:0},stations:[],trains:[],routes:[],towns:structuredClone(campaign.towns),industries:[],company:{id:'company:1',cash:campaign.startingCash,openingCash:campaign.startingCash,ledger:[]},objectiveProgress:{}};

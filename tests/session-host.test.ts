@@ -39,6 +39,6 @@ test('candidate failure preserves the active game and renderer',async()=>{
 
 test('content registry rejects unknown and modified world definitions',()=>{
   const initial=createInitialState(),registry=new ContentRegistry();assert.equal(registry.resolve(initial).campaign.id,initial.campaignId);
-  assert.throws(()=>registry.resolve({...initial,campaignVersion:2}),/Unsupported campaign content/);
+  assert.throws(()=>registry.resolve({...initial,campaignVersion:3}),/Unsupported campaign content/);
   assert.throws(()=>registry.resolve({...initial,world:{...initial.world,widthM:12000}}),/not compatible/);
 });

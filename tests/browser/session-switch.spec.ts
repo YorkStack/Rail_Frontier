@@ -9,11 +9,15 @@ test('V1 load replaces the scene on one WebGL context and preserves a live sessi
     Object.defineProperty(window,'__webglContextCount',{value:()=>contextCount,configurable:true});let contextCount=0;
     HTMLCanvasElement.prototype.getContext=function(...args:Parameters<HTMLCanvasElement['getContext']>){const result=original.apply(this,args) as RenderingContext|null;if(result&&String(args[0]).startsWith('webgl')&&!seen.has(result)){seen.add(result);contextCount++;}return result as never;};
   });
-  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready===true);
+  await page.goto('/?skip-menu=1&world=v1');await page.waitForFunction(()=>window.__railProbe?.ready===true);
   await page.getByRole('button',{name:'Pause',exact:true}).click();
   await page.getByRole('button',{name:'Save study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study saved');
   const saved=await page.evaluate(()=>window.__railProbe.snapshot());
+  expect(saved.campaignVersion).toBe(1);expect(saved.world.generatorVersion).toBe(1);
   const contextCount=await page.evaluate(()=>(window as unknown as {__webglContextCount():number}).__webglContextCount());expect(contextCount).toBe(1);
+  await page.getByRole('button',{name:'Open main menu'}).click();await page.getByRole('button',{name:/Start new company/}).click();
+  await page.waitForFunction(()=>window.__railProbe.snapshot().world.generatorVersion===2);expect((await page.evaluate(()=>window.__railProbe.snapshot())).campaignVersion).toBe(2);
+  expect(await page.evaluate(()=>(window as unknown as {__webglContextCount():number}).__webglContextCount())).toBe(1);
   await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed');
   expect(await page.evaluate(()=>window.__railProbe.snapshot())).toEqual(saved);
   expect(await page.evaluate(()=>(window as unknown as {__webglContextCount():number}).__webglContextCount())).toBe(1);
