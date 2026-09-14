@@ -2,7 +2,7 @@
 
 Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-**Current milestone: the Norway passenger, timber-freight, first town-economy and management-reporting loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, grow connected towns, inspect live trains/stations/towns/industries, compare company/train/route profitability, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
+**Current milestone: the Norway passenger, timber-freight, first town-economy, management-reporting and graphics gates are complete.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, grow connected towns, inspect live trains/stations/towns/industries, compare company/train/route profitability, read three map overlays, manage saves and complete campaign objectives. The production scene uses an original two-LOD Blender pack with mixed Norwegian vegetation and rocks, timber settlements, industries and detailed current rolling stock.
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
@@ -32,7 +32,7 @@ npm run build
 npm run preview
 ```
 
-Browser tests require installed Google Chrome (Playwright channel chrome). They start/reuse the local Vite server. Build emits a static site in dist; preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The 637 KB Three.js chunk produces Vite's normal size advisory; about 160 KB gzip, within the current total download budget.
+Browser tests require installed Google Chrome (Playwright channel chrome). They start/reuse the local Vite server. Build emits a static site in dist; preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The 640.71 KB Three.js chunk produces Vite's normal size advisory; 160.48 KB gzip, within the current total download budget.
 
 ## Reproduce Blender assets
 

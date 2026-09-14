@@ -3,6 +3,7 @@ RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
 GRAPHICS_IMPLEMENTATION_STARTED=true
+GRAPHICS_IMPLEMENTATION_COMPLETE=true
 AWAITING_USER_MODEL_SWITCH=false
 
 # Current status — Norway management implementation, 2026-09-14
@@ -34,14 +35,14 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 - ECON-003 now supplies the first production chain. Granli Forest creates timber into capped storage; Sundvik Sawmill atomically consumes timber and produces lumber. Covered stations transfer both goods through capacity-bound freight wagons, towns consume delivered lumber, distance-based freight revenue posts once, and blocked partial cargo remains aboard.
 - The commissioned preview begins with a small working stock so a player can buy a freight consist and operate the full Granli–Sundvik chain immediately. A new company starts with empty industries and must wait for production. The railway office shows recipe progress, storage, timber/lumber inventory and typed onboard cargo.
 - The Blender 4.0.2 Norway pack supplies two LODs each for 32 asset types / 64 GLBs plus 12 shared PNG maps, totaling 1.19 MiB: the detailed current railway kit, mixed vegetation/rocks, eight timber-house finishes and dedicated farm/industry structures. No unrelated model pack is requested.
-- Three.js renders the authored rolling stock and stations as LOD objects and batches authored spruces, houses and bridge pieces with instancing. The production scene measures 146 draw calls after bridge batching, versus 2,704 in the rejected per-span clone pass, while preserving about 60 FPS in the local normal and scale runs.
+- Three.js renders material-merged rolling stock/stations as LOD objects and batches the authored scenery, houses and bridge pieces. The final fixed Norway views measure 187–226 calls and 1.45–1.77 million triangles while preserving a 16.8 ms frame p95 in the documented local run.
 - The renderer now lives at the production boundary in `src/rendering/fjord-renderer.ts`. Trains and stations carry ephemeral pick identities; town and industry map labels use the same `WorldSelection` contract. A live contextual card reports authoritative state for all four entity kinds and follows a selected moving train.
 - Station catchment, industry-site and rail-traffic overlays are available from the strategy toolbar. Overlay geometry rebuilds only when the relevant station, industry or reservation signature changes, and map labels yield pointer input while a construction tool is active.
 - Schema 3 adds one economy record per town with local lumber demand and delivery, waiting mail, activity, service duration and fractional population growth. A pure 2→3 migration initializes these values while preserving all prior operations; schema 1 still migrates sequentially through schema 2.
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 77 Node tests and 9 real browser tests pass. Asset validation and the production build pass.
+- 86 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -52,19 +53,15 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 3 plus strict sequential 1→2→3 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **77 Node tests and 9 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- **86 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-User priority change, 2026-09-14: complete the Norway graphics enhancement before continuing gameplay. Planning is complete in [docs/art/NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md), based on actual Kartverket map views, inspected Aurlandsfjord/Undredal/Bakka photographs and historical settlement references. Local Blender 4.0.2 was verified; no new graphics assets or runtime changes were made during planning.
+The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Texture planning was extended on 2026-09-14 in [docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md). Inspected photos now inform four house colour families, eight wall/trim/door combinations, wood/roof/window materials, existing steam pipes/cab details and coach/freight textures. Future locomotive references cover type 18a-inspired steam detail, El 1, Di 3, Di 4 and El 18, with model and livery dates separated. No new textures or models have been generated.
-
-The user switched to Sol and resumed implementation. GFX-001 through GFX-007 are complete: [baseline](docs/art/GFX001_BASELINE.md), [session replacement](docs/art/GFX002_SESSION_COMPATIBILITY.md), [V2 landforms](docs/art/GFX003_V2_LANDFORMS.md), [surface materials/daylight](docs/art/GFX004_SURFACES.md), [Blender scenery](docs/art/GFX005_SCENERY.md), [settlements](docs/art/GFX006_SETTLEMENTS.md), [rolling stock](docs/art/GFX006B_ROLLING_STOCK.md) and [composition/performance](docs/art/GFX007_COMPOSITION_PERFORMANCE.md). V1 saves retain their exact terrain. V2 now has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Proceed with GFX-008. Do not automatically resume mail work.
-
-Remembered gameplay checkpoint: **fb0abf4 — Add company and route reporting**, branch implementation/passenger-slice. FIN-002 remains complete with schema 3. **After GFX-008 passes, resume mail transport** (town mail waiting exists; transport/delivery/income do not). Additional station classes, Arizona/River expansion and release/deployment remain later work.
+The next gameplay continuation is mail transport. Schema 3 already stores bounded waiting mail for each town; mail cargo, station transfer, destination delivery, income and UI reporting are not implemented yet. Additional station classes, Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -83,7 +80,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack, including dedicated farm, timber-yard and sawmill structures.
 
-Conservative curve rejection, one-chunk terrain/culling, short local performance samples and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is ~637 KB minified / 160 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
+Conservative curve rejection, one-chunk terrain and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is 640.71 KB minified / 160.48 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 
 ## Git state and reproduction
 

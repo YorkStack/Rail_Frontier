@@ -7,8 +7,8 @@ test('map picks build a free alignment and a station through the UI',async({page
   const before=await page.evaluate(()=>({revision:window.__railProbe.snapshot().railway.revision,stations:window.__railProbe.snapshot().stations.length}));
   await page.getByRole('button',{name:'Survey track'}).click();await page.getByLabel('Corridor').selectOption('free');
   const points=await page.evaluate(()=>[
-    window.__railProbe.project({x:1500,y:95.69,z:2000}),
-    window.__railProbe.project({x:1500,y:103.38,z:2400})
+    window.__railProbe.project({x:3000,y:51.17727902987974,z:3600}),
+    window.__railProbe.project({x:3300,y:48.83904632407689,z:3900})
   ]);
   expect(points.every(point=>point.visible)).toBe(true);for(const point of points)await page.mouse.click(point.x,point.y);
   await expect(page.locator('#quote-valid')).toContainText('Feasible');mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/free-alignment.png'});await page.getByRole('button',{name:'Build this alignment'}).click();
