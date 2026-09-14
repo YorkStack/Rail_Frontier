@@ -2,7 +2,7 @@
 
 Original browser-based single-player railroad strategy game. Build networks through Norwegian fjords, then expand the same systems to Arizona and great river landscapes. MIT licensed.
 
-**Current milestone: passenger simulation implemented, production UI in progress.** The browser runs the atomic game application over the validated 3D fjord scene. Construction, stations, vehicle purchase, routes, traction, occupancy, passenger demand/delivery, finance, objectives and transactional saves are implemented in the application/simulation layer. The current visible shell exposes live company status, train service, speed/camera controls, save/load/autosave and commit-ready engineering surveys. Full player-driven station/train/route panels and the generated 16 km renderer remain in progress.
+**Current milestone: the Norway passenger and timber-freight loops are playable.** The browser runs the atomic game application across the generated 16 km fjord. Players can build track and stations, buy passenger or freight consists, create routes, carry people and timber, inspect live trains/stations/towns/industries, read three map overlays, manage saves and complete campaign objectives. The production scene uses the original two-LOD Blender Norway asset pack.
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, Escape closes the survey. Background tabs pause explicitly. Survey track compares coastal/bridge/tunnel elevation and cost without constructing infrastructure. Save/load persists the study to IndexedDB.
+Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, and Escape closes the active panel. Map labels and rendered trains/stations open live detail cards. The Overlays panel shows station catchments, industry sites and current track reservations. Background tabs pause explicitly. Save/load persists the company to IndexedDB.
 
 The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an implementation preview, not the finished game menu and management interface.
 
@@ -39,7 +39,7 @@ Browser tests require installed Google Chrome (Playwright channel chrome). They 
 Blender is optional to run tests because the small runtime GLBs are tracked. Tested generator: Blender 4.0.2 / Python 3.10.13.
 
 ```sh
-"/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_probe.py
+"/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_pack.py
 npm run validate:assets
 ```
 
@@ -47,6 +47,6 @@ Use the matching local Blender executable on other platforms. [ASSET_PIPELINE.md
 
 ## Continue in Sol
 
-Read [CURRENT_STATUS.md](CURRENT_STATUS.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DATA_MODEL.md](DATA_MODEL.md), [ECONOMIC_CONTRACT.md](ECONOMIC_CONTRACT.md), [SAVEGAME_FORMAT.md](SAVEGAME_FORMAT.md), [DECISIONS.md](DECISIONS.md) and [ASSET_PIPELINE.md](ASSET_PIPELINE.md). The prepared study is isolated in spikes; reuse validated kernels without treating demonstration code as production simulation.
+Read [CURRENT_STATUS.md](CURRENT_STATUS.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DATA_MODEL.md](DATA_MODEL.md), [ECONOMIC_CONTRACT.md](ECONOMIC_CONTRACT.md), [SAVEGAME_FORMAT.md](SAVEGAME_FORMAT.md), [DECISIONS.md](DECISIONS.md) and [ASSET_PIPELINE.md](ASSET_PIPELINE.md). The active renderer is `src/rendering/fjord-renderer.ts`; the small study fixtures remain isolated under `spikes/`.
 
 Tests: [TESTING.md](TESTING.md). Measured limits: [PERFORMANCE.md](PERFORMANCE.md). Engine evidence: [RENDERING_CAPABILITIES.md](RENDERING_CAPABILITIES.md). Dependency/art attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

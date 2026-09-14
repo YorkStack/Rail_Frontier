@@ -1,7 +1,7 @@
 import { test,expect } from '@playwright/test';
 import { mkdirSync,writeFileSync } from 'node:fs';
 import type { GameState,Speed,Vec3 } from '../../src/domain/model.js';
-import type { AssetReport,RenderStats } from '../../spikes/fjord-renderer.js';
+import type { AssetReport,RenderStats } from '../../src/rendering/fjord-renderer.js';
 declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[];snapshot():GameState;save():Promise<number>;load():Promise<number>;setSpeed(speed:Speed):void;stats():RenderStats;setStress(enabled:boolean):void;focusTrain():void;regional():void;project(position:Vec3):{x:number;y:number;visible:boolean};metrics():RenderStats&{frames:number[];renderMs:number[];tickMs:number[];userAgent:string;viewport:number[];dpr:number};pick(x:number,y:number):Vec3|null;dispose():void}}}
 
 test('runtime asset, camera, alignment, pause and durable save validation',async({page})=>{
