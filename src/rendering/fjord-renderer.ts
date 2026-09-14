@@ -19,10 +19,11 @@ import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
 import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
 import {norwayV2FjordAtZ,norwayV2Landforms,norwayV2ValleyX} from '../world/norway-landforms.js';
+import {generateNorwayScenery} from './scenery-placement.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
-interface PackAsset {id:string;kind:'vehicle'|'station'|'building'|'vegetation'|'infrastructure';lods:{path:string}[]}
+interface PackAsset {id:string;kind:'vehicle'|'station'|'building'|'vegetation'|'rock'|'infrastructure';lods:{path:string}[]}
 interface PackManifest {version:number;campaignId:string;assets:PackAsset[]}
 export class FjordRenderer implements WorldRenderer {
   readonly scene=new THREE.Scene();
@@ -122,12 +123,17 @@ export class FjordRenderer implements WorldRenderer {
   private updateTrainModels(state:Readonly<GameState>):void {this.syncTrainModels(state);for(const train of state.trains){const model=this.trainModels.get(train.id);if(!model)continue;let offset=0,previousLength=vehicleDefinition(train.locomotiveId)?.lengthM??15.2;for(let index=0;index<model.cars.length;index++){if(index>0){const length=vehicleDefinition(train.vehicleIds[index-1]!)?.lengthM??12;offset+=previousLength/2+length/2+.6;previousLength=length;}const {position,ahead}=this.behind(train.motion,offset),car=model.cars[index]!;car.position.set(position.x,position.y+.12,position.z);car.rotation.y=Math.atan2(-(ahead.x-position.x),-(ahead.z-position.z));}model.group.visible=true;}}
   private instancedAsset(id:string,lod:number,placements:THREE.Matrix4[]):THREE.Group {
     const source=this.assetLevels.get(id)?.[lod];if(!source)throw new Error(`Missing instanced asset: ${id}`);source.updateMatrixWorld(true);const group=new THREE.Group();
-    source.traverse(object=>{if(!(object instanceof THREE.Mesh))return;const instances=new THREE.InstancedMesh(object.geometry,object.material,placements.length);placements.forEach((placement,index)=>instances.setMatrixAt(index,placement.clone().multiply(object.matrixWorld)));instances.castShadow=true;instances.receiveShadow=true;instances.computeBoundingSphere();group.add(instances);});return group;
+    source.traverse(object=>{if(!(object instanceof THREE.Mesh))return;const material=Array.isArray(object.material)?object.material.map(value=>value.clone()):object.material.clone(),instances=new THREE.InstancedMesh(object.geometry.clone(),material,placements.length);placements.forEach((placement,index)=>instances.setMatrixAt(index,placement.clone().multiply(object.matrixWorld)));instances.castShadow=lod===0;instances.receiveShadow=true;instances.computeBoundingSphere();group.add(instances);});return group;
   }
   private authoredForest(count:number):THREE.Group {
     const random=new SeededRandom(708),placements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();
     for(let tries=0;placements.length<count&&tries<count*30;tries++) {const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,y=this.terrain.sample(x,z).elevationM,corridor=this.corridorX(z);if(y<10||y>this.profile.vegetation.treelineM||Math.abs(x-corridor)<24||Math.abs(z-6100)<24)continue;const scale=.72+random.next()*.62;dummy.position.set(x,y,z);dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.scale.setScalar(scale);dummy.updateMatrix();placements.push(dummy.matrix.clone());}
     this.treeCount=placements.length;return this.instancedAsset('norway-spruce',1,placements);
+  }
+  private authoredScenery(state:Readonly<GameState>):THREE.Group {
+    const records=generateNorwayScenery(this.terrain,state),batches=new Map<string,{id:string;lod:0|1;matrices:THREE.Matrix4[]}>(),dummy=new THREE.Object3D();
+    for(const record of records){const tile=`${Math.floor(record.x/4000)}:${Math.floor(record.z/4000)}`,key=`${tile}:${record.assetId}:${record.lod}`,batch=batches.get(key)??{id:record.assetId,lod:record.lod,matrices:[]};dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();batch.matrices.push(dummy.matrix.clone());batches.set(key,batch);}
+    const group=new THREE.Group();for(const batch of batches.values())group.add(this.instancedAsset(batch.id,batch.lod,batch.matrices));this.treeCount=records.filter(record=>record.category==='tree').length;return group;
   }
   private authoredBuildings(state:Readonly<GameState>,count:number):THREE.Group {
     const random=new SeededRandom(144),placements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();
@@ -135,7 +141,7 @@ export class FjordRenderer implements WorldRenderer {
     this.buildingCount=count;return this.instancedAsset('norway-house',0,placements);
   }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
-    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);
+    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);
     this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=this.authoredBuildings(state,360);this.scene.add(this.buildings);
   }
   private syncStationModels(state:Readonly<GameState>):void {
@@ -263,7 +269,7 @@ export class FjordRenderer implements WorldRenderer {
     this.scene.add(this.overlay);
   }
   setStress(state:GameState,enabled:boolean):void {
-    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-spruce')?this.authoredForest(enabled?20000:this.profile.vegetation.density):this.createForest(enabled?20000:this.profile.vegetation.density);this.scene.add(this.trees);
+    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=enabled?(this.assetLevels.has('norway-spruce')?this.authoredForest(20000):this.createForest(20000)):(this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.assetLevels.has('norway-spruce')?this.authoredForest(this.profile.vegetation.density):this.createForest(this.profile.vegetation.density));this.scene.add(this.trees);
     this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=new THREE.Group();if(this.assetLevels.has('norway-house'))this.buildings=this.authoredBuildings(state,enabled?2000:360);else this.createBuildings(state,enabled?2000:90);this.scene.add(this.buildings);
     if(this.stressTrains){this.scene.remove(this.stressTrains);disposeObject(this.stressTrains);this.stressTrains=null;}
     if(this.stressTrack){this.scene.remove(this.stressTrack);disposeObject(this.stressTrack);this.stressTrack=null;}
@@ -281,7 +287,7 @@ export class FjordRenderer implements WorldRenderer {
     this.scene.remove(this.trackGroup);disposeObject(this.trackGroup);this.trackGroup=new THREE.Group();
     this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
     for(const track of this.geometry.values())this.trackGroup.add(createTrack(track,this.terrain));
-    this.scene.add(this.trackGroup);if(this.assetLevels.size>0)this.rebuildAuthoredInfrastructure(state);
+    this.scene.add(this.trackGroup);if(this.assetLevels.size>0){this.rebuildAuthoredInfrastructure(state);this.replaceAuthoredScenery(state);}
   }
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
   followTrain():void {this.focus(this.trainPosition);this.camera.position.copy(this.trainPosition).add(new THREE.Vector3(35,21,45));this.follow=true;}

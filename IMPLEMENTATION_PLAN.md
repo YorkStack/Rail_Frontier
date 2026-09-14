@@ -2,7 +2,7 @@
 
 ## Current priority override — Norway graphics
 
-On 2026-09-14 the user requested a map/photo-informed Norway landscape enhancement with local Blender before further gameplay. Planning is complete and implementation is active on Sol. Follow [NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md): GFX-001 baseline/V1 isolation → GFX-002 safe session replacement → GFX-003 V2 landforms → GFX-004 materials/light are complete; continue with GFX-005 rocks/vegetation → GFX-006 settlements → GFX-006B rolling-stock textures/detail → GFX-007 performance/composition → GFX-008 full visual/gameplay regression.
+On 2026-09-14 the user requested a map/photo-informed Norway landscape enhancement with local Blender before further gameplay. Planning is complete and implementation is active on Sol. Follow [NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md): GFX-001 baseline/V1 isolation → GFX-002 safe session replacement → GFX-003 V2 landforms → GFX-004 materials/light → GFX-005 rocks/vegetation are complete; continue with GFX-006 settlements → GFX-006B rolling-stock textures/detail → GFX-007 performance/composition → GFX-008 full visual/gameplay regression.
 
 Texture planning extension: [NORWAY_TEXTURES_AND_ROLLING_STOCK.md](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md) specifies Norwegian red/yellow/black/white timber houses with separate white trim, original Blender PBR maps, detailed current steam/coach/freight assets, and researched El 1, Di 3, Di 4 and El 18 briefs for future vehicle eras. Implement current-stock detail inside the graphics pass; activate later traction only in its separate vehicle/technology expansion.
 

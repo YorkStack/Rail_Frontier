@@ -1,6 +1,6 @@
 # Asset pipeline
 
-Planned enhancement, 2026-09-14: [Norway graphics handoff](docs/art/NORWAY_GRAPHICS_PLAN.md) specifies a separate original Blender scenery generator for fractured rocks, mixed vegetation and period-oriented buildings, baked PBR textures, shared atlas references, footprint metadata, instancing and explicit engine validation. This is a plan, not an already exported pack. The existing verified pipeline and asset counts below describe checkpoint `fb0abf4`.
+Graphics enhancement, 2026-09-14: [Norway graphics handoff](docs/art/NORWAY_GRAPHICS_PLAN.md) now includes a completed separate Blender scenery generator for fractured rocks and mixed vegetation. Period buildings and rolling-stock texture work continue in GFX-006/GFX-006B.
 
 Planned texture extension: [Norway timber and rolling stock](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md) defines curated wall/trim/door palettes, original colour/normal/ORM maps, shared atlas ownership, UV/LOD and residency limits, current steam/coach/freight detail, and separately dated future diesel/electric briefs. GFX-006B integrates current rolling stock after the building kit; later vehicle classes remain separate content work. These deliverables have not been generated.
 
@@ -11,6 +11,7 @@ Generate:
 ```sh
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_probe.py
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_pack.py
+"/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_scenery.py
 npm run validate:assets
 ```
 
@@ -28,8 +29,8 @@ LOD0: body/chassis/marker/wheel proxies, 84 triangles, 11,736 bytes. LOD1: remov
 
 Validation checks GLB header/version/length, JSON structure, finite transforms, applied rotation/scale, bounded dimensions, positions/normals accessor presence/counts, material count, triangles, file size, attachment existence and axis marker positions. This structural CLI test intentionally reports engineImportValidated=false because it does not launch a browser. Separately, npm run test:browser proves runtime import, finite vertex normals, visual shading inspection, LOD switches and resource replacement/disposal. Untested extensions are not assumed supported. Initial probe limit: <2,000 triangles, ≤4 materials, <100 KB per LOD.
 
-Production pack: eight original asset types and 16 GLBs total about 336 KB. LOD0/LOD1 triangle counts are Nord 2-6-0 664/196, passenger coach 404/36, freight wagon 332/72, station 220/160, house 100/36, spruce 100/44, bridge span 252/156 and tunnel portal 84/36. Every vehicle preserves front/rear couplers and axis probes across LODs; props preserve ground, platform, track or span anchors. All stay far below the close vehicle ≤12k, LOD1 ≤3k and per-file byte budgets.
+Production pack after GFX-005: 19 original asset types and 38 GLBs total 716 KB. The original eight railway/house assets remain, joined by four tree forms, two understorey forms and five rock/scree forms from `generate_norway_scenery.py`. Every vehicle preserves front/rear couplers and axis probes across LODs; props preserve ground, platform, track or span anchors. All remain below their per-file triangle and byte budgets.
 
-Runtime selection: Three.js first requests `/packs/norway.json`, then loads exactly that manifest's 16 model files in parallel. Vehicles and stations use distance-switched LOD objects. Spruces, houses and authored bridge parts are batched as instanced meshes; the measured normal scene uses 146 draw calls after bridge batching. Collision remains on logical footprints and the track graph. No compression extension or texture dependency is used.
+Runtime selection: Three.js first requests `/packs/norway.json`, then loads exactly that manifest's model files in parallel. Vehicles and stations use distance-switched LOD objects. Vegetation and rocks use deterministic, frustum-cullable 4 km instance tiles; houses and bridge parts remain instanced. Collision remains on logical footprints and the track graph. GFX-005 records 1.40 million submitted regional triangles and 636 draw calls; GFX-007 owns draw-call consolidation. No compression extension is used.
 
 Status: Blender → GLB → Three.js is validated for both the architecture probe and the production Norway pack. Blender 4.0.2 generated the checked-in artifacts locally; the browser validated all normals, bounds, LODs, selected-pack requests, close/strategic views and complete WebGL disposal. Astra is a Codex model, not an engine. GLB remains the runtime asset format.

@@ -3,7 +3,8 @@
   "campaignId": "norwegian-fjords",
   "generator": {
     "blender": "4.0.2",
-    "script": "tools/blender/generate_norway_pack.py"
+    "script": "tools/blender/generate_norway_pack.py",
+    "sceneryScript": "tools/blender/generate_norway_scenery.py"
   },
   "assets": [
     {
@@ -206,6 +207,270 @@
           "path": "/models/norway/norway-tunnel-portal_lod1.glb",
           "maxTriangles": 3000,
           "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "norway-spruce-narrow",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-spruce-narrow_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-spruce-narrow_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-pine",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-pine_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-pine_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-birch",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-birch_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-birch_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-alder",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-alder_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-alder_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-shrub",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-shrub_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-shrub_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-fern",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        12,
+        22,
+        12
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-fern_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-fern_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-boulder-a",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        24,
+        12,
+        24
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-boulder-a_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-boulder-a_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-boulder-b",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        24,
+        12,
+        24
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-boulder-b_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-boulder-b_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-outcrop-a",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        24,
+        12,
+        24
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-outcrop-a_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-outcrop-a_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-outcrop-b",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        24,
+        12,
+        24
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-outcrop-b_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-outcrop-b_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
+        }
+      ]
+    },
+    {
+      "id": "norway-scree",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        24,
+        12,
+        24
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-scree_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 220000
+        },
+        {
+          "path": "/models/norway/norway-scree_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 100000
         }
       ]
     }
