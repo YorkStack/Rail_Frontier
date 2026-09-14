@@ -1,6 +1,6 @@
 # Data model
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 4 is implemented; contracts remain pre-release rather than a released save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 5 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
@@ -18,6 +18,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 | Company | company:N | Opening/current cash and ledger |
 | Transaction | transaction:N | Tick, signed integer amount, category, audit association |
 | CampaignDefinition | string ID + content version | World, settlements, initial finances, objectives |
+| GameState calendar | startingYear + tick | Deterministic 360-day vehicle era and HUD date |
 
 IDs use a global monotonically increasing safe-integer counter with a kind prefix; never reuse deleted IDs. The initial company is company:1; initial Norway towns are town:2–4. Campaign initialization advances beyond the highest town number. Content IDs are stable strings and distinct from allocated entity IDs. Reject duplicate or stale IDs on load. Historical transaction association is a descriptive string and may refer to a demolished entity.
 
@@ -29,4 +30,4 @@ Derived caches (arc tables, route adjacency, scene entities, spatial indices, qu
 
 StationDefinition provides purchase cost, daily maintenance, catchment radius, storage capacity and platform length for six station classes. `upgradeStation` changes the saved class ID without another schema field; it permits only capability-increasing classes and posts the purchase-cost difference as capital spending.
 
-Schema 4 includes demand queues; per-train service and financial state; exclusive reservations; built engineering spans and upkeep; industry cycles; per-town economy state; passenger/mail/timber/lumber delivery totals; completed objectives; monthly accounts; and command sequence. Schema 3 introduced town economies; schema 4 adds the mail delivery total and the mail cargo/income variants. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Any breaking state change needs an explicit migration.
+Schema 5 includes the campaign starting year, demand queues, per-train service and financial state, exclusive reservations, built engineering spans and upkeep, industry cycles, per-town economy state, passenger/mail/timber/lumber delivery totals, completed objectives, monthly accounts and command sequence. Schema 3 introduced town economies; schema 4 added mail; schema 5 makes the campaign epoch authoritative. VehicleDefinition includes a display name and availability year beside its physical and economic fields. StationDefinition and IndustryRecipe fix their reusable content fields. Any breaking state change needs an explicit migration.

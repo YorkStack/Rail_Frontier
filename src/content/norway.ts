@@ -26,5 +26,5 @@ export const norwayV2:CampaignDefinition={
 export const norway=norwayV2;
 export function createInitialState(campaign:CampaignDefinition=norway):GameState {
   const nextEntityId=Math.max(1,...campaign.towns.map(town=>Number(town.id.split(':')[1])))+1;
-  return {operations:emptyOperations(campaign.towns),tick:0,nextEntityId,rngState:campaign.world.seed>>>0,campaignId:campaign.id,campaignVersion:campaign.version,world:structuredClone(campaign.world),railway:{nodes:[],edges:[],revision:0},stations:[],trains:[],routes:[],towns:structuredClone(campaign.towns),industries:[],company:{id:'company:1',cash:campaign.startingCash,openingCash:campaign.startingCash,ledger:[]},objectiveProgress:{}};
+  return {operations:emptyOperations(campaign.towns),tick:0,startingYear:campaign.startingYear,nextEntityId,rngState:campaign.world.seed>>>0,campaignId:campaign.id,campaignVersion:campaign.version,world:structuredClone(campaign.world),railway:{nodes:[],edges:[],revision:0},stations:[],trains:[],routes:[],towns:structuredClone(campaign.towns),industries:[],company:{id:'company:1',cash:campaign.startingCash,openingCash:campaign.startingCash,ledger:[]},objectiveProgress:{}};
 }

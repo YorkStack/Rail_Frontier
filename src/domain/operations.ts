@@ -1,7 +1,7 @@
 import type { CargoKind,Id,Money,Town } from './model.js';
 /** Persistent content and operating contracts shared by simulation, saves and UI. */
 export interface VehicleDefinition {
-  id:string;kind:'locomotive'|'wagon';traction:'steam'|'diesel'|'electric'|'none';availableYear:number;
+  id:string;name:string;kind:'locomotive'|'wagon';traction:'steam'|'diesel'|'electric'|'none';availableYear:number;
   purchaseCost:Money;massKg:number;powerW:number;tractiveForceN:number;maxSpeedMps:number;
   lengthM:number;capacity:Partial<Record<CargoKind,number>>;runningCostPerKm:Money;maintenancePerDay:Money;
 }

@@ -35,7 +35,7 @@ export interface CampaignDefinition {
 }
 export interface GameState {
   operations:OperationsState;
-  tick: number; nextEntityId: number; rngState: number; campaignId: string; campaignVersion: number;
+  tick: number; startingYear:number; nextEntityId: number; rngState: number; campaignId: string; campaignVersion: number;
   world: WorldDefinition; railway: RailGraph; stations: Station[]; trains: Train[];
   routes: Route[]; towns: Town[]; industries: Industry[];
   company: { id: Id<'company'>; cash: Money; openingCash: Money; ledger: Transaction[] };
