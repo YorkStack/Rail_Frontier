@@ -69,12 +69,10 @@ export class FjordRenderer implements WorldRenderer {
   private readonly clearKeys=()=>this.keys.clear();
   private readonly controlStart=()=>{this.follow=false;};
 
-  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState) {
+  private readonly ownsRenderer:boolean;
+  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,sharedRenderer?:THREE.WebGLRenderer) {
     this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
-    this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-    this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
-    this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFShadowMap;
+    this.ownsRenderer=sharedRenderer===undefined;this.renderer=sharedRenderer??createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);
     const scale=terrainSize(terrain)/4000;this.scene.background=new THREE.Color(this.profile.palette.haze);this.scene.fog=new THREE.FogExp2(this.profile.palette.haze,.00018/scale);
     const sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);sun.position.set(-1200*scale,2600*scale,1400*scale);sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);sun.castShadow=true;
     sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-2100*scale;sun.shadow.camera.right=2100*scale;sun.shadow.camera.top=2100*scale;sun.shadow.camera.bottom=-2100*scale;sun.shadow.camera.far=7000*scale;sun.shadow.normalBias=3;
@@ -304,8 +302,17 @@ export class FjordRenderer implements WorldRenderer {
   pickEntity(screenX:number,screenY:number):WorldSelection|null {const rect=this.canvas.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((screenX-rect.left)/rect.width*2-1,-(screenY-rect.top)/rect.height*2+1),this.camera);const roots=[...this.trainModels.values()].map(item=>item.group as THREE.Object3D).concat([...this.stationModels.values()]);for(const hit of ray.intersectObjects(roots,true)){let object:THREE.Object3D|null=hit.object;while(object){if(object.userData.selection)return object.userData.selection as WorldSelection;object=object.parent;}}return null;}
   private verifyTerrain():void {this.landscape.updateMatrixWorld(true);const scale=this.terrain.widthM/4000;for(const [x,z] of [[2173,1857],[2411,932],[1601,2047],[2809,2991]]){const sx=x!*scale,sz=z!*scale,ray=new THREE.Raycaster(new THREE.Vector3(sx,3000,sz),new THREE.Vector3(0,-1,0)),hit=ray.intersectObject(this.landscape)[0];if(!hit)throw new Error('Terrain raycast missed');this.terrainErrorM=Math.max(this.terrainErrorM,Math.abs(hit.point.y-this.terrain.sample(sx,sz).elevationM));}if(this.terrainErrorM>.001)throw new Error('Rendered terrain differs from simulation');}
   stats():RenderStats {const info=this.renderer.info,first=[...this.trainModels.values()][0]?.cars[0];return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressTrains?this.stressCount:this.trainModels.size,lod:first?.getCurrentLevel()??0,terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
-  dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);this.renderer.dispose();this.renderer.forceContextLoss();}
+  dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);if(this.ownsRenderer){this.renderer.dispose();this.renderer.forceContextLoss();}}
 }
+export class FjordRenderHost {
+  readonly renderer:THREE.WebGLRenderer;
+  private disposed=false;
+  constructor(private readonly canvas:HTMLCanvasElement) {this.renderer=createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);}
+  create(terrain:Heightfield,state:GameState):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');return new FjordRenderer(this.canvas,terrain,state,this.renderer);}
+  dispose():void {if(this.disposed)return;this.renderer.dispose();this.renderer.forceContextLoss();this.disposed=true;}
+}
+function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {return new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}
+function configureWebGLRenderer(renderer:THREE.WebGLRenderer):void {renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;}
 function terrainSize(terrain:Heightfield):number {return Math.max(terrain.widthM,terrain.depthM);}
 function railwayKey(state:Readonly<GameState>):string {return `${state.railway.revision}|${state.railway.nodes.map(node=>`${node.id}:${node.position.x}:${node.position.y}:${node.position.z}`).join(',')}|${state.railway.edges.map(edge=>`${edge.id}:${edge.from}:${edge.to}`).join(',')}`;}
 export function disposeObject(root:THREE.Object3D):void {
