@@ -23,7 +23,9 @@ COLORS = {
     'loco_paint':(.055,.075,.068),'loco_metal':(.12,.13,.12),'coach_paint':(.38,.055,.035),'coach_roof':(.07,.08,.075),
     'freight_paint':(.075,.19,.105),'freight_metal':(.08,.09,.085),'freight_wood':(.32,.16,.06),
     'diesel_paint':(.055,.18,.105),'diesel_metal':(.075,.085,.08),'diesel_roof':(.06,.07,.068),
-    'diesel_grille':(.025,.035,.034),'diesel_stripe':(.78,.76,.62),'diesel_yellow':(.84,.52,.08)
+    'diesel_grille':(.025,.035,.034),'diesel_stripe':(.78,.76,.62),'diesel_yellow':(.84,.52,.08),
+    'electric_paint':(.085,.22,.115),'electric_running':(.42,.055,.035),'electric_dark':(.035,.045,.042),
+    'electric_trim':(.66,.58,.38),'electric_copper':(.42,.22,.08),'electric_insulator':(.34,.18,.09)
 }
 
 def write_png(path,size,pixel):
@@ -55,7 +57,7 @@ def mat(key, metal=0.0):
     return value
 
 def finish(obj, name, material):
-    obj.name = name; bpy.ops.object.transform_apply(location=False, rotation=True, scale=True); obj.data.materials.append(mat(material, .55 if material in ('iron','gold') else 0)); return obj
+    obj.name = name; bpy.ops.object.transform_apply(location=False, rotation=True, scale=True); obj.data.materials.append(mat(material, .55 if material in ('iron','gold','electric_running','electric_copper') else 0)); return obj
 
 def box(name, loc, dims, material, rotation=(0,0,0)):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rotation); obj=bpy.context.object; obj.dimensions=dims; return finish(obj,name,material)
@@ -157,6 +159,56 @@ def diesel_di3b(lod):
         box('RF_Di3_Exhaust',(0,3.3,5.0),(.72,1.0,.28),'diesel_metal')
     vehicle_markers(9.45,-9.45)
 
+def electric_el1(lod):
+    """Original low-poly El 1a interpretation based on preserved 1922 units 2001/2011."""
+    box('RF_El1_Chassis',(0,0,.9),(3.0,12.25,.5),'electric_dark')
+    bevel_box('RF_El1_Cab',(0,0,3.05),(2.95,4.65,3.55),'electric_paint',.16,2 if lod else 3)
+    box('RF_El1_CabRoof',(0,0,4.9),(3.18,5.0,.3),'electric_dark')
+    for end in (-1,1):
+        y=end*4.05
+        bevel_box('RF_El1_Hood',(0,y,2.42),(2.82,3.65,2.45),'electric_paint',.28,2 if lod else 4)
+        box('RF_El1_HoodTop',(0,y,3.68),(2.9,3.75,.18),'electric_dark')
+        box('RF_El1_BufferBeam',(0,end*6.08,1.02),(3.12,.25,.42),'electric_running')
+        cylinder('RF_El1_Headlamp',(0,end*5.93,2.65),.27,.2,'electric_trim',10 if lod else 16,(math.pi/2,0,0))
+        if not lod:
+            box('RF_El1_NumberPlate',(0,end*5.96,2.05),(1.05,.07,.34),'electric_trim')
+            box('RF_El1_Plow',(0,end*6.18,.42),(3.1,.34,.38),'electric_running',(math.radians(end*10),0,0))
+            for x in (-1.16,1.16):pipe_between('RF_El1_EndRail',(x,end*5.95,1.2),(x,end*5.95,2.25),.04,'electric_trim',6)
+    wheel_positions=(-4.25,-1.35,1.35,4.25)
+    for y in wheel_positions:
+        for x in (-1.32,1.32):
+            cylinder('RF_El1_Wheel',(x,y,.72),.72,.24,'electric_running',10 if lod else 16,(0,math.pi/2,0))
+            if not lod:
+                cylinder('RF_El1_Hub',(x*1.015,y,.72),.18,.28,'electric_dark',12,(0,math.pi/2,0))
+                for spoke in range(4):
+                    angle=spoke*math.pi/2;pipe_between('RF_El1_Spoke',(x*1.02,y,.72),(x*1.02,y+math.cos(angle)*.58,.72+math.sin(angle)*.58),.035,'electric_dark',5)
+    for side in (-1,1):
+        x=side*1.48
+        box('RF_El1_RunningRod',(x,0,.77),(.12,8.65,.16),'electric_trim')
+        if not lod:
+            for y in (-4.25,-1.35,1.35,4.25):cylinder('RF_El1_CrankPin',(x*1.01,y,.77),.13,.1,'electric_dark',10,(0,math.pi/2,0))
+            for y in (-1.35,1.35):
+                box('RF_El1_CabDoor',(x,y,2.95),(.08,1.0,2.5),'electric_dark')
+                box('RF_El1_DoorWindow',(x*1.01,y,3.55),(.09,.58,.7),'glass')
+            for y in (-4.55,-3.95,-3.35,3.35,3.95,4.55):box('RF_El1_Louvre',(x,y,2.65),(.09,.34,.72),'electric_dark')
+            for z in (2.18,2.48,2.78):
+                pipe_between('RF_El1_SidePipe',(x*1.015,-4.75,z),(x*1.015,4.75,z),.045,'electric_trim',6)
+            for y in (-4.75,4.75):pipe_between('RF_El1_PipeReturn',(x*1.015,y,2.18),(x*1.015,y,2.78),.045,'electric_trim',6)
+    if not lod:
+        for end in (-1,1):
+            y=end*2.36
+            for x in (-.67,.67):box('RF_El1_FrontWindow',(x,y,3.72),(1.03,.08,.75),'glass')
+    for center in (-1.3,1.3):
+        for x in (-.83,.83):
+            for y in (center-.72,center+.72):cylinder('RF_El1_Insulator',(x,y,5.13),.13,.32,'electric_insulator',8)
+            pipe_between('RF_El1_PantographArm',(x,center-.72,5.25),(x,center+.16,6.18),.045,'electric_trim',6)
+            pipe_between('RF_El1_PantographArm',(x,center+.72,5.25),(x,center-.16,6.18),.045,'electric_trim',6)
+            pipe_between('RF_El1_PantographUpper',(x,center+.16,6.18),(x,center-.48,6.76),.04,'electric_trim',6)
+            pipe_between('RF_El1_PantographUpper',(x,center-.16,6.18),(x,center+.48,6.76),.04,'electric_trim',6)
+        pipe_between('RF_El1_ContactBar',(-1.18,center,6.82),(1.18,center,6.82),.055,'electric_copper',6)
+    pipe_between('RF_El1_RoofConductor',(0,-2.0,5.12),(0,2.0,5.12),.055,'electric_copper',7)
+    vehicle_markers(6.35,-6.35)
+
 def station(lod):
     box('RF_Station_Platform',(0,0,.28),(7.5,28,.55),'stone');box('RF_Station_Body',(4.9,1.5,3.4),(8.5,15,6.8),'cream');box('RF_Station_Roof',(4.9,1.5,7.05),(9.5,16,.5),'roof',(0,0,math.radians(5)))
     box('RF_Station_Canopy',(0,-1,4.0),(7.8,15,.28),'green')
@@ -198,10 +250,10 @@ def portal(lod):
         for x in (-4.7,-2.3,2.3,4.7): box('RF_Portal_Block',(x,-1.3,7.8),(1.9,.35,.8),'cream')
     empty('track_center',(0,0,0))
 
-BUILDERS={'nord-2-6-0':locomotive,'nord-di-3b':diesel_di3b,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-station':station,'norway-house':house,'norway-spruce':spruce,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
-KINDS={'nord-2-6-0':'vehicle','nord-di-3b':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-station':'station','norway-house':'building','norway-spruce':'vegetation','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
-NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-station':['platform_origin','track_side'],'norway-house':['ground_origin'],'norway-spruce':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
-MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-di-3b':[4,5.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-station':[16,10,31],'norway-house':[12,11,13],'norway-spruce':[9,16,9],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
+BUILDERS={'nord-2-6-0':locomotive,'nord-el-1':electric_el1,'nord-di-3b':diesel_di3b,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-station':station,'norway-house':house,'norway-spruce':spruce,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
+KINDS={'nord-2-6-0':'vehicle','nord-el-1':'vehicle','nord-di-3b':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-station':'station','norway-house':'building','norway-spruce':'vegetation','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
+NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-1':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-station':['platform_origin','track_side'],'norway-house':['ground_origin'],'norway-spruce':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
+MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-el-1':[4,7.5,14.5],'nord-di-3b':[4,5.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-station':[16,10,31],'norway-house':[12,11,13],'norway-spruce':[9,16,9],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
 
 assets=[]
 for asset_id,builder in BUILDERS.items():
@@ -213,10 +265,10 @@ for asset_id,builder in BUILDERS.items():
     assets.append({'id':asset_id,'kind':KINDS[asset_id],'requiredNodes':NODES[asset_id],'maxDimensionsM':MAX_DIMS[asset_id],'lods':lods})
 
 manifest=json.loads((PACKS/'norway.json').read_text()) if (PACKS/'norway.json').exists() else {'version':1,'campaignId':'norwegian-fjords','generator':{},'assets':[]}
-core_ids=set(BUILDERS);manifest['assets']=[asset for asset in manifest.get('assets',[]) if asset['id'] not in core_ids]+assets;manifest['generator']['blender']=bpy.app.version_string;manifest['generator']['script']='tools/blender/generate_norway_pack.py';manifest['generator']['rollingStockDetail']='GFX-006B+VEHICLE-002'
+core_ids=set(BUILDERS);manifest['assets']=[asset for asset in manifest.get('assets',[]) if asset['id'] not in core_ids]+assets;manifest['generator']['blender']=bpy.app.version_string;manifest['generator']['script']='tools/blender/generate_norway_pack.py';manifest['generator']['rollingStockDetail']='GFX-006B+VEHICLE-002+VEHICLE-003'
 rolling_textures=[{'id':'rolling-metal-base','path':'/textures/norway/rolling-metal-base.png','role':'baseColor','colorSpace':'srgb'},{'id':'rolling-metal-normal','path':'/textures/norway/rolling-metal-normal.png','role':'normal','colorSpace':'linear'},{'id':'rolling-metal-roughness','path':'/textures/norway/rolling-metal-roughness.png','role':'roughness','colorSpace':'linear'},{'id':'rolling-wood-base','path':'/textures/norway/rolling-wood-base.png','role':'baseColor','colorSpace':'srgb'},{'id':'rolling-wood-normal','path':'/textures/norway/rolling-wood-normal.png','role':'normal','colorSpace':'linear'},{'id':'rolling-wood-roughness','path':'/textures/norway/rolling-wood-roughness.png','role':'roughness','colorSpace':'linear'}]
 texture_ids={texture['id'] for texture in rolling_textures};manifest['textures']=[texture for texture in manifest.get('textures',[]) if texture['id'] not in texture_ids]+rolling_textures
-rolling_bindings=[{'materialPrefix':prefix,'map':'rolling-metal-base','normalMap':'rolling-metal-normal','roughnessMap':'rolling-metal-roughness','repeat':[2,4]} for prefix in ('RF_Loco_','RF_Coach_','RF_Freight_Paint','RF_Freight_Metal','RF_Diesel_Paint','RF_Diesel_Metal','RF_Diesel_Roof','RF_Diesel_Grille')]+[{'materialPrefix':'RF_Freight_Wood','map':'rolling-wood-base','normalMap':'rolling-wood-normal','roughnessMap':'rolling-wood-roughness','repeat':[2,4]}]
+rolling_bindings=[{'materialPrefix':prefix,'map':'rolling-metal-base','normalMap':'rolling-metal-normal','roughnessMap':'rolling-metal-roughness','repeat':[2,4]} for prefix in ('RF_Loco_','RF_Coach_','RF_Freight_Paint','RF_Freight_Metal','RF_Diesel_Paint','RF_Diesel_Metal','RF_Diesel_Roof','RF_Diesel_Grille','RF_Electric_Paint','RF_Electric_Running','RF_Electric_Dark','RF_Electric_Trim')]+[{'materialPrefix':'RF_Freight_Wood','map':'rolling-wood-base','normalMap':'rolling-wood-normal','roughnessMap':'rolling-wood-roughness','repeat':[2,4]}]
 prefixes={binding['materialPrefix'] for binding in rolling_bindings};manifest['materialBindings']=[binding for binding in manifest.get('materialBindings',[]) if binding['materialPrefix'] not in prefixes]+rolling_bindings
 (PACKS/'norway.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print('RF_NORWAY_PACK_EXPORT',json.dumps({'blender':bpy.app.version_string,'assets':len(assets),'output':str(OUTPUT)}))

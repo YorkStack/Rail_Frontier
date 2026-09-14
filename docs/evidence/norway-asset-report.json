@@ -7,6 +7,7 @@
       "bytes": 11736,
       "triangles": 84,
       "materials": 3,
+      "hasUvs": true,
       "bounds": {
         "min": [
           -1.399999976158142,
@@ -30,6 +31,7 @@
       "bytes": 5672,
       "triangles": 36,
       "materials": 3,
+      "hasUvs": true,
       "bounds": {
         "min": [
           -1.399999976158142,
@@ -53,41 +55,1342 @@
     "campaignId": "norwegian-fjords",
     "generator": {
       "blender": "4.0.2",
-      "script": "tools/blender/generate_norway_pack.py"
+      "script": "tools/blender/generate_norway_pack.py",
+      "sceneryScript": "tools/blender/generate_norway_scenery.py",
+      "architectureScript": "tools/blender/generate_norway_architecture.py"
     },
+    "decodedTextureBytes": 7340040,
     "assets": [
+      {
+        "id": "norway-spruce-narrow",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-spruce-narrow_lod0.glb",
+            "bytes": 8964,
+            "triangles": 100,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.138486623764038,
+                0,
+                -3.299999952316284
+              ],
+              "max": [
+                3.138486623764038,
+                17.09999990463257,
+                3.299999952316284
+              ]
+            },
+            "dimensions": [
+              6.276973247528076,
+              17.09999990463257,
+              6.599999904632568
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-spruce-narrow_lod1.glb",
+            "bytes": 5104,
+            "triangles": 44,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -2.632305383682251,
+                0,
+                -2.700000047683716
+              ],
+              "max": [
+                2.632305383682251,
+                17.09999990463257,
+                2.4326159954071045
+              ]
+            },
+            "dimensions": [
+              5.264610767364502,
+              17.09999990463257,
+              5.13261604309082
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-pine",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-pine_lod0.glb",
+            "bytes": 32972,
+            "triangles": 396,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.700000047683716,
+                -0.003326416015625,
+                -2.8000000715255737
+              ],
+              "max": [
+                4,
+                17,
+                2.4000000059604645
+              ]
+            },
+            "dimensions": [
+              7.700000047683716,
+              17.003326416015625,
+              5.200000077486038
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-pine_lod1.glb",
+            "bytes": 5832,
+            "triangles": 44,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.072717249393463,
+                -0.0012316703796386719,
+                -2.326600030064583
+              ],
+              "max": [
+                2.4727172255516052,
+                16,
+                1.9266000241041183
+              ]
+            },
+            "dimensions": [
+              5.545434474945068,
+              16.00123167037964,
+              4.253200054168701
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-birch",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-birch_lod0.glb",
+            "bytes": 28040,
+            "triangles": 328,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.3147544860839844,
+                0,
+                -2.632305383682251
+              ],
+              "max": [
+                3.899999976158142,
+                14.199999809265137,
+                2.632305145263672
+              ]
+            },
+            "dimensions": [
+              7.2147544622421265,
+              14.199999809265137,
+              5.264610528945923
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-birch_lod1.glb",
+            "bytes": 5840,
+            "triangles": 44,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.0410449504852295,
+                0,
+                -2.2967281341552734
+              ],
+              "max": [
+                3.0410449504852295,
+                14.199999809265137,
+                2.2967281341552734
+              ]
+            },
+            "dimensions": [
+              6.082089900970459,
+              14.199999809265137,
+              4.593456268310547
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-alder",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-alder_lod0.glb",
+            "bytes": 25948,
+            "triangles": 320,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.012247204780579,
+                0,
+                -2.924783706665039
+              ],
+              "max": [
+                4.5348122119903564,
+                11,
+                2.924783229827881
+              ]
+            },
+            "dimensions": [
+              8.547059416770935,
+              11,
+              5.84956693649292
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-alder_lod1.glb",
+            "bytes": 5856,
+            "triangles": 44,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.59881491959095,
+                0,
+                -2.636983871459961
+              ],
+              "max": [
+                3.1988149136304855,
+                11.099999904632568,
+                2.636983871459961
+              ]
+            },
+            "dimensions": [
+              6.7976298332214355,
+              11.099999904632568,
+              5.273967742919922
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-shrub",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-shrub_lod0.glb",
+            "bytes": 24488,
+            "triangles": 300,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -2.426585078239441,
+                0.06000000238418579,
+                -2.0750001668930054
+              ],
+              "max": [
+                2.283926486968994,
+                2.4800000190734863,
+                1.3000000715255737
+              ]
+            },
+            "dimensions": [
+              4.710511565208435,
+              2.4200000166893005,
+              3.375000238418579
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-shrub_lod1.glb",
+            "bytes": 3348,
+            "triangles": 20,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -2.3416374921798706,
+                0.07999992370605469,
+                -1.1058319807052612
+              ],
+              "max": [
+                0.3416374921798706,
+                2.4800000190734863,
+                1.1058319807052612
+              ]
+            },
+            "dimensions": [
+              2.683274984359741,
+              2.4000000953674316,
+              2.2116639614105225
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-fern",
+        "kind": "vegetation",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-fern_lod0.glb",
+            "bytes": 13484,
+            "triangles": 112,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.0136145949363708,
+                0.1589406132698059,
+                -1.094478577375412
+              ],
+              "max": [
+                1.113176941871643,
+                1.4810593724250793,
+                1.0747771263122559
+              ]
+            },
+            "dimensions": [
+              2.126791536808014,
+              1.3221187591552734,
+              2.169255703687668
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-fern_lod1.glb",
+            "bytes": 5992,
+            "triangles": 48,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -0.6083803474903107,
+                0.1592974066734314,
+                -0.9905140399932861
+              ],
+              "max": [
+                1.113176941871643,
+                1.4807025790214539,
+                0.970147043466568
+              ]
+            },
+            "dimensions": [
+              1.7215572893619537,
+              1.3214051723480225,
+              1.9606610834598541
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-boulder-a",
+        "kind": "rock",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-boulder-a_lod0.glb",
+            "bytes": 9468,
+            "triangles": 80,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.131530284881592,
+                0,
+                -3.0129311084747314
+              ],
+              "max": [
+                3.3994386196136475,
+                4.731644868850708,
+                3.0129311084747314
+              ]
+            },
+            "dimensions": [
+              7.530968904495239,
+              4.731644868850708,
+              6.025862216949463
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-boulder-a_lod1.glb",
+            "bytes": 3340,
+            "triangles": 20,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.816298246383667,
+                0,
+                -2.5863161087036133
+              ],
+              "max": [
+                2.597632884979248,
+                4.560711860656738,
+                2.5863161087036133
+              ]
+            },
+            "dimensions": [
+              6.413931131362915,
+              4.560711860656738,
+              5.172632217407227
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-boulder-b",
+        "kind": "rock",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-boulder-b_lod0.glb",
+            "bytes": 9472,
+            "triangles": 80,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.858603835105896,
+                0,
+                -3.476226806640625
+              ],
+              "max": [
+                2.112037181854248,
+                3.514283061027527,
+                3.476226806640625
+              ]
+            },
+            "dimensions": [
+              3.970641016960144,
+              3.514283061027527,
+              6.95245361328125
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-boulder-b_lod1.glb",
+            "bytes": 3348,
+            "triangles": 20,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.8071527481079102,
+                0,
+                -2.685122013092041
+              ],
+              "max": [
+                1.9337785243988037,
+                3.4494768381118774,
+                2.685122013092041
+              ]
+            },
+            "dimensions": [
+              3.740931272506714,
+              3.4494768381118774,
+              5.370244026184082
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-outcrop-a",
+        "kind": "rock",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-outcrop-a_lod0.glb",
+            "bytes": 18712,
+            "triangles": 160,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -8.436018943786621,
+                0,
+                -3.429553747177124
+              ],
+              "max": [
+                6.692779779434204,
+                5.97448992729187,
+                3.429553747177124
+              ]
+            },
+            "dimensions": [
+              15.128798723220825,
+              5.97448992729187,
+              6.859107494354248
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-outcrop-a_lod1.glb",
+            "bytes": 3340,
+            "triangles": 20,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -8.045360565185547,
+                0,
+                -2.7507171630859375
+              ],
+              "max": [
+                0.6080322265625,
+                5.965243577957153,
+                2.7507171630859375
+              ]
+            },
+            "dimensions": [
+              8.653392791748047,
+              5.965243577957153,
+              5.501434326171875
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-outcrop-b",
+        "kind": "rock",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-outcrop-b_lod0.glb",
+            "bytes": 18704,
+            "triangles": 160,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -6.884817123413086,
+                0,
+                -5.020790100097656
+              ],
+              "max": [
+                3.6519875526428223,
+                7.893827438354492,
+                5.020790100097656
+              ]
+            },
+            "dimensions": [
+              10.536804676055908,
+              7.893827438354492,
+              10.041580200195312
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-outcrop-b_lod1.glb",
+            "bytes": 3340,
+            "triangles": 20,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -2.56850266456604,
+                0,
+                -4.57661247253418
+              ],
+              "max": [
+                3.432286500930786,
+                7.065070867538452,
+                4.57661247253418
+              ]
+            },
+            "dimensions": [
+              6.000789165496826,
+              7.065070867538452,
+              9.15322494506836
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-scree",
+        "kind": "rock",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-scree_lod0.glb",
+            "bytes": 100124,
+            "triangles": 880,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -6.197046995162964,
+                0,
+                -4.6408140659332275
+              ],
+              "max": [
+                5.465487778186798,
+                1.5181702971458435,
+                6.412842214107513
+              ]
+            },
+            "dimensions": [
+              11.662534773349762,
+              1.5181702971458435,
+              11.053656280040741
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-scree_lod1.glb",
+            "bytes": 11792,
+            "triangles": 80,
+            "materials": 2,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.9459782242774963,
+                0,
+                -2.7786340713500977
+              ],
+              "max": [
+                2.698920249938965,
+                1.4901739954948425,
+                2.5892142057418823
+              ]
+            },
+            "dimensions": [
+              4.644898474216461,
+              1.4901739954948425,
+              5.36784827709198
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-red-white",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-red-white_lod0.glb",
+            "bytes": 34824,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -6.300000071525574
+              ],
+              "max": [
+                4.175000190734863,
+                9.999999761581421,
+                5.650000095367432
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.999999761581421,
+              11.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-red-white_lod1.glb",
+            "bytes": 7436,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -5.574999809265137
+              ],
+              "max": [
+                4.175000190734863,
+                9.929841041564941,
+                5.574999809265137
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.929841041564941,
+              11.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-red-dark",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-red-dark_lod0.glb",
+            "bytes": 34860,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -7.300000071525574
+              ],
+              "max": [
+                3.674999952316284,
+                10.999999761581421,
+                6.650000095367432
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.999999761581421,
+              13.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-red-dark_lod1.glb",
+            "bytes": 7444,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -6.574999809265137
+              ],
+              "max": [
+                3.674999952316284,
+                10.706845760345459,
+                6.574999809265137
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.706845760345459,
+              13.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-ochre-white",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-ochre-white_lod0.glb",
+            "bytes": 34932,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.175000190734863,
+                0,
+                -5.300000071525574
+              ],
+              "max": [
+                5.175000190734863,
+                9.775831699371338,
+                4.650000095367432
+              ]
+            },
+            "dimensions": [
+              10.350000381469727,
+              9.775831699371338,
+              9.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-ochre-white_lod1.glb",
+            "bytes": 7500,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.175000190734863,
+                0,
+                -4.574999809265137
+              ],
+              "max": [
+                5.175000190734863,
+                9.775831699371338,
+                4.574999809265137
+              ]
+            },
+            "dimensions": [
+              10.350000381469727,
+              9.775831699371338,
+              9.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-ochre-cream",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-ochre-cream_lod0.glb",
+            "bytes": 34828,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -6.300000071525574
+              ],
+              "max": [
+                4.175000190734863,
+                9.999999761581421,
+                5.650000095367432
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.999999761581421,
+              11.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-ochre-cream_lod1.glb",
+            "bytes": 7436,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -5.574999809265137
+              ],
+              "max": [
+                4.175000190734863,
+                9.929841041564941,
+                5.574999809265137
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.929841041564941,
+              11.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-charcoal-white",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-charcoal-white_lod0.glb",
+            "bytes": 34868,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -7.300000071525574
+              ],
+              "max": [
+                3.674999952316284,
+                10.999999761581421,
+                6.650000095367432
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.999999761581421,
+              13.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-charcoal-white_lod1.glb",
+            "bytes": 7452,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -6.574999809265137
+              ],
+              "max": [
+                3.674999952316284,
+                10.706845760345459,
+                6.574999809265137
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.706845760345459,
+              13.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-charcoal-dark",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-charcoal-dark_lod0.glb",
+            "bytes": 34940,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.175000190734863,
+                0,
+                -5.300000071525574
+              ],
+              "max": [
+                5.175000190734863,
+                9.775831699371338,
+                4.650000095367432
+              ]
+            },
+            "dimensions": [
+              10.350000381469727,
+              9.775831699371338,
+              9.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-charcoal-dark_lod1.glb",
+            "bytes": 7504,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.175000190734863,
+                0,
+                -4.574999809265137
+              ],
+              "max": [
+                5.175000190734863,
+                9.775831699371338,
+                4.574999809265137
+              ]
+            },
+            "dimensions": [
+              10.350000381469727,
+              9.775831699371338,
+              9.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-white-red",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-white-red_lod0.glb",
+            "bytes": 34824,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -6.300000071525574
+              ],
+              "max": [
+                4.175000190734863,
+                9.999999761581421,
+                5.650000095367432
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.999999761581421,
+              11.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-white-red_lod1.glb",
+            "bytes": 7432,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.175000190734863,
+                0,
+                -5.574999809265137
+              ],
+              "max": [
+                4.175000190734863,
+                9.929841041564941,
+                5.574999809265137
+              ]
+            },
+            "dimensions": [
+              8.350000381469727,
+              9.929841041564941,
+              11.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-house-white-dark",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-house-white-dark_lod0.glb",
+            "bytes": 34856,
+            "triangles": 268,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -7.300000071525574
+              ],
+              "max": [
+                3.674999952316284,
+                10.999999761581421,
+                6.650000095367432
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.999999761581421,
+              13.950000166893005
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-house-white-dark_lod1.glb",
+            "bytes": 7440,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -3.674999952316284,
+                0,
+                -6.574999809265137
+              ],
+              "max": [
+                3.674999952316284,
+                10.706845760345459,
+                6.574999809265137
+              ]
+            },
+            "dimensions": [
+              7.349999904632568,
+              10.706845760345459,
+              13.149999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-barn",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-barn_lod0.glb",
+            "bytes": 10424,
+            "triangles": 72,
+            "materials": 5,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.879761219024658,
+                0,
+                -9
+              ],
+              "max": [
+                5.879761219024658,
+                11.628113031387329,
+                9
+              ]
+            },
+            "dimensions": [
+              11.759522438049316,
+              11.628113031387329,
+              18
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-barn_lod1.glb",
+            "bytes": 7052,
+            "triangles": 48,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -5.879761219024658,
+                0,
+                -9
+              ],
+              "max": [
+                5.879761219024658,
+                11.628113031387329,
+                9
+              ]
+            },
+            "dimensions": [
+              11.759522438049316,
+              11.628113031387329,
+              18
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-stabbur",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-stabbur_lod0.glb",
+            "bytes": 16724,
+            "triangles": 160,
+            "materials": 5,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.199999809265137,
+                0,
+                -4.699999809265137
+              ],
+              "max": [
+                4.199999809265137,
+                7.075000196695328,
+                4.699999809265137
+              ]
+            },
+            "dimensions": [
+              8.399999618530273,
+              7.075000196695328,
+              9.399999618530273
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-stabbur_lod1.glb",
+            "bytes": 13384,
+            "triangles": 136,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.199999809265137,
+                0,
+                -4.699999809265137
+              ],
+              "max": [
+                4.199999809265137,
+                7.075000196695328,
+                4.699999809265137
+              ]
+            },
+            "dimensions": [
+              8.399999618530273,
+              7.075000196695328,
+              9.399999618530273
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-boathouse",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-boathouse_lod0.glb",
+            "bytes": 7120,
+            "triangles": 48,
+            "materials": 4,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.25,
+                0,
+                -6.75
+              ],
+              "max": [
+                4.25,
+                6.599999904632568,
+                6.75
+              ]
+            },
+            "dimensions": [
+              8.5,
+              6.599999904632568,
+              13.5
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-boathouse_lod1.glb",
+            "bytes": 5420,
+            "triangles": 36,
+            "materials": 3,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -4.25,
+                0,
+                -6.75
+              ],
+              "max": [
+                4.25,
+                6.599999904632568,
+                6.75
+              ]
+            },
+            "dimensions": [
+              8.5,
+              6.599999904632568,
+              13.5
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-sawmill",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-sawmill_lod0.glb",
+            "bytes": 11564,
+            "triangles": 96,
+            "materials": 5,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -7.25,
+                0,
+                -11
+              ],
+              "max": [
+                11,
+                15,
+                11
+              ]
+            },
+            "dimensions": [
+              18.25,
+              15,
+              22
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-sawmill_lod1.glb",
+            "bytes": 6992,
+            "triangles": 48,
+            "materials": 4,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -7.25,
+                0,
+                -11
+              ],
+              "max": [
+                11,
+                8.775000005960464,
+                11
+              ]
+            },
+            "dimensions": [
+              18.25,
+              8.775000005960464,
+              22
+            ]
+          }
+        ]
+      },
+      {
+        "id": "norway-timber-yard",
+        "kind": "building",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/norway-timber-yard_lod0.glb",
+            "bytes": 28968,
+            "triangles": 348,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -7.5,
+                0,
+                -9
+              ],
+              "max": [
+                7.5,
+                1.4800001978874207,
+                10
+              ]
+            },
+            "dimensions": [
+              15,
+              1.4800001978874207,
+              19
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/norway-timber-yard_lod1.glb",
+            "bytes": 15680,
+            "triangles": 180,
+            "materials": 1,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -7.5,
+                0,
+                -9
+              ],
+              "max": [
+                7.5,
+                1.4800001978874207,
+                10
+              ]
+            },
+            "dimensions": [
+              15,
+              1.4800001978874207,
+              19
+            ]
+          }
+        ]
+      },
       {
         "id": "nord-2-6-0",
         "kind": "vehicle",
         "lods": [
           {
             "file": "assets/runtime/models/norway/nord-2-6-0_lod0.glb",
-            "bytes": 54104,
-            "triangles": 664,
-            "materials": 5,
+            "bytes": 95556,
+            "triangles": 1204,
+            "materials": 8,
+            "hasUvs": true,
             "bounds": {
               "min": [
-                -1.5750000476837158,
+                -1.9749999642372131,
                 0,
                 -6.900000095367432
               ],
               "max": [
-                1.5750000476837158,
+                1.9749999642372131,
                 5.549999833106995,
                 6.900000095367432
               ]
             },
             "dimensions": [
-              3.1500000953674316,
+              3.9499999284744263,
               5.549999833106995,
               13.800000190734863
             ]
           },
           {
             "file": "assets/runtime/models/norway/nord-2-6-0_lod1.glb",
-            "bytes": 17924,
-            "triangles": 196,
+            "bytes": 21976,
+            "triangles": 236,
             "materials": 4,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -1.5750000476837158,
@@ -109,37 +1412,147 @@
         ]
       },
       {
+        "id": "nord-el-1",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/nord-el-1_lod0.glb",
+            "bytes": 337756,
+            "triangles": 3860,
+            "materials": 7,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.590000033378601,
+                0,
+                -6.380410298705101
+              ],
+              "max": [
+                1.590000033378601,
+                6.867631610482931,
+                6.380410298705101
+              ]
+            },
+            "dimensions": [
+              3.180000066757202,
+              6.867631610482931,
+              12.760820597410202
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/nord-el-1_lod1.glb",
+            "bytes": 120996,
+            "triangles": 1388,
+            "materials": 6,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.590000033378601,
+                0.03523927927017212,
+                -6.204999923706055
+              ],
+              "max": [
+                1.590000033378601,
+                6.867631610482931,
+                6.204999923706055
+              ]
+            },
+            "dimensions": [
+              3.180000066757202,
+              6.832392331212759,
+              12.40999984741211
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nord-di-3b",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/nord-di-3b_lod0.glb",
+            "bytes": 207912,
+            "triangles": 2652,
+            "materials": 7,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.625,
+                0.09378963708877563,
+                -9.514837488532066
+              ],
+              "max": [
+                1.625,
+                5.1400000005960464,
+                9.514837488532066
+              ]
+            },
+            "dimensions": [
+              3.25,
+              5.046210363507271,
+              19.029674977064133
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/nord-di-3b_lod1.glb",
+            "bytes": 64848,
+            "triangles": 756,
+            "materials": 5,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.559999942779541,
+                0.07999998331069946,
+                -9.325000166893005
+              ],
+              "max": [
+                1.559999942779541,
+                4.820000097155571,
+                9.325000166893005
+              ]
+            },
+            "dimensions": [
+              3.119999885559082,
+              4.7400001138448715,
+              18.65000033378601
+            ]
+          }
+        ]
+      },
+      {
         "id": "fjord-passenger-coach",
         "kind": "vehicle",
         "lods": [
           {
             "file": "assets/runtime/models/norway/fjord-passenger-coach_lod0.glb",
-            "bytes": 42608,
-            "triangles": 404,
-            "materials": 5,
+            "bytes": 59344,
+            "triangles": 536,
+            "materials": 6,
+            "hasUvs": true,
             "bounds": {
               "min": [
-                -1.475000023841858,
+                -1.5,
                 0,
                 -8.75
               ],
               "max": [
-                1.475000023841858,
-                4.510000169277191,
+                1.5,
+                4.57000020891428,
                 8.75
               ]
             },
             "dimensions": [
-              2.950000047683716,
-              4.510000169277191,
+              3,
+              4.57000020891428,
               17.5
             ]
           },
           {
             "file": "assets/runtime/models/norway/fjord-passenger-coach_lod1.glb",
-            "bytes": 5660,
+            "bytes": 5688,
             "triangles": 36,
             "materials": 3,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -1.475000023841858,
@@ -166,32 +1579,34 @@
         "lods": [
           {
             "file": "assets/runtime/models/norway/fjord-freight-wagon_lod0.glb",
-            "bytes": 30076,
-            "triangles": 332,
-            "materials": 4,
+            "bytes": 45616,
+            "triangles": 452,
+            "materials": 5,
+            "hasUvs": true,
             "bounds": {
               "min": [
-                -1.4099999517202377,
+                -1.489999946206808,
                 0,
-                -5.949999809265137
+                -6.140000194311142
               ],
               "max": [
-                1.4099999517202377,
-                3.174999952316284,
-                5.949999809265137
+                1.489999946206808,
+                3.649999976158142,
+                6.140000194311142
               ]
             },
             "dimensions": [
-              2.8199999034404755,
-              3.174999952316284,
-              11.899999618530273
+              2.979999892413616,
+              3.649999976158142,
+              12.280000388622284
             ]
           },
           {
             "file": "assets/runtime/models/norway/fjord-freight-wagon_lod1.glb",
-            "bytes": 10232,
+            "bytes": 10280,
             "triangles": 72,
             "materials": 3,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -1.4099999517202377,
@@ -218,9 +1633,10 @@
         "lods": [
           {
             "file": "assets/runtime/models/norway/norway-station_lod0.glb",
-            "bytes": 24672,
+            "bytes": 24736,
             "triangles": 220,
             "materials": 7,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.9000000953674316,
@@ -241,9 +1657,10 @@
           },
           {
             "file": "assets/runtime/models/norway/norway-station_lod1.glb",
-            "bytes": 16824,
+            "bytes": 16852,
             "triangles": 160,
             "materials": 5,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.9000000953674316,
@@ -270,9 +1687,10 @@
         "lods": [
           {
             "file": "assets/runtime/models/norway/norway-house_lod0.glb",
-            "bytes": 13068,
+            "bytes": 13108,
             "triangles": 100,
             "materials": 5,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -4.268287420272827,
@@ -293,9 +1711,10 @@
           },
           {
             "file": "assets/runtime/models/norway/norway-house_lod1.glb",
-            "bytes": 5504,
+            "bytes": 5524,
             "triangles": 36,
             "materials": 2,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -4.268287420272827,
@@ -325,6 +1744,7 @@
             "bytes": 8964,
             "triangles": 100,
             "materials": 3,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.2335922718048096,
@@ -348,6 +1768,7 @@
             "bytes": 5096,
             "triangles": 44,
             "materials": 2,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.3147549629211426,
@@ -374,9 +1795,10 @@
         "lods": [
           {
             "file": "assets/runtime/models/norway/norway-bridge-span_lod0.glb",
-            "bytes": 32096,
+            "bytes": 32244,
             "triangles": 252,
             "materials": 1,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.5999999046325684,
@@ -397,9 +1819,10 @@
           },
           {
             "file": "assets/runtime/models/norway/norway-bridge-span_lod1.glb",
-            "bytes": 20044,
+            "bytes": 20136,
             "triangles": 156,
             "materials": 1,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -3.5999999046325684,
@@ -426,9 +1849,10 @@
         "lods": [
           {
             "file": "assets/runtime/models/norway/norway-tunnel-portal_lod0.glb",
-            "bytes": 11108,
+            "bytes": 11156,
             "triangles": 84,
             "materials": 2,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -5.649999797344208,
@@ -449,9 +1873,10 @@
           },
           {
             "file": "assets/runtime/models/norway/norway-tunnel-portal_lod1.glb",
-            "bytes": 4852,
+            "bytes": 4876,
             "triangles": 36,
             "materials": 1,
+            "hasUvs": true,
             "bounds": {
               "min": [
                 -4.600000023841858,
