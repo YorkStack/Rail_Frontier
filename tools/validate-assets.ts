@@ -36,7 +36,7 @@ assert.ok(probeResults[1]!.triangles<probeResults[0]!.triangles);
 const pack=packSchema.parse(JSON.parse(readFileSync('assets/runtime/packs/norway.json','utf8'))),packResults=[];
 assert.equal(new Set(pack.assets.map(asset=>asset.id)).size,pack.assets.length);assert.equal(pack.assets.length,32);assert.equal(pack.assets.filter(asset=>asset.kind==='vegetation').length,7);assert.equal(pack.assets.filter(asset=>asset.kind==='rock').length,5);assert.equal(pack.assets.filter(asset=>asset.kind==='building').length,14);
 const textureIds=new Set<string>();for(const texture of pack.textures??[]){assert.equal(textureIds.has(texture.id),false);textureIds.add(texture.id);assert.equal(texture.role==='baseColor'?texture.colorSpace:'linear',texture.colorSpace);const bytes=readFileSync(`assets/runtime${texture.path}`);assert.deepEqual([...bytes.subarray(0,8)],[137,80,78,71,13,10,26,10]);}
-assert.equal(textureIds.size,6);for(const binding of pack.materialBindings??[])for(const id of [binding.map,binding.normalMap,binding.roughnessMap])assert.ok(textureIds.has(id),`Unknown texture binding ${id}`);
+assert.equal(textureIds.size,12);for(const binding of pack.materialBindings??[])for(const id of [binding.map,binding.normalMap,binding.roughnessMap])assert.ok(textureIds.has(id),`Unknown texture binding ${id}`);
 for(const asset of pack.assets) {
   const inspected=asset.lods.map(lod=>{
     const file=`assets/runtime${lod.path}`,result=inspect(file);assert.ok(result.bytes<=lod.maxBytes,`${asset.id} exceeds byte budget`);assert.ok(result.triangles<=lod.maxTriangles,`${asset.id} exceeds triangle budget`);assert.ok(result.materials<=8,`${asset.id} exceeds material budget`);
@@ -49,6 +49,9 @@ for(const asset of pack.assets) {
   if(asset.kind==='vehicle') {
     const front=inspected[0]!.nodes.get('coupler_front')!,rear=inspected[0]!.nodes.get('coupler_rear')!,forward=inspected[0]!.nodes.get('forward_probe')!,up=inspected[0]!.nodes.get('up_probe')!;
     assert.ok(front[2]!<0&&rear[2]!>0&&forward[2]!<front[2]!);close(up[1]!,2);
+    const detailNodes=asset.id==='nord-2-6-0'?['RF_Loco_MainPipe','RF_Loco_BoilerBand','RF_Loco_CabDoor','RF_Loco_Lamp']:asset.id==='fjord-passenger-coach'?['RF_Coach_Door','RF_Coach_DoorWindow','RF_Coach_RoofSeam']:['RF_Freight_Stake','RF_Freight_Buffer','RF_Timber_Load'];
+    for(const name of detailNodes)assert.ok(inspected[0]!.nodes.has(name),`${asset.id} LOD0 is missing ${name}`);
+    if(asset.id==='nord-2-6-0')assert.ok(inspected[0]!.nodes.get('RF_Loco_Smokebox')![2]!<inspected[0]!.nodes.get('RF_Loco_Cab')![2]!,`${asset.id} smokebox must face its forward marker`);
   }
   packResults.push({id:asset.id,kind:asset.kind,lods:inspected.map(({nodes:_,...result})=>result)});
 }
