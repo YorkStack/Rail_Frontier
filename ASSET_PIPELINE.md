@@ -1,5 +1,7 @@
 # Asset pipeline
 
+Planned enhancement, 2026-09-14: [Norway graphics handoff](docs/art/NORWAY_GRAPHICS_PLAN.md) specifies a separate original Blender scenery generator for fractured rocks, mixed vegetation and period-oriented buildings, baked PBR textures, shared atlas references, footprint metadata, instancing and explicit engine validation. This is a plan, not an already exported pack. The existing verified pipeline and asset counts below describe checkpoint `fb0abf4`.
+
 Verified locally: Blender 4.0.2, Python 3.10.13, glTF 2.0 exporter, background CLI. Executable: `/Applications/Blender.app/Contents/MacOS/Blender`. Python and glTF export operator were inspected through the actual running application.
 
 Generate:

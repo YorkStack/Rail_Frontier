@@ -1,6 +1,9 @@
 ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
+GRAPHICS_PLANNING_COMPLETE=true
+GRAPHICS_IMPLEMENTATION_STARTED=false
+AWAITING_USER_MODEL_SWITCH=true
 
 # Current status — Norway management implementation, 2026-09-14
 
@@ -55,7 +58,11 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 
 ## Currently working
 
-Next: mail transport is the next Norway economy milestone. Additional station classes, Arizona/River expansion and release/deployment work remain separately scoped.
+User priority change, 2026-09-14: complete the Norway graphics enhancement before continuing gameplay. Planning is complete in [docs/art/NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md), based on actual Kartverket map views, inspected Aurlandsfjord/Undredal/Bakka photographs and historical settlement references. Local Blender 4.0.2 was verified; no new graphics assets or runtime changes were made during planning.
+
+**Pause now for the user's switch to Sol.** On explicit continuation, start GFX-001 and follow GFX-001 through GFX-008. The plan specifies original Blender rocks, varied forests/vegetation, timber buildings, materials, a V2 terrain for new worlds, and preservation of original terrain for V1 saves. Do not automatically resume mail work.
+
+Remembered gameplay checkpoint: **fb0abf4 — Add company and route reporting**, branch implementation/passenger-slice. FIN-002 remains complete with schema 3. **After GFX-008 passes, resume mail transport** (town mail waiting exists; transport/delivery/income do not). Additional station classes, Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
