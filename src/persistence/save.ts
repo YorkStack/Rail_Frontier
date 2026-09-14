@@ -3,6 +3,7 @@ import type { GameState } from '../domain/model.js';
 import { compileGraph } from '../rail/graph.js';
 import { emptyOperations,initialTownEconomy } from '../domain/operations.js';
 import { industryDefinition } from '../content/industries.js';
+import { stationDefinition } from '../content/stations.js';
 
 const finite=z.number().finite(), integer=z.number().int().safe(), nonnegative=integer.nonnegative();
 const id=<K extends string>(kind:K)=>z.custom<`${K}:${number}`>((v)=>typeof v==='string' && new RegExp(`^${kind}:[1-9][0-9]*$`).test(v) && Number.isSafeInteger(Number(v.split(':')[1])));
@@ -52,7 +53,7 @@ export function validateState(value: unknown): GameState {
   const ids=new Set<string>(entities.map(e=>e.id));
   if(ids.size!==entities.length || entities.some(e=>Number(e.id.split(':')[1])>=state.nextEntityId)) throw new Error('Duplicate ID or stale ID counter');
   const requireRef=(ref:string|null)=>{if(ref!==null&&!ids.has(ref)) throw new Error(`Dangling reference: ${ref}`);};
-  for(const station of state.stations) {requireRef(station.nodeId);requireRef(station.townId);}
+  for(const station of state.stations) {requireRef(station.nodeId);requireRef(station.townId);const definition=stationDefinition(station.classId);if(!definition)throw new Error(`Unknown station class: ${station.classId}`);const stored=station.storage.reduce((sum,lot)=>sum+lot.quantity,0);if(!Number.isSafeInteger(stored)||stored>definition.storageCapacity)throw new Error('Station storage exceeds capacity');}
   for(const edge of state.railway.edges) requireRef(edge.ownerId);
   for(const route of state.routes) route.stops.forEach(requireRef);
   for(const train of state.trains) {

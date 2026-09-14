@@ -3,6 +3,8 @@ import type { GameCommand } from './ports.js';
 import { allocateId, type Id, type Train } from '../domain/model.js';
 import { RailNetwork } from '../rail/graph.js';
 import { serviceStop } from '../simulation/transfer.js';
+import { stationDefinition } from '../content/stations.js';
+import { vehicleDefinition } from '../content/vehicles.js';
 
 type CreateRoute=Extract<GameCommand,{type:'createRoute'}>;
 type AssignRoute=Extract<GameCommand,{type:'assignRoute'}>;
@@ -28,6 +30,9 @@ function restingNode(state:Parameters<CommandHandler<AssignRoute>>[0],train:Trai
 export const assignRouteHandler:CommandHandler<AssignRoute>=(state,command)=>{
   const train=state.trains.find(candidate=>candidate.id===command.trainId)!,route=state.routes.find(candidate=>candidate.id===command.routeId)!;
   if(train.phase!=='idle'&&train.phase!=='dwelling')throw new Error('Train must be stopped before route assignment');
+  const consist=[vehicleDefinition(train.locomotiveId),...train.vehicleIds.map(vehicleDefinition)];if(consist.some(item=>!item))throw new Error('Train contains unknown vehicle content');
+  const length=consist.reduce((sum,item)=>sum+item!.lengthM,0),short=route.stops.find(id=>{const station=state.stations.find(candidate=>candidate.id===id)!,definition=stationDefinition(station.classId);return !definition||definition.platformLengthM<length;});
+  if(short)throw new Error(`Train is too long for the platform at ${short}`);
   const node=restingNode(state,train);
   if(!node)throw new Error('Train is not stopped at a station node');
   const stopIndex=route.stops.findIndex(id=>state.stations.find(station=>station.id===id)!.nodeId===node);

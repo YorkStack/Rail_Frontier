@@ -30,6 +30,10 @@ export function validateCommand(state:GameState,command:GameCommand):void {
       if(!state.railway.nodes.some(node=>node.id===command.nodeId))throw new Error(`Unknown station node: ${command.nodeId}`);
       if(command.classId.length===0)throw new Error('Station class is required');
       return;
+    case 'upgradeStation':
+      if(!state.stations.some(station=>station.id===command.stationId))throw new Error(`Unknown station: ${command.stationId}`);
+      if(command.classId.length===0)throw new Error('Station class is required');
+      return;
     case 'purchaseTrain':
       if(!state.stations.some(station=>station.id===command.stationId))throw new Error(`Unknown purchase station: ${command.stationId}`);
       if(command.locomotiveId.length===0||command.vehicleIds.some(id=>id.length===0))throw new Error('Vehicle IDs are required');

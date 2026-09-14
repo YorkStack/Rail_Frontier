@@ -1,6 +1,7 @@
 import type { CommandHandler, CommandHandlers } from './commands.js';
 import type { GameCommand } from './ports.js';
 import { vehicleDefinition } from '../content/vehicles.js';
+import { stationDefinition } from '../content/stations.js';
 import { allocateId, type Money } from '../domain/model.js';
 import { ECONOMY_INTERVAL_TICKS } from '../simulation/clock.js';
 import { postExpense } from '../simulation/finance.js';
@@ -19,6 +20,8 @@ export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=
   const cost=[locomotive,...vehicles].reduce<Money>((sum,vehicle)=>sum+vehicle!.purchaseCost,0);
   if(!Number.isSafeInteger(cost))throw new Error('Vehicle purchase exceeds finance range');
   if(state.company.cash<cost)throw new Error('Insufficient funds');
+  const platform=stationDefinition(station.classId);if(!platform)throw new Error(`Unknown station class: ${station.classId}`);
+  const length=[locomotive,...vehicles].reduce((sum,vehicle)=>sum+vehicle!.lengthM,0);if(length>platform.platformLengthM)throw new Error('Train is too long for the purchase station platform');
   const edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);
   if(!edge)throw new Error('Purchase station is disconnected from track');
   const id=allocateId(state,'train'),reverse=edge.to===station.nodeId;
