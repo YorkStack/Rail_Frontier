@@ -2,11 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createInitialState } from '../src/content/norway.js';
 import type { CubicCurve, GameState, Vec3 } from '../src/domain/model.js';
-import { rebuildMonthlyAccounts } from '../src/simulation/accounting.js';
+import { companyReport, rebuildMonthlyAccounts } from '../src/simulation/accounting.js';
 import { ECONOMY_INTERVAL_TICKS } from '../src/simulation/clock.js';
 import { postExpense, postIncome } from '../src/simulation/finance.js';
 import { postDailyMaintenance } from '../src/simulation/maintenance.js';
 import { evaluateObjectives } from '../src/simulation/objectives.js';
+import { stationDefinition } from '../src/content/stations.js';
+import { vehicleDefinition } from '../src/content/vehicles.js';
 
 const line=(p0:Vec3,p3:Vec3):CubicCurve=>({p0,p1:{x:(2*p0.x+p3.x)/3,y:(2*p0.y+p3.y)/3,z:(2*p0.z+p3.z)/3},p2:{x:(p0.x+2*p3.x)/3,y:(p0.y+2*p3.y)/3,z:(p0.z+2*p3.z)/3},p3});
 function assets():GameState {
@@ -38,4 +40,27 @@ test('campaign objectives progress from connected coverage, delivery and operati
   state.operations.delivered.passengers=200;state.operations.monthlyAccounts=[{month:0,revenue:1_100_000,operatingCost:50_000,capitalCost:5_000_000}];evaluateObjectives(state);evaluateObjectives(state);
   assert.ok(state.operations.completedObjectives.includes('first-passengers'));assert.ok(state.operations.completedObjectives.includes('profitable-railway'));
   assert.equal(new Set(state.operations.completedObjectives).size,state.operations.completedObjectives.length);
+});
+
+test('company report separates operating performance, capital and infrastructure value',()=>{
+  const state=assets();
+  postExpense(state,'construction',1000,'edge:7','Track construction');postExpense(state,'construction',5000,'station:8','Station construction');postExpense(state,'vehicle',4000,'train:10','Train purchase');
+  postExpense(state,'maintenance',300,'train:10','Train running cost');postIncome(state,'passenger',800,'train:10','Passenger fares');
+  state.operations.trainServices['train:10']={...state.operations.trainServices['train:10']!,distanceM:1250,revenue:800,operatingCosts:300};
+  const report=companyReport(state);
+  assert.deepEqual({revenue:report.revenue,operatingCost:report.operatingCost,capitalCost:report.capitalCost,operatingProfit:report.operatingProfit},{revenue:800,operatingCost:300,capitalCost:10_000,operatingProfit:500});
+  const stationValue=2*stationDefinition('rural-halt')!.purchaseCost,vehicleValue=vehicleDefinition('nord-2-6-0')!.purchaseCost+vehicleDefinition('fjord-passenger-coach')!.purchaseCost;
+  assert.equal(report.infrastructureCost,1000);assert.equal(report.stationValue,stationValue);assert.equal(report.vehicleValue,vehicleValue);assert.equal(report.ownedAssetValue,1000+stationValue+vehicleValue);assert.equal(report.companyValue,state.company.cash+report.ownedAssetValue);
+  assert.deepEqual(report.currentMonth,{revenue:800,operatingCost:300,capitalCost:10_000,operatingProfit:500});
+  assert.deepEqual(report.trains[0],{trainId:'train:10',routeId:null,revenue:800,operatingCost:300,capitalCost:0,operatingProfit:500,distanceM:1250});
+});
+
+test('route reports aggregate assigned trains and exclude unassigned stock',()=>{
+  const state=assets();state.routes=[{id:'route:11',stops:['station:8','station:9'],mode:'shuttle'},{id:'route:12',stops:['station:9','station:8'],mode:'shuttle'}];state.trains[0]!.routeId='route:11';
+  state.operations.trainServices['train:10']={...state.operations.trainServices['train:10']!,distanceM:1500,revenue:900,operatingCosts:250};
+  state.trains.push({...structuredClone(state.trains[0]!),id:'train:13',routeId:'route:11'});state.operations.trainServices['train:13']={...state.operations.trainServices['train:10']!,distanceM:700,revenue:300,operatingCosts:400};
+  state.trains.push({...structuredClone(state.trains[0]!),id:'train:14',routeId:null});state.operations.trainServices['train:14']={...state.operations.trainServices['train:10']!,distanceM:500,revenue:999,operatingCosts:1};
+  const report=companyReport(state);
+  assert.deepEqual(report.routes[0],{routeId:'route:11',trainIds:['train:10','train:13'],revenue:1200,operatingCost:650,capitalCost:0,operatingProfit:550,distanceM:2200});
+  assert.deepEqual(report.routes[1],{routeId:'route:12',trainIds:[],revenue:0,operatingCost:0,capitalCost:0,operatingProfit:0,distanceM:0});
 });

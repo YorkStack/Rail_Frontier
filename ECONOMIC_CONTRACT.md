@@ -18,6 +18,8 @@ Freight starts only after the passenger gate. Forest produces timber into capped
 
 Money is a safe integer in minor units. cash = openingCash + sum(ledger.amount) at all times. Construction and purchase expenses are capital categories; fuel/running cost and daily track/station/train upkeep are operating costs. Reports must not treat construction as operating loss. Record immutable built infrastructure cost so content rebalance cannot rewrite past purchases.
 
+Live company reports derive from authoritative state rather than adding saved summary fields. Monthly and all-time operating profit equal revenue minus maintenance/running costs; capital expenditure remains separate. Infrastructure value is the immutable historical construction cost stored on owned edges. Station and vehicle values use the current content purchase values until depreciation, sales and asset-specific historical values are introduced. Company value is cash plus owned infrastructure, station and vehicle value. Train services own lifetime revenue, operating cost and distance; route reports aggregate only trains currently assigned to that route.
+
 For distance-based running costs, accumulate per-train fractional minor units in costRemainder; post floor(total) and carry the remainder. Daily maintenance posts once at the fixed day boundary. MonthlyAccounts aggregates ledger categories, keyed by game month. Transaction timestamp is completed simulation tick; entityId can retain a demolished entity's historical ID.
 
 ## Atomic commands

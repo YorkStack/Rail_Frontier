@@ -2,9 +2,9 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 
-# Current status — Norway economy implementation, 2026-09-14
+# Current status — Norway management implementation, 2026-09-14
 
-Current milestone: the Norway passenger, freight, production-asset, world-inspection and first city-economy gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+Current milestone: the Norway passenger, freight, production-asset, world-inspection, city-economy and company-reporting gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
 
 ## Implementation completed after handoff
 
@@ -17,6 +17,7 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 - Physical train simulation with consist mass/power/tractive force, signed grade, service braking, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
 - Deterministic edge reservations prevent opposing trains from sharing track and expose blocked service state.
 - Destination-weighted daily passenger demand, capacity-bound oldest-first boarding, distance-tracked delivery, exactly-once fares, daily maintenance and monthly capital/operating reports.
+- FIN-002 adds live company, month, train and route reports without changing schema 3. The Railway Office separates revenue, operating cost and capital; exposes historical track cost, owned asset value and cash-plus-assets company value; and shows profitability for assigned and unassigned rolling stock.
 - Connected-town, delivered-passenger and operating-profit campaign objectives with once-only completion.
 - Transactional save manager covers manual/autosave, list/latest/delete, content compatibility and failure-preserves-session behavior. The browser shell now saves manually and autosaves daily.
 - The visible fjord shell now runs RailFrontierGame rather than the demonstration clock. Live cash, date, passenger delivery, route result, service phase/speed/cargo, speed controls and camera controls read immutable snapshots. Surveyed parallel alignments can be committed through the real construction command and update rendering/cash immediately.
@@ -37,7 +38,7 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 75 Node tests and 9 real browser tests pass. Asset validation and the production build pass.
+- 77 Node tests and 9 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -48,13 +49,13 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 3 plus strict sequential 1→2→3 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **75 Node tests and 9 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- **77 Node tests and 9 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: company and route reporting is the next Norway management milestone. Mail transport, additional station classes, Arizona/River expansion and release/deployment work remain separately scoped.
+Next: mail transport is the next Norway economy milestone. Additional station classes, Arizona/River expansion and release/deployment work remain separately scoped.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
