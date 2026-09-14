@@ -5,6 +5,7 @@ import { RailNetwork } from '../rail/graph.js';
 import { serviceStop } from '../simulation/transfer.js';
 import { stationDefinition } from '../content/stations.js';
 import { vehicleDefinition } from '../content/vehicles.js';
+import { pathIsElectrified,routeIsElectrified } from './electrification.js';
 
 type CreateRoute=Extract<GameCommand,{type:'createRoute'}>;
 type AssignRoute=Extract<GameCommand,{type:'assignRoute'}>;
@@ -33,6 +34,7 @@ export const assignRouteHandler:CommandHandler<AssignRoute>=(state,command)=>{
   const consist=[vehicleDefinition(train.locomotiveId),...train.vehicleIds.map(vehicleDefinition)];if(consist.some(item=>!item))throw new Error('Train contains unknown vehicle content');
   const length=consist.reduce((sum,item)=>sum+item!.lengthM,0),short=route.stops.find(id=>{const station=state.stations.find(candidate=>candidate.id===id)!,definition=stationDefinition(station.classId);return !definition||definition.platformLengthM<length;});
   if(short)throw new Error(`Train is too long for the platform at ${short}`);
+  if(consist[0]!.traction==='electric'&&!routeIsElectrified(state,route))throw new Error('Electric traction requires a fully electrified route');
   const node=restingNode(state,train);
   if(!node)throw new Error('Train is not stopped at a station node');
   const stopIndex=route.stops.findIndex(id=>state.stations.find(station=>station.id===id)!.nodeId===node);
@@ -40,6 +42,7 @@ export const assignRouteHandler:CommandHandler<AssignRoute>=(state,command)=>{
   const direction:1|-1=route.mode==='shuttle'&&stopIndex===route.stops.length-1?-1:1,nextStopIndex=(stopIndex+direction+route.stops.length)%route.stops.length;
   const destination=state.stations.find(station=>station.id===route.stops[nextStopIndex])!.nodeId,path=new RailNetwork(state.railway).findPath(node,destination);
   if(!path)throw new Error('Route leg is disconnected');
+  if(consist[0]!.traction==='electric'&&!pathIsElectrified(state,path))throw new Error('Electric traction requires an electrified departure path');
   train.routeId=route.id;serviceStop(state,train,route.stops[stopIndex]!);train.motion={path,leg:0,distanceM:0,arrived:false};train.phase='running';train.dwellTicks=0;train.speedMps=0;
   const service=state.operations.trainServices[train.id];if(!service)throw new Error('Train service state is missing');service.nextStopIndex=nextStopIndex;service.direction=direction;
   return {createdIds:[]};

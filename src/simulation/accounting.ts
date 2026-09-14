@@ -58,7 +58,7 @@ function accountReport(transactions:readonly Transaction[]):AccountReport {
 export function companyReport(state:Readonly<GameState>):CompanyReport {
   const totals=accountReport(state.company.ledger),month=accountingMonth(state.tick);
   const currentMonth=accountReport(state.company.ledger.filter(transaction=>accountingMonth(transaction.tick)===month));
-  const infrastructureCost=Object.values(state.operations.infrastructure).reduce((sum,item)=>checkedAdd(sum,item.constructionCost,'Infrastructure cost'),0);
+  const infrastructureCost=Object.values(state.operations.infrastructure).reduce((sum,item)=>checkedAdd(checkedAdd(sum,item.constructionCost,'Infrastructure cost'),item.electrificationCost,'Infrastructure cost'),0);
   const stationValue=state.stations.reduce((sum,station)=>{const definition=stationDefinition(station.classId);if(!definition)throw new Error(`Unknown station class in report: ${station.classId}`);return checkedAdd(sum,definition.purchaseCost,'Station value');},0);
   const vehicleValue=state.trains.reduce((sum,train)=>{
     const ids=[train.locomotiveId,...train.vehicleIds];

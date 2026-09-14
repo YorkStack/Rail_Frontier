@@ -1,6 +1,6 @@
 # Data model
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 5 is implemented; contracts remain pre-release rather than a released save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 6 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
@@ -30,4 +30,4 @@ Derived caches (arc tables, route adjacency, scene entities, spatial indices, qu
 
 StationDefinition provides purchase cost, daily maintenance, catchment radius, storage capacity and platform length for six station classes. `upgradeStation` changes the saved class ID without another schema field; it permits only capability-increasing classes and posts the purchase-cost difference as capital spending.
 
-Schema 5 includes the campaign starting year, demand queues, per-train service and financial state, exclusive reservations, built engineering spans and upkeep, industry cycles, per-town economy state, passenger/mail/timber/lumber delivery totals, completed objectives, monthly accounts and command sequence. Schema 3 introduced town economies; schema 4 added mail; schema 5 makes the campaign epoch authoritative. VehicleDefinition includes a display name and availability year beside its physical and economic fields. StationDefinition and IndustryRecipe fix their reusable content fields. Any breaking state change needs an explicit migration.
+Schema 6 includes the campaign starting year, demand queues, per-train service and financial state, exclusive reservations, built engineering spans, base upkeep, edge electrification cost/status/upkeep, industry cycles, per-town economy state, passenger/mail/timber/lumber delivery totals, completed objectives, monthly accounts and command sequence. Schema 3 introduced town economies; schema 4 added mail; schema 5 made the campaign epoch authoritative; schema 6 adds explicit electrification records and migrates every older edge to unelectrified. VehicleDefinition includes a display name and availability year beside its physical and economic fields. StationDefinition and IndustryRecipe fix their reusable content fields. Any breaking state change needs an explicit migration.

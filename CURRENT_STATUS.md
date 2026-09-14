@@ -41,10 +41,11 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Schema 3 adds one economy record per town with local lumber demand and delivery, waiting mail, activity, service duration and fractional population growth. A pure 2→3 migration initializes these values while preserving all prior operations; schema 1 still migrates sequentially through schema 2.
 - ECON-004 turns waiting mail into addressed train cargo. Every passenger coach has 24 mail units beside its 48 seats; mail selects the farthest other settlement on the route, accrues real rail distance, remains aboard at intermediate stops and posts one dedicated income transaction at delivery. Schema 4 adds the global mail-delivery total through a strict 3→4 migration.
 - TECH-001 removes the hardcoded 1900 purchase path. Campaign start year is authoritative in schema 5, a shared 360-day calendar drives the HUD and availability checks, and the Railway Office fills its locomotive selector from eligible vehicle content. The 4→5 migration restores the historical 1900 epoch without changing older operations.
+- TECH-002 persists electrification status, historical construction cost and separate daily upkeep per rail edge. The Railway Office quotes missing route sections and commits them atomically; electrical purchase, assignment and departure paths require powered track. Three.js derives visible portals, contact and messenger wires from this state. Schema 6 migrates all schema-5 edges to explicit unelectrified records.
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 97 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 102 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -54,8 +55,8 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Actual Blender 4.0.2 → GLB → Three.js pipeline proven: axes, metres, pivots, couplers, finite normals, materials and close/far LOD with hysteresis.
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
-- Schema 5 plus strict sequential 1→2→3→4→5 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **97 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- Schema 6 plus strict sequential 1→2→3→4→5→6 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
+- **102 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -63,7 +64,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport, six-class station progression, the campaign calendar/catalogue boundary and first later-era diesel are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility and dedicated ledger income are visible in the browser and survive save/reload. Electric-route infrastructure and later Blender vehicles, Arizona/River expansion and release/deployment remain later work.
+Mail transport, six-class station progression, the campaign calendar/catalogue boundary, first later-era diesel and route electrification are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. The El 1 and later Blender vehicles, Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -74,7 +75,7 @@ Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.m
 - src/world/terrain.ts + domain/curve-math.ts: triangle surface and exact crossing rules.
 - src/rail/geometry.ts, constraints.ts, planner.ts, graph.ts: cubic/arc/traversal/quote/cache rules.
 - src/simulation/clock.ts: 20 Hz fixed steps, preserved time debt and compressed calendar contract.
-- src/persistence/save.ts: schema 5 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
+- src/persistence/save.ts: schema 6 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
 
 Do not casually change units/axes, graph identity/connectivity, tick cadence/order, typed IDs, command atomicity or saved operational semantics. A genuine redesign follows ASTRA_ESCALATIONS.md; there is no open escalation now.
 
@@ -86,7 +87,7 @@ Conservative curve rejection, one-chunk terrain and incomplete public-import/sto
 
 ## Git state and reproduction
 
-Branch: implementation/passenger-slice. Remote: https://github.com/YorkStack/Rail_Frontier. The implementation branch starts from architecture checkpoint **3e65484**. No push, deployment or main-branch modification has been performed.
+Branch: implementation/passenger-slice. Remote: https://github.com/YorkStack/Rail_Frontier. The implementation branch starts from architecture checkpoint **3e65484** and is synchronized to the remote after each completed milestone. No deployment or main-branch modification has been performed.
 
 Development: npm ci; npm run dev → http://127.0.0.1:5173.
 Production preview: npm run build; npm run preview → http://127.0.0.1:4173.
@@ -94,4 +95,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next product expansion is TECH-002 route electrification: persist and price electrified infrastructure, expose it through commands/UI and prevent electric assignment over unelectrified paths. The 1922 El 1 Blender vehicle follows once that rule exists; Arizona/River content follows after the Norway systems remain stable.
+The next product expansion is VEHICLE-003: author the researched 1922 El 1 in local Blender, add its two validated LODs and enable it against the completed TECH-002 electrification rule. Arizona/River content follows after the Norway systems remain stable.

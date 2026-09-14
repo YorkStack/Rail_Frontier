@@ -42,6 +42,9 @@ export function validateCommand(state:GameState,command:GameCommand):void {
       if(command.stops.length<2)throw new Error('A route needs at least two stops');
       for(const stop of command.stops)if(!state.stations.some(station=>station.id===stop))throw new Error(`Unknown route stop: ${stop}`);
       return;
+    case 'electrifyRoute':
+      if(!state.routes.some(route=>route.id===command.routeId))throw new Error(`Unknown route: ${command.routeId}`);
+      return;
     case 'assignRoute':
       if(!state.trains.some(train=>train.id===command.trainId))throw new Error(`Unknown train: ${command.trainId}`);
       if(!state.routes.some(route=>route.id===command.routeId))throw new Error(`Unknown route: ${command.routeId}`);
