@@ -1,20 +1,22 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import type { GameState,MotionState,Vec3 } from '../src/domain/model.js';
-import type { WorldRenderer } from '../src/application/ports.js';
-import type { Heightfield } from '../src/world/terrain.js';
-import { fjordProfile,type BiomeDefinition } from '../src/world/profiles.js';
-import { norwayBiome } from '../src/world/biome.js';
-import { SeededRandom } from '../src/world/random.js';
-import { shorelineX } from '../src/world/fjord-study.js';
-import { norwayCorridorX,norwayShorelineX } from '../src/world/generator.js';
-import { compileGraph } from '../src/rail/graph.js';
-import { motionPosition } from '../src/simulation/motion.js';
-import { terrainMesh } from '../src/rendering/terrain-mesh.js';
-import { createTrack } from '../src/rendering/track-mesh.js';
-import { sampleDistance,type TrackGeometry } from '../src/rail/geometry.js';
-import { vehicleDefinition } from '../src/content/vehicles.js';
+import type { GameState,MotionState,Vec3 } from '../domain/model.js';
+import type { MapOverlay,WorldRenderer,WorldSelection } from '../application/ports.js';
+import type { Heightfield } from '../world/terrain.js';
+import { fjordProfile,type BiomeDefinition } from '../world/profiles.js';
+import { norwayBiome } from '../world/biome.js';
+import { SeededRandom } from '../world/random.js';
+import { shorelineX } from '../world/fjord-study.js';
+import { norwayCorridorX,norwayShorelineX } from '../world/generator.js';
+import { compileGraph } from '../rail/graph.js';
+import { motionPosition } from '../simulation/motion.js';
+import { terrainMesh } from './terrain-mesh.js';
+import { createTrack } from './track-mesh.js';
+import { sampleDistance,type TrackGeometry } from '../rail/geometry.js';
+import { vehicleDefinition } from '../content/vehicles.js';
+import { stationDefinition } from '../content/stations.js';
+import { industryName } from '../content/industries.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -27,7 +29,7 @@ export class FjordRenderer implements WorldRenderer {
   readonly controls:OrbitControls;
   readonly landscape:THREE.Mesh;
   readonly assets:AssetReport[]=[];
-  readonly labels:{name:string;position:Vec3}[];
+  readonly labels:{name:string;position:Vec3;selection:WorldSelection}[];
   readonly terrain:Heightfield;
   readonly profile:BiomeDefinition;
   private geometry:ReturnType<typeof compileGraph>;
@@ -46,6 +48,11 @@ export class FjordRenderer implements WorldRenderer {
   private buildings=new THREE.Group();
   private preview:THREE.Object3D|null=null;
   private marker:THREE.Object3D|null=null;
+  private selectionMarker:THREE.Object3D|null=null;
+  private selection:WorldSelection|null=null;
+  private overlay=new THREE.Group();
+  private overlayKind:MapOverlay='none';
+  private overlaySignature='';
   private trainPosition=new THREE.Vector3();
   private follow=false;
   private treeCount=0;
@@ -78,7 +85,11 @@ export class FjordRenderer implements WorldRenderer {
     this.trees=this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
     this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
     this.createPortals();this.createBridgeTrusses();this.scene.add(this.infrastructureModels);
-    this.labels=state.towns.map(town=>({name:town.name,position:town.position}));
+    this.labels=[
+      ...state.towns.map(town=>({name:town.name,position:town.position,selection:{kind:'town' as const,id:town.id}})),
+      ...state.industries.map(industry=>({name:industryName(industry.definitionId),position:industry.position,selection:{kind:'industry' as const,id:industry.id}}))
+    ];
+    this.scene.add(this.overlay);
     this.controls=new OrbitControls(this.camera,canvas);this.controls.enableDamping=true;this.controls.dampingFactor=.075;
     this.controls.minDistance=18;this.controls.maxDistance=terrainSize(terrain)*1.45;this.controls.maxPolarAngle=Math.PI*.475;this.controls.minPolarAngle=.15;this.controls.screenSpacePanning=false;
     this.controls.addEventListener('start',this.controlStart);
@@ -104,7 +115,7 @@ export class FjordRenderer implements WorldRenderer {
     this.replaceAuthoredScenery(this.modelState);this.rebuildAuthoredInfrastructure(this.modelState);this.syncTrainModels(this.modelState);this.syncStationModels(this.modelState);
   }
   private cloneLod(id:string,distance=180):THREE.LOD {const levels=this.assetLevels.get(id);if(!levels)throw new Error(`Missing runtime asset: ${id}`);const lod=new THREE.LOD();levels.forEach((level,index)=>lod.addLevel(level.clone(true),index===0?0:distance,.15));return lod;}
-  private syncTrainModels(state:Readonly<GameState>):void {if(this.assetLevels.size===0)return;for(const model of this.trainModels.values())model.group.visible=false;for(const train of state.trains){const signature=[train.locomotiveId,...train.vehicleIds].join('|'),existing=this.trainModels.get(train.id);if(existing&&existing.signature!==signature){this.scene.remove(existing.group);this.trainModels.delete(train.id);}if(!this.trainModels.has(train.id)){const group=new THREE.Group(),cars=[this.cloneLod(train.locomotiveId),...train.vehicleIds.map(id=>this.cloneLod(id))];for(const car of cars)group.add(car);this.scene.add(group);this.trainModels.set(train.id,{group,cars,signature});}this.trainModels.get(train.id)!.group.visible=true;}}
+  private syncTrainModels(state:Readonly<GameState>):void {if(this.assetLevels.size===0)return;for(const model of this.trainModels.values())model.group.visible=false;for(const train of state.trains){const signature=[train.locomotiveId,...train.vehicleIds].join('|'),existing=this.trainModels.get(train.id);if(existing&&existing.signature!==signature){this.scene.remove(existing.group);this.trainModels.delete(train.id);}if(!this.trainModels.has(train.id)){const group=new THREE.Group(),cars=[this.cloneLod(train.locomotiveId),...train.vehicleIds.map(id=>this.cloneLod(id))];group.userData.selection={kind:'train',id:train.id} satisfies WorldSelection;for(const car of cars)group.add(car);this.scene.add(group);this.trainModels.set(train.id,{group,cars,signature});}this.trainModels.get(train.id)!.group.visible=true;}}
   private behind(motion:MotionState,distanceM:number):{position:Vec3;ahead:Vec3} {let leg=motion.leg,distance=motion.distanceM-distanceM;while(distance<0&&leg>0){leg--;distance+=this.geometry.get(motion.path[leg]!.edgeId)!.lengthM;}distance=Math.max(0,distance);const sample=(offset:number)=>{let sampleLeg=leg,s=distance+offset;while(sampleLeg<motion.path.length-1&&s>this.geometry.get(motion.path[sampleLeg]!.edgeId)!.lengthM){s-=this.geometry.get(motion.path[sampleLeg]!.edgeId)!.lengthM;sampleLeg++;}const traversal=motion.path[sampleLeg]!,geometry=this.geometry.get(traversal.edgeId)!;return sampleDistance(geometry,traversal.reverse?geometry.lengthM-Math.min(s,geometry.lengthM):Math.min(s,geometry.lengthM));};return {position:sample(0),ahead:sample(.25)};}
   private updateTrainModels(state:Readonly<GameState>):void {this.syncTrainModels(state);for(const train of state.trains){const model=this.trainModels.get(train.id);if(!model)continue;let offset=0,previousLength=vehicleDefinition(train.locomotiveId)?.lengthM??15.2;for(let index=0;index<model.cars.length;index++){if(index>0){const length=vehicleDefinition(train.vehicleIds[index-1]!)?.lengthM??12;offset+=previousLength/2+length/2+.6;previousLength=length;}const {position,ahead}=this.behind(train.motion,offset),car=model.cars[index]!;car.position.set(position.x,position.y+.12,position.z);car.rotation.y=Math.atan2(-(ahead.x-position.x),-(ahead.z-position.z));}model.group.visible=true;}}
   private instancedAsset(id:string,lod:number,placements:THREE.Matrix4[]):THREE.Group {
@@ -127,7 +138,7 @@ export class FjordRenderer implements WorldRenderer {
   }
   private syncStationModels(state:Readonly<GameState>):void {
     if(!this.assetLevels.has('norway-station'))return;for(const model of this.stationModels.values())model.visible=false;
-    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod('norway-station',260);this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=true;}
+    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod('norway-station',260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=true;}
   }
   private rebuildAuthoredInfrastructure(state:Readonly<GameState>):void {
     if(!this.assetLevels.has('norway-bridge-span'))return;this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
@@ -220,6 +231,33 @@ export class FjordRenderer implements WorldRenderer {
     if(!position)return;
     const group=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(9,.7,8,36),new THREE.MeshBasicMaterial({color,depthTest:false})),pin=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,16,8),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;pin.position.y=8;group.add(ring,pin);group.position.set(position.x,position.y+1.2,position.z);group.renderOrder=11;this.marker=group;this.scene.add(group);
   }
+  setSelection(selection:WorldSelection|null,state:Readonly<GameState>):void {
+    this.selection=selection;
+    if(this.selectionMarker){this.scene.remove(this.selectionMarker);disposeObject(this.selectionMarker);this.selectionMarker=null;}
+    if(!selection)return;
+    const group=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(13,.7,8,48),new THREE.MeshBasicMaterial({color:'#f1d78d',depthTest:false})),pin=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,22,8),new THREE.MeshBasicMaterial({color:'#f1d78d',transparent:true,opacity:.8,depthTest:false}));ring.rotation.x=Math.PI/2;pin.position.y=11;group.add(ring,pin);group.renderOrder=12;this.selectionMarker=group;this.scene.add(group);this.syncSelectionMarker(state);
+  }
+  private selectionPosition(state:Readonly<GameState>):Vec3|null {
+    if(!this.selection)return null;
+    if(this.selection.kind==='town')return state.towns.find(item=>item.id===this.selection!.id)?.position??null;
+    if(this.selection.kind==='industry')return state.industries.find(item=>item.id===this.selection!.id)?.position??null;
+    if(this.selection.kind==='station'){const station=state.stations.find(item=>item.id===this.selection!.id);return state.railway.nodes.find(item=>item.id===station?.nodeId)?.position??null;}
+    const train=state.trains.find(item=>item.id===this.selection!.id);return train?motionPosition(train.motion,this.geometry):null;
+  }
+  private syncSelectionMarker(state:Readonly<GameState>):void {const position=this.selectionPosition(state);if(!this.selectionMarker||!position)return;this.selectionMarker.position.set(position.x,position.y+1.5,position.z);}
+  private syncLabels(state:Readonly<GameState>):void {let townIndex=0,industryIndex=0;for(const label of this.labels){if(label.selection.kind==='town'){const town=state.towns[townIndex++];if(town){label.name=town.name;label.position=town.position;label.selection={kind:'town',id:town.id};}}else{const industry=state.industries[industryIndex++];if(industry){label.name=industryName(industry.definitionId);label.position=industry.position;label.selection={kind:'industry',id:industry.id};}}}}
+  focusSelection(selection:WorldSelection,state:Readonly<GameState>):void {this.selection=selection;const position=this.selectionPosition(state);if(position)this.focus(position);}
+  setOverlay(kind:MapOverlay,state:Readonly<GameState>):void {this.overlayKind=kind;this.overlaySignature='';this.syncOverlay(state);}
+  private syncOverlay(state:Readonly<GameState>):void {
+    const signature=this.overlayKind==='traffic'?state.operations.reservations.map(item=>`${item.edgeId}:${item.trainId}`).join('|'):this.overlayKind==='catchment'?`${state.railway.revision}|${state.stations.map(item=>`${item.id}:${item.classId}:${item.nodeId}`).join('|')}`:this.overlayKind==='industry'?state.industries.map(item=>`${item.id}:${item.definitionId}`).join('|'):'none';
+    if(signature===this.overlaySignature)return;this.overlaySignature=signature;this.scene.remove(this.overlay);disposeObject(this.overlay);this.overlay=new THREE.Group();
+    const line=(points:THREE.Vector3[],color:string,opacity=.9,closed=false)=>{const material=new THREE.LineBasicMaterial({color,transparent:opacity<1,opacity,depthTest:false,vertexColors:false}),object=new THREE.Line(new THREE.BufferGeometry().setFromPoints(closed?[...points,points[0]!.clone()]:points),material);object.renderOrder=8;this.overlay.add(object);};
+    const circle=(position:Vec3,radius:number,color:string)=>{const points=Array.from({length:64},(_,index)=>{const angle=index/64*Math.PI*2,x=position.x+Math.cos(angle)*radius,z=position.z+Math.sin(angle)*radius;return new THREE.Vector3(x,this.terrain.sample(x,z).elevationM+2,z);});line(points,color,.82,true);};
+    if(this.overlayKind==='catchment')for(const station of state.stations){const node=state.railway.nodes.find(item=>item.id===station.nodeId),radius=stationDefinition(station.classId)?.coverageRadiusM;if(node&&radius)circle(node.position,radius,'#e7cf87');}
+    if(this.overlayKind==='industry')for(const industry of state.industries){const color=industry.definitionId==='forest'?'#91bd79':'#d79b68';circle(industry.position,150,color);line([new THREE.Vector3(industry.position.x,industry.position.y+2,industry.position.z),new THREE.Vector3(industry.position.x,industry.position.y+95,industry.position.z)],color);}
+    if(this.overlayKind==='traffic'){const reserved=new Set(state.operations.reservations.map(item=>item.edgeId));for(const [edgeId,track] of this.geometry){const points=track.samples.map(sample=>new THREE.Vector3(sample.position.x,sample.position.y+1.8,sample.position.z));line(points,reserved.has(edgeId)?'#ed8b68':'#93a99a',reserved.has(edgeId)?1:.42);}}
+    this.scene.add(this.overlay);
+  }
   setStress(state:GameState,enabled:boolean):void {
     this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-spruce')?this.authoredForest(enabled?20000:this.profile.vegetation.density):this.createForest(enabled?20000:this.profile.vegetation.density);this.scene.add(this.trees);
     this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=new THREE.Group();if(this.assetLevels.has('norway-house'))this.buildings=this.authoredBuildings(state,enabled?2000:360);else this.createBuildings(state,enabled?2000:90);this.scene.add(this.buildings);
@@ -245,7 +283,8 @@ export class FjordRenderer implements WorldRenderer {
   regional():void {this.follow=false;const production=this.terrain.widthM>4000;this.controls.target.set(production?5200:1850,production?180:80,production?5600:1970);this.camera.position.set(production?13000:3500,production?6500:1750,production?14500:3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    this.modelState=current;if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
+    this.modelState=current;this.syncLabels(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
+    this.syncOverlay(current);this.syncSelectionMarker(current);
     const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
     const shift=new THREE.Vector3((this.keys.has('KeyD')?1:0)-(this.keys.has('KeyA')?1:0),0,(this.keys.has('KeyS')?1:0)-(this.keys.has('KeyW')?1:0));
@@ -260,6 +299,7 @@ export class FjordRenderer implements WorldRenderer {
   }
   project(position:Vec3):{x:number;y:number;visible:boolean} {const vector=new THREE.Vector3(position.x,position.y+25,position.z).project(this.camera),rect=this.canvas.getBoundingClientRect();return {x:(vector.x+1)*rect.width/2,y:(1-vector.y)*rect.height/2,visible:vector.z>-1&&vector.z<1&&Math.abs(vector.x)<1&&Math.abs(vector.y)<1};}
   pick(screenX:number,screenY:number):Vec3|null {const rect=this.canvas.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((screenX-rect.left)/rect.width*2-1,-(screenY-rect.top)/rect.height*2+1),this.camera);const point=ray.intersectObject(this.landscape)[0]?.point;return point?{x:point.x,y:point.y,z:point.z}:null;}
+  pickEntity(screenX:number,screenY:number):WorldSelection|null {const rect=this.canvas.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((screenX-rect.left)/rect.width*2-1,-(screenY-rect.top)/rect.height*2+1),this.camera);const roots=[...this.trainModels.values()].map(item=>item.group as THREE.Object3D).concat([...this.stationModels.values()]);for(const hit of ray.intersectObjects(roots,true)){let object:THREE.Object3D|null=hit.object;while(object){if(object.userData.selection)return object.userData.selection as WorldSelection;object=object.parent;}}return null;}
   private verifyTerrain():void {this.landscape.updateMatrixWorld(true);const scale=this.terrain.widthM/4000;for(const [x,z] of [[2173,1857],[2411,932],[1601,2047],[2809,2991]]){const sx=x!*scale,sz=z!*scale,ray=new THREE.Raycaster(new THREE.Vector3(sx,3000,sz),new THREE.Vector3(0,-1,0)),hit=ray.intersectObject(this.landscape)[0];if(!hit)throw new Error('Terrain raycast missed');this.terrainErrorM=Math.max(this.terrainErrorM,Math.abs(hit.point.y-this.terrain.sample(sx,sz).elevationM));}if(this.terrainErrorM>.001)throw new Error('Rendered terrain differs from simulation');}
   stats():RenderStats {const info=this.renderer.info,first=[...this.trainModels.values()][0]?.cars[0];return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressTrains?this.stressCount:this.trainModels.size,lod:first?.getCurrentLevel()??0,terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
   dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();disposeObject(this.scene);this.renderer.dispose();this.renderer.forceContextLoss();}

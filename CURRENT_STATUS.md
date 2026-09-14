@@ -4,7 +4,7 @@ ASTRA_REVIEW_REQUIRED=false
 
 # Current status — passenger and freight implementation, 2026-09-14
 
-Current milestone: the Norway passenger, freight and production-asset implementation gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+Current milestone: the Norway passenger, freight, production-asset and world-inspection gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
 
 ## Implementation completed after handoff
 
@@ -31,8 +31,10 @@ Current milestone: the Norway passenger, freight and production-asset implementa
 - The commissioned preview begins with a small working stock so a player can buy a freight consist and operate the full Granli–Sundvik chain immediately. A new company starts with empty industries and must wait for production. The railway office shows recipe progress, storage, timber/lumber inventory and typed onboard cargo.
 - The original Blender 4.0.2 Norway pack now supplies two LODs each for the Nord 2-6-0, passenger coach, freight wagon, station, house, spruce, bridge span and tunnel portal. Its versioned campaign manifest loads 16 GLBs totaling about 336 KB; no unrelated model pack is requested.
 - Three.js renders the authored rolling stock and stations as LOD objects and batches authored spruces, houses and bridge pieces with instancing. The production scene measures 146 draw calls after bridge batching, versus 2,704 in the rejected per-span clone pass, while preserving about 60 FPS in the local normal and scale runs.
+- The renderer now lives at the production boundary in `src/rendering/fjord-renderer.ts`. Trains and stations carry ephemeral pick identities; town and industry map labels use the same `WorldSelection` contract. A live contextual card reports authoritative state for all four entity kinds and follows a selected moving train.
+- Station catchment, industry-site and rail-traffic overlays are available from the strategy toolbar. Overlay geometry rebuilds only when the relevant station, industry or reservation signature changes, and map labels yield pointer input while a construction tool is active.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 71 Node tests and 7 real browser tests pass. Asset validation and the production build pass.
+- 71 Node tests and 8 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -43,13 +45,13 @@ Current milestone: the Norway passenger, freight and production-asset implementa
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 2 plus strict 1→2 migration and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **71 Node tests and 7 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
+- **71 Node tests and 8 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests also fail on console warnings; the removed Three.js shadow option was corrected to PCFShadowMap.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
 ## Currently working
 
-Next: the planned Norway gates are complete. Any Arizona/River expansion, additional content depth or release/deployment work should start as a separately scoped milestone.
+Next: city growth and local goods demand are the next Norway simulation milestone. Arizona/River expansion and release/deployment work remain separately scoped.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 

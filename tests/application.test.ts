@@ -80,7 +80,7 @@ test('session visibility pause prevents hidden-time catch-up and dispose is comp
     hidden:()=>hidden,
     listenVisibility:next=>{visibility=next;return ()=>{visibility=null;};}
   };
-  const renderer:WorldRenderer={update:()=>{},pick:()=>null,focus:()=>{},dispose:()=>{disposed++;}};
+  const renderer:WorldRenderer={update:()=>{},pick:()=>null,pickEntity:()=>null,setSelection:()=>{},setOverlay:()=>{},focus:()=>{},dispose:()=>{disposed++;}};
   const game=new RailFrontierGame(createInitialState(),terrain());
   const session=new GameSession(game,renderer,environment);
   session.start();

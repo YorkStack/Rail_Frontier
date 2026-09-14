@@ -22,10 +22,19 @@ export interface SaveStore {
   read(id:string):Promise<string>;
   remove(id:string):Promise<void>;
 }
+export type WorldSelection=
+  | {kind:'town';id:Id<'town'>}
+  | {kind:'industry';id:Id<'industry'>}
+  | {kind:'station';id:Id<'station'>}
+  | {kind:'train';id:Id<'train'>};
+export type MapOverlay='none'|'catchment'|'industry'|'traffic';
 /** Three.js adapter boundary. Renderer state never enters saves. */
 export interface WorldRenderer {
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void;
   pick(screenX:number,screenY:number):Vec3|null;
+  pickEntity(screenX:number,screenY:number):WorldSelection|null;
+  setSelection(selection:WorldSelection|null,state:Readonly<GameState>):void;
+  setOverlay(overlay:MapOverlay,state:Readonly<GameState>):void;
   focus(position:Vec3):void;
   dispose():void;
 }

@@ -2,7 +2,7 @@
 
 Commands: npm ci; npm run check; npm test; npm run validate:assets; npm run build; npm run test:browser; npm run spike:network. Browser tests use installed Google Chrome through Playwright, one worker. On another machine install Chrome or configure an available Playwright browser explicitly. The dev server is started automatically if port 5173 is free. Do not let an unrelated server occupy the fixed port.
 
-Current Norway passenger/freight/art milestone: **71 Node tests**, **7 browser integration/end-to-end tests**, strict TypeScript, Blender GLB pack validation and production build. Browser screenshot/trace/temp outputs are ignored under artifacts/. Compact reference benchmark JSON is copied to docs/evidence/ for review.
+Current Norway passenger/freight/art/inspection milestone: **71 Node tests**, **8 browser integration/end-to-end tests**, strict TypeScript, Blender GLB pack validation and production build. Browser screenshot/trace/temp outputs are ignored under artifacts/. Compact reference benchmark JSON is copied to docs/evidence/ for review.
 
 Core tests cover triangle interpolation/borders/copy isolation, seeded generation/RNG continuation, arc length and distance, graph validity/weighted/reverse/disconnected paths, tangent/grade/radius/cusp constraints, exact terrain boundary crossing with narrow flooded-cell regression, ground/bridge/tunnel quotes, clock frame-rate/speed/pause/debt invariants, train edge crossing, save/load with dwell/turnaround, schema migration/progress guard, invalid saves/ledger/references/reservations, ID allocation and snapshot isolation.
 

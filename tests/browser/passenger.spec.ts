@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs';
 test('empty Norway charter reaches saved passenger revenue through the UI',async({page})=>{
   test.setTimeout(150000);const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
   await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:/Start new company/}).click();await page.getByRole('button',{name:'Pause',exact:true}).click();
-  expect(await page.evaluate(()=>{const state=window.__railProbe.snapshot();return [state.railway.edges.length,state.stations.length,state.trains.length,state.towns.length];})).toEqual([0,0,0,3]);await page.getByRole('button',{name:/Sundvik/}).click();await page.getByRole('button',{name:'Regional view'}).click();
+  expect(await page.evaluate(()=>{const state=window.__railProbe.snapshot();return [state.railway.edges.length,state.stations.length,state.trains.length,state.towns.length];})).toEqual([0,0,0,3]);await page.getByRole('navigation',{name:'Focus a settlement'}).getByRole('button',{name:/Sundvik/}).click();await page.getByRole('button',{name:'Regional view'}).click();
   const towns=await page.evaluate(()=>window.__railProbe.snapshot().towns.slice(0,2).map(town=>town.position));
   await page.getByRole('button',{name:'Survey track'}).click();await page.getByLabel('Corridor').selectOption('free');for(const town of towns)await clickMap(page,town);
   await expect(page.locator('#quote-valid')).toContainText('Feasible');await page.getByRole('button',{name:'Build this alignment'}).click();await page.waitForFunction(()=>window.__railProbe.snapshot().railway.edges.length===1);
