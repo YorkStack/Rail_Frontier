@@ -151,12 +151,13 @@ export class FjordRenderer implements WorldRenderer {
   }
   private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {
     const material=new THREE.ShaderMaterial({
-      uniforms:{time:{value:0},deep:{value:new THREE.Color('#224e5a')},light:{value:new THREE.Color('#618a8b')}},
+      uniforms:{time:{value:0},deep:{value:new THREE.Color('#173f4a')},light:{value:new THREE.Color('#73999b')},sky:{value:new THREE.Color('#b7c9c7')}},
       vertexShader:'varying vec3 world; void main(){ vec4 p=modelMatrix*vec4(position,1.0); world=p.xyz; gl_Position=projectionMatrix*viewMatrix*p; }',
-      fragmentShader:`uniform float time; uniform vec3 deep; uniform vec3 light; varying vec3 world;
-        void main(){ float waves=sin(world.x*.065+world.z*.11+time*.8)*sin(world.x*.021-world.z*.043+time*.5);
-        float streak=pow(max(0.0,sin(world.z*.12+world.x*.01+time*.7)),24.0)*.065;
-        vec3 color=mix(deep,light,.18+waves*.10+streak); gl_FragColor=vec4(color,1.0);
+      fragmentShader:`uniform float time; uniform vec3 deep; uniform vec3 light; uniform vec3 sky; varying vec3 world;
+        void main(){ float a=world.x*.024+world.z*.039+time*.42,b=world.x*.011-world.z*.027-time*.31;
+        vec3 normal=normalize(vec3(cos(a)*.075+cos(b)*.045,1.0,sin(a)*.12-sin(b)*.05));vec3 viewDir=normalize(cameraPosition-world);
+        float fresnel=pow(1.0-max(0.0,dot(normal,viewDir)),3.2),spark=pow(max(0.0,dot(normal,normalize(vec3(-.35,.8,.48)))),72.0);
+        float variation=.5+.5*sin(world.x*.0047+world.z*.0061+sin(world.z*.0013));vec3 color=mix(deep,light,.11+variation*.08);color=mix(color,sky,fresnel*.42);color+=spark*.18;gl_FragColor=vec4(color,1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
         }`
@@ -317,7 +318,7 @@ export class FjordRenderHost {
   dispose():void {if(this.disposed)return;this.renderer.dispose();this.renderer.forceContextLoss();this.disposed=true;}
 }
 function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {return new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}
-function configureWebGLRenderer(renderer:THREE.WebGLRenderer):void {renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;}
+function configureWebGLRenderer(renderer:THREE.WebGLRenderer):void {renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;}
 function terrainSize(terrain:Heightfield):number {return Math.max(terrain.widthM,terrain.depthM);}
 function railwayKey(state:Readonly<GameState>):string {return `${state.railway.revision}|${state.railway.nodes.map(node=>`${node.id}:${node.position.x}:${node.position.y}:${node.position.z}`).join(',')}|${state.railway.edges.map(edge=>`${edge.id}:${edge.from}:${edge.to}`).join(',')}`;}
 export function disposeObject(root:THREE.Object3D):void {
