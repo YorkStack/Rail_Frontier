@@ -34,7 +34,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - QA-001 now passes as a separate empty-network browser journey: Norway selection, camera navigation, free track, two stations, locomotive/coach purchase, route assignment, physical service, passenger delivery, revenue and operating cost, reconciled cash, speed/pause, save, reload, exact load and resumed ticks with a clean console.
 - ECON-003 now supplies the first production chain. Granli Forest creates timber into capped storage; Sundvik Sawmill atomically consumes timber and produces lumber. Covered stations transfer both goods through capacity-bound freight wagons, towns consume delivered lumber, distance-based freight revenue posts once, and blocked partial cargo remains aboard.
 - The commissioned preview begins with a small working stock so a player can buy a freight consist and operate the full Granli–Sundvik chain immediately. A new company starts with empty industries and must wait for production. The railway office shows recipe progress, storage, timber/lumber inventory and typed onboard cargo.
-- The Blender 4.0.2 Norway pack supplies two LODs each for 32 asset types / 64 GLBs plus 12 shared PNG maps, totaling 1.19 MiB: the detailed current railway kit, mixed vegetation/rocks, eight timber-house finishes and dedicated farm/industry structures. No unrelated model pack is requested.
+- The Blender 4.0.2 Norway pack supplies two LODs each for 33 asset types / 66 GLBs plus 12 shared PNG maps, totaling 1.45 MiB: the detailed current railway kit, the new 1960 Nord Di 3B, mixed vegetation/rocks, eight timber-house finishes and dedicated farm/industry structures. No unrelated model pack is requested.
 - Three.js renders material-merged rolling stock/stations as LOD objects and batches the authored scenery, houses and bridge pieces. The final fixed Norway views measure 187–226 calls and 1.45–1.77 million triangles while preserving a 16.8 ms frame p95 in the documented local run.
 - The renderer now lives at the production boundary in `src/rendering/fjord-renderer.ts`. Trains and stations carry ephemeral pick identities; town and industry map labels use the same `WorldSelection` contract. A live contextual card reports authoritative state for all four entity kinds and follows a selected moving train.
 - Station catchment, industry-site and rail-traffic overlays are available from the strategy toolbar. Overlay geometry rebuilds only when the relevant station, industry or reservation signature changes, and map labels yield pointer input while a construction tool is active.
@@ -44,7 +44,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 96 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 97 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -55,7 +55,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 5 plus strict sequential 1→2→3→4→5 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **96 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- **97 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -63,7 +63,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport, six-class station progression and the campaign calendar/catalogue boundary are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility and dedicated ledger income are visible in the browser and survive save/reload. Future-era Blender vehicles and electric-route infrastructure, Arizona/River expansion and release/deployment remain later work.
+Mail transport, six-class station progression, the campaign calendar/catalogue boundary and first later-era diesel are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility and dedicated ledger income are visible in the browser and survive save/reload. Electric-route infrastructure and later Blender vehicles, Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -94,4 +94,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next product expansion is VEHICLE-002: author and validate the first future-era Blender locomotive from the researched Norway briefs, then add its balanced catalogue record. Electric entries wait for explicit route electrification; Arizona/River content follows after the Norway systems remain stable.
+The next product expansion is TECH-002 route electrification: persist and price electrified infrastructure, expose it through commands/UI and prevent electric assignment over unelectrified paths. The 1922 El 1 Blender vehicle follows once that rule exists; Arizona/River content follows after the Norway systems remain stable.

@@ -6,7 +6,7 @@
     "script": "tools/blender/generate_norway_pack.py",
     "sceneryScript": "tools/blender/generate_norway_scenery.py",
     "architectureScript": "tools/blender/generate_norway_architecture.py",
-    "rollingStockDetail": "GFX-006B"
+    "rollingStockDetail": "GFX-006B+VEHICLE-002"
   },
   "assets": [
     {
@@ -639,6 +639,33 @@
       ]
     },
     {
+      "id": "nord-di-3b",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        5.5,
+        20.5
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/nord-di-3b_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/nord-di-3b_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
       "id": "fjord-passenger-coach",
       "kind": "vehicle",
       "requiredNodes": [
@@ -942,6 +969,46 @@
     },
     {
       "materialPrefix": "RF_Freight_Metal",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Diesel_Paint",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Diesel_Metal",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Diesel_Roof",
+      "map": "rolling-metal-base",
+      "normalMap": "rolling-metal-normal",
+      "roughnessMap": "rolling-metal-roughness",
+      "repeat": [
+        2,
+        4
+      ]
+    },
+    {
+      "materialPrefix": "RF_Diesel_Grille",
       "map": "rolling-metal-base",
       "normalMap": "rolling-metal-normal",
       "roughnessMap": "rolling-metal-roughness",
