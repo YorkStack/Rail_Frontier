@@ -6,6 +6,7 @@ export type GameCommand =
   | { type:'setSpeed'; speed:Speed }
   | { type:'buildTrack'; curve:CubicCurve; from:RailAnchor; to:RailAnchor; expectedRevision:number; quotedCost:number }
   | { type:'buildStation'; nodeId:Id<'node'>; classId:string }
+  | { type:'upgradeStation'; stationId:Id<'station'>; classId:string }
   | { type:'purchaseTrain'; locomotiveId:string; vehicleIds:string[]; stationId:Id<'station'> }
   | { type:'createRoute'; stops:Id<'station'>[]; mode:'shuttle'|'loop' }
   | { type:'assignRoute'; trainId:Id<'train'>; routeId:Id<'route'> };

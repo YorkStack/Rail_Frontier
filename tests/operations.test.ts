@@ -50,3 +50,14 @@ test('purchased train can receive a connected shuttle route from its current sta
   assert.equal(train.routeId,'route:12');assert.equal(train.phase,'running');assert.deepEqual(train.motion.path,[{edgeId:'edge:7',reverse:false}]);
   assert.equal(state.operations.trainServices['train:10']!.nextStopIndex,1);
 });
+
+test('station platforms reject overlong purchases and route assignments until upgraded',()=>{
+  const instance=game(),longConsist=Array<string>(5).fill('fjord-passenger-coach'),before=JSON.stringify(instance.snapshot());
+  assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:longConsist,stationId:'station:8'}}),{ok:false,reason:'Train is too long for the purchase station platform'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  assert.equal(instance.dispatch({sequence:1,command:{type:'upgradeStation',stationId:'station:8',classId:'small-station'}}).ok,true);
+  assert.equal(instance.dispatch({sequence:2,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:longConsist,stationId:'station:8'}}).ok,true);
+  assert.equal(instance.dispatch({sequence:3,command:{type:'createRoute',stops:['station:8','station:9'],mode:'shuttle'}}).ok,true);
+  assert.deepEqual(instance.dispatch({sequence:4,command:{type:'assignRoute',trainId:'train:11',routeId:'route:13'}}),{ok:false,reason:'Train is too long for the platform at station:9'});
+  assert.equal(instance.dispatch({sequence:4,command:{type:'upgradeStation',stationId:'station:9',classId:'small-station'}}).ok,true);
+  assert.equal(instance.dispatch({sequence:5,command:{type:'assignRoute',trainId:'train:11',routeId:'route:13'}}).ok,true);
+});

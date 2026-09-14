@@ -16,7 +16,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Safe-integer finance service with ledger reconciliation, category signs, overdraft/overflow rejection, exactly-once command replay behavior and saved fractional train running costs.
 - Versioned 16 km Norway heightfield with deterministic fjord/valley relief, sea, forest/rock/urban masks, authoritative settlement elevations and a stable seeded fingerprint.
 - Construction handler with live terrain quote/revision checks, funds, engineering span persistence, terminal tangent checks, endpoint junction splitting, inherited infrastructure cost/upkeep and disconnected interior crossings.
-- Station content, rail/ground placement and deterministic closest town coverage.
+- Station content, rail/ground placement and deterministic closest town coverage. Six classes now progress from Rural Halt to Major Terminal; atomic upgrades charge only the cost difference, expand catchment/storage/platform capability, recalculate the served town and raise daily upkeep. Purchases and routes reject trains that exceed platform length.
 - Original Norway steam locomotive and coach content, atomic train purchase, connected route validation and route assignment from the train's current station.
 - Physical train simulation with consist mass/power/tractive force, signed grade, service braking, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
 - Deterministic edge reservations prevent opposing trains from sharing track and expose blocked service state.
@@ -43,7 +43,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 89 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 93 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -54,7 +54,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 4 plus strict sequential 1→2→3→4 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **89 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- **93 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -62,7 +62,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport is complete. Town demand, onboard cargo, global deliveries and dedicated ledger income are visible in the browser and survive save/reload. Additional station classes, Arizona/River expansion and release/deployment remain later work.
+Mail transport and the six-class station progression are complete. Town demand, onboard cargo, station capability, global deliveries and dedicated ledger income are visible in the browser and survive save/reload. Vehicle/technology progression, Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -93,4 +93,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The remaining work is predominantly implementation: expand station classes and capacity rules before starting the Arizona/River content expansion.
+The next product expansion is the data-driven vehicle/technology progression already researched for later steam, diesel and electric eras; Arizona/River content follows after the Norway systems remain stable.

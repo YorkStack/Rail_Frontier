@@ -14,6 +14,8 @@ Town economy is evaluated once per economic day. A town needs a covered station 
 
 Visual goal: deep blue water, steep green and rocky slopes, high-altitude snow, dense forest, small original Norwegian-style buildings, moving trains, waterfall mist, bridges and tunnel portals. Strategic camera must smoothly pan, zoom, rotate and tilt, focus selected objects and follow trains. Tool cancellation and strategic-view reset must be accessible by keyboard.
 
+Station size progresses from rural halt through small, town and city stations to freight and major terminals. Larger classes cost more to build and maintain while increasing catchment, storage and usable train length. Existing stations can be expanded for the price difference; routes must fit their shortest platform.
+
 The UI includes a main menu (new/continue/load/settings/credits), cash/date/speed/objective HUD, primary rail/station/train/route tools, contextual selection panels and live finance reports. Avoid covering the world with permanent panels. The forest-green field-survey UI uses warm pale type and brass accents, locally bundled DM Sans/Libre Caslon Display, a lightweight DOM layer and Three.js/Vite. Additional campaigns and deeper management panels remain planned.
 
 Deferred: competitors, multiplayer, stocks, advanced signals, large vehicle catalogue, full weather physics. Steam/diesel/electric content architecture is planned, but only one original early-era locomotive and passenger coach are needed first.

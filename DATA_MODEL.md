@@ -7,7 +7,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 | WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; 4 km study and 16 km Norway generators implemented |
 | RailNode | node:N, position | Graph connectivity |
 | RailEdge | edge:N, from/to, ownerId | Cubic curve and speed limit |
-| Station | station:N, nodeId, optional townId | Coverage connection and cargo storage |
+| Station | station:N, nodeId, optional townId | Class-driven coverage, platform and cargo storage |
 | Route | route:N, ordered station IDs | Shuttle or loop service |
 | Train | train:N, routeId | Consist content IDs, phase, speed, cargo and motion |
 | MotionState | ordered edge traversal IDs | Current leg, distance along traversal, arrival |
@@ -26,5 +26,7 @@ Money is integer minor currency units, currently displayed conceptually as NOK-l
 Motion distance measures metres in traversal direction, so reverse geometry samples `length − distance`. The edge index changes only when its distance is consumed. Arrival clamps to the final endpoint. Idle trains may have no path. Node positions and curve endpoints match within 1 mm. Train fixtures use continuous paths, but normal movement calls assume validated input.
 
 Derived caches (arc tables, route adjacency, scene entities, spatial indices, quote previews, graphics buffers) are not persisted. Rebuild from authoritative state. RNG state is uint32; src/world/random.ts implements Mulberry32 with tested continuation. Rendering has an independent seeded stream. No Math.random in authoritative simulation.
+
+StationDefinition provides purchase cost, daily maintenance, catchment radius, storage capacity and platform length for six station classes. `upgradeStation` changes the saved class ID without another schema field; it permits only capability-increasing classes and posts the purchase-cost difference as capital spending.
 
 Schema 4 includes demand queues; per-train service and financial state; exclusive reservations; built engineering spans and upkeep; industry cycles; per-town economy state; passenger/mail/timber/lumber delivery totals; completed objectives; monthly accounts; and command sequence. Schema 3 introduced town economies; schema 4 adds the mail delivery total and the mail cargo/income variants. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Any breaking state change needs an explicit migration.
