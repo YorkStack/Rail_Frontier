@@ -2,8 +2,8 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
-GRAPHICS_IMPLEMENTATION_STARTED=false
-AWAITING_USER_MODEL_SWITCH=true
+GRAPHICS_IMPLEMENTATION_STARTED=true
+AWAITING_USER_MODEL_SWITCH=false
 
 # Current status — Norway management implementation, 2026-09-14
 
@@ -62,7 +62,7 @@ User priority change, 2026-09-14: complete the Norway graphics enhancement befor
 
 Texture planning was extended on 2026-09-14 in [docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md). Inspected photos now inform four house colour families, eight wall/trim/door combinations, wood/roof/window materials, existing steam pipes/cab details and coach/freight textures. Future locomotive references cover type 18a-inspired steam detail, El 1, Di 3, Di 4 and El 18, with model and livery dates separated. No new textures or models have been generated.
 
-**Pause now for the user's switch to Sol.** On explicit continuation, start GFX-001 and follow GFX-001 through GFX-008, including the added GFX-006B rolling-stock detail after GFX-006. The plan specifies original Blender rocks, varied forests/vegetation, timber buildings, materials, a V2 terrain for new worlds, and preservation of original terrain for V1 saves. Do not automatically resume mail work.
+The user switched to Sol and resumed implementation. GFX-001 is complete: [the baseline record](docs/art/GFX001_BASELINE.md) freezes the V1 generator independently from art settings and adds seven reproducible visual cameras. The original sampled fingerprint remains unchanged. Proceed with GFX-002 session/content compatibility, then continue through GFX-008 including GFX-006B. Do not automatically resume mail work.
 
 Remembered gameplay checkpoint: **fb0abf4 — Add company and route reporting**, branch implementation/passenger-slice. FIN-002 remains complete with schema 3. **After GFX-008 passes, resume mail transport** (town mail waiting exists; transport/delivery/income do not). Additional station classes, Arizona/River expansion and release/deployment remain later work.
 

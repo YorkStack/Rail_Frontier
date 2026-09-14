@@ -22,6 +22,7 @@ import { industryCoverage,townCoverage } from './simulation/coverage.js';
 import { connectedTowns } from './simulation/city.js';
 import type { MapOverlay,WorldSelection } from './application/ports.js';
 import { companyReport } from './simulation/accounting.js';
+import type {NorwayCameraPresetId} from './rendering/norway-camera-presets.js';
 
 const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
@@ -307,7 +308,7 @@ async function start():Promise<void> {
   const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);view.dispose();void store.close();};
   if(import.meta.hot)import.meta.hot.dispose(dispose);
   if(import.meta.env.DEV) {
-    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
+    const probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),regional:()=>view.regional(),cameraPreset:(id:NorwayCameraPresetId)=>view.setCameraPreset(id),project:(position:Vec3)=>view.project(position),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);frames.length=0;renderTimes.length=0;tickTimes.length=0;},metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
     Object.defineProperty(window,'__railProbe',{value:probe,configurable:true});
   }
 }

@@ -6,6 +6,7 @@ import type { CubicCurve, Vec3 } from '../src/domain/model.js';
 import { compileCurve } from '../src/rail/geometry.js';
 import { quoteTrack } from '../src/rail/planner.js';
 import { generateWorld } from '../src/world/generator.js';
+import {norwayV1WorldProfile} from '../src/world/norway-v1.js';
 
 const line=(p0:Vec3,p3:Vec3):CubicCurve=>({p0,p1:{x:(2*p0.x+p3.x)/3,y:(2*p0.y+p3.y)/3,z:(2*p0.z+p3.z)/3},p2:{x:(p0.x+2*p3.x)/3,y:(p0.y+2*p3.y)/3,z:(p0.z+2*p3.z)/3},p3});
 const fingerprint=(seed:number)=>{
@@ -21,6 +22,11 @@ test('production Norway terrain has a stable versioned fingerprint',()=>{
   assert.equal(first,fingerprint(norway.world.seed));
   assert.notEqual(first,fingerprint(norway.world.seed+1));
   assert.equal(first,'5e0a5b63073156cc412b17986651d1e777270198ab10f9e902e78e3cce5e7f1e');
+});
+
+test('V1 simulation profile is frozen and independent of the art palette',()=>{
+  assert.ok(Object.isFrozen(norwayV1WorldProfile));
+  assert.deepEqual({...norwayV1WorldProfile},{biomeId:'fjord',widthM:16000,depthM:16000,cellM:25,peakM:1250,seaLevelM:0,generatorVersion:1});
 });
 
 test('Norway settlements sit on authoritative land with deterministic masks',()=>{
