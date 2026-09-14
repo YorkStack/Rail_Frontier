@@ -31,6 +31,11 @@ test('vehicle purchase uses the persisted campaign year and rejects future stock
   state.startingYear=1960;const available=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(available.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-di-3b',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(available.snapshot().trains[0]!.locomotiveId,'nord-di-3b');
 });
 
+test('Di 4 purchase follows its 1981 delivery boundary',()=>{
+  const state=operationalState();state.startingYear=1980;let instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-di-4',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  state.startingYear=1981;instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-di-4',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(instance.snapshot().trains[0]!.locomotiveId,'nord-di-4');
+});
+
 test('El 1 purchase requires its 1922 era and powered station track',()=>{
   const state=operationalState();state.startingYear=1921;let instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());
   assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);
