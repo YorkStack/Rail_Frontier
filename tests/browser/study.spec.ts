@@ -2,7 +2,8 @@ import { test,expect } from '@playwright/test';
 import { mkdirSync,writeFileSync } from 'node:fs';
 import type { GameState,Speed,Vec3 } from '../../src/domain/model.js';
 import type { AssetReport,RenderStats } from '../../src/rendering/fjord-renderer.js';
-declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[];snapshot():GameState;save():Promise<number>;load():Promise<number>;setSpeed(speed:Speed):void;stats():RenderStats;setStress(enabled:boolean):void;focusTrain():void;regional():void;project(position:Vec3):{x:number;y:number;visible:boolean};metrics():RenderStats&{frames:number[];renderMs:number[];tickMs:number[];userAgent:string;viewport:number[];dpr:number};pick(x:number,y:number):Vec3|null;dispose():void}}}
+import type {NorwayCameraPresetId} from '../../src/rendering/norway-camera-presets.js';
+declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[];snapshot():GameState;save():Promise<number>;load():Promise<number>;setSpeed(speed:Speed):void;stats():RenderStats;setStress(enabled:boolean):void;focusTrain():void;regional():void;cameraPreset(id:NorwayCameraPresetId):void;project(position:Vec3):{x:number;y:number;visible:boolean};metrics():RenderStats&{frames:number[];renderMs:number[];tickMs:number[];userAgent:string;viewport:number[];dpr:number};pick(x:number,y:number):Vec3|null;dispose():void}}}
 
 test('runtime asset, camera, alignment, pause and durable save validation',async({page})=>{
   const errors:string[]=[],models:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});page.on('request',request=>{if(request.url().includes('/models/'))models.push(request.url());});

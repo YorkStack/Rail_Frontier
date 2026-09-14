@@ -17,6 +17,7 @@ import { sampleDistance,type TrackGeometry } from '../rail/geometry.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
+import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -280,7 +281,8 @@ export class FjordRenderer implements WorldRenderer {
   }
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
   followTrain():void {this.focus(this.trainPosition);this.camera.position.copy(this.trainPosition).add(new THREE.Vector3(35,21,45));this.follow=true;}
-  regional():void {this.follow=false;const production=this.terrain.widthM>4000;this.controls.target.set(production?5200:1850,production?180:80,production?5600:1970);this.camera.position.set(production?13000:3500,production?6500:1750,production?14500:3900);this.controls.update();}
+  setCameraPreset(id:NorwayCameraPresetId):void {if(this.terrain.widthM<=4000){this.regional();return;}const preset=norwayCameraPresets[id],sample=this.terrain.sample(preset.targetXZ.x,preset.targetXZ.z),target=new THREE.Vector3(preset.targetXZ.x,sample.elevationM,preset.targetXZ.z);this.follow=false;this.controls.target.copy(target);this.camera.position.set(target.x+preset.offset.x,target.y+preset.offset.y,target.z+preset.offset.z);this.controls.update();}
+  regional():void {if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
     this.modelState=current;this.syncLabels(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
