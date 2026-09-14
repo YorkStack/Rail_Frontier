@@ -6,7 +6,7 @@
     "script": "tools/blender/generate_norway_pack.py",
     "sceneryScript": "tools/blender/generate_norway_scenery.py",
     "architectureScript": "tools/blender/generate_norway_architecture.py",
-    "rollingStockDetail": "GFX-006B+VEHICLE-002+VEHICLE-003+VEHICLE-004"
+    "rollingStockDetail": "GFX-006B+VEHICLE-002+VEHICLE-003+VEHICLE-004+VEHICLE-005"
   },
   "assets": [
     {
@@ -714,6 +714,33 @@
         },
         {
           "path": "/models/norway/nord-di-4_lod1.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 140000
+        }
+      ]
+    },
+    {
+      "id": "nord-el-18",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        4,
+        7.5,
+        20.5
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/nord-el-18_lod0.glb",
+          "maxTriangles": 12000,
+          "maxBytes": 350000
+        },
+        {
+          "path": "/models/norway/nord-el-18_lod1.glb",
           "maxTriangles": 3000,
           "maxBytes": 140000
         }

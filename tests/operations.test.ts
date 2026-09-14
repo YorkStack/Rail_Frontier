@@ -36,6 +36,11 @@ test('Di 4 purchase follows its 1981 delivery boundary',()=>{
   state.startingYear=1981;instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-di-4',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(instance.snapshot().trains[0]!.locomotiveId,'nord-di-4');
 });
 
+test('El 18 purchase follows its 1996 delivery and electrification boundary',()=>{
+  const state=operationalState();state.startingYear=1995;state.operations.infrastructure['edge:7']!.electrified=true;state.operations.infrastructure['edge:7']!.electrificationCost=3_600_000;state.operations.infrastructure['edge:7']!.electrificationMaintenancePerDay=144;let instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-18',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);
+  state.startingYear=1996;instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4)));assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-18',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);assert.equal(instance.snapshot().trains[0]!.locomotiveId,'nord-el-18');
+});
+
 test('El 1 purchase requires its 1922 era and powered station track',()=>{
   const state=operationalState();state.startingYear=1921;let instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());
   assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-el-1',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);

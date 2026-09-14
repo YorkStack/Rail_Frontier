@@ -1574,6 +1574,60 @@
         ]
       },
       {
+        "id": "nord-el-18",
+        "kind": "vehicle",
+        "lods": [
+          {
+            "file": "assets/runtime/models/norway/nord-el-18_lod0.glb",
+            "bytes": 178100,
+            "triangles": 1944,
+            "materials": 7,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.5700999945402145,
+                0.04404032230377197,
+                -9.25
+              ],
+              "max": [
+                1.5700999945402145,
+                6.867631610482931,
+                9.25
+              ]
+            },
+            "dimensions": [
+              3.140199989080429,
+              6.823591288179159,
+              18.5
+            ]
+          },
+          {
+            "file": "assets/runtime/models/norway/nord-el-18_lod1.glb",
+            "bytes": 138420,
+            "triangles": 1408,
+            "materials": 7,
+            "hasUvs": true,
+            "bounds": {
+              "min": [
+                -1.5700999945402145,
+                0.029999971389770508,
+                -9.25
+              ],
+              "max": [
+                1.5700999945402145,
+                6.867631610482931,
+                9.25
+              ]
+            },
+            "dimensions": [
+              3.140199989080429,
+              6.837631639093161,
+              18.5
+            ]
+          }
+        ]
+      },
+      {
         "id": "fjord-passenger-coach",
         "kind": "vehicle",
         "lods": [
