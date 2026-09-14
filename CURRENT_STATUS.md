@@ -60,7 +60,9 @@ Current milestone: the Norway passenger, freight, production-asset, world-inspec
 
 User priority change, 2026-09-14: complete the Norway graphics enhancement before continuing gameplay. Planning is complete in [docs/art/NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md), based on actual Kartverket map views, inspected Aurlandsfjord/Undredal/Bakka photographs and historical settlement references. Local Blender 4.0.2 was verified; no new graphics assets or runtime changes were made during planning.
 
-**Pause now for the user's switch to Sol.** On explicit continuation, start GFX-001 and follow GFX-001 through GFX-008. The plan specifies original Blender rocks, varied forests/vegetation, timber buildings, materials, a V2 terrain for new worlds, and preservation of original terrain for V1 saves. Do not automatically resume mail work.
+Texture planning was extended on 2026-09-14 in [docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md). Inspected photos now inform four house colour families, eight wall/trim/door combinations, wood/roof/window materials, existing steam pipes/cab details and coach/freight textures. Future locomotive references cover type 18a-inspired steam detail, El 1, Di 3, Di 4 and El 18, with model and livery dates separated. No new textures or models have been generated.
+
+**Pause now for the user's switch to Sol.** On explicit continuation, start GFX-001 and follow GFX-001 through GFX-008, including the added GFX-006B rolling-stock detail after GFX-006. The plan specifies original Blender rocks, varied forests/vegetation, timber buildings, materials, a V2 terrain for new worlds, and preservation of original terrain for V1 saves. Do not automatically resume mail work.
 
 Remembered gameplay checkpoint: **fb0abf4 — Add company and route reporting**, branch implementation/passenger-slice. FIN-002 remains complete with schema 3. **After GFX-008 passes, resume mail transport** (town mail waiting exists; transport/delivery/income do not). Additional station classes, Arizona/River expansion and release/deployment remain later work.
 

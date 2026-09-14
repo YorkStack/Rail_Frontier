@@ -2,6 +2,8 @@
 
 Planned enhancement, 2026-09-14: [Norway graphics handoff](docs/art/NORWAY_GRAPHICS_PLAN.md) specifies a separate original Blender scenery generator for fractured rocks, mixed vegetation and period-oriented buildings, baked PBR textures, shared atlas references, footprint metadata, instancing and explicit engine validation. This is a plan, not an already exported pack. The existing verified pipeline and asset counts below describe checkpoint `fb0abf4`.
 
+Planned texture extension: [Norway timber and rolling stock](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md) defines curated wall/trim/door palettes, original colour/normal/ORM maps, shared atlas ownership, UV/LOD and residency limits, current steam/coach/freight detail, and separately dated future diesel/electric briefs. GFX-006B integrates current rolling stock after the building kit; later vehicle classes remain separate content work. These deliverables have not been generated.
+
 Verified locally: Blender 4.0.2, Python 3.10.13, glTF 2.0 exporter, background CLI. Executable: `/Applications/Blender.app/Contents/MacOS/Blender`. Python and glTF export operator were inspected through the actual running application.
 
 Generate:
