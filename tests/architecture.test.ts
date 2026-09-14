@@ -46,17 +46,21 @@ test('cubic root isolation includes tangent contact with a boundary',()=>{
   const roots=cubicRoots([.25,-1/12,-1/12,.25],0);assert.ok(roots.some(t=>Math.abs(t-.5)<1e-8));
 });
 test('schema 1 migrates without mutating legacy state; nonadvancing migrations fail',()=>{
-  const state=createStudyState(),{operations,...legacyState}=state,legacy={schemaVersion:1,gameVersion:'0.1.0',state:legacyState},json=JSON.stringify(legacy);
+  const state=createStudyState(),{operations,startingYear:_,...legacyState}=state,legacy={schemaVersion:1,gameVersion:'0.1.0',state:legacyState},json=JSON.stringify(legacy);
   const loaded=deserialize(json);assert.deepEqual(loaded,{...state,operations:emptyOperations(state.towns)});assert.equal(JSON.stringify(legacy),json);
   const migrate=migrations.get(1)!;migrations.set(1,value=>value);try{assert.throws(()=>deserialize(json),/advance/);}finally{migrations.set(1,migrate);}
 });
 test('schema 2 adds deterministic town economies without changing prior operations',()=>{
-  const state=createStudyState(),{townEconomy,delivered,...rest}=state.operations,{mail,...legacyDelivered}=delivered,operations={...rest,delivered:legacyDelivered},legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...state,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{startingYear:_,...historicalState}=state,{townEconomy,delivered,...rest}=state.operations,{mail,...legacyDelivered}=delivered,operations={...rest,delivered:legacyDelivered},legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...historicalState,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,{...state,operations:{...operations,townEconomy:initialTownEconomy(state.towns),delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(townEconomy!==undefined&&mail===0,true);
 });
 test('schema 3 adds mail delivery totals without changing prior town economy',()=>{
-  const state=createStudyState(),{mail,...legacyDelivered}=state.operations.delivered,legacy={schemaVersion:3,gameVersion:'0.3.0',state:{...state,operations:{...state.operations,delivered:legacyDelivered}}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{startingYear:_,...historicalState}=state,{mail,...legacyDelivered}=state.operations.delivered,legacy={schemaVersion:3,gameVersion:'0.3.0',state:{...historicalState,operations:{...state.operations,delivered:legacyDelivered}}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,{...state,operations:{...state.operations,delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(mail,0);
+});
+test('schema 4 adds the campaign starting year without changing operational state',()=>{
+  const state=createStudyState(),{startingYear,...historicalState}=state,legacy={schemaVersion:4,gameVersion:'0.4.0',state:historicalState},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.deepEqual(loaded,state);assert.equal(loaded.startingYear,1900);assert.equal(JSON.stringify(legacy),json);assert.equal(startingYear,1900);
 });
 test('save validation rejects conflicting edge reservations',()=>{
   const state=createStudyState();state.operations.reservations=[{edgeId:'edge:9',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}];assert.throws(()=>serialize(state),/Conflicting/);

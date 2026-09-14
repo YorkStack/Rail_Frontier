@@ -4,7 +4,7 @@ test('commissioned Norway line carries timber through the sawmill to town',async
   test.setTimeout(160000);const errors:string[]=[];page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});page.on('pageerror',error=>errors.push(error.message));await page.goto('/?skip-menu');await page.waitForFunction(()=>window.__railProbe?.ready===true);
   await page.getByRole('button',{name:'Operations'}).click();
   const setup=await page.evaluate(()=>{const state=window.__railProbe.snapshot(),byTown=(townId:string)=>state.stations.find(station=>station.townId===townId)!.id;return {granli:byTown('town:3'),sundvik:byTown('town:2')};});
-  await page.locator('#purchase-station').selectOption(setup.granli);await page.locator('#consist-kind').selectOption('freight');await page.locator('#coach-count').selectOption('1');await page.getByRole('button',{name:'Buy steam consist'}).click();
+  await page.locator('#purchase-station').selectOption(setup.granli);await page.locator('#consist-kind').selectOption('freight');await page.locator('#coach-count').selectOption('1');await page.getByRole('button',{name:'Buy consist'}).click();
   const trainId=await page.evaluate(()=>window.__railProbe.snapshot().trains.find(train=>train.vehicleIds.includes('fjord-freight-wagon'))!.id);
   await page.locator('#route-from').selectOption(setup.granli);await page.locator('#route-to').selectOption(setup.sundvik);await page.getByRole('button',{name:'Create shuttle route'}).click();
   const routeId=await page.evaluate(()=>window.__railProbe.snapshot().routes.at(-1)!.id);await page.locator('#assign-train').selectOption(trainId);await page.locator('#assign-route-select').selectOption(routeId);await page.getByRole('button',{name:'Assign service'}).click();

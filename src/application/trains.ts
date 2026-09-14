@@ -3,7 +3,7 @@ import type { GameCommand } from './ports.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { allocateId, type Money } from '../domain/model.js';
-import { ECONOMY_INTERVAL_TICKS } from '../simulation/clock.js';
+import { currentYear } from '../simulation/calendar.js';
 import { postExpense } from '../simulation/finance.js';
 
 type PurchaseTrain=Extract<GameCommand,{type:'purchaseTrain'}>;
@@ -15,8 +15,7 @@ export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=
   const vehicles=command.vehicleIds.map(id=>vehicleDefinition(id));
   const invalidIndex=vehicles.findIndex(vehicle=>!vehicle||vehicle.kind!=='wagon');
   if(invalidIndex>=0)throw new Error(`Unknown rail vehicle: ${command.vehicleIds[invalidIndex]}`);
-  const year=1900+Math.floor(state.tick/(ECONOMY_INTERVAL_TICKS*360));
-  if([locomotive,...vehicles].some(vehicle=>vehicle!.availableYear>year))throw new Error('A selected vehicle is not available yet');
+  if([locomotive,...vehicles].some(vehicle=>vehicle!.availableYear>currentYear(state)))throw new Error('A selected vehicle is not available yet');
   const cost=[locomotive,...vehicles].reduce<Money>((sum,vehicle)=>sum+vehicle!.purchaseCost,0);
   if(!Number.isSafeInteger(cost))throw new Error('Vehicle purchase exceeds finance range');
   if(state.company.cash<cost)throw new Error('Insufficient funds');

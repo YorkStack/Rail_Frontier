@@ -24,6 +24,11 @@ test('mixed invalid vehicle selection and overdraft produce no train or debit',(
   assert.equal(JSON.stringify(poorGame.snapshot()),poorBefore);
 });
 
+test('vehicle purchase uses the persisted campaign year and rejects future stock atomically',()=>{
+  const state=operationalState();state.startingYear=1899;const instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),before=JSON.stringify(instance.snapshot());
+  assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}),{ok:false,reason:'A selected vehicle is not available yet'});assert.equal(JSON.stringify(instance.snapshot()),before);
+});
+
 test('train purchase creates an idle consist and one capital transaction',()=>{
   const instance=game();
   assert.deepEqual(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach','fjord-passenger-coach'],stationId:'station:8'}}),{ok:true,createdIds:['train:10']});
