@@ -1,6 +1,6 @@
 # Data model
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 3 is implemented; contracts remain pre-release rather than a released save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 4 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
@@ -11,7 +11,7 @@ Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/sav
 | Route | route:N, ordered station IDs | Shuttle or loop service |
 | Train | train:N, routeId | Consist content IDs, phase, speed, cargo and motion |
 | MotionState | ordered edge traversal IDs | Current leg, distance along traversal, arrival |
-| CargoLot | origin/destination station IDs | Integer quantity and carried distance |
+| CargoLot | origin/destination station IDs | Integer passenger, mail, timber or lumber quantity and carried distance |
 | Town | town:N | Position, name, population |
 | TownEconomyState | keyed by town:N | Lumber demand/supply, mail, activity, service days and growth carry |
 | Industry | industry:N, definitionId | Typed inventory |
@@ -27,4 +27,4 @@ Motion distance measures metres in traversal direction, so reverse geometry samp
 
 Derived caches (arc tables, route adjacency, scene entities, spatial indices, quote previews, graphics buffers) are not persisted. Rebuild from authoritative state. RNG state is uint32; src/world/random.ts implements Mulberry32 with tested continuation. Rendering has an independent seeded stream. No Math.random in authoritative simulation.
 
-Schema 3 includes demand queues; per-train service and financial state; exclusive reservations; built engineering spans and upkeep; industry cycles; per-town economy state; delivered totals; completed objectives; monthly accounts; and command sequence. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Any breaking state change needs an explicit migration.
+Schema 4 includes demand queues; per-train service and financial state; exclusive reservations; built engineering spans and upkeep; industry cycles; per-town economy state; passenger/mail/timber/lumber delivery totals; completed objectives; monthly accounts; and command sequence. Schema 3 introduced town economies; schema 4 adds the mail delivery total and the mail cargo/income variants. VehicleDefinition, StationDefinition and IndustryRecipe fix reusable content fields. Any breaking state change needs an explicit migration.

@@ -51,8 +51,12 @@ test('schema 1 migrates without mutating legacy state; nonadvancing migrations f
   const migrate=migrations.get(1)!;migrations.set(1,value=>value);try{assert.throws(()=>deserialize(json),/advance/);}finally{migrations.set(1,migrate);}
 });
 test('schema 2 adds deterministic town economies without changing prior operations',()=>{
-  const state=createStudyState(),{townEconomy,...operations}=state.operations,legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...state,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
-  assert.deepEqual(loaded,{...state,operations:{...operations,townEconomy:initialTownEconomy(state.towns)}});assert.equal(JSON.stringify(legacy),json);
+  const state=createStudyState(),{townEconomy,delivered,...rest}=state.operations,{mail,...legacyDelivered}=delivered,operations={...rest,delivered:legacyDelivered},legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...state,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.deepEqual(loaded,{...state,operations:{...operations,townEconomy:initialTownEconomy(state.towns),delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(townEconomy!==undefined&&mail===0,true);
+});
+test('schema 3 adds mail delivery totals without changing prior town economy',()=>{
+  const state=createStudyState(),{mail,...legacyDelivered}=state.operations.delivered,legacy={schemaVersion:3,gameVersion:'0.3.0',state:{...state,operations:{...state.operations,delivered:legacyDelivered}}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.deepEqual(loaded,{...state,operations:{...state.operations,delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(mail,0);
 });
 test('save validation rejects conflicting edge reservations',()=>{
   const state=createStudyState();state.operations.reservations=[{edgeId:'edge:9',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}];assert.throws(()=>serialize(state),/Conflicting/);

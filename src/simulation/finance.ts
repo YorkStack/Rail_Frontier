@@ -21,7 +21,7 @@ function requirePositiveMoney(value:number,label:string):void {
 export function postTransaction(state:GameState,post:TransactionPost):Id<'transaction'> {
   requireMoney(post.amount,'Transaction amount');
   if(post.entityId.length===0||post.description.length===0)throw new Error('Transaction metadata is required');
-  const income=post.category==='passenger'||post.category==='freight';
+  const income=post.category==='passenger'||post.category==='mail'||post.category==='freight';
   if(income!==post.amount>0)throw new Error('Transaction amount has the wrong sign for its category');
   if(reconcileCash(state)!==state.company.cash)throw new Error('Ledger does not reconcile');
   const cash=state.company.cash+post.amount;
@@ -38,7 +38,7 @@ export function postExpense(state:GameState,category:'construction'|'vehicle'|'m
   return postTransaction(state,{category,amount:-amount,entityId,description});
 }
 
-export function postIncome(state:GameState,category:'passenger'|'freight',amount:Money,entityId:string,description:string):Id<'transaction'> {
+export function postIncome(state:GameState,category:'passenger'|'mail'|'freight',amount:Money,entityId:string,description:string):Id<'transaction'> {
   requirePositiveMoney(amount,'Income');
   return postTransaction(state,{category,amount,entityId,description});
 }

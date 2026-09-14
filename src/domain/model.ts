@@ -20,13 +20,13 @@ export interface Train {
   phase: 'idle' | 'running' | 'dwelling' | 'blocked'; dwellTicks: number;
   cargo: CargoLot[];
 }
-export type CargoKind = 'passengers' | 'timber' | 'lumber';
+export type CargoKind = 'passengers' | 'mail' | 'timber' | 'lumber';
 export interface CargoLot { kind: CargoKind; quantity: number; destinationId: Id<'station'>; originId: Id<'station'>; loadedTick: number; distanceM: number }
 export interface Station { id: Id<'station'>; nodeId: Id<'node'>; townId: Id<'town'> | null; classId: string; storage: CargoLot[] }
 export interface Route { id: Id<'route'>; stops: Id<'station'>[]; mode: 'shuttle' | 'loop' }
 export interface Town { id: Id<'town'>; name: string; position: Vec3; population: number }
 export interface Industry { id: Id<'industry'>; definitionId: string; position: Vec3; inventory: Partial<Record<CargoKind, number>> }
-export interface Transaction { id: Id<'transaction'>; tick: number; category: 'construction' | 'vehicle' | 'passenger' | 'freight' | 'maintenance'; amount: Money; entityId: string; description: string }
+export interface Transaction { id: Id<'transaction'>; tick: number; category: 'construction' | 'vehicle' | 'passenger' | 'mail' | 'freight' | 'maintenance'; amount: Money; entityId: string; description: string }
 export interface WorldDefinition { seed: number; widthM: number; depthM: number; cellM: number; generatorVersion: number; biomeId: string }
 export interface CampaignDefinition {
   id: string; version: number; title: string; startingYear: number; startingCash: Money;

@@ -1,6 +1,6 @@
 # Rail Frontier architecture
 
-Production architecture, updated 2026-09-14. The user clarified that **Astra and Sol are Codex models, not game engines**. Three.js 0.186.0 is the renderer. Vite 8.3.0 builds the browser app; strict TypeScript implements the independent simulation core. Norway now has playable passenger and timber-freight loops, production assets, contextual world selection and strategy overlays. City growth and additional biomes remain later milestones.
+Production architecture, updated 2026-09-14. The user clarified that **Astra and Sol are Codex models, not game engines**. Three.js 0.186.0 is the renderer. Vite 8.3.0 builds the browser app; strict TypeScript implements the independent simulation core. Norway now has playable passenger, mail and timber-freight loops, production assets, contextual world selection and strategy overlays. City growth and additional biomes remain later milestones.
 
 ## Repository and scope
 
@@ -17,7 +17,7 @@ Production code lives under `src/domain`, `world`, `rail`, `simulation`, `persis
 | rail/geometry, constraints, planner, graph | Cubic alignment, arc length, validity, engineering and routing | Implemented/tested |
 | simulation/* | Fixed tick, traction, occupancy, transfers, industry, city economy, accounting and objectives | Implemented for Norway |
 | application/ports, snapshot, game and command handlers | Atomic commands, storage/render boundaries and frozen UI snapshots | Implemented |
-| persistence/save, indexeddb | Schema 3, sequential migrations, semantic validation and durable slots | Implemented with autosave and archive UI |
+| persistence/save, indexeddb | Schema 4, sequential migrations, semantic validation and durable slots | Implemented with autosave and archive UI |
 | rendering/fjord-renderer, terrain-mesh, track-mesh | Three.js world composition, assets, picking, overlays and geometry | Production adapter implemented |
 
 Dependency rule: simulation never imports Three.js, DOM, IndexedDB or UI objects. All renderer identities, GPU buffers, caches, wall timestamps and camera poses are ephemeral. Domain cross-imports between model/operations are type-only, with no runtime cycle. UI commands validate and commit atomically through GameApplication. snapshotState returns a detached recursively frozen snapshot. Render interpolation must never write into authoritative state.
@@ -62,16 +62,16 @@ CommandEnvelope has a monotonic sequence. Handler requires sequence=lastCommandS
 
 ## Train/economy/occupancy contracts
 
-VehicleDefinition fixes mass/power/tractive-force/speed/length/capacity/cost fields. StationDefinition fixes coverage/storage/platform capacity and costs. IndustryRecipe fixes consumed and produced quantities and tick interval. OperationsState holds destination demand, service state, running-cost remainder, reservations, constructed spans, industry cycles, per-town economy, delivery totals, objectives, monthly accounts and command sequence. Schema 3 persists these values without ad-hoc render state.
+VehicleDefinition fixes mass/power/tractive-force/speed/length/capacity/cost fields. StationDefinition fixes coverage/storage/platform capacity and costs. IndustryRecipe fixes consumed and produced quantities and tick interval. OperationsState holds destination demand, service state, running-cost remainder, reservations, constructed spans, industry cycles, per-town economy, delivery totals, objectives, monthly accounts and command sequence. Schema 4 persists these values without ad-hoc render state and includes mail cargo, income and delivery totals.
 
 Train traction: F=min(tractiveForceN,powerW/max(v,1)); subtract rolling resistance 0.002×mass×g and mass×g×signedGrade, divide by mass and integrate fixed dt. Brake using min(line/vehicle/curve speed, sqrt(2×0.6×distanceToStop)); clamp at destination and consume residual edge motion correctly. Wagons sample prior route history at cumulative coupler distances. Keep enough oriented traversal history while any coach occupies an edge. Derived history can be reconstructed from service route+direction and current path; reservations remain until the tail clears.
 
 Initial safety: one exclusive reservation per edge, station holds, deterministic train-ID priority, no overlapping occupied edge. Reserve the full next single-track corridor to the next station before departing; release behind the tail. A fully occupied bidirectional corridor waits with clear feedback. No train should drive into a deadlock; advanced blocks/platform selection/signals are deferred. Reservation validation prevents duplicate edge grants; the scheduling system is not yet implemented.
 
-Economic formulas and conservation/transaction rules are fixed in ECONOMIC_CONTRACT.md. Passenger revenue, freight transfer, industries, purchases, accounts and objectives are implemented. City growth and local mail/goods demand are the next economic expansion.
+Economic formulas and conservation/transaction rules are fixed in ECONOMIC_CONTRACT.md. Passenger and mail revenue, freight transfer, industries, purchases, accounts, objectives and city growth are implemented. Waiting mail is a bounded outbound town stock carried in passenger coaches with separate capacity.
 
 ## Saves and evidence
 
-Schema 3 stores all authoritative state and operations. Version 1 migrates explicitly to 2, then version 2 migrates to 3 by adding per-town economic state. Every step validates and advances exactly one version. Future versions, invalid references, disconnected movement, nonfinite values, conflicting reservations and inconsistent ledger/spans fail before adoption. IndexedDB uses atomic slot transactions. Details and known hardening tasks: SAVEGAME_FORMAT.md.
+Schema 4 stores all authoritative state and operations. Version 1 migrates explicitly to 2, version 2 migrates to 3 by adding per-town economic state, and version 3 migrates to 4 by adding the mail delivery total. Every step validates and advances exactly one version. Future versions, invalid references, disconnected movement, nonfinite values, conflicting reservations and inconsistent ledger/spans fail before adoption. IndexedDB uses atomic slot transactions. Details and known hardening tasks: SAVEGAME_FORMAT.md.
 
-86 core tests, 18 browser integration/end-to-end tests, Blender pack checks and the production build pass. Browser tests cover construction, operations, contextual selection, city updates, 3D picking, overlays, passenger and freight revenue, save/reload continuation, V1/V2 replacement, responsive output, runtime LODs and GPU-resource disposal. Separate 5k-edge/100-train CPU and 20k-tree/100-proxy rendering benchmarks reduce scale risks. Current performance evidence applies to the documented local target machine.
+89 core tests, 18 browser integration/end-to-end tests, Blender pack checks and the production build pass. Browser tests cover construction, operations, contextual selection, city updates, 3D picking, overlays, passenger, mail and freight revenue, save/reload continuation, V1/V2 replacement, responsive output, runtime LODs and GPU-resource disposal. Separate 5k-edge/100-train CPU and 20k-tree/100-proxy rendering benchmarks reduce scale risks. Current performance evidence applies to the documented local target machine.
