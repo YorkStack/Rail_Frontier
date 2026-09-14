@@ -7,7 +7,10 @@ interface Charge {amount:Money;entityId:string;description:string;trainId?:strin
 
 export function postDailyMaintenance(state:GameState):void {
   const charges:Charge[]=[];
-  for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure))if(infrastructure.maintenancePerDay>0)charges.push({amount:infrastructure.maintenancePerDay,entityId:edgeId,description:'Track daily maintenance'});
+  for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)) {
+    if(infrastructure.maintenancePerDay>0)charges.push({amount:infrastructure.maintenancePerDay,entityId:edgeId,description:'Track daily maintenance'});
+    if(infrastructure.electrificationMaintenancePerDay>0)charges.push({amount:infrastructure.electrificationMaintenancePerDay,entityId:edgeId,description:'Electrification daily maintenance'});
+  }
   for(const station of state.stations) {const amount=stationDefinition(station.classId)?.maintenancePerDay;if(amount)charges.push({amount,entityId:station.id,description:'Station daily maintenance'});}
   for(const train of state.trains) {
     const definitions=[vehicleDefinition(train.locomotiveId),...train.vehicleIds.map(vehicleDefinition)];

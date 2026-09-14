@@ -62,6 +62,10 @@ test('schema 4 adds the campaign starting year without changing operational stat
   const state=createStudyState(),{startingYear,...historicalState}=state,legacy={schemaVersion:4,gameVersion:'0.4.0',state:historicalState},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,state);assert.equal(loaded.startingYear,1900);assert.equal(JSON.stringify(legacy),json);assert.equal(startingYear,1900);
 });
+test('schema 5 adds authoritative unelectrified infrastructure records',()=>{
+  const state=createStudyState(),infrastructure=Object.fromEntries(state.railway.edges.map(edge=>{const length=compileCurve(edge.curve).lengthM;return [edge.id,{spans:[{startM:0,endM:length,kind:'ground'}],constructionCost:1000,maintenancePerDay:10}];})),legacy={schemaVersion:5,gameVersion:'0.5.0',state:{...state,operations:{...state.operations,infrastructure}}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.equal(JSON.stringify(legacy),json);for(const item of Object.values(loaded.operations.infrastructure)){assert.equal(item.electrified,false);assert.equal(item.electrificationCost,0);assert.equal(item.electrificationMaintenancePerDay,0);}
+});
 test('save validation rejects conflicting edge reservations',()=>{
   const state=createStudyState();state.operations.reservations=[{edgeId:'edge:9',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}];assert.throws(()=>serialize(state),/Conflicting/);
 });

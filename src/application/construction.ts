@@ -77,9 +77,11 @@ function splitInfrastructure(state:GameState,oldEdge:RailEdge,left:RailEdge,righ
   });
   const leftCost=Math.round(infrastructure.constructionCost*leftLength/(leftLength+rightLength));
   const leftUpkeep=Math.round(infrastructure.maintenancePerDay*leftLength/(leftLength+rightLength));
+  const leftElectrificationCost=Math.round(infrastructure.electrificationCost*leftLength/(leftLength+rightLength));
+  const leftElectrificationUpkeep=Math.round(infrastructure.electrificationMaintenancePerDay*leftLength/(leftLength+rightLength));
   delete state.operations.infrastructure[oldEdge.id];
-  state.operations.infrastructure[left.id]={spans:map('left'),constructionCost:leftCost,maintenancePerDay:leftUpkeep};
-  state.operations.infrastructure[right.id]={spans:map('right'),constructionCost:infrastructure.constructionCost-leftCost,maintenancePerDay:infrastructure.maintenancePerDay-leftUpkeep};
+  state.operations.infrastructure[left.id]={spans:map('left'),constructionCost:leftCost,maintenancePerDay:leftUpkeep,electrified:infrastructure.electrified,electrificationCost:leftElectrificationCost,electrificationMaintenancePerDay:leftElectrificationUpkeep};
+  state.operations.infrastructure[right.id]={spans:map('right'),constructionCost:infrastructure.constructionCost-leftCost,maintenancePerDay:infrastructure.maintenancePerDay-leftUpkeep,electrified:infrastructure.electrified,electrificationCost:infrastructure.electrificationCost-leftElectrificationCost,electrificationMaintenancePerDay:infrastructure.electrificationMaintenancePerDay-leftElectrificationUpkeep};
 }
 
 function commitAnchor(state:GameState,plan:AnchorPlan,createdIds:string[]):Id<'node'> {
@@ -111,7 +113,7 @@ export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context
   const edgeId=allocateId(state,'edge');
   state.railway.edges.push({id:edgeId,from,to,curve:structuredClone(command.curve),speedLimitMps:22.22,ownerId:state.company.id});
   const spans=engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind}));
-  state.operations.infrastructure[edgeId]={spans,constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005))};
+  state.operations.infrastructure[edgeId]={spans,constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
   postExpense(state,'construction',quote.cost,edgeId,'Track construction');
   state.railway.revision++;
   createdIds.push(edgeId);

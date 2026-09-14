@@ -12,18 +12,21 @@ const id=<K extends string>(kind:K)=>z.custom<`${K}:${number}`>((v)=>typeof v===
 const vec=z.strictObject({x:finite,y:finite,z:finite});
 const cargoV3=z.strictObject({kind:z.enum(['passengers','timber','lumber']),quantity:nonnegative,destinationId:id('station'),originId:id('station'),loadedTick:nonnegative,distanceM:finite.nonnegative()});
 const cargo=z.strictObject({kind:z.enum(['passengers','mail','timber','lumber']),quantity:nonnegative,destinationId:id('station'),originId:id('station'),loadedTick:nonnegative,distanceM:finite.nonnegative()});
+const infrastructureV5Schema=z.record(id('edge'),z.strictObject({spans:z.array(z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['ground','bridge','tunnel'])})),constructionCost:nonnegative,maintenancePerDay:nonnegative}));
+const infrastructureSchema=z.record(id('edge'),z.strictObject({spans:z.array(z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['ground','bridge','tunnel'])})),constructionCost:nonnegative,maintenancePerDay:nonnegative,electrified:z.boolean(),electrificationCost:nonnegative,electrificationMaintenancePerDay:nonnegative}));
 const operationsV2Schema=z.strictObject({
   demand:z.array(z.strictObject({originTownId:id('town'),destinationTownId:id('town'),quantity:nonnegative,generatedTick:nonnegative})),
   trainServices:z.record(id('train'),z.strictObject({nextStopIndex:nonnegative,direction:z.union([z.literal(1),z.literal(-1)]),ageDays:nonnegative,condition:finite.min(0).max(1),distanceM:finite.nonnegative(),revenue:nonnegative,operatingCosts:nonnegative,costRemainder:finite.min(0).lt(1)})),
   reservations:z.array(z.strictObject({edgeId:id('edge'),trainId:id('train')})),
-  infrastructure:z.record(id('edge'),z.strictObject({spans:z.array(z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['ground','bridge','tunnel'])})),constructionCost:nonnegative,maintenancePerDay:nonnegative})),
+  infrastructure:infrastructureV5Schema,
   industryCycleTicks:z.record(id('industry'),nonnegative),
   delivered:z.strictObject({passengers:nonnegative,timber:nonnegative,lumber:nonnegative}),completedObjectives:z.array(z.string()),
   monthlyAccounts:z.array(z.strictObject({month:nonnegative,revenue:nonnegative,operatingCost:nonnegative,capitalCost:nonnegative})),lastCommandSequence:nonnegative
 });
 const townEconomySchema=z.record(id('town'),z.strictObject({lumberDemand:nonnegative,lumberDelivered:nonnegative,lumberReceivedToday:nonnegative,mailWaiting:nonnegative,economicActivity:integer.min(0).max(100),connectedDays:nonnegative,growthRemainder:finite.min(0).lt(1),lastPopulationChange:nonnegative}));
 const operationsV3Schema=operationsV2Schema.extend({townEconomy:townEconomySchema});
-const operationsSchema=operationsV3Schema.extend({delivered:z.strictObject({passengers:nonnegative,mail:nonnegative,timber:nonnegative,lumber:nonnegative})});
+const operationsV5Schema=operationsV3Schema.extend({delivered:z.strictObject({passengers:nonnegative,mail:nonnegative,timber:nonnegative,lumber:nonnegative})});
+const operationsSchema=operationsV5Schema.extend({infrastructure:infrastructureSchema});
 const stateSchema=z.strictObject({
   operations:operationsSchema,
   tick:nonnegative,startingYear:integer.positive(),nextEntityId:integer.positive(),rngState:integer.min(0).max(4294967295),campaignId:z.string().min(1),campaignVersion:integer.positive(),
@@ -37,7 +40,8 @@ const stateSchema=z.strictObject({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','mail','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))}),
   objectiveProgress:z.record(z.string(),nonnegative)
 }) satisfies z.ZodType<GameState>;
-const stateV4Schema=stateSchema.omit({startingYear:true});
+const stateV5Schema=stateSchema.extend({operations:operationsV5Schema});
+const stateV4Schema=stateV5Schema.omit({startingYear:true});
 const stateV3Schema=stateV4Schema.extend({
   operations:operationsV3Schema,
   stations:z.array(z.strictObject({id:id('station'),nodeId:id('node'),townId:id('town').nullable(),classId:z.string().min(1),storage:z.array(cargoV3)})),
@@ -46,7 +50,8 @@ const stateV3Schema=stateV4Schema.extend({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))})
 });
 const stateV2Schema=stateV3Schema.extend({operations:operationsV2Schema});
-const envelope=z.strictObject({schemaVersion:z.literal(5),gameVersion:z.literal('0.5.0'),state:stateSchema});
+const envelope=z.strictObject({schemaVersion:z.literal(6),gameVersion:z.literal('0.6.0'),state:stateSchema});
+const versionFiveEnvelope=z.strictObject({schemaVersion:z.literal(5),gameVersion:z.literal('0.5.0'),state:stateV5Schema});
 const versionFourEnvelope=z.strictObject({schemaVersion:z.literal(4),gameVersion:z.literal('0.4.0'),state:stateV4Schema});
 const versionThreeEnvelope=z.strictObject({schemaVersion:z.literal(3),gameVersion:z.literal('0.3.0'),state:stateV3Schema});
 const versionTwoEnvelope=z.strictObject({schemaVersion:z.literal(2),gameVersion:z.literal('0.2.0'),state:stateV2Schema});
@@ -83,7 +88,7 @@ export function validateState(value: unknown): GameState {
   const reserved=new Set<string>();
   for(const reservation of state.operations.reservations){requireRef(reservation.edgeId);requireRef(reservation.trainId);if(reserved.has(reservation.edgeId))throw new Error('Conflicting edge reservations');reserved.add(reservation.edgeId);}
   for(const [trainId,service] of Object.entries(state.operations.trainServices)){requireRef(trainId);const train=state.trains.find(t=>t.id===trainId)!;const route=state.routes.find(r=>r.id===train.routeId);if(route&&service.nextStopIndex>=route.stops.length)throw new Error('Invalid service stop');}
-  for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){requireRef(edgeId);let end=0;for(const span of infrastructure.spans){if(Math.abs(span.startM-end)>.001||span.endM<=span.startM)throw new Error('Invalid engineering span');end=span.endM;}const edge=state.railway.edges.find(e=>e.id===edgeId)!;if(Math.abs(end-geometry.get(edge.id)!.lengthM)>.01)throw new Error('Engineering spans must cover entire edge');}
+  for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){requireRef(edgeId);let end=0;for(const span of infrastructure.spans){if(Math.abs(span.startM-end)>.001||span.endM<=span.startM)throw new Error('Invalid engineering span');end=span.endM;}const edge=state.railway.edges.find(e=>e.id===edgeId)!;if(Math.abs(end-geometry.get(edge.id)!.lengthM)>.01)throw new Error('Engineering spans must cover entire edge');if(infrastructure.electrified?(infrastructure.electrificationCost<=0||infrastructure.electrificationMaintenancePerDay<=0):(infrastructure.electrificationCost!==0||infrastructure.electrificationMaintenancePerDay!==0))throw new Error('Invalid electrification record');}
   for(const industryId of Object.keys(state.operations.industryCycleTicks))requireRef(industryId);
   for(const industry of state.industries) {
     const recipe=industryDefinition(industry.definitionId);if(!recipe)throw new Error(`Unknown industry: ${industry.definitionId}`);
@@ -105,15 +110,16 @@ export const migrations=new Map<number,(value:unknown)=>unknown>([
   [1,(value)=>{const legacy=legacyEnvelope.parse(value);return {schemaVersion:2,gameVersion:'0.2.0',state:{...legacy.state,operations:emptyVersionTwoOperations()}};}],
   [2,(value)=>{const previous=versionTwoEnvelope.parse(value);return {schemaVersion:3,gameVersion:'0.3.0',state:{...previous.state,operations:{...previous.state.operations,townEconomy:initialTownEconomy(previous.state.towns)}}};}],
   [3,(value)=>{const previous=versionThreeEnvelope.parse(value);return {schemaVersion:4,gameVersion:'0.4.0',state:{...previous.state,operations:{...previous.state.operations,delivered:{...previous.state.operations.delivered,mail:0}}}};}],
-  [4,(value)=>{const previous=versionFourEnvelope.parse(value);return {schemaVersion:5,gameVersion:'0.5.0',state:{...previous.state,startingYear:1900}};}]
+  [4,(value)=>{const previous=versionFourEnvelope.parse(value);return {schemaVersion:5,gameVersion:'0.5.0',state:{...previous.state,startingYear:1900}};}],
+  [5,(value)=>{const previous=versionFiveEnvelope.parse(value);return {schemaVersion:6,gameVersion:'0.6.0',state:{...previous.state,operations:{...previous.state.operations,infrastructure:Object.fromEntries(Object.entries(previous.state.operations.infrastructure).map(([edgeId,infrastructure])=>[edgeId,{...infrastructure,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0}]))}}};}]
 ]);
-export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:5,gameVersion:'0.5.0',state:validateState(state)}); }
+export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:6,gameVersion:'0.6.0',state:validateState(state)}); }
 export function deserialize(json:string):GameState {
   if(json.length>20_000_000) throw new Error('Save exceeds 20 MB limit');
   let value:unknown=JSON.parse(json);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
-  if(version>5) throw new Error('Save was created by a newer game');
-  while(version<5) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
+  if(version>6) throw new Error('Save was created by a newer game');
+  while(version<6) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
   return validateState(envelope.parse(value).state);
 }

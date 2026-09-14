@@ -1,6 +1,8 @@
 import type { GameState, Id, Train } from '../domain/model.js';
 import { RailNetwork } from '../rail/graph.js';
 import { serviceStop } from './transfer.js';
+import { vehicleDefinition } from '../content/vehicles.js';
+import { pathIsElectrified } from './electrification.js';
 
 export const DWELL_TICKS=60;
 
@@ -20,5 +22,7 @@ export function advanceDwell(state:GameState,train:Train,network:RailNetwork):vo
   const stationNode=(index:number):Id<'node'>=>state.stations.find(station=>station.id===route.stops[index])!.nodeId;
   const path=network.findPath(stationNode(current),stationNode(next));
   if(!path){train.phase='blocked';train.speedMps=0;return;}
+  const locomotive=vehicleDefinition(train.locomotiveId);
+  if(locomotive?.traction==='electric'&&!pathIsElectrified(state,path)){train.phase='blocked';train.speedMps=0;return;}
   service.nextStopIndex=next;train.motion={path,leg:0,distanceM:0,arrived:false};train.speedMps=0;train.phase='running';train.dwellTicks=0;
 }

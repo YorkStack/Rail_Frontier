@@ -15,7 +15,7 @@ export interface OperationsState {
   demand:{originTownId:Id<'town'>;destinationTownId:Id<'town'>;quantity:number;generatedTick:number}[];
   trainServices:Record<Id<'train'>,{nextStopIndex:number;direction:1|-1;ageDays:number;condition:number;distanceM:number;revenue:Money;operatingCosts:Money;costRemainder:number}>;
   reservations:{edgeId:Id<'edge'>;trainId:Id<'train'>}[];
-  infrastructure:Record<Id<'edge'>,{spans:{startM:number;endM:number;kind:'ground'|'bridge'|'tunnel'}[];constructionCost:Money;maintenancePerDay:Money}>;
+  infrastructure:Record<Id<'edge'>,{spans:{startM:number;endM:number;kind:'ground'|'bridge'|'tunnel'}[];constructionCost:Money;maintenancePerDay:Money;electrified:boolean;electrificationCost:Money;electrificationMaintenancePerDay:Money}>;
   industryCycleTicks:Record<Id<'industry'>,number>;
   townEconomy:Record<Id<'town'>,TownEconomyState>;
   delivered:Record<CargoKind,number>;

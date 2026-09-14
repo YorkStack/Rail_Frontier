@@ -21,8 +21,10 @@ export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=
   if(state.company.cash<cost)throw new Error('Insufficient funds');
   const platform=stationDefinition(station.classId);if(!platform)throw new Error(`Unknown station class: ${station.classId}`);
   const length=[locomotive,...vehicles].reduce((sum,vehicle)=>sum+vehicle!.lengthM,0);if(length>platform.platformLengthM)throw new Error('Train is too long for the purchase station platform');
-  const edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);
-  if(!edge)throw new Error('Purchase station is disconnected from track');
+  const adjacent=state.railway.edges.filter(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);
+  if(adjacent.length===0)throw new Error('Purchase station is disconnected from track');
+  const edge=adjacent.find(candidate=>locomotive.traction!=='electric'||state.operations.infrastructure[candidate.id]?.electrified);
+  if(!edge)throw new Error('Electric traction requires electrified track at the purchase station');
   const id=allocateId(state,'train'),reverse=edge.to===station.nodeId;
   state.trains.push({id,routeId:null,locomotiveId:locomotive.id,vehicleIds:[...command.vehicleIds],motion:{path:[{edgeId:edge.id,reverse}],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'idle',dwellTicks:0,cargo:[]});
   state.operations.trainServices[id]={nextStopIndex:0,direction:1,ageDays:0,condition:1,distanceM:0,revenue:0,operatingCosts:0,costRemainder:0};

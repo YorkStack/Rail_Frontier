@@ -3,6 +3,7 @@ import { constructionCommandHandlers } from './construction.js';
 import { stationCommandHandlers } from './stations.js';
 import { trainCommandHandlers } from './trains.js';
 import { routeCommandHandlers } from './routes.js';
+import { electrificationCommandHandlers } from './electrification.js';
 import type { CommandEnvelope, CommandResult, GameApplication, WorldRenderer } from './ports.js';
 import { snapshotState } from './snapshot.js';
 import type { GameState, Speed } from '../domain/model.js';
@@ -40,7 +41,7 @@ export class RailFrontierGame implements GameApplication {
     this.state=validateState(structuredClone(initialState));
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
-    this.handlers={...baseCommandHandlers,...constructionCommandHandlers,...stationCommandHandlers,...trainCommandHandlers,...routeCommandHandlers,...options.handlers};
+    this.handlers={...baseCommandHandlers,...constructionCommandHandlers,...stationCommandHandlers,...trainCommandHandlers,...routeCommandHandlers,...electrificationCommandHandlers,...options.handlers};
     this.stepSystems=options.stepSystems??createSimulationSystems();
     this.runtimeSpeed=options.initialSpeed??1;
     this.clock=new SimulationClock(()=>this.step());

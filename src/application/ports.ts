@@ -9,6 +9,7 @@ export type GameCommand =
   | { type:'upgradeStation'; stationId:Id<'station'>; classId:string }
   | { type:'purchaseTrain'; locomotiveId:string; vehicleIds:string[]; stationId:Id<'station'> }
   | { type:'createRoute'; stops:Id<'station'>[]; mode:'shuttle'|'loop' }
+  | { type:'electrifyRoute'; routeId:Id<'route'> }
   | { type:'assignRoute'; trainId:Id<'train'>; routeId:Id<'route'> };
 export interface CommandEnvelope {sequence:number;command:GameCommand}
 export type CommandResult={ok:true;createdIds:string[]}|{ok:false;reason:string};

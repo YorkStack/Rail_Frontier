@@ -13,7 +13,7 @@ import { norwayCorridorX,norwayShorelineX } from '../world/generator.js';
 import { compileGraph } from '../rail/graph.js';
 import { motionPosition } from '../simulation/motion.js';
 import { terrainMesh } from './terrain-mesh.js';
-import { createTrack } from './track-mesh.js';
+import { createElectrification,createTrack } from './track-mesh.js';
 import { sampleDistance,type TrackGeometry } from '../rail/geometry.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
@@ -42,6 +42,7 @@ export class FjordRenderer implements WorldRenderer {
   private geometry:ReturnType<typeof compileGraph>;
   private railwayRevision:number;
   private railwaySignature:string;
+  private electrificationSignature:string;
   private trackGroup=new THREE.Group();
   private assetLevels=new Map<string,THREE.Object3D[]>();
   private assetLibrary=new THREE.Group();
@@ -85,7 +86,7 @@ export class FjordRenderer implements WorldRenderer {
   private readonly terrainSurfaceMaterial:THREE.Material;
   private terrainBlockoutMaterial:THREE.MeshStandardMaterial|null=null;
   constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,sharedRenderer?:THREE.WebGLRenderer) {
-    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
+    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
     this.ownsRenderer=sharedRenderer===undefined;this.renderer=sharedRenderer??createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);
     const scale=terrainSize(terrain)/4000;this.scene.background=new THREE.Color(this.profile.palette.haze);this.scene.fog=new THREE.FogExp2(this.profile.palette.haze,.00018/scale);
     this.sunOffset=new THREE.Vector3(-1200,2600,1400).multiplyScalar(scale);this.sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);this.sun.position.copy(this.sunOffset);this.sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);this.sun.castShadow=true;
@@ -311,10 +312,11 @@ export class FjordRenderer implements WorldRenderer {
   }
   setTrees(visible:boolean):void {this.trees.visible=visible;}
   setTerrainBlockout(enabled:boolean):void {if(enabled){this.terrainBlockoutMaterial??=new THREE.MeshStandardMaterial({color:'#8b9188',roughness:1,metalness:0});this.landscape.material=this.terrainBlockoutMaterial;}else{this.landscape.material=this.terrainSurfaceMaterial;this.terrainBlockoutMaterial?.dispose();this.terrainBlockoutMaterial=null;}}
+  private electrificationKey(state:Readonly<GameState>):string {return Object.entries(state.operations.infrastructure).filter(([,item])=>item.electrified).map(([edgeId])=>edgeId).sort().join('|');}
   private rebuildTracks(state:Readonly<GameState>):void {
     this.scene.remove(this.trackGroup);disposeObject(this.trackGroup);this.trackGroup=new THREE.Group();
-    this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);
-    for(const track of this.geometry.values())this.trackGroup.add(createTrack(track,this.terrain));
+    this.geometry=compileGraph(structuredClone(state.railway));this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
+    for(const [edgeId,track] of this.geometry){this.trackGroup.add(createTrack(track,this.terrain));if(state.operations.infrastructure[edgeId]?.electrified)this.trackGroup.add(createElectrification(track));}
     this.scene.add(this.trackGroup);if(this.assetLevels.size>0){this.rebuildAuthoredInfrastructure(state);this.replaceAuthoredScenery(state);}
   }
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
@@ -325,7 +327,7 @@ export class FjordRenderer implements WorldRenderer {
   regional():void {if(this.inspectionModel){this.scene.remove(this.inspectionModel);disposeObject(this.inspectionModel);this.inspectionModel=null;this.inspectionAssetId='';}this.landscape.visible=true;this.water.visible=true;this.shoreContact.visible=true;this.waterfall.visible=true;this.trackGroup.visible=true;this.infrastructureModels.visible=true;this.buildings.visible=true;this.trees.visible=true;for(const model of this.trainModels.values())model.group.visible=true;for(const station of this.stationModels.values())station.visible=true;if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    this.modelState=current;this.syncLabels(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
+    this.modelState=current;this.syncLabels(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
     this.syncOverlay(current);this.syncSelectionMarker(current);
     const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
