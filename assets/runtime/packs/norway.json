@@ -4,7 +4,8 @@
   "generator": {
     "blender": "4.0.2",
     "script": "tools/blender/generate_norway_pack.py",
-    "sceneryScript": "tools/blender/generate_norway_scenery.py"
+    "sceneryScript": "tools/blender/generate_norway_scenery.py",
+    "architectureScript": "tools/blender/generate_norway_architecture.py"
   },
   "assets": [
     {
@@ -472,6 +473,404 @@
           "maxTriangles": 1600,
           "maxBytes": 100000
         }
+      ]
+    },
+    {
+      "id": "norway-house-red-white",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-red-white_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-red-white_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-red-dark",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-red-dark_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-red-dark_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-ochre-white",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-ochre-white_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-ochre-white_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-ochre-cream",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-ochre-cream_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-ochre-cream_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-charcoal-white",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-charcoal-white_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-charcoal-white_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-charcoal-dark",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-charcoal-dark_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-charcoal-dark_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-white-red",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-white-red_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-white-red_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-house-white-dark",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-house-white-dark_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-house-white-dark_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-barn",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-barn_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-barn_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-stabbur",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-stabbur_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-stabbur_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-boathouse",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-boathouse_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-boathouse_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-sawmill",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-sawmill_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-sawmill_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-timber-yard",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        22,
+        18,
+        25
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-timber-yard_lod0.glb",
+          "maxTriangles": 5000,
+          "maxBytes": 260000
+        },
+        {
+          "path": "/models/norway/norway-timber-yard_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 120000
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "id": "timber-base",
+      "path": "/textures/norway/timber-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "timber-normal",
+      "path": "/textures/norway/timber-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "timber-roughness",
+      "path": "/textures/norway/timber-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "slate-base",
+      "path": "/textures/norway/slate-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "slate-normal",
+      "path": "/textures/norway/slate-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "slate-roughness",
+      "path": "/textures/norway/slate-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    }
+  ],
+  "materialBindings": [
+    {
+      "materialPrefix": "RF_Wall_",
+      "map": "timber-base",
+      "normalMap": "timber-normal",
+      "roughnessMap": "timber-roughness",
+      "repeat": [
+        2,
+        3
+      ]
+    },
+    {
+      "materialPrefix": "RF_Roof_",
+      "map": "slate-base",
+      "normalMap": "slate-normal",
+      "roughnessMap": "slate-roughness",
+      "repeat": [
+        3,
+        4
       ]
     }
   ]

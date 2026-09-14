@@ -22,7 +22,7 @@ function closeToTrack(x:number,z:number,buckets:Map<string,{x:number;z:number}[]
 }
 
 function closeToOperations(x:number,z:number,state:Pick<GameState,'towns'|'industries'|'stations'|'railway'>):boolean {
-  if(state.towns.some(item=>Math.hypot(x-item.position.x,z-item.position.z)<82))return true;
+  if(state.towns.some(item=>Math.hypot(x-item.position.x,z-item.position.z)<330))return true;
   if(state.industries.some(item=>Math.hypot(x-item.position.x,z-item.position.z)<58))return true;
   return state.stations.some(station=>{const node=state.railway.nodes.find(item=>item.id===station.nodeId);return node!==undefined&&Math.hypot(x-node.position.x,z-node.position.z)<34;});
 }
