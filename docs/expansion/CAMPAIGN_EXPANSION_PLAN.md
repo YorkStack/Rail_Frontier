@@ -1,5 +1,7 @@
 # Campaign expansion plan
 
+**2026-09-15 priority update:** EXP-001–003 remain technical foundations. Arizona EXP-003 is terrain-only and its visual quality is not accepted. Further campaign/economy work pauses for the [graphics rework](../art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial plan](../ux/ONBOARDING_AND_CONTROLS_PLAN.md). GFX-R07 now covers the Arizona architecture portion of EXP-004; reuse it when expansion resumes. Current handoff is planning-only, awaiting the user’s SOL switch.
+
 The Norway vertical slice remains the reference implementation. Arizona / Southwest USA and Great River reuse its simulation, rail geometry, construction, stations, trains, routes, dispatch, economy, objectives and save system. A campaign supplies versioned world generation, starting content and a presentation profile; it does not fork the game loop.
 
 ## Reference direction

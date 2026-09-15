@@ -1,4 +1,6 @@
-# Norway graphics enhancement — implementation handoff
+# Norway graphics enhancement — historical implementation brief
+
+**Superseded 2026-09-15:** The planning-time status and resume instructions below are historical. GFX-001–008 were implemented, but user screenshots reopen visual acceptance. Follow [GRAPHICS_REWORK_PLAN.md](GRAPHICS_REWORK_PLAN.md) and the [controls/tutorial plan](../ux/ONBOARDING_AND_CONTROLS_PLAN.md), with CURRENT_STATUS.md as the active handoff. Do not restart this old sequence.
 
 Date: 2026-09-14. Status: **planning complete; implementation has not started**.
 User instruction: improve Norway using real maps and landscape photography, original Blender rocks, forests, vegetation and buildings; do this before further gameplay work; pause after planning so the user can switch to Sol.

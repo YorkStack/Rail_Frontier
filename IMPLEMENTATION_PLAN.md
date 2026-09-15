@@ -1,18 +1,21 @@
 # Implementation plan
 
-## Current continuation — Norway operations
+## Current continuation — graphics and first-use experience
 
-On 2026-09-14 the user requested a map/photo-informed Norway landscape enhancement with local Blender before further gameplay. GFX-001 through GFX-008 are complete and accepted: [NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md). ECON-004 completes the deferred mail loop; STATION-002 adds the six requested station classes and their operational progression; TECH-001 establishes the campaign calendar and data-driven vehicle purchase boundary; VEHICLE-002 adds the first later-era diesel and Blender asset.
+**2026-09-15: planning complete; pause until the user switches to SOL and asks to continue.** Read [CURRENT_STATUS.md](CURRENT_STATUS.md) first. Runtime checkpoint `031261f5942a8d234ab9e073e32027a8c87db803` preserves the completed Norway game and Arizona terrain prototype. This turn changes plans/evidence only.
 
-Texture planning extension: [NORWAY_TEXTURES_AND_ROLLING_STOCK.md](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md) specifies Norwegian red/yellow/black/white timber houses with separate white trim, original Blender PBR maps, detailed current steam/coach/freight assets, and researched El 1, Di 3, Di 4 and El 18 briefs for future vehicle eras. Implement current-stock detail inside the graphics pass; activate later traction only in its separate vehicle/technology expansion.
+The user rejected the current landscape/building/tree appearance and found the menus, station placement and first-service sequence unclear. Previous GFX-001–008 completion and test results are historical engineering evidence; their visual acceptance is reopened. Arizona EXP-003 is a **terrain study**, not a playable campaign.
 
-Completed graphics checkpoint: `438909e` (GFX-008). Mail transport resumed only after that gate passed. The historical task sequence below remains an audit trail; do not restart completed work.
+Active implementation briefs:
 
-Read CURRENT_STATUS.md first. **The user clarified Astra/Sol are Codex models. Three.js is the game renderer. Architecture gates ARCH-001–006 are complete.** Stop at the required handoff; after the user switches to Sol and asks to continue, execute the remaining implementation tasks. Do not restart engine discovery or rebuild the completed technical proofs.
+- [GRAPHICS_REWORK_PLAN.md](docs/art/GRAPHICS_REWORK_PLAN.md): diagnosed exported roof defect; local Blender regeneration; settlement entry and horizon; natural materials and camera-dependent trees; Norwegian cliffs/waterfalls; Arizona geology and circa-1900 textured architecture; real visual/performance gates.
+- [ONBOARDING_AND_CONTROLS_PLAN.md](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md): readable/scalable DE/EN controls; direct town/track/station flow; visible locomotive-and-wagon composition; real first-service tutorial; progressive disclosure that preserves historical technology constraints; save and usability checks.
 
-Read ECONOMIC_CONTRACT.md in addition to the architecture/data/save/pipeline documents. The playable study is separate from the unfinished production game. Next implementation sequence: APP-001 integration shell → FIN-001 → APP-002 → WORLD-001 → RAIL-004 → STATION-001 → TRAIN-002/ROUTE-001 → TRAIN-003/004 → ECON-001/002 → SAVE-002/CAM-001 → UI → QA-001.
+Required combined order: **GFX-R01 → GFX-R02 → UX-001–003 → GFX-R03–07 → UX-004–005 → GFX-R08–09 + UX-006**. Start with corrected roof geometry and exported-asset screenshots. No rework implementation has started. Preserve older world generators/saves; do not silently reshape an existing saved railway. Commit/push completed checkpoints to both `implementation/passenger-slice` and `main`, verify remote hashes and update this handoff.
 
-Completed during architecture: runtime Three.js adapter and camera, actual Blender LOD import, triangular terrain/raycast agreement, seeded fjord scene, certified radius/grade/cusp/tangents, exact cell/water/clearance subdivision, RailNetwork heap/adjacency cache, schema 2 plus 1→2 migration, frozen snapshots, operational/content contracts, IndexedDB backend, and browser/CPU scale tests. These are foundations for the tasks below, not reasons to duplicate them.
+Pause EXP-004 economy/campaign work and later expansion until the combined review. Its Arizona architecture scope is now GFX-R07. Original [NORWAY_GRAPHICS_PLAN.md](docs/art/NORWAY_GRAPHICS_PLAN.md), its [texture/rolling-stock extension](docs/art/NORWAY_TEXTURES_AND_ROLLING_STOCK.md) and the task definitions below remain history and reusable specifications. Keep the researched Norwegian engine eras and texture details; do not duplicate them.
+
+**Astra and SOL are Codex models. Three.js is the renderer.** Architecture gates ARCH-001–006 and the Norway build/station/train/route/economy/save loop are implemented. Do not resume the obsolete APP-001→QA-001 sequence from scratch. Read ECONOMIC_CONTRACT.md plus architecture/data/save/pipeline contracts when touching those systems. Implementation completion requires actual reviewed output; test counts and asset presence alone do not establish graphic or usability quality.
 
 ## Completed foundation tasks
 
