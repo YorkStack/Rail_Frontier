@@ -5,8 +5,7 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import type { GameState,MotionState,Vec3 } from '../domain/model.js';
 import type { MapOverlay,WorldRenderer,WorldSelection } from '../application/ports.js';
 import type { Heightfield } from '../world/terrain.js';
-import { fjordProfile,type BiomeDefinition } from '../world/profiles.js';
-import { norwayBiome } from '../world/biome.js';
+import type { BiomeDefinition } from '../world/profiles.js';
 import { SeededRandom } from '../world/random.js';
 import { shorelineX } from '../world/fjord-study.js';
 import { norwayCorridorX,norwayShorelineX } from '../world/generator.js';
@@ -22,6 +21,8 @@ import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-pre
 import {norwayV2FjordAtZ,norwayV2Landforms,norwayV2ValleyX} from '../world/norway-landforms.js';
 import {generateNorwayScenery} from './scenery-placement.js';
 import {generateNorwaySettlements} from './settlement-placement.js';
+import type {CampaignContent} from '../content/registry.js';
+import type {CampaignPresentation} from '../content/presentation.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -85,8 +86,8 @@ export class FjordRenderer implements WorldRenderer {
   private readonly ownsRenderer:boolean;
   private readonly terrainSurfaceMaterial:THREE.Material;
   private terrainBlockoutMaterial:THREE.MeshStandardMaterial|null=null;
-  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,sharedRenderer?:THREE.WebGLRenderer) {
-    this.terrain=terrain;this.profile=state.world.biomeId===norwayBiome.id?norwayBiome:fjordProfile;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
+  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,private readonly presentation:CampaignPresentation,sharedRenderer?:THREE.WebGLRenderer) {
+    this.terrain=terrain;this.profile=presentation.biome;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
     this.ownsRenderer=sharedRenderer===undefined;this.renderer=sharedRenderer??createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);
     const scale=terrainSize(terrain)/4000;this.scene.background=new THREE.Color(this.profile.palette.haze);this.scene.fog=new THREE.FogExp2(this.profile.palette.haze,.00018/scale);
     this.sunOffset=new THREE.Vector3(-1200,2600,1400).multiplyScalar(scale);this.sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);this.sun.position.copy(this.sunOffset);this.sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);this.sun.castShadow=true;
@@ -113,8 +114,8 @@ export class FjordRenderer implements WorldRenderer {
     this.verifyTerrain();
   }
   async loadAssets():Promise<void> {
-    const response=await fetch('/packs/norway.json');if(!response.ok)throw new Error('Norway asset manifest could not be loaded');
-    const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error('Norway asset manifest is incompatible');
+    const response=await fetch(this.presentation.assetManifestUrl);if(!response.ok)throw new Error(`${this.presentation.id} asset manifest could not be loaded`);
+    const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error(`${this.presentation.id} asset manifest is incompatible`);
     const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader(),textures=new Map<string,THREE.Texture>();
     await Promise.all((manifest.textures??[]).map(async definition=>{const value=await textureLoader.loadAsync(definition.path);value.colorSpace=definition.colorSpace==='srgb'?THREE.SRGBColorSpace:THREE.NoColorSpace;value.wrapS=value.wrapT=THREE.RepeatWrapping;value.userData.assetLibrary=true;textures.set(definition.id,value);}));
     const loadedAssets=await Promise.all(manifest.assets.map(async asset=>({asset,loaded:await Promise.all(asset.lods.map(lod=>loader.loadAsync(lod.path)))})));
@@ -348,11 +349,11 @@ export class FjordRenderer implements WorldRenderer {
   stats():RenderStats {const info=this.renderer.info,first=[...this.trainModels.values()][0]?.cars[0];return {calls:info.render.calls,triangles:info.render.triangles,geometries:info.memory.geometries,textures:info.memory.textures,trees:this.treeCount,buildings:this.buildingCount,trains:this.stressTrains?this.stressCount:this.trainModels.size,lod:first?.getCurrentLevel()??0,terrainErrorM:this.terrainErrorM,contextLost:this.renderer.getContext().isContextLost()};}
   dispose():void {window.removeEventListener('resize',this.onResize);window.removeEventListener('keydown',this.keyDown);window.removeEventListener('keyup',this.keyUp);window.removeEventListener('blur',this.clearKeys);this.controls.removeEventListener('start',this.controlStart);this.controls.dispose();if(this.terrainBlockoutMaterial){this.landscape.material=this.terrainSurfaceMaterial;this.terrainBlockoutMaterial.dispose();this.terrainBlockoutMaterial=null;}disposeObject(this.scene);if(this.ownsRenderer){this.renderer.dispose();this.renderer.forceContextLoss();}}
 }
-export class FjordRenderHost {
+export class CampaignRenderHost {
   readonly renderer:THREE.WebGLRenderer;
   private disposed=false;
   constructor(private readonly canvas:HTMLCanvasElement) {this.renderer=createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);}
-  create(terrain:Heightfield,state:GameState):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');return new FjordRenderer(this.canvas,terrain,state,this.renderer);}
+  create(terrain:Heightfield,state:GameState,content:CampaignContent):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');if(content.presentation.rendererId!=='fjord')throw new Error(`Unsupported renderer: ${content.presentation.rendererId}`);return new FjordRenderer(this.canvas,terrain,state,content.presentation,this.renderer);}
   dispose():void {if(this.disposed)return;this.renderer.dispose();this.renderer.forceContextLoss();this.disposed=true;}
 }
 function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {return new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}

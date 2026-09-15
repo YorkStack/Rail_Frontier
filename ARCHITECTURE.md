@@ -13,14 +13,17 @@ Production code lives under `src/domain`, `world`, `rail`, `simulation`, `persis
 | Layer / files | Owns | Actual state |
 |---|---|---|
 | domain/model, operations, curve-math | Serializable records, SI coordinates, IDs, content contracts and math | Implemented and validated in saves |
-| world/terrain, random, profiles | Authoritative triangular heightfield, seed stream, biome parameters | Implemented for the versioned 16 km Norway world |
+| world/terrain, random, profiles | Authoritative triangular heightfield, seed stream, biome parameters | Implemented for the versioned 16 km Norway world; generator registry extraction is next |
 | rail/geometry, constraints, planner, graph | Cubic alignment, arc length, validity, engineering and routing | Implemented/tested |
 | simulation/* | Fixed tick, traction, occupancy, transfers, industry, city economy, accounting and objectives | Implemented for Norway |
 | application/ports, snapshot, game and command handlers | Atomic commands, storage/render boundaries and frozen UI snapshots | Implemented |
 | persistence/save, indexeddb | Schema 6, sequential migrations, semantic validation and durable slots | Implemented with autosave and archive UI |
-| rendering/fjord-renderer, terrain-mesh, track-mesh | Three.js world composition, assets, picking, overlays and geometry | Production adapter implemented |
+| content/registry, presentation, application/session-host | Versioned campaign world and presentation selection, validation and atomic session replacement | Norway registered; expansion boundary implemented |
+| rendering/fjord-renderer, terrain-mesh, track-mesh | Three.js world composition, assets, picking, overlays and geometry | Production adapter implemented; biome and pack selected by resolved campaign presentation |
 
 Dependency rule: simulation never imports Three.js, DOM, IndexedDB or UI objects. All renderer identities, GPU buffers, caches, wall timestamps and camera poses are ephemeral. Domain cross-imports between model/operations are type-only, with no runtime cycle. UI commands validate and commit atomically through GameApplication. snapshotState returns a detached recursively frozen snapshot. Render interpolation must never write into authoritative state.
+
+CampaignContent is the versioned composition root for a playable world. It owns the campaign definition, world validation/generation and a CampaignPresentation with renderer ID, biome profile and asset-manifest URL. ActiveSessionHost resolves this record before scene creation and hands it to the renderer factory. Save data contains stable campaign/world identity only; presentation settings and asset paths remain content, not persisted player state. Future Arizona and Great River content therefore register new generators and presentations without importing their rules into the simulation.
 
 ## Engine selection and browser delivery
 
@@ -74,4 +77,4 @@ Economic formulas and conservation/transaction rules are fixed in ECONOMIC_CONTR
 
 Schema 6 stores all authoritative state and operations. Version 1 migrates explicitly to 2, version 2 migrates to 3 by adding per-town economic state, version 3 migrates to 4 by adding the mail delivery total, version 4 migrates to 5 by persisting the original 1900 campaign epoch, and version 5 migrates to 6 by adding explicit unelectrified edge records. Every step validates and advances exactly one version. Future versions, invalid references, disconnected movement, nonfinite values, conflicting reservations and inconsistent ledger/spans fail before adoption. IndexedDB uses atomic slot transactions. Details and known hardening tasks: SAVEGAME_FORMAT.md.
 
-102 core tests and 18 browser integration/end-to-end tests cover construction, electrification, operations, contextual selection, city updates, 3D picking, overlays, passenger, mail and freight revenue, calendar/vehicle availability, sequential save migrations, V1/V2 replacement, responsive output, current/Di 3B runtime LODs and GPU-resource disposal. Blender pack checks and the production build pass. Separate 5k-edge/100-train CPU and 20k-tree/100-proxy rendering benchmarks reduce scale risks. Current performance evidence applies to the documented local target machine.
+113 Node tests and 18 browser integration/end-to-end tests cover construction, electrification, operations, contextual selection, city updates, 3D picking, overlays, passenger, mail and freight revenue, calendar/vehicle availability, sequential save migrations, campaign presentation selection, V1/V2 replacement, responsive output, all Norway runtime LODs and GPU-resource disposal. Blender pack checks and the production build pass. Separate 5k-edge/100-train CPU and 20k-tree/100-proxy rendering benchmarks reduce scale risks. Current performance evidence applies to the documented local target machine.
