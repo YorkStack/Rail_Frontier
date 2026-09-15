@@ -15,6 +15,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build && tsx tools/copy-notices.ts",
     "preview": "vite preview",
+    "screenshots:readme": "tsx tools/capture-readme-screenshots.ts",
     "test:browser": "playwright test",
     "spike:network": "tsx spikes/network-scale.ts"
   },

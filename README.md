@@ -6,6 +6,18 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. The required Astra → Sol handoff is documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## Current build
+
+The Norway vertical slice is playable now. It has the complete build → station → consist → route → delivery → revenue loop, passenger, mail and timber traffic, town growth, objectives, save archives and safe single-track dispatch. The next public-alpha step is release hardening: publish the static build, define the supported browser/device matrix, keep permanent released-save upgrade fixtures and complete a focused onboarding/accessibility/manual-QA pass. Arizona and Great River are later content expansions and do not block a first Norway release.
+
+The latest checkpoint passes 112 Node tests and 18 real-Chrome journeys in addition to TypeScript, asset and production-build validation.
+
+| Norwegian fjord landscape and live HUD | Steam passenger service |
+| --- | --- |
+| ![A regional view over the Norwegian fjord landscape with the game HUD](docs/screenshots/norway-landscape-hud.png) | ![A steam locomotive and passenger coaches on the Northern Line](docs/screenshots/train-service.png) |
+| Sundvik station and timber village | Landscape and motion settings |
+| ![Sundvik station, train and Norwegian timber houses](docs/screenshots/sundvik-station.png) | ![Rail Frontier landscape and motion settings menu](docs/screenshots/settings-menu.png) |
+
 ## Run
 
 Node ≥22.12 and npm required. Tested on Apple M2 Pro with Node 25.8.0, npm 11.11.0 and Chrome 153.
@@ -17,7 +29,7 @@ npm run dev
 
 Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, and Escape closes the active panel. Map labels and rendered trains/stations open live detail cards. The Operations panel reports cash, monthly results, infrastructure and owned-asset value, plus train and route profitability. The Overlays panel shows station catchments, industry sites and current track reservations. Background tabs pause explicitly. Save/load persists the company to IndexedDB; the company archive can export and import portable `.railfrontier.json` backups.
 
-The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an implementation preview, not the finished game menu and management interface.
+The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an early playable interface and remains subject to release polish.
 
 ## Validate and build
 
@@ -33,6 +45,8 @@ npm run preview
 ```
 
 Browser tests require installed Google Chrome (Playwright channel chrome). They start/reuse the local Vite server. Build emits a static site in dist; preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The 640.71 KB Three.js chunk produces Vite's normal size advisory; 160.48 KB gzip, within the current total download budget.
+
+README screenshots are captured from the running application with `npm run screenshots:readme`. Set `RAIL_FRONTIER_URL` to capture a server other than `http://127.0.0.1:5173`.
 
 ## Reproduce Blender assets
 
