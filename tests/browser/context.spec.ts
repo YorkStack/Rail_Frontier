@@ -14,7 +14,7 @@ test('map objects expose live context and overlays',async({page})=>{
 
   await page.getByRole('navigation',{name:'Focus a settlement'}).getByRole('button',{name:/Sundvik/}).click();await expect(context).toBeVisible();await expect(context.getByText('SETTLEMENT',{exact:true})).toBeVisible();await expect(context.getByText('Rail access',{exact:true})).toBeVisible();await expect(context.getByText('Economic activity',{exact:true})).toBeVisible();await expect(context.getByText('Lumber demand',{exact:true})).toBeVisible();await expect(context.getByText('Mail waiting',{exact:true})).toBeVisible();
 
-  await context.getByRole('button',{name:'Close selection'}).click();await page.getByRole('button',{name:/Operations/}).click();const office=page.getByRole('region',{name:'Railway operations'});await expect(office.getByText('STATIONS',{exact:true})).toBeVisible();
+  await context.getByRole('button',{name:'Close selection'}).click();await page.getByRole('button',{name:/Trains & lines/}).click();const office=page.getByRole('region',{name:'Railway operations'});await expect(office.getByText('STATIONS',{exact:true})).toBeVisible();
   await office.locator('#train-roster .office-row').first().click();await expect(context).toBeVisible();await expect(context.getByText('TRAIN',{exact:true})).toBeVisible();await expect(context.getByText('Revenue',{exact:true})).toBeVisible();
   await context.getByRole('button',{name:'Close selection'}).click();await page.mouse.click(720,450);await expect(context).toBeVisible();await expect(context.getByText('TRAIN',{exact:true})).toBeVisible();
 

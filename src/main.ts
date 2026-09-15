@@ -26,7 +26,10 @@ import { currentYear,dayOfYear } from './simulation/calendar.js';
 import {campaignContentRegistry} from './content/registry.js';
 import {ActiveSessionHost} from './application/session-host.js';
 import {quoteRouteElectrification,routeIsElectrified} from './application/electrification.js';
+import {applyPresentationPreferences,readPresentationPreferences,writePresentationPreferences,type PresentationPreferences,type UiLanguage,type UiScale} from './ui/preferences.js';
+import {applyInterfaceLanguage} from './ui/interface-language.js';
 
+const preferenceStorage=(()=>{try{return window.localStorage;}catch{return null;}})(),initialPreferences=readPresentationPreferences(preferenceStorage,navigator.language);applyPresentationPreferences(document.documentElement,initialPreferences);
 const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
   <canvas id="world" aria-label="Norwegian fjord landscape. Drag to orbit, right drag to pan, scroll to zoom." tabindex="0"></canvas>
@@ -36,10 +39,10 @@ app.innerHTML=`
       <div class="menu-brand"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 4v32M27 4v32M9 11h22M9 20h22M9 29h22"/></svg><span>RAIL <b>FRONTIER</b><small>THE NORTHERN LINE</small></span></div>
       <p class="menu-edition">NORWAY · 1900</p>
       <nav aria-label="Main menu sections">
-        <button data-menu-view="campaign" aria-current="page"><span>01</span>Campaign</button>
-        <button data-menu-view="saves"><span>02</span>Load game</button>
-        <button data-menu-view="settings"><span>03</span>Settings</button>
-        <button data-menu-view="credits"><span>04</span>Credits</button>
+        <button data-menu-view="campaign" aria-current="page"><span>01</span><b data-ui-copy="campaign">Campaign</b></button>
+        <button data-menu-view="saves"><span>02</span><b data-ui-copy="loadGame">Load game</b></button>
+        <button data-menu-view="settings"><span>03</span><b data-ui-copy="settings">Settings</b></button>
+        <button data-menu-view="credits"><span>04</span><b data-ui-copy="credits">Credits</b></button>
       </nav>
       <p class="menu-version">EARLY OPERATIONS · BUILD 0.6</p>
     </div>
@@ -54,7 +57,7 @@ app.innerHTML=`
           <p>FIRST CHARTER</p>
           <span><i>01</i>Connect two settlements</span><span><i>02</i>Carry 200 passengers</span><span><i>03</i>Earn NOK 10,000 operating profit</span>
         </div>
-        <div class="menu-actions"><button id="new-game" class="primary-action">Start new company <b>→</b></button><button id="continue-game">Continue latest</button></div>
+        <div class="menu-actions"><button id="new-game" class="primary-action"><span data-ui-copy="startCompany">Start new company</span><b>→</b></button><button id="continue-game" data-ui-copy="continueLatest">Continue latest</button></div>
       </article>
       <article id="menu-saves" class="menu-view" hidden>
         <p class="eyebrow">COMPANY ARCHIVE</p><h2>Saved companies</h2><p class="menu-lede">Resume a railway exactly where its operations stopped.</p>
@@ -64,9 +67,11 @@ app.innerHTML=`
       </article>
       <article id="menu-settings" class="menu-view" hidden>
         <p class="eyebrow">FIELD SETTINGS</p><h2>Landscape & motion</h2><p class="menu-lede">Tune the survey view for this device.</p>
-        <label class="setting-row"><span>Woodland<small>Show instanced trees across the fjord.</small></span><input id="trees-setting" type="checkbox" checked></label>
-        <div class="setting-row"><span>Reduced motion<small>Follows your operating-system preference.</small></span><output id="motion-setting">Off</output></div>
-        <div class="setting-row"><span>Camera controls<small>Drag to orbit · right drag to pan · scroll to zoom.</small></span><output>Active</output></div>
+        <label class="setting-row"><span><b data-ui-copy="interfaceSize">Interface size</b><small data-ui-copy="interfaceSizeHelp">Enlarges controls and text without changing the landscape zoom.</small></span><select id="ui-scale-setting"><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label>
+        <label class="setting-row"><span><b data-ui-copy="language">Language</b><small data-ui-copy="languageHelp">Used for controls and first-service guidance.</small></span><select id="language-setting"><option value="en">English</option><option value="de">Deutsch</option></select></label>
+        <label class="setting-row"><span><b data-ui-copy="woodland">Woodland</b><small data-ui-copy="woodlandHelp">Show trees across the landscape.</small></span><input id="trees-setting" type="checkbox" checked></label>
+        <div class="setting-row"><span><b data-ui-copy="reducedMotion">Reduced motion</b><small data-ui-copy="reducedMotionHelp">Follows your operating-system preference.</small></span><output id="motion-setting">Off</output></div>
+        <div class="setting-row"><span><b data-ui-copy="cameraControls">Camera controls</b><small data-ui-copy="cameraControlsHelp">Drag to orbit · right drag to pan · scroll to zoom.</small></span><output>Active</output></div>
       </article>
       <article id="menu-credits" class="menu-view" hidden>
         <p class="eyebrow">CREDITS & LICENSES</p><h2>Built for the rails.</h2><p class="menu-lede">Rail Frontier is an original browser strategy prototype created in TypeScript and rendered with Three.js.</p>
@@ -77,7 +82,7 @@ app.innerHTML=`
   <header class="masthead">
     <button id="open-menu" class="brand" aria-label="Open main menu"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M13 4v32M27 4v32M9 11h22M9 20h22M9 29h22"/></svg><span>RAIL <b>FRONTIER</b><small>THE NORTHERN LINE</small></span></button>
     <div class="chapter"><span class="live-dot"></span> ACTIVE COMPANY <span class="chapter-number">01 / NORWAY</span></div>
-    <div class="session-tools"><button id="save" aria-label="Save study">Save game</button><button id="load" aria-label="Load study">Load game</button><button id="details" class="square" aria-label="Toggle technical diagnostics" aria-expanded="false">⌘</button></div>
+    <div class="session-tools"><button id="save" aria-label="Save study" data-ui-copy="saveGame">Save game</button><button id="load" aria-label="Load study" data-ui-copy="loadGame">Load game</button><button id="details" class="square" aria-label="Toggle technical diagnostics" aria-expanded="false">⌘</button></div>
   </header>
   <aside class="field-notes">
     <p class="eyebrow">60° NORTH · A NEW BEGINNING</p>
@@ -160,7 +165,7 @@ app.innerHTML=`
     <p class="disclosure">The scale test includes 2,000 buildings and 5,000 strategic rail segments. It measures rendering, not a complete economy.</p>
   </section>
   <footer class="control-deck">
-    <div class="camera-tools"><button id="regional" class="icon-button" title="Regional view (R)"><span>⌖</span>Regional view</button><button id="follow" class="icon-button" title="Follow train (F)"><span>▰</span>Follow train</button><button id="plan" class="icon-button" aria-expanded="false"><span>⌁</span>Survey track</button><button id="place-station" class="icon-button" aria-expanded="false"><span>⌑</span>Place station</button><button id="operations" class="icon-button" aria-expanded="false"><span>▤</span>Operations</button><button id="overlays" class="icon-button" aria-expanded="false"><span>◉</span>Overlays</button></div>
+    <div class="camera-tools"><button id="regional" class="icon-button" title="Regional view (R)"><span>⌖</span><b data-ui-copy="overview">Overview</b></button><button id="follow" class="icon-button" title="Follow train (F)"><span>▰</span><b data-ui-copy="followTrain">Follow train</b></button><button id="plan" class="icon-button" aria-expanded="false"><span>⌁</span><b data-ui-copy="buildTracks">Build tracks</b></button><button id="place-station" class="icon-button" aria-expanded="false"><span>⌑</span><b data-ui-copy="buildStation">Build station</b></button><button id="operations" class="icon-button" aria-expanded="false"><span>▤</span><b data-ui-copy="trainsLines">Trains & lines</b></button><button id="overlays" class="icon-button" aria-expanded="false"><span>◉</span><b data-ui-copy="overlays">Overlays</b></button></div>
     <div class="time-control"><span id="run-state">RUNNING</span><div class="speeds" role="group" aria-label="Simulation speed"><button data-speed="0" aria-label="Pause" aria-pressed="false">Ⅱ</button><button data-speed="1" aria-pressed="true">1×</button><button data-speed="2" aria-pressed="false">2×</button><button data-speed="4" aria-pressed="false">4×</button><button data-speed="8" aria-pressed="false">8×</button></div></div>
   </footer>
   <aside class="company-strip" aria-label="Company status"><span>Cash<strong id="cash">—</strong></span><span>Date<strong id="date">—</strong></span><span>Passengers<strong id="passengers">0 delivered</strong></span><span>Mail<strong id="mail">0 delivered</strong></span><span>Operating result<strong id="profit">No result yet</strong></span></aside>
@@ -175,6 +180,7 @@ app.innerHTML=`
   <div id="toast" role="status" aria-live="polite">Preparing the northern line…</div>
 `;
 const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
+applyInterfaceLanguage(document,initialPreferences.language);
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
@@ -183,6 +189,8 @@ async function start():Promise<void> {
   await sessionHost.initialize(initial);
   const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};
   let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store,undefined,validateSaveContent),state=game.snapshot(),switchingSession=false;
+  let preferences:PresentationPreferences={...initialPreferences};const persistPreferences=()=>{applyPresentationPreferences(document.documentElement,preferences);applyInterfaceLanguage(document,preferences.language);writePresentationPreferences(preferenceStorage,preferences);};
+  const scaleSetting=element<HTMLSelectElement>('#ui-scale-setting'),languageSetting=element<HTMLSelectElement>('#language-setting');scaleSetting.value=String(preferences.uiScale);languageSetting.value=preferences.language;scaleSetting.onchange=()=>{preferences={...preferences,uiScale:Number(scaleSetting.value) as UiScale};persistPreferences();};languageSetting.onchange=()=>{preferences={...preferences,language:languageSetting.value as UiLanguage};persistPreferences();};
   element<HTMLSelectElement>('#station-class').replaceChildren(...Object.values(stationDefinitions).map(definition=>{const option=document.createElement('option');option.value=definition.id;option.textContent=`${stationClassName(definition.id)} · ${money(definition.purchaseCost)}`;return option;}));
   let selection:WorldSelection|null=null;
   const labels=view.labels.map(label=>{const node=document.createElement('button');node.className=`map-label ${label.selection.kind}`;node.textContent=label.name;node.onclick=()=>selectWorld(label.selection,true);element('#map-labels').append(node);return node;});
