@@ -26,6 +26,12 @@ export function validateCommand(state:GameState,command:GameCommand):void {
       }
       return;
     }
+    case 'placeStation':
+      if(!Number.isSafeInteger(command.expectedRevision)||command.expectedRevision!==state.railway.revision)throw new Error('Station preview is stale');
+      if(!Number.isSafeInteger(command.quotedCost)||command.quotedCost<0)throw new Error('Invalid quoted cost');
+      if(!Number.isFinite(command.position.x)||!Number.isFinite(command.position.z)||!Number.isFinite(command.orientationRad))throw new Error('Invalid station placement');
+      if(command.classId.length===0)throw new Error('Station class is required');
+      return;
     case 'buildStation':
       if(!state.railway.nodes.some(node=>node.id===command.nodeId))throw new Error(`Unknown station node: ${command.nodeId}`);
       if(command.classId.length===0)throw new Error('Station class is required');

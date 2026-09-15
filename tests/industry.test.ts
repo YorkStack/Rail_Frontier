@@ -12,7 +12,7 @@ function freightState():GameState {
   const state=createInitialState(),a={x:100,y:0,z:0},b={x:300,y:0,z:0};
   state.towns=[{id:'town:2',name:'Timberton',position:a,population:1000},{id:'town:3',name:'Millhaven',position:b,population:1000},{id:'town:4',name:'Elsewhere',position:{x:900,y:0,z:0},population:1000}];
   state.railway={revision:1,nodes:[{id:'node:5',position:a},{id:'node:6',position:b}],edges:[{id:'edge:7',from:'node:5',to:'node:6',curve:line(a,b),speedLimitMps:18,ownerId:'company:1'}]};
-  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[]},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'rural-halt',storage:[]}];
+  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];
   state.routes=[{id:'route:10',stops:['station:8','station:9'],mode:'shuttle'}];
   state.trains=[{id:'train:11',routeId:'route:10',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-freight-wagon'],motion:{path:[{edgeId:'edge:7',reverse:false}],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'running',dwellTicks:0,cargo:[]}];
   state.industries=[{id:'industry:12',definitionId:'forest',position:a,inventory:{}},{id:'industry:13',definitionId:'sawmill',position:b,inventory:{}}];

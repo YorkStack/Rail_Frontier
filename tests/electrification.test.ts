@@ -17,7 +17,7 @@ function fixture(cash=250_000_000):GameState {
     'edge:8':{spans:[{startM:0,endM:100,kind:'ground'}],constructionCost:100_000,maintenancePerDay:10,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0},
     'edge:9':{spans:[{startM:0,endM:100,kind:'ground'}],constructionCost:100_000,maintenancePerDay:10,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0}
   };
-  state.stations=[{id:'station:10',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[]},{id:'station:11',nodeId:'node:7',townId:null,classId:'rural-halt',storage:[]}];
+  state.stations=[{id:'station:10',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:11',nodeId:'node:7',townId:null,classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];
   state.routes=[{id:'route:12',stops:['station:10','station:11'],mode:'shuttle'}];state.nextEntityId=13;
   return state;
 }

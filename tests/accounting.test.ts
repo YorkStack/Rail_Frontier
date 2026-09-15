@@ -15,7 +15,7 @@ function assets():GameState {
   const state=createInitialState(),a={x:2200,y:state.towns[0]!.position.y,z:3200},b={x:4700,y:state.towns[1]!.position.y,z:4900};
   state.railway={revision:1,nodes:[{id:'node:5',position:a},{id:'node:6',position:b}],edges:[{id:'edge:7',from:'node:5',to:'node:6',curve:line(a,b),speedLimitMps:20,ownerId:'company:1'}]};
   state.operations.infrastructure['edge:7']={spans:[{startM:0,endM:3023.2437214726323,kind:'ground'}],constructionCost:1000,maintenancePerDay:100,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
-  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[]},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'rural-halt',storage:[]}];
+  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];
   state.trains=[{id:'train:10',routeId:null,locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],motion:{path:[{edgeId:'edge:7',reverse:false}],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'idle',dwellTicks:0,cargo:[]}];
   state.operations.trainServices['train:10']={nextStopIndex:0,direction:1,ageDays:0,condition:1,distanceM:0,revenue:0,operatingCosts:0,costRemainder:0};state.nextEntityId=11;
   return state;

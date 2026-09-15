@@ -10,7 +10,7 @@ function operationalState():GameState {
   const state=createInitialState(),a={x:20,y:0,z:100},b={x:220,y:0,z:100};
   state.railway={revision:1,nodes:[{id:'node:5',position:a},{id:'node:6',position:b}],edges:[{id:'edge:7',from:'node:5',to:'node:6',curve:line(a,b),speedLimitMps:20,ownerId:'company:1'}]};
   state.operations.infrastructure['edge:7']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
-  state.stations=[{id:'station:8',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[]},{id:'station:9',nodeId:'node:6',townId:null,classId:'rural-halt',storage:[]}];state.nextEntityId=10;
+  state.stations=[{id:'station:8',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:9',nodeId:'node:6',townId:null,classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];state.nextEntityId=10;
   return state;
 }
 const game=()=>new RailFrontierGame(operationalState(),new Heightfield(2,2,500,new Float64Array(4)));
@@ -76,7 +76,7 @@ test('route creation validates repeated and disconnected stops',()=>{
 });
 
 test('ordered multi-stop loop routes preserve their service pattern',()=>{
-  const state=operationalState(),end={x:420,y:0,z:100};state.railway.nodes.push({id:'node:10',position:end});state.railway.edges.push({id:'edge:11',from:'node:6',to:'node:10',curve:line(state.railway.nodes[1]!.position,end),speedLimitMps:20,ownerId:'company:1'});state.operations.infrastructure['edge:11']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};state.stations.push({id:'station:12',nodeId:'node:10',townId:null,classId:'rural-halt',storage:[]});state.nextEntityId=13;
+  const state=operationalState(),end={x:420,y:0,z:100};state.railway.nodes.push({id:'node:10',position:end});state.railway.edges.push({id:'edge:11',from:'node:6',to:'node:10',curve:line(state.railway.nodes[1]!.position,end),speedLimitMps:20,ownerId:'company:1'});state.operations.infrastructure['edge:11']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};state.stations.push({id:'station:12',nodeId:'node:10',townId:null,classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000});state.nextEntityId=13;
   const instance=new RailFrontierGame(state,new Heightfield(2,2,500,new Float64Array(4))),stops=['station:9','station:12','station:8'] as const;assert.deepEqual(instance.dispatch({sequence:1,command:{type:'createRoute',stops:[...stops],mode:'loop'}}),{ok:true,createdIds:['route:13']});assert.deepEqual(instance.snapshot().routes[0],{id:'route:13',stops:[...stops],mode:'loop'});
 });
 

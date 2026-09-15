@@ -5,11 +5,13 @@ import { stationDefinition } from '../content/stations.js';
 import { allocateId, type Money } from '../domain/model.js';
 import { currentYear } from '../simulation/calendar.js';
 import { postExpense } from '../simulation/finance.js';
+import { stationHasExternalConnection,stationInternalEdges } from '../rail/station-layout.js';
 
 type PurchaseTrain=Extract<GameCommand,{type:'purchaseTrain'}>;
 
 export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=>{
   const station=state.stations.find(candidate=>candidate.id===command.stationId)!;
+  if(!stationHasExternalConnection(state,station))throw new Error('Purchase station needs an external track connection');
   const locomotive=vehicleDefinition(command.locomotiveId);
   if(!locomotive||locomotive.kind!=='locomotive')throw new Error(`Unknown locomotive: ${command.locomotiveId}`);
   const vehicles=command.vehicleIds.map(id=>vehicleDefinition(id));
@@ -21,7 +23,7 @@ export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=
   if(state.company.cash<cost)throw new Error('Insufficient funds');
   const platform=stationDefinition(station.classId);if(!platform)throw new Error(`Unknown station class: ${station.classId}`);
   const length=[locomotive,...vehicles].reduce((sum,vehicle)=>sum+vehicle!.lengthM,0);if(length>platform.platformLengthM)throw new Error('Train is too long for the purchase station platform');
-  const adjacent=state.railway.edges.filter(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);
+  const internal=stationInternalEdges(station),adjacent=state.railway.edges.filter(candidate=>(candidate.from===station.nodeId||candidate.to===station.nodeId)&&(station.layout.kind==='legacy-node'||internal.has(candidate.id)));
   if(adjacent.length===0)throw new Error('Purchase station is disconnected from track');
   const edge=adjacent.find(candidate=>locomotive.traction!=='electric'||state.operations.infrastructure[candidate.id]?.electrified);
   if(!edge)throw new Error('Electric traction requires electrified track at the purchase station');

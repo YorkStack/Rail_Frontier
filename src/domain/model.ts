@@ -22,7 +22,13 @@ export interface Train {
 }
 export type CargoKind = 'passengers' | 'mail' | 'timber' | 'lumber';
 export interface CargoLot { kind: CargoKind; quantity: number; destinationId: Id<'station'>; originId: Id<'station'>; loadedTick: number; distanceM: number }
-export interface Station { id: Id<'station'>; nodeId: Id<'node'>; townId: Id<'town'> | null; classId: string; storage: CargoLot[] }
+export interface StationPort {
+  key:'a'|'b';nodeId:Id<'node'>;outward:{x:number;z:number};trackClassId:'local';gaugeM:1.435;attachmentCapacity:1;
+}
+export type StationLayout=
+  | {kind:'legacy-node';version:1}
+  | {kind:'single-platform';version:1;orientationRad:number;stopNodeId:Id<'node'>;ports:[StationPort,StationPort];internalEdgeIds:[Id<'edge'>,Id<'edge'>];pad:{center:Vec3;lengthM:number;widthM:number;maxReliefM:number}};
+export interface Station { id: Id<'station'>; nodeId: Id<'node'>; townId: Id<'town'> | null; classId: string; storage: CargoLot[]; layout:StationLayout; constructionCost:Money }
 export interface Route { id: Id<'route'>; stops: Id<'station'>[]; mode: 'shuttle' | 'loop' }
 export interface Town { id: Id<'town'>; name: string; position: Vec3; population: number }
 export interface Industry { id: Id<'industry'>; definitionId: string; position: Vec3; inventory: Partial<Record<CargoKind, number>> }
