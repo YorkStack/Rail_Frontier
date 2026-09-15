@@ -4,6 +4,8 @@ ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
 GRAPHICS_IMPLEMENTATION_STARTED=false
 GRAPHICS_IMPLEMENTATION_COMPLETE=false
+CONSTRUCTION_DESIGN_COMPLETE=true
+CONSTRUCTION_IMPLEMENTATION_STARTED=false
 UX_PLANNING_COMPLETE=true
 UX_IMPLEMENTATION_STARTED=false
 UX_IMPLEMENTATION_COMPLETE=false
@@ -11,7 +13,7 @@ AWAITING_USER_MODEL_SWITCH=true
 
 # Current status — graphics and onboarding rework handoff, 2026-09-15
 
-Current milestone: **Astra planning complete; pause for the user to switch to SOL and ask to continue.** The user rejected the current graphics and found basic construction/menu interaction unclear. Active plans: [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this new rework, not the historically implemented GFX-001–008.
+Current milestone: **Astra planning complete; pause for the user to switch to SOL and ask to continue.** The user rejected the current graphics and found basic construction/menu interaction unclear. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this new rework, not the historically implemented GFX-001–008.
 
 Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pass changed only documentation and preserved user screenshots; it did not fix runtime graphics or controls. The actual renderer remains Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 was verified and used for read-only exported-roof inspection. Preserve completed Norway gameplay and schema-6 contracts.
 
@@ -77,11 +79,13 @@ Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pa
 
 The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Next implementation sequence: **GFX-R01 → GFX-R02 → UX-001–003 → GFX-R03–07 → UX-004–005 → GFX-R08–09 + UX-006**. Start with corrected roof geometry in local Blender and actual-game comparisons, then settlement entry views and readable build/service controls. The new tutorial must be tested against the reworked Norway terrain. No implementation of this sequence has started.
+Next implementation sequence: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Start with corrected roof geometry in local Blender and actual-game comparisons, then settlement entry views and readable build/service controls. The new tutorial must be tested against the reworked Norway terrain. No implementation of this sequence has started.
 
 Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
 
-Read the two active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Stop here until the user switches to SOL and asks to continue; this is the user's requested model handoff.
+The user’s construction brief supersedes the earlier track-first UX: standalone stations, visible ports, editable spline alignment, automatic engineering and whole-route purchase are now required. Architecture review is recorded in ASTRA_ESCALATIONS.md. No runtime changes were made. Save schema remains 6 until implementation, with proposed coordinated 6→7→8→9 migrations.
+
+Read the three active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Stop here until the user switches to SOL and asks to continue; this is the user's requested model handoff.
 
 ## Stable contracts
 

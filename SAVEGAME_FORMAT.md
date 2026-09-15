@@ -1,5 +1,7 @@
 # Save game format
 
+**Planned extension, 2026-09-15:** See [station-first construction migrations](docs/construction/STATION_TRACK_DESIGN.md). It specifies the next implementation and coordinated schema changes; the implemented contracts described below remain the current runtime until those slices land.
+
 Current experimental format: `{ "schemaVersion": 6, "gameVersion": "0.6.0", "state": GameState }`. See src/persistence/save.ts for exact runtime validation and src/domain/model.ts + operations.ts for records. Game is pre-release; future released-save compatibility must preserve explicit migrations.
 
 Authoritative state includes tick/start year/ID counter/RNG, campaign/content/generator versions, rail graph, stations, trains/cargo/route state, towns, industries, finance ledger, objectives and **operations**. Operations holds OD demand, service direction/stop cursor/condition/cost remainder, exclusive reservations, built engineering spans/base costs/upkeep, edge electrification status/historical cost/upkeep, industry cycles, per-town economy state, delivered totals, completed objectives, monthly accounts and command sequence.

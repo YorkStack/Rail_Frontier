@@ -10,7 +10,7 @@ This is the active graphics handoff. It supersedes the visual acceptance claims 
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
 - EXP-003 is a technical Arizona terrain prototype, **not a finished or playable Arizona campaign**. Its hidden HUD, empty railway and primitive buildings must be described accordingly.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
-- Combined order after the user switches model and asks to continue: **GFX-R01 roofs → GFX-R02 entry → UX-001–003 readable controls/build/service → GFX-R03–07 materials/vegetation/landforms/architecture → UX-004–005 tutorial/progression → GFX-R08–09 + UX-006 integrated acceptance**. See [ONBOARDING_AND_CONTROLS_PLAN.md](../ux/ONBOARDING_AND_CONTROLS_PLAN.md). SOL is an LLM selection; Three.js remains the renderer.
+- Combined order after the user switches model and asks to continue: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. The [station-first construction design](../construction/STATION_TRACK_DESIGN.md) supersedes the initial UX-002 proposal; see also [ONBOARDING_AND_CONTROLS_PLAN.md](../ux/ONBOARDING_AND_CONTROLS_PLAN.md). SOL is an LLM selection; Three.js remains the renderer.
 - This planning turn changes documentation and preserves the user's screenshots only. It does not regenerate assets, change runtime code or claim new implementation test passes.
 
 ## Evidence and diagnosed causes

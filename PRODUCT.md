@@ -10,7 +10,7 @@ Rail Frontier is for single-player strategy players who enjoy planning infrastru
 
 ## Product Purpose
 
-Rail Frontier is a browser-based railroad company management simulation. It combines terrain-aware network construction with a legible economic model and a living model-railway landscape. The first success case is a complete Norwegian passenger loop: survey and build track, place stations, purchase a train, assign a route, carry passengers, earn fares, pay costs, save, reload, and continue without simulation drift.
+Rail Frontier is a browser-based railroad company management simulation. It combines terrain-aware network construction with a legible economic model and a living model-railway landscape. The first success case is a complete Norwegian passenger loop: place stations, plan and build a connecting railway, purchase a train, assign a route, carry passengers, earn fares, pay costs, save, reload, and continue without simulation drift.
 
 ## Brand Personality
 
@@ -38,4 +38,4 @@ All primary actions require keyboard access, visible focus, readable labels, and
 
 ## First-use priority (2026-09-15)
 
-A new player must be able to create a first railway without reading external instructions or enlarging the browser to read controls. Introduce construction, stations, locomotive and wagon composition, and service through real actions in the world. Show advanced choices progressively while retaining an explicit full-tools mode and all authoritative campaign/year constraints. Graphics should feel like a situated landscape with natural silhouettes and convincing buildings, rather than a tabletop of isolated primitives. Active detail: docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md and docs/art/GRAPHICS_REWORK_PLAN.md.
+A new player must be able to create a first railway without reading external instructions or enlarging the browser to read controls. Place and orient a station first, then plan railway from its visible connection points using editable waypoints, automatic engineering and a full-route cost review. Introduce locomotive/wagon composition and service through real actions in the world. Show advanced choices progressively while retaining an explicit full-tools mode and all authoritative campaign/year constraints. Graphics should feel like a situated landscape with natural silhouettes and convincing buildings, rather than a tabletop of isolated primitives. Active detail: docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md and docs/art/GRAPHICS_REWORK_PLAN.md.

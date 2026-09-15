@@ -1,5 +1,7 @@
 # Rail Frontier architecture
 
+**Planned extension, 2026-09-15:** See [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md). It specifies the next implementation and coordinated schema changes; the implemented contracts described below remain the current runtime until those slices land.
+
 Production architecture, updated 2026-09-15. The user clarified that **Astra and Sol are Codex models, not game engines**. Three.js 0.186.0 is the renderer. Vite 8.3.0 builds the browser app; strict TypeScript implements the independent simulation core. Norway now has playable passenger, mail and timber-freight loops, city growth, six progressive station classes, production assets, contextual world selection, strategy overlays, persisted route electrification with derived overhead-line rendering, portable save archives, ordered multi-stop services and safe station-to-station corridor dispatch. The researched 1922 El 1, 1960 Di 3B, 1981 Di 4 and 1996 El 18 eras are complete; additional biomes remain later milestones.
 
 ## Repository and scope
