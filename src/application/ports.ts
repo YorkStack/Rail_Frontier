@@ -23,6 +23,7 @@ export interface SaveStore {
   write(id:string,name:string,json:string):Promise<void>;
   read(id:string):Promise<string>;
   remove(id:string):Promise<void>;
+  estimate?():Promise<{usageBytes:number|null;quotaBytes:number|null}>;
 }
 export type WorldSelection=
   | {kind:'town';id:Id<'town'>}

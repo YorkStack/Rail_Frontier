@@ -45,10 +45,11 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - VEHICLE-003 adds the 1922 Nord El 1 with researched dimensions and performance, distinct purchase/running balance, and two locally generated Blender LODs. Its coupled rods, side pipework, louvres, glazing, doors, paired diamond pantographs and insulators are validated and rendered in Chrome; pantograph contact height matches the derived overhead wire.
 - VEHICLE-004 adds the official 1981 Di 4 delivery boundary and specifications with a distinct angular six-axle Blender model, sloping framed windscreens, high radiator banks, roof fans, exhaust and snowploughs. Both LODs carry complete UVs and remain inside the unchanged vehicle budgets.
 - VEHICLE-005 completes the researched locomotive set with the 1996 El 18: a separate swept four-axle electric Blender model with sealed glazing, doors, handholds, intakes and paired pantographs. Its exact 18.50 m rendered length and official performance values are tested against the existing power gates.
+- SAVE-003 adds versioned `.railfrontier.json` export and atomic import for every company slot. Imports accept portable or raw saves, enforce UTF-8 byte plus entity/geometry/operational collection limits before graph validation, reject unsupported content before writing, and never replace the live session. The archive reports browser storage usage and actionable quota/private-mode failures; one rejected write cannot poison later saves.
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 106 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 109 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -59,7 +60,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 6 plus strict sequential 1→2→3→4→5→6 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **106 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- **109 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -67,7 +68,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, and route electrification are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. Arizona/River expansion and release/deployment remain later work.
+Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification and portable save archives are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -86,7 +87,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack, including dedicated farm, timber-yard and sawmill structures.
 
-Conservative curve rejection, one-chunk terrain and incomplete public-import/storage hardening are documented in TECH_DEBT.md. The default Vite 500 KB chunk advisory remains: Three.js is 640.71 KB minified / 160.48 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
+Conservative curve rejection, one-chunk terrain and remaining release-only cross-tab/save-fixture work are documented in TECH_DEBT.md and SAVEGAME_FORMAT.md. The default Vite 500 KB chunk advisory remains: Three.js is 640.71 KB minified / 160.48 KB gzip; total initial payload stays below the 5 MB budget. No warning is suppressed.
 
 ## Git state and reproduction
 
@@ -98,4 +99,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next work returns to the remaining product backlog: public save import/storage hardening, route and dispatch depth, then the separately scoped Arizona/River expansion.
+The next work is route and dispatch depth, then the separately scoped Arizona/River expansion.
