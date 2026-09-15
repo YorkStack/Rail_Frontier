@@ -6,7 +6,7 @@ import type { CubicCurve, GameState, Vec3 } from '../src/domain/model.js';
 import { FIXED_DT } from '../src/simulation/clock.js';
 import { DWELL_TICKS } from '../src/simulation/station-service.js';
 import { createTrainSimulation } from '../src/simulation/trains.js';
-import { consistPhysics, tractionAcceleration } from '../src/simulation/traction.js';
+import { anticipatorySpeedLimit, consistPhysics, tractionAcceleration } from '../src/simulation/traction.js';
 import { Heightfield } from '../src/world/terrain.js';
 
 const line=(p0:Vec3,p3:Vec3):CubicCurve=>({p0,p1:{x:(2*p0.x+p3.x)/3,y:(2*p0.y+p3.y)/3,z:(2*p0.z+p3.z)/3},p2:{x:(p0.x+2*p3.x)/3,y:(p0.y+2*p3.y)/3,z:(p0.z+2*p3.z)/3},p3});
@@ -25,6 +25,18 @@ test('traction responds to consist mass and signed gradient',()=>{
   assert.ok(tractionAcceleration(light,5,0)>tractionAcceleration(heavy,5,0));
   assert.ok(tractionAcceleration(heavy,5,-.02)>tractionAcceleration(heavy,5,0));
   assert.ok(tractionAcceleration(heavy,5,.02)<tractionAcceleration(heavy,5,0));
+});
+
+test('speed envelope anticipates a slower downstream edge',()=>{
+  const allowed=anticipatorySpeedLimit(22,[{distanceM:50,limitMps:5}],500);
+  assert.ok(Math.abs(allowed-Math.sqrt(85))<1e-12);
+  assert.equal(anticipatorySpeedLimit(12,[{distanceM:500,limitMps:5}],500),12);
+  assert.throws(()=>anticipatorySpeedLimit(20,[{distanceM:-1,limitMps:5}],100),/Invalid speed envelope/);
+});
+
+test('running train brakes before entering a slower edge',()=>{
+  const state=runningState(150),middle=state.railway.nodes[1]!.position,end={x:middle.x+150,y:0,z:middle.z};state.railway.nodes.push({id:'node:12',position:end});state.railway.edges.push({id:'edge:13',from:'node:6',to:'node:12',curve:line(middle,end),speedLimitMps:5,ownerId:'company:1'});state.stations[1]!.nodeId='node:12';state.trains[0]!.motion={path:[{edgeId:'edge:7',reverse:false},{edgeId:'edge:13',reverse:false}],leg:0,distanceM:100,arrived:false};state.trains[0]!.speedMps=20;state.nextEntityId=14;
+  createTrainSimulation()(state);assert.ok(state.trains[0]!.speedMps<=Math.sqrt(85));assert.ok(state.trains[0]!.speedMps<20);assert.equal(state.trains[0]!.motion.leg,0);
 });
 
 test('train brakes to the exact station endpoint, dwells, then reverses',()=>{

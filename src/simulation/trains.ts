@@ -5,7 +5,7 @@ import { advanceMotion, motionPosition } from './motion.js';
 import { FIXED_DT } from './clock.js';
 import { accrueRunningCost } from './finance.js';
 import { advanceDwell } from './station-service.js';
-import { brakingSpeed, consistPhysics, SERVICE_BRAKE_MPS2, tractionAcceleration } from './traction.js';
+import { anticipatorySpeedLimit, consistPhysics, SERVICE_BRAKE_MPS2, tractionAcceleration } from './traction.js';
 import { serviceStop } from './transfer.js';
 import { updateReservations } from './occupancy.js';
 
@@ -30,7 +30,9 @@ function stepTrain(state:GameState,train:Train,network:RailNetwork,reservedNext:
   const traversal=train.motion.path[train.motion.leg];if(!traversal){train.phase='blocked';train.speedMps=0;return;}
   const geometry=network.geometry.get(traversal.edgeId);if(!geometry)throw new Error('Train path uses missing track');
   const currentRemaining=geometry.lengthM-train.motion.distanceM,pathRemaining=remainingDistance(train,network),stopDistance=reservedNext?pathRemaining:currentRemaining;
-  const physics=consistPhysics(train),limit=Math.min(physics.maxSpeedMps,state.railway.edges.find(edge=>edge.id===traversal.edgeId)!.speedLimitMps),target=Math.min(limit,brakingSpeed(stopDistance));
+  const physics=consistPhysics(train),edgeLimit=(edgeId:Id<'edge'>)=>state.railway.edges.find(edge=>edge.id===edgeId)!.speedLimitMps,limit=Math.min(physics.maxSpeedMps,edgeLimit(traversal.edgeId)),restrictions:{distanceM:number;limitMps:number}[]=[];
+  if(reservedNext){let distanceM=currentRemaining;for(let index=train.motion.leg+1;index<train.motion.path.length;index++){const leg=train.motion.path[index]!,nextLimit=Math.min(physics.maxSpeedMps,edgeLimit(leg.edgeId));if(nextLimit<limit)restrictions.push({distanceM,limitMps:nextLimit});distanceM+=network.geometry.get(leg.edgeId)!.lengthM;}}
+  const target=anticipatorySpeedLimit(limit,restrictions,stopDistance);
   const acceleration=train.speedMps>target? -SERVICE_BRAKE_MPS2:tractionAcceleration(physics,train.speedMps,signedGrade(train,network));
   const nextSpeed=Math.max(0,Math.min(target,train.speedMps+acceleration*FIXED_DT)),travelLimit=reservedNext?pathRemaining:Math.max(0,currentRemaining-1e-6),distanceM=Math.min(travelLimit,(train.speedMps+nextSpeed)*.5*FIXED_DT);
   try {accrueRunningCost(state,train.id,distanceM,physics.runningCostPerKm);} catch(error) {if(error instanceof Error&&error.message==='Insufficient funds'){train.phase='blocked';train.speedMps=0;return;}throw error;}

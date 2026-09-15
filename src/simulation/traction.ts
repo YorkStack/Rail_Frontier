@@ -27,3 +27,10 @@ export function tractionAcceleration(physics:ConsistPhysics,speedMps:number,sign
 }
 
 export const brakingSpeed=(distanceM:number)=>Math.sqrt(Math.max(0,2*SERVICE_BRAKE_MPS2*distanceM));
+export const approachSpeed=(targetSpeedMps:number,distanceM:number)=>Math.sqrt(Math.max(0,targetSpeedMps*targetSpeedMps+2*SERVICE_BRAKE_MPS2*distanceM));
+
+/** Maximum present speed that can satisfy every known downstream restriction. */
+export function anticipatorySpeedLimit(currentLimitMps:number,restrictions:readonly {distanceM:number;limitMps:number}[],stopDistanceM:number):number {
+  if(!Number.isFinite(currentLimitMps)||currentLimitMps<=0||!Number.isFinite(stopDistanceM)||stopDistanceM<0||restrictions.some(item=>!Number.isFinite(item.distanceM)||item.distanceM<0||!Number.isFinite(item.limitMps)||item.limitMps<=0))throw new Error('Invalid speed envelope');
+  return Math.min(currentLimitMps,brakingSpeed(stopDistanceM),...restrictions.map(item=>approachSpeed(item.limitMps,item.distanceM)));
+}
