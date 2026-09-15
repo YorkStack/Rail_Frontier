@@ -39,5 +39,6 @@ export interface WorldRenderer {
   setSelection(selection:WorldSelection|null,state:Readonly<GameState>):void;
   setOverlay(overlay:MapOverlay,state:Readonly<GameState>):void;
   focus(position:Vec3):void;
+  entry():void;
   dispose():void;
 }

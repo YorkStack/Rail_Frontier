@@ -12,7 +12,7 @@ class FakeRenderer implements PreparedWorldRenderer {
   disposed=false;
   constructor(private readonly fail=false) {}
   async loadAssets(){if(this.fail)throw new Error('candidate asset failure');}
-  update(){} pick(){return null;}pickEntity(){return null;}setSelection(){}setOverlay(){}focus(){}
+  update(){} pick(){return null;}pickEntity(){return null;}setSelection(){}setOverlay(){}focus(){}entry(){}
   dispose(){this.disposed=true;}
 }
 class FakeFactory implements WorldRendererFactory {
@@ -20,7 +20,7 @@ class FakeFactory implements WorldRendererFactory {
   create(_terrain:Heightfield,_state:GameState,entry:CampaignContent){this.presentations.push(entry.presentation.id);const renderer=new FakeRenderer(this.failNext);this.failNext=false;this.created.push(renderer);return renderer;}
   dispose(){this.disposed=true;}
 }
-const content=(campaign:CampaignDefinition):CampaignContent=>{const worldGenerator:WorldGenerator={id:'test',biomeId:campaign.world.biomeId,version:campaign.world.generatorVersion,landforms:{anchors:{},corridorX:()=>0,waterCrossSection:()=>({westBankX:null,eastBankX:null}),waterfall:null},validate(world){if(world.widthM!==campaign.world.widthM)throw new Error('wrong width');},elevation:()=>0,generate(){return new Heightfield(2,2,campaign.world.widthM,new Float64Array(4));}};return {campaign,presentation:{id:'test',rendererId:'test',assetManifestUrl:'/test.json',biome:norwayBiome,cameraPresets:{},cameraSweep:[],proceduralScenery:'norway-fallback'},worldGenerator,validateWorld:worldGenerator.validate};};
+const content=(campaign:CampaignDefinition):CampaignContent=>{const worldGenerator:WorldGenerator={id:'test',biomeId:campaign.world.biomeId,version:campaign.world.generatorVersion,landforms:{anchors:{},corridorX:()=>0,waterCrossSection:()=>({westBankX:null,eastBankX:null}),waterfall:null},validate(world){if(world.widthM!==campaign.world.widthM)throw new Error('wrong width');},elevation:()=>0,generate(){return new Heightfield(2,2,campaign.world.widthM,new Float64Array(4));}};return {campaign,presentation:{id:'test',rendererId:'test',assetManifestUrl:'/test.json',biome:norwayBiome,cameraPresets:{entry:{targetXZ:{x:0,z:0},offset:{x:1,y:1,z:1}}},entryCameraId:'entry',cameraSweep:[],proceduralScenery:'norway-fallback'},worldGenerator,validateWorld:worldGenerator.validate};};
 
 test('session host stages a paused replacement before disposing the live renderer',async()=>{
   const initial=createInitialState(),factory=new FakeFactory(),host=new ActiveSessionHost(new ContentRegistry([content({id:initial.campaignId,version:initial.campaignVersion,title:'test',startingYear:1900,startingCash:1,world:initial.world,towns:[],objectives:[]})]),factory);

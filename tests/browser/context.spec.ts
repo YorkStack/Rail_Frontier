@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs';
 
 test('map objects expose live context and overlays',async({page})=>{
   const errors:string[]=[];page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('/?skip-menu');await page.waitForFunction(()=>window.__railProbe?.ready===true);
+  await page.goto('/?skip-menu');await page.waitForFunction(()=>window.__railProbe?.ready===true);await page.evaluate(()=>window.__railProbe.regional());
 
   await page.getByRole('button',{name:'Granli Forest',exact:true}).click();
   const context=page.getByRole('region',{name:'Selected map object'});await expect(context).toBeVisible();await expect(context.getByText('INDUSTRY',{exact:true})).toBeVisible();await expect(context.getByRole('heading',{name:'Granli Forest'})).toBeVisible();await expect(context.getByText('Production',{exact:true})).toBeVisible();
