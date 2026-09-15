@@ -165,6 +165,13 @@ app.innerHTML=`
   </footer>
   <aside class="company-strip" aria-label="Company status"><span>Cash<strong id="cash">—</strong></span><span>Date<strong id="date">—</strong></span><span>Passengers<strong id="passengers">0 delivered</strong></span><span>Mail<strong id="mail">0 delivered</strong></span><span>Operating result<strong id="profit">No result yet</strong></span></aside>
   <div class="world-caption"><span>NORWEGIAN FJORDS</span><span>Drag to orbit · Right drag to pan · Scroll to explore</span><span id="fps">Preparing landscape…</span></div>
+  <aside class="terrain-study-caption" aria-label="Arizona terrain study controls">
+    <p>ARIZONA BASIN · LANDSCAPE STUDY</p>
+    <h1>Red rock country.</h1>
+    <span>This is a scenery preview. Railway construction and company play are currently available in Norway.</span>
+    <nav aria-label="Arizona camera views"><button data-study-camera="entry" aria-pressed="true">Town</button><button data-study-camera="canyon" aria-pressed="false">Canyon</button><button data-study-camera="regional" aria-pressed="false">Overview</button></nav>
+    <a href="./?skip-menu=1">Return to the Norway campaign</a>
+  </aside>
   <div id="toast" role="status" aria-live="polite">Preparing the northern line…</div>
 `;
 const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
@@ -184,6 +191,7 @@ async function start():Promise<void> {
   const startsInMenu=!query.has('skip-menu');if(startsInMenu)game.pauseForVisibility();element('#main-menu').hidden=!startsInMenu;syncSpeed();
   document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>setSpeed(Number(button.dataset.speed) as Speed));
   element('#regional').onclick=()=>view.regional();element('#follow').onclick=()=>{view.followTrain();toast('Following the Fjord Corridor passenger service.');};
+  document.querySelectorAll<HTMLButtonElement>('[data-study-camera]').forEach(button=>button.onclick=()=>{view.setCameraPreset(button.dataset.studyCamera!);document.querySelectorAll<HTMLButtonElement>('[data-study-camera]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));});
   document.querySelectorAll<HTMLButtonElement>('[data-town]').forEach(button=>button.onclick=()=>{const town=state.towns[Number(button.dataset.town)];if(town)selectWorld({kind:'town',id:town.id},true);});
   element('#details').onclick=()=>{const panel=element('#diagnostics');panel.hidden=!panel.hidden;element('#details').setAttribute('aria-expanded',String(!panel.hidden));};
   element<HTMLInputElement>('#stress').onchange=event=>{view.setStress(structuredClone(state) as GameState,(event.target as HTMLInputElement).checked);view.regional();frames.length=0;};
@@ -283,7 +291,7 @@ async function start():Promise<void> {
   element<HTMLFormElement>('#create-route').onsubmit=event=>{event.preventDefault();const mode=element<HTMLSelectElement>('#route-mode').value as 'shuttle'|'loop',result=game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'createRoute',stops:[...routeDraft],mode}});if(result.ok)routeDraft.length=0;operationResult(result,`${mode==='loop'?'Loop':'Shuttle'} route created.`);};
   element<HTMLFormElement>('#assign-route').onsubmit=event=>{event.preventDefault();const trainId=element<HTMLSelectElement>('#assign-train').value as `train:${number}`,routeId=element<HTMLSelectElement>('#assign-route-select').value as `route:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'assignRoute',trainId,routeId}}),'Train assigned to service.');};
   element<HTMLFormElement>('#electrify-route').onsubmit=event=>{event.preventDefault();const routeId=element<HTMLSelectElement>('#electrify-route-id').value as `route:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'electrifyRoute',routeId}}),'Route electrified.');};
-  const activateSession=async(candidate:GameState)=>{switchingSession=true;try{await saves.drain();state=await sessionHost.replace(candidate);game=sessionHost.game;view=sessionHost.renderer;saves=new GameSaveManager(game,store,undefined,validateSaveContent);selection=null;syncSpeed();selectOverlay('none');toggleContext(false);view.regional();return state;}finally{switchingSession=false;last=performance.now();}};
+  const activateSession=async(candidate:GameState)=>{switchingSession=true;try{await saves.drain();state=await sessionHost.replace(candidate);game=sessionHost.game;view=sessionHost.renderer;saves=new GameSaveManager(game,store,undefined,validateSaveContent);selection=null;syncSpeed();selectOverlay('none');toggleContext(false);view.entry();return state;}finally{switchingSession=false;last=performance.now();}};
   const save=async()=>{state=game.snapshot();await saves.save('study','Norwegian Fjords company');return state.tick;};
   const load=async()=>{const candidate=await saves.read('study');state=await activateSession(candidate);return state.tick;};
   element('#save').onclick=()=>{void save().then(tick=>toast(`Study saved at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not save: ${message(error)}`));};

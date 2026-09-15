@@ -39,15 +39,44 @@ def box(name,loc,dims,key,rotation=(0,0,0),material_name=None):bpy.ops.mesh.prim
 def cylinder(name,loc,radius,depth,key,vertices=8,rotation=(0,0,0)):bpy.ops.mesh.primitive_cylinder_add(vertices=vertices,radius=radius,depth=depth,location=loc,rotation=rotation);return finish(bpy.context.object,name,key)
 def empty(name,loc=(0,0,0)):obj=bpy.data.objects.new(name,None);bpy.context.collection.objects.link(obj);obj.location=loc
 
+def gable_infill(name,center_x,width,depth,wall_top,ridge_z,key,material_name=None):
+    half_width=width/2;half_depth=depth/2;thickness=.16
+    vertices=[
+        (center_x-half_width,-half_depth-thickness,wall_top),(center_x+half_width,-half_depth-thickness,wall_top),(center_x,-half_depth-thickness,ridge_z),
+        (center_x-half_width,-half_depth,wall_top),(center_x+half_width,-half_depth,wall_top),(center_x,-half_depth,ridge_z),
+        (center_x-half_width,half_depth,wall_top),(center_x+half_width,half_depth,wall_top),(center_x,half_depth,ridge_z),
+        (center_x-half_width,half_depth+thickness,wall_top),(center_x+half_width,half_depth+thickness,wall_top),(center_x,half_depth+thickness,ridge_z)
+    ]
+    faces=[(0,1,2),(3,5,4),(0,3,4,1),(1,4,5,2),(2,5,3,0),(6,7,8),(9,11,10),(6,9,10,7),(7,10,11,8),(8,11,9,6)]
+    mesh=bpy.data.meshes.new(name+'_Mesh');mesh.from_pydata(vertices,[],faces);mesh.update();obj=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active=obj;obj.select_set(True);bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.uv.smart_project(island_margin=.02);bpy.ops.object.mode_set(mode='OBJECT');obj.select_set(False)
+    obj.data.materials.append(mat(key,material_name));return obj
+
+def sloped_beam(name,start,end,y,depth,height,key,material_name=None):
+    x0,z0=start;x1,z1=end;length=math.hypot(x1-x0,z1-z0);angle=math.atan2(-(z1-z0),x1-x0)
+    return box(name,((x0+x1)/2,y,(z0+z1)/2),(length,depth,height),key,(0,angle,0),material_name)
+
+def gable_roof(prefix,center_x,width,depth,wall_top,rise,wall_key,wall_material=None,markers=True):
+    overhang_x=.52;overhang_y=.58;panel_thickness=.34
+    ridge=(center_x,wall_top+rise);left=(center_x-width/2-overhang_x,wall_top+.18);right=(center_x+width/2+overhang_x,wall_top+.18)
+    sloped_beam(prefix+'_RoofA',left,ridge,0,depth+overhang_y*2,panel_thickness,'roof','RF_Roof_Slate')
+    sloped_beam(prefix+'_RoofB',ridge,right,0,depth+overhang_y*2,panel_thickness,'roof','RF_Roof_Slate')
+    gable_infill(prefix+'_Gables',center_x,width,depth,wall_top,ridge[1]-.14,wall_key,wall_material)
+    for side,y in (('Front',-depth/2-overhang_y-.04),('Rear',depth/2+overhang_y+.04)):
+        sloped_beam(prefix+'_VergeLeft'+side,left,ridge,y,.16,.18,'warm_white')
+        sloped_beam(prefix+'_VergeRight'+side,ridge,right,y,.16,.18,'warm_white')
+    box(prefix+'_RidgeCap',(center_x,0,ridge[1]+.08),(.28,depth+overhang_y*2+.12,.24),'roof',material_name='RF_Roof_Slate')
+    if markers:
+        empty('roof_ridge',(ridge[0],0,ridge[1]));empty('roof_eave_left',(left[0],0,left[1]));empty('roof_eave_right',(right[0],0,right[1]))
+
 def anchors(width,depth):empty('ground_origin');empty('footprint_nw',(-width/2,-depth/2,0));empty('footprint_se',(width/2,depth/2,0))
 
 def house(lod,shape,finish_id,wall,trim,door):
     width,depth,height=((8,10,6),(7,12,7),(10,8,5.4))[shape];wall_name='RF_Wall_'+finish_id;trim_name='RF_Trim_'+finish_id
     box('RF_House_Foundation',(0,0,.45),(width+.35,depth+.35,.9),'stone');box('RF_House_Walls',(0,0,.9+height/2),(width,depth,height),'white' if wall=='white' else wall,material_name=wall_name)
-    roof_z=height+2.0;box('RF_House_RoofA',(-width*.265,0,roof_z),(width*.62,depth+1.15,.42),'roof',(0,math.radians(46),0),material_name='RF_Roof_Slate');box('RF_House_RoofB',(width*.265,0,roof_z),(width*.62,depth+1.15,.42),'roof',(0,math.radians(-46),0),material_name='RF_Roof_Slate')
+    wall_top=.9+height;gable_roof('RF_House',0,width,depth,wall_top,width*.5*math.tan(math.radians(36)),wall,wall_name)
     if not lod:
         for x in (-width/2+.14,width/2-.14):box('RF_House_Corner',(x,-depth/2-.05,height*.54+1.0),(.23,.16,height+.18),trim,material_name=trim_name)
-        for side in (-1,1):box('RF_House_Fascia',(side*(width*.5+.08),0,height+1.25),(.19,depth+1.3,.24),trim,material_name=trim_name)
         for x in (-width*.23,width*.23):
             box('RF_House_WindowRecess',(x,-depth/2-.055,height*.6+1.0),(1.35,.12,1.6),'glass')
             for dx in (-.72,.72):box('RF_House_WindowTrim',(x+dx*.86,-depth/2-.13,height*.6+1.0),(.16,.12,1.9),trim,material_name=trim_name)
@@ -56,21 +85,21 @@ def house(lod,shape,finish_id,wall,trim,door):
     anchors(width+.8,depth+1.2)
 
 def barn(lod):
-    box('RF_Barn_Foundation',(0,0,.35),(11,17,.7),'stone');box('RF_Barn_Walls',(0,0,4.2),(10.5,16.5,7.7),'timber',material_name='RF_Wall_Weathered');box('RF_Barn_RoofA',(-3,0,9),(7.3,18,.5),'roof',(0,math.radians(42),0),material_name='RF_Roof_Slate');box('RF_Barn_RoofB',(3,0,9),(7.3,18,.5),'roof',(0,math.radians(-42),0),material_name='RF_Roof_Slate')
+    box('RF_Barn_Foundation',(0,0,.35),(11,17,.7),'stone');box('RF_Barn_Walls',(0,0,4.2),(10.5,16.5,7.7),'timber',material_name='RF_Wall_Weathered');gable_roof('RF_Barn',0,10.5,16.5,8.05,3.35,'timber','RF_Wall_Weathered')
     if not lod:box('RF_Barn_Door',(0,-8.35,3),(4.2,.16,5.4),'dark');box('RF_Barn_Trim',(0,-8.46,6.8),(10.8,.15,.22),'warm_white')
     anchors(11,18)
 def stabbur(lod):
     for x in (-2.5,2.5):
         for y in (-3,3):cylinder('RF_Stabbur_Post',(x,y,.65),.45,1.3,'stone',8)
-    box('RF_Stabbur_Body',(0,0,3.5),(7,8,5.6),'red',material_name='RF_Wall_Red-White');box('RF_Stabbur_Roof',(0,0,6.8),(8.4,9.4,.55),'roof',material_name='RF_Roof_Slate')
+    box('RF_Stabbur_Body',(0,0,3.5),(7,8,5.6),'red',material_name='RF_Wall_Red-White');gable_roof('RF_Stabbur',0,7,8,6.3,2.15,'red','RF_Wall_Red-White')
     if not lod:box('RF_Stabbur_Door',(0,-4.05,3.2),(1.5,.15,3),'dark');box('RF_Stabbur_Trim',(0,-4.15,5.9),(7.2,.16,.22),'warm_white')
     anchors(8,9)
 def boathouse(lod):
-    box('RF_Boathouse_Foundation',(0,0,.3),(8,13,.6),'stone');box('RF_Boathouse_Walls',(0,0,3.2),(7.5,12.5,5.8),'red',material_name='RF_Wall_Red-Dark');box('RF_Boathouse_Roof',(0,0,6.35),(8.5,13.5,.5),'roof',material_name='RF_Roof_Slate')
+    box('RF_Boathouse_Foundation',(0,0,.3),(8,13,.6),'stone');box('RF_Boathouse_Walls',(0,0,3.2),(7.5,12.5,5.8),'red',material_name='RF_Wall_Red-Dark');gable_roof('RF_Boathouse',0,7.5,12.5,6.1,2.35,'red','RF_Wall_Red-Dark')
     if not lod:box('RF_Boathouse_Door',(0,-6.35,2.8),(4.8,.15,4.6),'dark')
     anchors(8.5,13.5)
 def sawmill(lod):
-    box('RF_Sawmill_Base',(0,0,.4),(14,22,.8),'stone');box('RF_Sawmill_Hall',(0,1,4.3),(13,18,7.8),'ochre',material_name='RF_Wall_Ochre-Cream');box('RF_Sawmill_Roof',(0,1,8.5),(14.5,19.5,.55),'roof',material_name='RF_Roof_Slate');box('RF_Sawmill_Shed',(8,-3,2.8),(6,12,5),'timber',material_name='RF_Wall_Weathered')
+    box('RF_Sawmill_Base',(0,0,.4),(14,22,.8),'stone');box('RF_Sawmill_Hall',(0,1,4.3),(13,18,7.8),'ochre',material_name='RF_Wall_Ochre-Cream');gable_roof('RF_Sawmill',0,13,18,8.2,3.7,'ochre','RF_Wall_Ochre-Cream');box('RF_Sawmill_Shed',(8,-3,2.8),(6,12,5),'timber',material_name='RF_Wall_Weathered');gable_roof('RF_SawmillShed',8,6,12,5.3,1.8,'timber','RF_Wall_Weathered',False)
     if not lod:
         cylinder('RF_Sawmill_Chimney',(-4,4,11),.6,8,'stone',10);box('RF_Sawmill_Door',(0,-8.08,3.2),(4.5,.2,5),'dark')
     anchors(18,22)
@@ -88,7 +117,9 @@ for asset_id,builder in BUILDERS.items():
     lods=[]
     for lod in (0,1):
         reset();bpy.context.scene.unit_settings.system='METRIC';bpy.context.scene.unit_settings.scale_length=1;builder(lod);filename=f'{asset_id}_lod{lod}.glb';bpy.ops.export_scene.gltf(filepath=str(OUTPUT/filename),export_format='GLB',export_yup=True,export_animations=False,export_cameras=False,export_lights=False);lods.append({'path':f'/models/norway/{filename}','maxTriangles':5000 if lod==0 else 1800,'maxBytes':260000 if lod==0 else 120000})
-    new_assets.append({'id':asset_id,'kind':'building','requiredNodes':['ground_origin','footprint_nw','footprint_se'],'maxDimensionsM':[22,18,25],'lods':lods})
+    required=['ground_origin','footprint_nw','footprint_se']
+    if asset_id!='norway-timber-yard':required+=['roof_ridge','roof_eave_left','roof_eave_right']
+    new_assets.append({'id':asset_id,'kind':'building','requiredNodes':required,'maxDimensionsM':[22,18,25],'lods':lods})
 manifest=json.loads(MANIFEST.read_text());ids=set(BUILDERS);manifest['assets']=[asset for asset in manifest['assets'] if asset['id'] not in ids]+new_assets;manifest['generator']['architectureScript']='tools/blender/generate_norway_architecture.py'
 architecture_textures=[{'id':'timber-base','path':'/textures/norway/timber-base.png','role':'baseColor','colorSpace':'srgb'},{'id':'timber-normal','path':'/textures/norway/timber-normal.png','role':'normal','colorSpace':'linear'},{'id':'timber-roughness','path':'/textures/norway/timber-roughness.png','role':'roughness','colorSpace':'linear'},{'id':'slate-base','path':'/textures/norway/slate-base.png','role':'baseColor','colorSpace':'srgb'},{'id':'slate-normal','path':'/textures/norway/slate-normal.png','role':'normal','colorSpace':'linear'},{'id':'slate-roughness','path':'/textures/norway/slate-roughness.png','role':'roughness','colorSpace':'linear'}]
 texture_ids={texture['id'] for texture in architecture_textures};manifest['textures']=[texture for texture in manifest.get('textures',[]) if texture['id'] not in texture_ids]+architecture_textures

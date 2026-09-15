@@ -1,7 +1,8 @@
 import type {CameraPreset} from '../content/presentation.js';
 
-export type ArizonaCameraPresetId='regional'|'canyon'|'settlement'|'industry'|'train';
+export type ArizonaCameraPresetId='entry'|'regional'|'canyon'|'settlement'|'industry'|'train';
 export const arizonaCameraPresets:Readonly<Record<ArizonaCameraPresetId,CameraPreset>>=Object.freeze({
+  entry:Object.freeze({targetXZ:Object.freeze({x:11976,z:10500}),offset:Object.freeze({x:160,y:72,z:200})}),
   regional:Object.freeze({targetXZ:Object.freeze({x:12000,z:12000}),offset:Object.freeze({x:13600,y:7600,z:12800})}),
   canyon:Object.freeze({targetXZ:Object.freeze({x:11900,z:14200}),offset:Object.freeze({x:-760,y:440,z:-980})}),
   settlement:Object.freeze({targetXZ:Object.freeze({x:11970,z:10500}),offset:Object.freeze({x:430,y:210,z:520})}),

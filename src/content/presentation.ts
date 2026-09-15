@@ -13,6 +13,7 @@ export interface CampaignPresentation {
   readonly assetManifestUrl:string|null;
   readonly biome:Readonly<BiomeDefinition>;
   readonly cameraPresets:Readonly<Record<string,CameraPreset>>;
+  readonly entryCameraId:string;
   readonly cameraSweep:readonly string[];
   readonly proceduralScenery:'norway-fallback'|'southwest-study';
 }

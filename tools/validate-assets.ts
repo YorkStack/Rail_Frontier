@@ -54,6 +54,13 @@ for(const asset of pack.assets) {
     for(const name of detailNodes)assert.ok(inspected[0]!.nodes.has(name),`${asset.id} LOD0 is missing ${name}`);
     if(asset.id==='nord-2-6-0')assert.ok(inspected[0]!.nodes.get('RF_Loco_Smokebox')![2]!<inspected[0]!.nodes.get('RF_Loco_Cab')![2]!,`${asset.id} smokebox must face its forward marker`);
   }
+  if(asset.requiredNodes.includes('roof_ridge')) {
+    for(const item of inspected) {
+      const ridge=item.nodes.get('roof_ridge')!,left=item.nodes.get('roof_eave_left')!,right=item.nodes.get('roof_eave_right')!;
+      assert.ok(ridge[1]!>left[1]!+.5&&ridge[1]!>right[1]!+.5,`${asset.id} roof ridge must be above both eaves`);
+      assert.ok(left[0]!<ridge[0]!&&ridge[0]!<right[0]!,`${asset.id} roof ridge must lie between the eaves`);
+    }
+  }
   packResults.push({id:asset.id,kind:asset.kind,lods:inspected.map(({nodes:_,...result})=>result)});
 }
 console.log(JSON.stringify({formatValidated:true,engineImportValidated:false,probe:probeResults,pack:{campaignId:pack.campaignId,generator:pack.generator,decodedTextureBytes,assets:packResults}},null,2));
