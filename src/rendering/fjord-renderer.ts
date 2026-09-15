@@ -16,7 +16,6 @@ import { sampleDistance,type TrackGeometry } from '../rail/geometry.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
-import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
 import {generateNorwayScenery} from './scenery-placement.js';
 import {generateNorwaySettlements} from './settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
@@ -91,12 +90,12 @@ export class FjordRenderer implements WorldRenderer {
     const shadowRadius=terrain.widthM>4000?700:360;this.sun.shadow.mapSize.set(2048,2048);this.sun.shadow.camera.left=-shadowRadius;this.sun.shadow.camera.right=shadowRadius;this.sun.shadow.camera.top=shadowRadius;this.sun.shadow.camera.bottom=-shadowRadius;this.sun.shadow.camera.near=100;this.sun.shadow.camera.far=15000;this.sun.shadow.normalBias=1.2;
     this.scene.add(this.sun,this.sun.target,new THREE.HemisphereLight(this.profile.lighting.skyColor,this.profile.lighting.groundColor,2.1));
     this.landscape=terrainMesh(terrain,this.profile);this.terrainSurfaceMaterial=this.landscape.material as THREE.Material;this.scene.add(this.landscape);
-    this.water=this.createWater();this.scene.add(this.water);
+    this.water=this.createWater();this.water.visible=terrain.waterLevelM!==null;this.scene.add(this.water);
     this.shoreContact=this.createShoreContact();this.scene.add(this.shoreContact);
-    this.waterfall=this.createWaterfall();this.scene.add(this.waterfall);
+    this.waterfall=this.createWaterfall();this.waterfall.visible=content.worldGenerator.landforms.waterfall!==null;this.scene.add(this.waterfall);
     this.rebuildTracks(state);
-    this.trees=this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
-    this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
+    this.trees=content.presentation.proceduralScenery==='southwest-study'?this.createSouthwestVegetation(this.profile.vegetation.density):this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
+    if(content.presentation.proceduralScenery==='southwest-study')this.createSouthwestBuildings(state,180);else this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
     this.createPortals();this.createBridgeTrusses();this.scene.add(this.infrastructureModels);
     this.labels=[
       ...state.towns.map(town=>({name:town.name,position:town.position,selection:{kind:'town' as const,id:town.id}})),
@@ -111,7 +110,8 @@ export class FjordRenderer implements WorldRenderer {
     this.verifyTerrain();
   }
   async loadAssets():Promise<void> {
-    const response=await fetch(this.content.presentation.assetManifestUrl);if(!response.ok)throw new Error(`${this.content.presentation.id} asset manifest could not be loaded`);
+    const assetManifestUrl=this.content.presentation.assetManifestUrl;if(assetManifestUrl===null)return;
+    const response=await fetch(assetManifestUrl);if(!response.ok)throw new Error(`${this.content.presentation.id} asset manifest could not be loaded`);
     const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error(`${this.content.presentation.id} asset manifest is incompatible`);
     const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader(),textures=new Map<string,THREE.Texture>();
     await Promise.all((manifest.textures??[]).map(async definition=>{const value=await textureLoader.loadAsync(definition.path);value.colorSpace=definition.colorSpace==='srgb'?THREE.SRGBColorSpace:THREE.NoColorSpace;value.wrapS=value.wrapT=THREE.RepeatWrapping;value.userData.assetLibrary=true;textures.set(definition.id,value);}));
@@ -198,13 +198,14 @@ export class FjordRenderer implements WorldRenderer {
   }
   private createWaterfall():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {
     const production=this.terrain.widthM>4000,landmark=this.content.worldGenerator.landforms.waterfall,z=production&&landmark?landmark.z:2470,crossSection=this.content.worldGenerator.landforms.waterCrossSection(z),bank=production&&landmark?(landmark.bank==='east'?crossSection.eastBankX:crossSection.westBankX):shorelineX(z),direction=production&&landmark?.bank==='west'?-1:1,offset=production&&landmark?landmark.offsetFromBankM:260,positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{time:{value:0}},vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:`varying vec2 vUv; uniform float time; void main(){float streak=.65+.35*sin(vUv.x*80.0+sin(vUv.y*15.0-time*6.0));float fade=sin(vUv.x*3.14159);gl_FragColor=vec4(.76,.91,.91,fade*streak*.86);}`});
+    if(landmark===null)return new THREE.Mesh(new THREE.BufferGeometry(),material);
     if(bank===null)throw new Error('Waterfall landmark has no matching water bank');
     for(let i=0;i<=80;i++) {
       const x=bank+direction*(offset-i*(production?7.5:3.5));
       for(const side of [-1,1]) {const sampleZ=z+side*(5+3*Math.sin(i/80*Math.PI));positions.push(x,Math.max(.6,this.terrain.sample(x,sampleZ).elevationM+1.3),sampleZ);uv.push((side+1)/2,1-i/80);}
       if(i>0){const a=(i-1)*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
     }
-    const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{time:{value:0}},vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:`varying vec2 vUv; uniform float time; void main(){float streak=.65+.35*sin(vUv.x*80.0+sin(vUv.y*15.0-time*6.0));float fade=sin(vUv.x*3.14159);gl_FragColor=vec4(.76,.91,.91,fade*streak*.86);}`});
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex(indices);return new THREE.Mesh(geometry,material);
   }
   private createShoreContact():THREE.Mesh<THREE.BufferGeometry,THREE.MeshBasicMaterial> {const positions:number[]=[],indices:number[]=[],middle=this.content.worldGenerator.landforms.waterCrossSection(this.terrain.depthM/2);if(this.terrain.widthM>4000&&middle.westBankX!==null&&middle.eastBankX!==null)for(const side of ['west','east'] as const)for(let index=0;index<=160;index++){const z=index/160*this.terrain.depthM,section=this.content.worldGenerator.landforms.waterCrossSection(z),edge=side==='west'?section.westBankX:section.eastBankX;if(edge===null)continue;const inside=side==='west'?1:-1,base=positions.length/3;positions.push(edge,.32,z,edge+inside*5,.34,z);if(index>0){const previous=base-2;indices.push(previous,previous+1,base,previous+1,base+1,base);}}const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);const material=new THREE.MeshBasicMaterial({color:'#c6d8d3',transparent:true,opacity:.24,depthWrite:false,side:THREE.DoubleSide});const mesh=new THREE.Mesh(geometry,material);mesh.renderOrder=2;return mesh;}
@@ -223,6 +224,21 @@ export class FjordRenderer implements WorldRenderer {
     }
     crowns.count=trunks.count=placed;crowns.castShadow=true;crowns.computeBoundingSphere();trunks.computeBoundingSphere();group.add(crowns,trunks);this.treeCount=placed;return group;
   }
+  private createSouthwestVegetation(count:number):THREE.Group {
+    const cactusMaterial=new THREE.MeshStandardMaterial({color:'#537044',roughness:.92}),group=new THREE.Group(),random=new SeededRandom(270519),shrubs=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#6e7140',roughness:1}),count),grass=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,3),new THREE.MeshStandardMaterial({color:'#a89a58',roughness:1}),count),cacti=new THREE.InstancedMesh(new THREE.CylinderGeometry(.32,.42,1,6),cactusMaterial,count),cactusArms=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.22,1,6),cactusMaterial,count*2),dryTrees=new THREE.InstancedMesh(new THREE.CylinderGeometry(.1,.18,1,5),new THREE.MeshStandardMaterial({color:'#5f4535',roughness:1}),count),dummy=new THREE.Object3D();
+    let placed=0,shrubCount=0,grassCount=0,cactusCount=0,cactusArmCount=0,dryCount=0;
+    for(let tries=0;placed<count&&tries<count*35;tries++){
+      const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,sample=this.terrain.sample(x,z),y=sample.elevationM;
+      if(sample.urban>.16||sample.rock>.72||Math.abs(x-this.corridorX(z))<38)continue;
+      const roll=random.next();dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.position.set(x,y,z);
+      if(roll<.53){const h=.5+random.next()*1.15;dummy.position.y+=h*.38;dummy.scale.set(.8+random.next()*1.25,h,.8+random.next()*1.25);dummy.updateMatrix();shrubs.setMatrixAt(shrubCount++,dummy.matrix);}
+      else if(roll<.78){const h=.35+random.next()*.75;dummy.position.y+=h*.5;dummy.scale.set(.18+random.next()*.18,h,.18+random.next()*.18);dummy.updateMatrix();grass.setMatrixAt(grassCount++,dummy.matrix);}
+      else if(roll<.92){const h=2+random.next()*5,yaw=random.next()*Math.PI*2;dummy.position.y+=h*.5;dummy.scale.set(1,h,1);dummy.updateMatrix();cacti.setMatrixAt(cactusCount++,dummy.matrix);for(const side of [-1,1]){const arm=.65+random.next()*1.1;dummy.position.set(x+Math.cos(yaw)*side*arm*.3,y+h*(side<0?.42:.62),z+Math.sin(yaw)*side*arm*.3);dummy.rotation.set(0,yaw,Math.PI/2);dummy.scale.set(1,arm,1);dummy.updateMatrix();cactusArms.setMatrixAt(cactusArmCount++,dummy.matrix);}}
+      else {const h=2.5+random.next()*4;dummy.position.y+=h*.5;dummy.scale.set(1,h,1);dummy.updateMatrix();dryTrees.setMatrixAt(dryCount++,dummy.matrix);}
+      placed++;
+    }
+    for(const [mesh,size] of [[shrubs,shrubCount],[grass,grassCount],[cacti,cactusCount],[cactusArms,cactusArmCount],[dryTrees,dryCount]] as const){mesh.count=size;mesh.castShadow=true;mesh.computeBoundingSphere();group.add(mesh);}this.treeCount=placed;return group;
+  }
   private createBuildings(state:GameState,count:number):void {
     const random=new SeededRandom(144),dummy=new THREE.Object3D();
     const body=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({roughness:.9}),count);
@@ -236,6 +252,11 @@ export class FjordRenderer implements WorldRenderer {
       dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));
       dummy.position.y=y+h+2;dummy.rotation.y=rotation+Math.PI/4;dummy.scale.set(w*.82,5,d*.82);dummy.updateMatrix();roof.setMatrixAt(i,dummy.matrix);
     }
+    body.castShadow=true;roof.castShadow=true;body.computeBoundingSphere();roof.computeBoundingSphere();this.buildings.add(body,roof);this.buildingCount=count;
+  }
+  private createSouthwestBuildings(state:GameState,count:number):void {
+    const random=new SeededRandom(519),dummy=new THREE.Object3D(),body=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({roughness:1}),count),roof=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:'#6f4a38',roughness:1}),count),palettes=['#c9865d','#d7aa78','#b96949','#e0c092','#8f5544'];
+    for(let i=0;i<count;i++){const town=state.towns[i%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=80+Math.sqrt(random.next())*430;x=Math.max(3,Math.min(this.terrain.widthM-3,town.position.x+Math.cos(angle)*radius));z=Math.max(3,Math.min(this.terrain.depthM-3,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-this.corridorX(z))>70)break;}const y=this.terrain.sample(x,z).elevationM,w=7+random.next()*9,h=3.5+random.next()*4,d=8+random.next()*11,rotation=Math.round(random.next()*3)*Math.PI/2;dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));dummy.position.y=y+h+.28;dummy.scale.set(w+1,.55,d+1);dummy.updateMatrix();roof.setMatrixAt(i,dummy.matrix);}
     body.castShadow=true;roof.castShadow=true;body.computeBoundingSphere();roof.computeBoundingSphere();this.buildings.add(body,roof);this.buildingCount=count;
   }
   private createPortals():void {
@@ -321,9 +342,9 @@ export class FjordRenderer implements WorldRenderer {
   focus(position:Vec3):void {this.follow=false;this.controls.target.set(position.x,position.y,position.z);this.camera.position.set(position.x+160,position.y+110,position.z+190);this.controls.update();}
   followTrain():void {this.focus(this.trainPosition);this.camera.position.copy(this.trainPosition).add(new THREE.Vector3(35,21,45));this.follow=true;}
   setVehicleInspection(view:'front'|'left'|'right'|'roof',assetId='nord-2-6-0'):void {if(!this.assetLevels.has(assetId))return;if(this.inspectionAssetId!==assetId){if(this.inspectionModel){this.scene.remove(this.inspectionModel);disposeObject(this.inspectionModel);}this.inspectionModel=this.cloneLod(assetId);this.inspectionAssetId=assetId;this.inspectionModel.position.set(0,100,0);this.scene.add(this.inspectionModel);}this.landscape.visible=false;this.water.visible=false;this.shoreContact.visible=false;this.waterfall.visible=false;this.trackGroup.visible=false;this.infrastructureModels.visible=false;this.buildings.visible=false;this.trees.visible=false;for(const model of this.trainModels.values())model.group.visible=false;for(const station of this.stationModels.values())station.visible=false;const car=this.inspectionModel!;car.updateMatrixWorld(true);const origin=car.getWorldPosition(new THREE.Vector3()),target=origin.clone().add(new THREE.Vector3(0,2.5,0)),probe=car.getObjectByName('forward_probe')?.getWorldPosition(new THREE.Vector3()),forward=(probe??origin.clone().add(new THREE.Vector3(0,0,-1))).sub(origin).setY(0).normalize(),right=new THREE.Vector3(forward.z,0,-forward.x),offset=view==='front'?forward.multiplyScalar(21).add(new THREE.Vector3(0,4,0)):view==='left'?right.multiplyScalar(-24).add(new THREE.Vector3(0,5,0)):view==='right'?right.multiplyScalar(24).add(new THREE.Vector3(0,5,0)):right.multiplyScalar(10).addScaledVector(forward,-8).add(new THREE.Vector3(0,21,0));this.follow=false;this.controls.target.copy(target);this.camera.position.copy(target).add(offset);this.controls.update();}
-  setCameraPreset(id:NorwayCameraPresetId):void {if(this.terrain.widthM<=4000){this.regional();return;}const preset=norwayCameraPresets[id],sample=this.terrain.sample(preset.targetXZ.x,preset.targetXZ.z),target=new THREE.Vector3(preset.targetXZ.x,sample.elevationM,preset.targetXZ.z);this.follow=false;this.controls.target.copy(target);this.camera.position.set(target.x+preset.offset.x,target.y+preset.offset.y,target.z+preset.offset.z);this.controls.update();}
-  setCameraSweep(progress:number):void {const ids:NorwayCameraPresetId[]=['regional','shore','forest-edge','train'],scaled=Math.max(0,Math.min(.999999,progress))*(ids.length-1),index=Math.floor(scaled),mix=scaled-index,a=norwayCameraPresets[ids[index]!]!,b=norwayCameraPresets[ids[index+1]!]!,x=THREE.MathUtils.lerp(a.targetXZ.x,b.targetXZ.x,mix),z=THREE.MathUtils.lerp(a.targetXZ.z,b.targetXZ.z,mix),target=new THREE.Vector3(x,this.terrain.sample(x,z).elevationM,z),offset=new THREE.Vector3(a.offset.x,a.offset.y,a.offset.z).lerp(new THREE.Vector3(b.offset.x,b.offset.y,b.offset.z),mix);this.follow=false;this.controls.target.copy(target);this.camera.position.copy(target).add(offset);this.controls.update();}
-  regional():void {if(this.inspectionModel){this.scene.remove(this.inspectionModel);disposeObject(this.inspectionModel);this.inspectionModel=null;this.inspectionAssetId='';}this.landscape.visible=true;this.water.visible=true;this.shoreContact.visible=true;this.waterfall.visible=true;this.trackGroup.visible=true;this.infrastructureModels.visible=true;this.buildings.visible=true;this.trees.visible=true;for(const model of this.trainModels.values())model.group.visible=true;for(const station of this.stationModels.values())station.visible=true;if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
+  setCameraPreset(id:string):void {if(this.terrain.widthM<=4000){this.regional();return;}const preset=this.content.presentation.cameraPresets[id];if(!preset)throw new Error(`Unknown camera preset: ${id}`);const sample=this.terrain.sample(preset.targetXZ.x,preset.targetXZ.z),target=new THREE.Vector3(preset.targetXZ.x,sample.elevationM,preset.targetXZ.z);this.follow=false;this.controls.target.copy(target);this.camera.position.set(target.x+preset.offset.x,target.y+preset.offset.y,target.z+preset.offset.z);this.controls.update();}
+  setCameraSweep(progress:number):void {const ids=this.content.presentation.cameraSweep;if(ids.length<2){this.regional();return;}const scaled=Math.max(0,Math.min(.999999,progress))*(ids.length-1),index=Math.floor(scaled),mix=scaled-index,a=this.content.presentation.cameraPresets[ids[index]!]!,b=this.content.presentation.cameraPresets[ids[index+1]!]!,x=THREE.MathUtils.lerp(a.targetXZ.x,b.targetXZ.x,mix),z=THREE.MathUtils.lerp(a.targetXZ.z,b.targetXZ.z,mix),target=new THREE.Vector3(x,this.terrain.sample(x,z).elevationM,z),offset=new THREE.Vector3(a.offset.x,a.offset.y,a.offset.z).lerp(new THREE.Vector3(b.offset.x,b.offset.y,b.offset.z),mix);this.follow=false;this.controls.target.copy(target);this.camera.position.copy(target).add(offset);this.controls.update();}
+  regional():void {if(this.inspectionModel){this.scene.remove(this.inspectionModel);disposeObject(this.inspectionModel);this.inspectionModel=null;this.inspectionAssetId='';}this.landscape.visible=true;this.water.visible=this.terrain.waterLevelM!==null;this.shoreContact.visible=this.terrain.waterLevelM!==null;this.waterfall.visible=this.content.worldGenerator.landforms.waterfall!==null;this.trackGroup.visible=true;this.infrastructureModels.visible=true;this.buildings.visible=true;this.trees.visible=true;for(const model of this.trainModels.values())model.group.visible=true;for(const station of this.stationModels.values())station.visible=true;if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
     this.modelState=current;this.syncLabels(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
@@ -351,7 +372,7 @@ export class CampaignRenderHost {
   readonly renderer:THREE.WebGLRenderer;
   private disposed=false;
   constructor(private readonly canvas:HTMLCanvasElement) {this.renderer=createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);}
-  create(terrain:Heightfield,state:GameState,content:CampaignContent):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');if(content.presentation.rendererId!=='fjord')throw new Error(`Unsupported renderer: ${content.presentation.rendererId}`);return new FjordRenderer(this.canvas,terrain,state,content,this.renderer);}
+  create(terrain:Heightfield,state:GameState,content:CampaignContent):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');if(!['fjord','terrain-study'].includes(content.presentation.rendererId))throw new Error(`Unsupported renderer: ${content.presentation.rendererId}`);return new FjordRenderer(this.canvas,terrain,state,content,this.renderer);}
   dispose():void {if(this.disposed)return;this.renderer.dispose();this.renderer.forceContextLoss();this.disposed=true;}
 }
 function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {return new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}

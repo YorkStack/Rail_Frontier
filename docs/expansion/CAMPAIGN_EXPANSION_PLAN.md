@@ -36,11 +36,15 @@ Acceptance: adding a synthetic test biome requires no edit to a central `if (gen
 
 ### EXP-003 — Arizona terrain study
 
-Status: next.
+Status: complete. The independently registered `arizona-basin-v1` generator produces a deterministic 24 × 24 km fictional world at 40 m terrain resolution. A broad low basin sits between a rough western range and elevated eastern plateau rim; two irregular flat-topped mesas, a tributary canyon and a protected low-grade north/south railway shelf define the construction grammar. Three settlement pads are flattened only within their authored urban masks. The first 7 km alignment remains on ground at 0.22% maximum grade; the second 10 km alignment retains the same grade while its direct route crosses the canyon on a roughly 1.2 km bridge.
+
+The Southwest presentation adds warm layered rock/soil vertex materials and seeded instanced scrub, dry grass, branched cactus and dry-tree blockouts. It deliberately has no asset manifest: original Blender buildings, railway structures and rolling stock begin in EXP-004. Fixed `regional`, `canyon`, `settlement`, `industry` and `train` cameras are content data rather than renderer constants. The isolated browser route is `/?skip-menu=1&world=arizona`; it hides the Norway campaign HUD because campaign selection and Arizona copy belong to EXP-005.
 
 Create a separately versioned 24 km test world with a broad basin, plateau rim, two mesas, one tributary canyon, a long low-grade railway shelf and at least three viable settlement sites. Author layered rock/soil materials and procedural scrub, grass, cactus and dry-tree placement. Establish fixed regional, canyon, settlement, industry and train cameras before Blender asset work.
 
 Acceptance: stable seeded fingerprint; landform cross-sections match the stated plateau/basin grammar; every settlement is on buildable land; two long corridors are feasible while at least one canyon forces a bridge or detour; close and regional screenshots pass the existing composition budgets.
+
+Evidence: SHA-256 terrain/mask fingerprint `e6c668d8fc0545e0bb29cdc6f881275d0b213dc3c66f7a73d49f19786bff30a5`; five fixed-camera Chrome captures; no browser warnings; 10,500 procedural plants and 180 settlement blockouts; fewer than 50 draw calls and fewer than 2 million triangles. Covered by `tests/arizona-world.test.ts` and `tests/browser/arizona-terrain.spec.ts`.
 
 ### EXP-004 — Arizona campaign content and art
 
@@ -68,4 +72,4 @@ Acceptance: a UI-only browser journey builds one river crossing, operates bank-s
 
 ## Checkpoint rule
 
-Each task ends with targeted tests, full TypeScript and Node checks, asset validation when relevant, a production build, browser coverage for visible work, document updates, a Git commit and a push to `implementation/passenger-slice`.
+Each task ends with targeted tests, full TypeScript and Node checks, asset validation when relevant, a production build, browser coverage for visible work, document updates, a Git commit and a push to `implementation/passenger-slice` and `main`.

@@ -5,7 +5,8 @@ import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/libre-caslon-display/latin-400.css';
 import './ui/study.css';
 import { createNorwayPreviewState,straightCurve } from './content/norway-preview.js';
-import { norway,norwayV1 } from './content/norway.js';
+import { createInitialState,norway,norwayV1 } from './content/norway.js';
+import {arizonaTerrainStudy} from './content/arizona.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { availableVehicles,vehicleDefinition } from './content/vehicles.js';
 import { CampaignRenderHost } from './rendering/fjord-renderer.js';
@@ -22,7 +23,6 @@ import { connectedTowns } from './simulation/city.js';
 import type { MapOverlay,WorldSelection } from './application/ports.js';
 import { companyReport } from './simulation/accounting.js';
 import { currentYear,dayOfYear } from './simulation/calendar.js';
-import type {NorwayCameraPresetId} from './rendering/norway-camera-presets.js';
 import {campaignContentRegistry} from './content/registry.js';
 import {ActiveSessionHost} from './application/session-host.js';
 import {quoteRouteElectrification,routeIsElectrified} from './application/electrification.js';
@@ -171,7 +171,8 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,initialContent=campaignContentRegistry.resolve({campaignId:initialCampaign.id,campaignVersion:initialCampaign.version,world:initialCampaign.world}),terrain=initialContent.worldGenerator.generate(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  const query=new URLSearchParams(location.search),world=query.get('world'),initialCampaign=world==='v1'?norwayV1:world==='arizona'?arizonaTerrainStudy:norway,initialContent=campaignContentRegistry.resolve({campaignId:initialCampaign.id,campaignVersion:initialCampaign.version,world:initialCampaign.world}),terrain=initialContent.worldGenerator.generate(initialCampaign.world),initial=initialCampaign.id===arizonaTerrainStudy.id?createInitialState(initialCampaign):createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  document.body.classList.toggle('terrain-study-mode',initialCampaign.id===arizonaTerrainStudy.id);element<HTMLCanvasElement>('#world').ariaLabel=initialCampaign.id===arizonaTerrainStudy.id?'Arizona basin terrain study. Drag to orbit, right drag to pan, scroll to zoom.':'Norwegian fjord landscape. Drag to orbit, right drag to pan, scroll to zoom.';
   await sessionHost.initialize(initial);
   const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};
   let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store,undefined,validateSaveContent),state=game.snapshot(),switchingSession=false;
@@ -335,7 +336,7 @@ async function start():Promise<void> {
   const dispose=()=>{cancelAnimationFrame(request);window.removeEventListener('keydown',keydown);document.removeEventListener('visibilitychange',visibility);canvas.removeEventListener('click',mapClick);sessionHost.dispose();void store.close();};
   if(import.meta.hot)import.meta.hot.dispose(dispose);
   if(import.meta.env.DEV) {
-    const resetMetrics=()=>{frames.length=0;renderTimes.length=0;tickTimes.length=0;},probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),vehicleInspection:(inspection:'front'|'left'|'right'|'roof',assetId?:string)=>view.setVehicleInspection(inspection,assetId),regional:()=>view.regional(),cameraPreset:(id:NorwayCameraPresetId)=>view.setCameraPreset(id),cameraSweep:(progress:number)=>view.setCameraSweep(progress),setTerrainBlockout:(enabled:boolean)=>view.setTerrainBlockout(enabled),project:(position:Vec3)=>view.project(position,0),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);resetMetrics();},resetMetrics,metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
+    const resetMetrics=()=>{frames.length=0;renderTimes.length=0;tickTimes.length=0;},probe={ready:true,assets:view.assets,snapshot:()=>structuredClone(state),save,load,setSpeed,stats:()=>view.stats(),focusTrain:()=>view.followTrain(),vehicleInspection:(inspection:'front'|'left'|'right'|'roof',assetId?:string)=>view.setVehicleInspection(inspection,assetId),regional:()=>view.regional(),cameraPreset:(id:string)=>view.setCameraPreset(id),cameraSweep:(progress:number)=>view.setCameraSweep(progress),setTerrainBlockout:(enabled:boolean)=>view.setTerrainBlockout(enabled),project:(position:Vec3)=>view.project(position,0),setStress:(enabled:boolean)=>{view.setStress(structuredClone(state) as GameState,enabled);resetMetrics();},resetMetrics,metrics:()=>({frames:[...frames],renderMs:[...renderTimes],tickMs:[...tickTimes],...view.stats(),userAgent:navigator.userAgent,viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}),pick:(x:number,y:number)=>view.pick(x,y),dispose};
     Object.defineProperty(window,'__railProbe',{value:probe,configurable:true});
   }
 }
