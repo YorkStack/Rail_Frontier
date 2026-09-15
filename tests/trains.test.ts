@@ -38,6 +38,13 @@ test('train brakes to the exact station endpoint, dwells, then reverses',()=>{
   assert.equal(train.phase,'running');assert.equal(train.motion.path[0]!.reverse,true);assert.equal(train.motion.distanceM,0);assert.equal(state.operations.trainServices['train:11']!.nextStopIndex,0);
 });
 
+test('a train blocked at a station retries its route after infrastructure is restored',()=>{
+  const state=runningState(),train=state.trains[0]!,step=createTrainSimulation();state.startingYear=1922;train.locomotiveId='nord-el-1';state.operations.infrastructure['edge:7']={spans:[{startM:0,endM:200,kind:'ground'}],constructionCost:200_000,maintenancePerDay:20,electrified:true,electrificationCost:3_600_000,electrificationMaintenancePerDay:144};
+  let ticks=0;while(train.phase!=='dwelling'&&ticks++<5000){state.tick++;step(state);}const infrastructure=state.operations.infrastructure['edge:7']!;infrastructure.electrified=false;infrastructure.electrificationCost=0;infrastructure.electrificationMaintenancePerDay=0;
+  for(let index=0;index<DWELL_TICKS;index++){state.tick++;step(state);}assert.equal(train.phase,'blocked');assert.equal(train.motion.arrived,true);
+  infrastructure.electrified=true;infrastructure.electrificationCost=3_600_000;infrastructure.electrificationMaintenancePerDay=144;state.tick++;step(state);assert.equal(train.phase,'running');assert.equal(train.motion.arrived,false);assert.equal(train.motion.path[0]!.reverse,true);
+});
+
 test('fixed-step train movement is independent of render frame rate',()=>{
   const terrain=new Heightfield(2,2,500,new Float64Array(4));
   const run=(fps:number)=>{const game=new RailFrontierGame(runningState(400),terrain);for(let frame=0;frame<fps*10;frame++)game.advance(1/fps);return game.snapshot();};

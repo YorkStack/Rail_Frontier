@@ -20,7 +20,7 @@
 | D16 | Triangular terrain queries match GPU topology | Eliminates bilinear/mesh discrepancy; <0.001 m raycast agreement |
 | D17 | RailNetwork immutable per-revision adjacency/heap cache | 5k-edge/100-query scale proof; no path compilation per simulation tick |
 | D18 | Prototype composition belongs in spikes/ | Prevent automatic demo shuttling and fixed world becoming production architecture |
-| D19 | Exclusive corridor reservation first, signals later | Simple deterministic anti-collision contract; scheduling implementation pending |
+| D19 | Exclusive station-to-station corridor reservation first, signals later | Deterministic train-ID arbitration is implemented; blocks, platforms and priorities remain later work |
 | D20 | Vite + native DOM; no large UI framework | Small study/control surface; typed application boundary supports later UI growth |
 | D21 | Explicit WebGL context release on complete renderer disposal | Resource test revealed residual texture counter after normal dispose; context release verified directly |
 

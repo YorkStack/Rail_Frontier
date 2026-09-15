@@ -35,3 +35,13 @@ test('reservation state is deterministically rebuilt from active train IDs',()=>
   stepA(a);stepB(b);
   assert.deepEqual(a.operations.reservations,b.operations.reservations);assert.deepEqual(a.trains,b.trains);
 });
+
+test('opposing departures reserve the complete single-track corridor before entry',()=>{
+  const state=createInitialState(),points=[0,80,160,240].map(x=>({x,y:0,z:0}));
+  state.railway={revision:1,nodes:points.map((position,index)=>({id:`node:${index+5}` as `node:${number}`,position})),edges:[0,1,2].map(index=>({id:`edge:${index+9}` as `edge:${number}`,from:`node:${index+5}` as `node:${number}`,to:`node:${index+6}` as `node:${number}`,curve:line(points[index]!,points[index+1]!),speedLimitMps:15,ownerId:'company:1'}))};
+  state.stations=[{id:'station:12',nodeId:'node:5',townId:null,classId:'rural-halt',storage:[]},{id:'station:13',nodeId:'node:8',townId:null,classId:'rural-halt',storage:[]}];state.routes=[{id:'route:14',stops:['station:12','station:13'],mode:'shuttle'}];
+  state.trains=[{id:'train:15',routeId:'route:14',locomotiveId:'nord-2-6-0',vehicleIds:[],motion:{path:[{edgeId:'edge:9',reverse:false},{edgeId:'edge:10',reverse:false},{edgeId:'edge:11',reverse:false}],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'running',dwellTicks:0,cargo:[]},{id:'train:16',routeId:'route:14',locomotiveId:'nord-2-6-0',vehicleIds:[],motion:{path:[{edgeId:'edge:11',reverse:true},{edgeId:'edge:10',reverse:true},{edgeId:'edge:9',reverse:true}],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'running',dwellTicks:0,cargo:[]}];
+  state.operations.trainServices['train:15']={nextStopIndex:1,direction:1,ageDays:0,condition:1,distanceM:0,revenue:0,operatingCosts:0,costRemainder:0};state.operations.trainServices['train:16']={nextStopIndex:0,direction:-1,ageDays:0,condition:1,distanceM:0,revenue:0,operatingCosts:0,costRemainder:0};state.nextEntityId=17;
+  const step=createTrainSimulation();state.tick++;step(state);assert.deepEqual(state.operations.reservations,[{edgeId:'edge:10',trainId:'train:15'},{edgeId:'edge:11',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}]);assert.equal(state.trains[1]!.phase,'blocked');assert.equal(state.trains[1]!.motion.distanceM,0);
+  let ticks=0;while(state.trains[0]!.phase!=='dwelling'&&ticks++<5000){state.tick++;step(state);}assert.equal(state.trains[0]!.phase,'dwelling');state.tick++;step(state);assert.equal(state.trains[1]!.phase,'running');assert.deepEqual(new Set(state.operations.reservations.map(item=>item.edgeId)),new Set(['edge:9','edge:10','edge:11']));assert.ok(state.operations.reservations.every(item=>item.trainId==='train:16'));
+});

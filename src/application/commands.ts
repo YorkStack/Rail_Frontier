@@ -40,6 +40,8 @@ export function validateCommand(state:GameState,command:GameCommand):void {
       return;
     case 'createRoute':
       if(command.stops.length<2)throw new Error('A route needs at least two stops');
+      if(command.stops.length>512)throw new Error('A route cannot exceed 512 stops');
+      if(command.mode!=='shuttle'&&command.mode!=='loop')throw new Error('Unknown route mode');
       for(const stop of command.stops)if(!state.stations.some(station=>station.id===stop))throw new Error(`Unknown route stop: ${stop}`);
       return;
     case 'electrifyRoute':
