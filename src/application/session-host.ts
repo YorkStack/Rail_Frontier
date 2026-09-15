@@ -1,13 +1,13 @@
 import type {GameState} from '../domain/model.js';
 import type {Heightfield} from '../world/terrain.js';
 import {validateState} from '../persistence/save.js';
-import type {ContentRegistry} from '../content/registry.js';
+import type {CampaignContent,ContentRegistry} from '../content/registry.js';
 import {RailFrontierGame} from './game.js';
 import type {WorldRenderer} from './ports.js';
 
 export interface PreparedWorldRenderer extends WorldRenderer {loadAssets():Promise<void>}
 export interface WorldRendererFactory<Renderer extends PreparedWorldRenderer=PreparedWorldRenderer> {
-  create(terrain:Heightfield,state:GameState):Renderer;
+  create(terrain:Heightfield,state:GameState,content:CampaignContent):Renderer;
   dispose():void;
 }
 interface ActiveSession<Renderer extends PreparedWorldRenderer> {game:RailFrontierGame;terrain:Heightfield;renderer:Renderer}
@@ -34,7 +34,7 @@ export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWo
   }
   dispose():void {this.active?.renderer.dispose();this.active=null;this.renderers.dispose();}
   private async prepare(value:GameState,initialSpeed:0|1):Promise<ActiveSession<Renderer>> {
-    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),terrain=content.generateWorld(state.world),game=new RailFrontierGame(state,terrain,{initialSpeed}),renderer=this.renderers.create(terrain,state);
+    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),terrain=content.generateWorld(state.world),game=new RailFrontierGame(state,terrain,{initialSpeed}),renderer=this.renderers.create(terrain,state,content);
     try {await renderer.loadAssets();return {game,terrain,renderer};}
     catch(error){renderer.dispose();throw error;}
   }

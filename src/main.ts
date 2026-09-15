@@ -9,7 +9,7 @@ import { norway,norwayV1 } from './content/norway.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { availableVehicles,vehicleDefinition } from './content/vehicles.js';
 import { generateWorld,norwayShorelineX } from './world/generator.js';
-import { FjordRenderHost } from './rendering/fjord-renderer.js';
+import { CampaignRenderHost } from './rendering/fjord-renderer.js';
 import type { GameState,Id,Speed,Vec3 } from './domain/model.js';
 import { IndexedDbSaveStore } from './persistence/indexeddb.js';
 import { compileCurve } from './rail/geometry.js';
@@ -170,7 +170,7 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,terrain=generateWorld(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new FjordRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,terrain=generateWorld(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
   await sessionHost.initialize(initial);
   const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};
   let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store,undefined,validateSaveContent),state=game.snapshot(),switchingSession=false;
