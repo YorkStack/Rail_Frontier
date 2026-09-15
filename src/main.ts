@@ -60,6 +60,7 @@ app.innerHTML=`
       <article id="menu-saves" class="menu-view" hidden>
         <p class="eyebrow">COMPANY ARCHIVE</p><h2>Saved companies</h2><p class="menu-lede">Resume a railway exactly where its operations stopped.</p>
         <form id="new-save-slot" class="new-save-slot"><label for="save-name">New manual save</label><div><input id="save-name" maxlength="48" required><button>Save current company</button></div></form>
+        <div class="archive-tools"><label class="import-save">Import save<input id="import-save" type="file" accept=".json,.railfrontier,application/json"></label><output id="storage-usage">Checking browser storage…</output></div>
         <div id="save-slots" class="save-slots" aria-live="polite"></div><p id="save-error" class="menu-error" role="status"></p>
       </article>
       <article id="menu-settings" class="menu-view" hidden>
@@ -171,7 +172,8 @@ let toastTimer=0;
 async function start():Promise<void> {
   const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,terrain=generateWorld(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new FjordRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
   await sessionHost.initialize(initial);
-  let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store),state=game.snapshot(),switchingSession=false;
+  const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};
+  let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store,undefined,validateSaveContent),state=game.snapshot(),switchingSession=false;
   element<HTMLSelectElement>('#station-class').replaceChildren(...Object.values(stationDefinitions).map(definition=>{const option=document.createElement('option');option.value=definition.id;option.textContent=`${stationClassName(definition.id)} · ${money(definition.purchaseCost)}`;return option;}));
   let selection:WorldSelection|null=null;
   const labels=view.labels.map(label=>{const node=document.createElement('button');node.className=`map-label ${label.selection.kind}`;node.textContent=label.name;node.onclick=()=>selectWorld(label.selection,true);element('#map-labels').append(node);return node;});
@@ -275,7 +277,7 @@ async function start():Promise<void> {
   element<HTMLFormElement>('#create-route').onsubmit=event=>{event.preventDefault();const from=element<HTMLSelectElement>('#route-from').value as `station:${number}`,to=element<HTMLSelectElement>('#route-to').value as `station:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'createRoute',stops:[from,to],mode:'shuttle'}}),'Shuttle route created.');};
   element<HTMLFormElement>('#assign-route').onsubmit=event=>{event.preventDefault();const trainId=element<HTMLSelectElement>('#assign-train').value as `train:${number}`,routeId=element<HTMLSelectElement>('#assign-route-select').value as `route:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'assignRoute',trainId,routeId}}),'Train assigned to service.');};
   element<HTMLFormElement>('#electrify-route').onsubmit=event=>{event.preventDefault();const routeId=element<HTMLSelectElement>('#electrify-route-id').value as `route:${number}`;operationResult(game.dispatch({sequence:state.operations.lastCommandSequence+1,command:{type:'electrifyRoute',routeId}}),'Route electrified.');};
-  const activateSession=async(candidate:GameState)=>{switchingSession=true;try{await saves.drain();state=await sessionHost.replace(candidate);game=sessionHost.game;view=sessionHost.renderer;saves=new GameSaveManager(game,store);selection=null;syncSpeed();selectOverlay('none');toggleContext(false);view.regional();return state;}finally{switchingSession=false;last=performance.now();}};
+  const activateSession=async(candidate:GameState)=>{switchingSession=true;try{await saves.drain();state=await sessionHost.replace(candidate);game=sessionHost.game;view=sessionHost.renderer;saves=new GameSaveManager(game,store,undefined,validateSaveContent);selection=null;syncSpeed();selectOverlay('none');toggleContext(false);view.regional();return state;}finally{switchingSession=false;last=performance.now();}};
   const save=async()=>{state=game.snapshot();await saves.save('study','Norwegian Fjords company');return state.tick;};
   const load=async()=>{const candidate=await saves.read('study');state=await activateSession(candidate);return state.tick;};
   element('#save').onclick=()=>{void save().then(tick=>toast(`Study saved at tick ${tick.toLocaleString()}.`)).catch(error=>toast(`Could not save: ${message(error)}`));};
@@ -285,16 +287,19 @@ async function start():Promise<void> {
   const closeMenu=()=>{element('#main-menu').hidden=true;element<HTMLCanvasElement>('#world').focus();};
   const openMenu=()=>{game.pauseForVisibility();syncSpeed();togglePlanner(false);toggleStation(false);toggleOperations(false);toggleOverlays(false);toggleContext(false);element('#main-menu').hidden=false;selectMenuView('campaign');};
   const loadSlot=async(id:string)=>{state=await activateSession(await saves.read(id));closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);};
+  const downloadSave=({filename,json}:{filename:string;json:string})=>{const url=URL.createObjectURL(new Blob([json],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),0);};
+  const renderStorageEstimate=async()=>{const output=element<HTMLOutputElement>('#storage-usage');try{const {usageBytes,quotaBytes}=await saves.estimate();output.textContent=usageBytes===null?'Browser storage usage unavailable':quotaBytes===null?`${formatBytes(usageBytes)} stored locally`:`${formatBytes(usageBytes)} of ${formatBytes(quotaBytes)} browser storage used`;}catch{output.textContent='Browser storage usage unavailable';}};
   const refreshSaveSlots=async()=>{
     const host=element('#save-slots');host.replaceChildren();element('#save-error').textContent='';
     try {
-      const slots=await saves.list(),continueButton=element<HTMLButtonElement>('#continue-game');continueButton.disabled=slots.length===0;
+      const slots=await saves.list(),continueButton=element<HTMLButtonElement>('#continue-game');continueButton.disabled=slots.length===0;void renderStorageEstimate();
       if(slots.length===0){const empty=document.createElement('div');empty.className='empty-slots';empty.innerHTML='<strong>No saved companies</strong><span>Start a company, then use Save game from the railway view.</span>';host.append(empty);return;}
       for(const slot of slots) {
         const row=document.createElement('div');row.className='save-slot';
         const copy=document.createElement('span'),name=document.createElement('strong'),date=document.createElement('small');name.textContent=slot.name;date.textContent=slot.id==='autosave'?`AUTOSAVE · ${formatDate(slot.modifiedAt)}`:formatDate(slot.modifiedAt);copy.append(name,date);
-        const actions=document.createElement('div'),resume=document.createElement('button'),rename=document.createElement('button'),remove=document.createElement('button');resume.textContent='Resume';rename.textContent='Rename';remove.textContent='Delete';actions.append(resume,rename,remove);row.append(copy,actions);host.append(row);
+        const actions=document.createElement('div'),resume=document.createElement('button'),exportButton=document.createElement('button'),rename=document.createElement('button'),remove=document.createElement('button');resume.textContent='Resume';exportButton.textContent='Export';rename.textContent='Rename';remove.textContent='Delete';actions.append(resume,exportButton,rename,remove);row.append(copy,actions);host.append(row);
         resume.onclick=()=>{void loadSlot(slot.id).catch(setMenuError);};
+        exportButton.onclick=()=>{void saves.exportSlot(slot.id).then(portable=>{downloadSave(portable);toast(`${slot.name} exported.`);}).catch(setMenuError);};
         rename.onclick=()=>{const form=document.createElement('form'),input=document.createElement('input'),confirm=document.createElement('button');input.value=slot.name;input.maxLength=48;input.setAttribute('aria-label',`New name for ${slot.name}`);confirm.textContent='Save name';form.append(input,confirm);actions.replaceWith(form);input.focus();input.select();form.onsubmit=event=>{event.preventDefault();void saves.rename(slot.id,input.value).then(refreshSaveSlots).catch(setMenuError);};};
         remove.onclick=()=>{if(remove.dataset.confirm!=='true'){remove.dataset.confirm='true';remove.textContent='Delete?';return;}void saves.remove(slot.id).then(refreshSaveSlots).catch(setMenuError);};
       }
@@ -303,6 +308,7 @@ async function start():Promise<void> {
   document.querySelectorAll<HTMLButtonElement>('[data-menu-view]').forEach(button=>button.onclick=()=>selectMenuView(button.dataset.menuView!));
   element<HTMLInputElement>('#save-name').value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;
   element<HTMLFormElement>('#new-save-slot').onsubmit=event=>{event.preventDefault();const input=element<HTMLInputElement>('#save-name'),id=`manual-${Date.now()}`;void saves.save(id,input.value).then(()=>{input.value=`Northern Line · Day ${Math.floor(state.tick/1200)+1}`;toast('A new manual save was added.');return refreshSaveSlots();}).catch(setMenuError);};
+  element<HTMLInputElement>('#import-save').onchange=event=>{const input=event.currentTarget as HTMLInputElement,file=input.files?.[0];if(!file)return;void file.text().then(json=>saves.importArchive(json,file.name.replace(/(?:\.railfrontier)?\.json$/i,'').slice(0,48))).then(imported=>{toast(`${imported.name} imported.`);return refreshSaveSlots();}).catch(setMenuError).finally(()=>{input.value='';});};
   element('#open-menu').onclick=openMenu;element('#close-menu').onclick=closeMenu;
   element('#new-game').onclick=()=>{void activateSession(createNorwayGameState()).then(()=>{lastAutosaveDay=0;setSpeed(1);closeMenu();toast('A new company charter is ready. Survey the first connection.');}).catch(setMenuError);};
   element('#continue-game').onclick=()=>{void saves.readLatest().then(activateSession).then(next=>{state=next;closeMenu();toast(`Company resumed at Day ${Math.floor(state.tick/1200)+1}.`);}).catch(setMenuError);};
@@ -330,6 +336,7 @@ async function start():Promise<void> {
 }
 const money=(amount:number)=>new Intl.NumberFormat('en',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(amount/100);
 const formatDate=(value:string)=>{const date=new Date(value);return Number.isNaN(date.valueOf())?'Unknown date':new Intl.DateTimeFormat('en',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(date);};
+const formatBytes=(value:number)=>value<1_000_000?`${Math.round(value/1000)} KB`:`${(value/1_000_000).toFixed(1)} MB`;
 function updateObjectives(state:Readonly<GameState>):void {
   const values:{id:string;value:number;target:number}[]=[
     {id:'first-connection',value:state.objectiveProgress['first-connection']??0,target:2},

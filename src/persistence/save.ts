@@ -7,6 +7,33 @@ import { stationDefinition } from '../content/stations.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { currentYear } from '../simulation/calendar.js';
 
+export const SAVE_LIMITS=Object.freeze({
+  bytes:20_000_000,nodes:25_000,edges:25_000,stations:5_000,trains:2_000,routes:5_000,towns:5_000,industries:5_000,ledger:100_000,
+  demand:50_000,reservations:25_000,monthlyAccounts:10_000,objectives:1_000,vehicleIdsPerTrain:128,pathEdgesPerTrain:25_000,cargoLotsPerEntity:2_048,stopsPerRoute:512,spansPerEdge:2_048
+});
+const record=(value:unknown):Record<string,unknown>|null=>typeof value==='object'&&value!==null&&!Array.isArray(value)?value as Record<string,unknown>:null;
+const limitedArray=(owner:Record<string,unknown>|null,key:string,limit:number,label:string):unknown[]=>{
+  const value=owner?.[key];if(!Array.isArray(value))return [];if(value.length>limit)throw new Error(`Save exceeds ${label} limit (${limit.toLocaleString('en')})`);return value;
+};
+const limitedRecord=(owner:Record<string,unknown>|null,key:string,limit:number,label:string):Record<string,unknown>=>{
+  const value=record(owner?.[key]);if(!value)return {};if(Object.keys(value).length>limit)throw new Error(`Save exceeds ${label} limit (${limit.toLocaleString('en')})`);return value;
+};
+function preflightEnvelope(value:unknown):void {
+  const state=record(record(value)?.state);if(!state)return;
+  const railway=record(state.railway),operations=record(state.operations),company=record(state.company);
+  limitedArray(railway,'nodes',SAVE_LIMITS.nodes,'rail node');limitedArray(railway,'edges',SAVE_LIMITS.edges,'rail edge');
+  const stations=limitedArray(state,'stations',SAVE_LIMITS.stations,'station');
+  const trains=limitedArray(state,'trains',SAVE_LIMITS.trains,'train');
+  const routes=limitedArray(state,'routes',SAVE_LIMITS.routes,'route');
+  limitedArray(state,'towns',SAVE_LIMITS.towns,'town');limitedArray(state,'industries',SAVE_LIMITS.industries,'industry');
+  limitedArray(company,'ledger',SAVE_LIMITS.ledger,'ledger entry');limitedArray(operations,'demand',SAVE_LIMITS.demand,'demand record');limitedArray(operations,'reservations',SAVE_LIMITS.reservations,'reservation');limitedArray(operations,'monthlyAccounts',SAVE_LIMITS.monthlyAccounts,'monthly account');limitedArray(operations,'completedObjectives',SAVE_LIMITS.objectives,'completed objective');
+  limitedRecord(operations,'trainServices',SAVE_LIMITS.trains,'train service');limitedRecord(operations,'infrastructure',SAVE_LIMITS.edges,'infrastructure record');limitedRecord(operations,'industryCycleTicks',SAVE_LIMITS.industries,'industry cycle');limitedRecord(operations,'townEconomy',SAVE_LIMITS.towns,'town economy');limitedRecord(state,'objectiveProgress',SAVE_LIMITS.objectives,'objective progress');
+  for(const item of stations)limitedArray(record(item),'storage',SAVE_LIMITS.cargoLotsPerEntity,'station cargo lot');
+  for(const item of trains){const train=record(item);limitedArray(train,'vehicleIds',SAVE_LIMITS.vehicleIdsPerTrain,'vehicles per train');limitedArray(record(train?.motion),'path',SAVE_LIMITS.pathEdgesPerTrain,'path edge per train');limitedArray(train,'cargo',SAVE_LIMITS.cargoLotsPerEntity,'train cargo lot');}
+  for(const item of routes)limitedArray(record(item),'stops',SAVE_LIMITS.stopsPerRoute,'route stop');
+  for(const item of Object.values(limitedRecord(operations,'infrastructure',SAVE_LIMITS.edges,'infrastructure record')))limitedArray(record(item),'spans',SAVE_LIMITS.spansPerEdge,'engineering span per edge');
+}
+
 const finite=z.number().finite(), integer=z.number().int().safe(), nonnegative=integer.nonnegative();
 const id=<K extends string>(kind:K)=>z.custom<`${K}:${number}`>((v)=>typeof v==='string' && new RegExp(`^${kind}:[1-9][0-9]*$`).test(v) && Number.isSafeInteger(Number(v.split(':')[1])));
 const vec=z.strictObject({x:finite,y:finite,z:finite});
@@ -115,8 +142,9 @@ export const migrations=new Map<number,(value:unknown)=>unknown>([
 ]);
 export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:6,gameVersion:'0.6.0',state:validateState(state)}); }
 export function deserialize(json:string):GameState {
-  if(json.length>20_000_000) throw new Error('Save exceeds 20 MB limit');
+  if(json.length>SAVE_LIMITS.bytes||new TextEncoder().encode(json).byteLength>SAVE_LIMITS.bytes) throw new Error('Save exceeds 20 MB limit');
   let value:unknown=JSON.parse(json);
+  preflightEnvelope(value);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
   if(version>6) throw new Error('Save was created by a newer game');
