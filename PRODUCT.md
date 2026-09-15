@@ -35,3 +35,7 @@ Measured, atmospheric, and exact. The interface should feel like a premium Scand
 ## Accessibility & Inclusion
 
 All primary actions require keyboard access, visible focus, readable labels, and explicit state text in addition to color. Motion respects reduced-motion preferences. Pointer capture and camera controls must always have a keyboard escape path. Responsive layouts retain speed, cash, objectives, and the active task on narrower screens.
+
+## First-use priority (2026-09-15)
+
+A new player must be able to create a first railway without reading external instructions or enlarging the browser to read controls. Introduce construction, stations, locomotive and wagon composition, and service through real actions in the world. Show advanced choices progressively while retaining an explicit full-tools mode and all authoritative campaign/year constraints. Graphics should feel like a situated landscape with natural silhouettes and convincing buildings, rather than a tabletop of isolated primitives. Active detail: docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md and docs/art/GRAPHICS_REWORK_PLAN.md.

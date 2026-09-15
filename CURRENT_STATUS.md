@@ -2,13 +2,18 @@ ASTRA_PHASE_COMPLETE=true
 RECOMMENDED_MODEL=SOL
 ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
-GRAPHICS_IMPLEMENTATION_STARTED=true
-GRAPHICS_IMPLEMENTATION_COMPLETE=true
-AWAITING_USER_MODEL_SWITCH=false
+GRAPHICS_IMPLEMENTATION_STARTED=false
+GRAPHICS_IMPLEMENTATION_COMPLETE=false
+UX_PLANNING_COMPLETE=true
+UX_IMPLEMENTATION_STARTED=false
+UX_IMPLEMENTATION_COMPLETE=false
+AWAITING_USER_MODEL_SWITCH=true
 
-# Current status — Norway management implementation, 2026-09-14
+# Current status — graphics and onboarding rework handoff, 2026-09-15
 
-Current milestone: the Norway passenger, mail, freight, production-asset, world-inspection, city-economy and company-reporting gates are complete. The actual renderer remains Three.js; Astra and Sol refer only to Codex models.
+Current milestone: **Astra planning complete; pause for the user to switch to SOL and ask to continue.** The user rejected the current graphics and found basic construction/menu interaction unclear. Active plans: [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this new rework, not the historically implemented GFX-001–008.
+
+Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pass changed only documentation and preserved user screenshots; it did not fix runtime graphics or controls. The actual renderer remains Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 was verified and used for read-only exported-roof inspection. Preserve completed Norway gameplay and schema-6 contracts.
 
 ## Implementation completed after handoff
 
@@ -70,11 +75,13 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 ## Currently working
 
-The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
+The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification, portable save archives, ordered services and safe corridor dispatch are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. EXP-001 through EXP-003 are complete; EXP-004 Arizona campaign content and original Blender art is next. Release/deployment remains later work.
+Next implementation sequence: **GFX-R01 → GFX-R02 → UX-001–003 → GFX-R03–07 → UX-004–005 → GFX-R08–09 + UX-006**. Start with corrected roof geometry in local Blender and actual-game comparisons, then settlement entry views and readable build/service controls. The new tutorial must be tested against the reworked Norway terrain. No implementation of this sequence has started.
 
-Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
+Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
+
+Read the two active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Stop here until the user switches to SOL and asks to continue; this is the user's requested model handoff.
 
 ## Stable contracts
 
@@ -88,6 +95,8 @@ Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.m
 Do not casually change units/axes, graph identity/connectivity, tick cadence/order, typed IDs, command atomicity or saved operational semantics. A genuine redesign follows ASTRA_ESCALATIONS.md; there is no open escalation now.
 
 ## Known limits and remaining product work
+
+Graphics and first-use UX are not visually/product accepted. A hands-on tutorial and readable UI scaling are planned, not implemented. Previously reported tests refer to the runtime checkpoint; no runtime suite was rerun for this documentation-only handoff.
 
 The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack, including dedicated farm, timber-yard and sawmill structures.
 
@@ -103,4 +112,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next work is EXP-004 Arizona campaign content and original Blender art. Great River and advanced signaling remain later systems.
+Next after the requested model switch: GFX-R01, following the combined rework sequence above. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
