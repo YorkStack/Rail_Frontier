@@ -8,7 +8,6 @@ import { createNorwayPreviewState,straightCurve } from './content/norway-preview
 import { norway,norwayV1 } from './content/norway.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { availableVehicles,vehicleDefinition } from './content/vehicles.js';
-import { generateWorld,norwayShorelineX } from './world/generator.js';
 import { CampaignRenderHost } from './rendering/fjord-renderer.js';
 import type { GameState,Id,Speed,Vec3 } from './domain/model.js';
 import { IndexedDbSaveStore } from './persistence/indexeddb.js';
@@ -172,7 +171,7 @@ const element=<T extends HTMLElement=HTMLElement>(selector:string)=>document.que
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,terrain=generateWorld(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  const query=new URLSearchParams(location.search),initialCampaign=query.get('world')==='v1'?norwayV1:norway,initialContent=campaignContentRegistry.resolve({campaignId:initialCampaign.id,campaignVersion:initialCampaign.version,world:initialCampaign.world}),terrain=initialContent.worldGenerator.generate(initialCampaign.world),initial=createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
   await sessionHost.initialize(initial);
   const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};
   let game=sessionHost.game,view=sessionHost.renderer,saves=new GameSaveManager(game,store,undefined,validateSaveContent),state=game.snapshot(),switchingSession=false;
@@ -222,7 +221,7 @@ async function start():Promise<void> {
     if(mode==='free'&&freePoints.length<2){preview=null;view.setPreview(null);element('#planner-copy').textContent=freePoints.length===0?'Click the landscape to choose the start of a free alignment.':'Start selected. Click the landscape again to choose its destination.';element('#quote-length').textContent='—';element('#quote-cost').textContent='—';element('#quote-kind').textContent='';element('#quote-valid').textContent='Two map points are required.';element<HTMLButtonElement>('#commit-track').disabled=true;return;}
     let curve:ReturnType<typeof straightCurve>;
     if(mode==='free') {const [a,b]=freePoints,third=(start:number,end:number)=>start+(end-start)/3;curve={p0:{...a!},p1:{x:third(a!.x,b!.x),y:third(a!.y,b!.y),z:third(a!.z,b!.z)},p2:{x:third(b!.x,a!.x),y:third(b!.y,a!.y),z:third(b!.z,a!.z)},p3:{...b!}};element('#planner-copy').textContent='A straight preliminary alignment through the selected terrain.';}
-    else if(mode==='bridge'){const z=3200,shore=norwayShorelineX(z,state.world.seed);curve=straightCurve({x:shore-350,y:height,z},{x:shore+350,y:height,z});element('#planner-copy').textContent='A direct crossing from open water into the Sundvik shore.';}
+    else if(mode==='bridge'){const z=3200,shore=sessionHost.content.worldGenerator.landforms.waterCrossSection(z).eastBankX;if(shore===null)throw new Error('This campaign has no east-bank crossing');curve=straightCurve({x:shore-350,y:height,z},{x:shore+350,y:height,z});element('#planner-copy').textContent='A direct crossing from open water into the Sundvik shore.';}
     else if(mode==='tunnel'){curve=straightCurve({x:3500,y:height,z:6100},{x:5200,y:height,z:6100});element('#planner-copy').textContent='A level bore beneath the Granli mountain spur.';}
     else {const a=state.towns[0]!.position,b=state.towns[1]!.position;curve=straightCurve({x:a.x+180,y:height,z:a.z+160},{x:b.x+180,y:height,z:b.z-160});element('#planner-copy').textContent='A long shelf following the inhabited side of the fjord.';}
     const geometry=compileCurve(curve),quote=quoteTrack(geometry,terrain),constraints=certifyCurve(curve),valid=quote.valid&&constraints.valid;

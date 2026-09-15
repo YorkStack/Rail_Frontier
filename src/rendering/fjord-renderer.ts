@@ -8,7 +8,6 @@ import type { Heightfield } from '../world/terrain.js';
 import type { BiomeDefinition } from '../world/profiles.js';
 import { SeededRandom } from '../world/random.js';
 import { shorelineX } from '../world/fjord-study.js';
-import { norwayCorridorX,norwayShorelineX } from '../world/generator.js';
 import { compileGraph } from '../rail/graph.js';
 import { motionPosition } from '../simulation/motion.js';
 import { terrainMesh } from './terrain-mesh.js';
@@ -18,11 +17,9 @@ import { vehicleDefinition } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
 import {norwayCameraPresets,type NorwayCameraPresetId} from './norway-camera-presets.js';
-import {norwayV2FjordAtZ,norwayV2Landforms,norwayV2ValleyX} from '../world/norway-landforms.js';
 import {generateNorwayScenery} from './scenery-placement.js';
 import {generateNorwaySettlements} from './settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
-import type {CampaignPresentation} from '../content/presentation.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -86,8 +83,8 @@ export class FjordRenderer implements WorldRenderer {
   private readonly ownsRenderer:boolean;
   private readonly terrainSurfaceMaterial:THREE.Material;
   private terrainBlockoutMaterial:THREE.MeshStandardMaterial|null=null;
-  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,private readonly presentation:CampaignPresentation,sharedRenderer?:THREE.WebGLRenderer) {
-    this.terrain=terrain;this.profile=presentation.biome;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
+  constructor(private readonly canvas:HTMLCanvasElement,terrain:Heightfield,state:GameState,private readonly content:CampaignContent,sharedRenderer?:THREE.WebGLRenderer) {
+    this.terrain=terrain;this.profile=content.presentation.biome;this.modelState=state;this.geometry=compileGraph(state.railway);this.railwayRevision=state.railway.revision;this.railwaySignature=railwayKey(state);this.electrificationSignature=this.electrificationKey(state);
     this.ownsRenderer=sharedRenderer===undefined;this.renderer=sharedRenderer??createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);
     const scale=terrainSize(terrain)/4000;this.scene.background=new THREE.Color(this.profile.palette.haze);this.scene.fog=new THREE.FogExp2(this.profile.palette.haze,.00018/scale);
     this.sunOffset=new THREE.Vector3(-1200,2600,1400).multiplyScalar(scale);this.sun=new THREE.DirectionalLight(this.profile.lighting.sunColor,this.profile.lighting.sunIntensity);this.sun.position.copy(this.sunOffset);this.sun.target.position.set(terrain.widthM*.45,0,terrain.depthM*.45);this.sun.castShadow=true;
@@ -114,8 +111,8 @@ export class FjordRenderer implements WorldRenderer {
     this.verifyTerrain();
   }
   async loadAssets():Promise<void> {
-    const response=await fetch(this.presentation.assetManifestUrl);if(!response.ok)throw new Error(`${this.presentation.id} asset manifest could not be loaded`);
-    const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error(`${this.presentation.id} asset manifest is incompatible`);
+    const response=await fetch(this.content.presentation.assetManifestUrl);if(!response.ok)throw new Error(`${this.content.presentation.id} asset manifest could not be loaded`);
+    const manifest=await response.json() as PackManifest;if(manifest.version!==1||manifest.campaignId!==this.modelState.campaignId||!Array.isArray(manifest.assets))throw new Error(`${this.content.presentation.id} asset manifest is incompatible`);
     const loader=new GLTFLoader(),textureLoader=new THREE.TextureLoader(),textures=new Map<string,THREE.Texture>();
     await Promise.all((manifest.textures??[]).map(async definition=>{const value=await textureLoader.loadAsync(definition.path);value.colorSpace=definition.colorSpace==='srgb'?THREE.SRGBColorSpace:THREE.NoColorSpace;value.wrapS=value.wrapT=THREE.RepeatWrapping;value.userData.assetLibrary=true;textures.set(definition.id,value);}));
     const loadedAssets=await Promise.all(manifest.assets.map(async asset=>({asset,loaded:await Promise.all(asset.lods.map(lod=>loader.loadAsync(lod.path)))})));
@@ -200,24 +197,25 @@ export class FjordRenderer implements WorldRenderer {
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(terrainSize(this.terrain),terrainSize(this.terrain)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(this.terrain.widthM/2,.15,this.terrain.depthM/2);return mesh;
   }
   private createWaterfall():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {
-    const production=this.terrain.widthM>4000,v2=production&&this.modelState.world.generatorVersion===2,z=v2?norwayV2Landforms.waterfall.z:production?6100:2470,shore=(value:number)=>v2?(()=>{const fjord=norwayV2FjordAtZ(value);return fjord.centerX+fjord.halfWidthM;})():production?norwayShorelineX(value,140919):shorelineX(value),offset=v2?norwayV2Landforms.waterfall.offsetFromEastShoreM:production?620:260,positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    const production=this.terrain.widthM>4000,landmark=this.content.worldGenerator.landforms.waterfall,z=production&&landmark?landmark.z:2470,crossSection=this.content.worldGenerator.landforms.waterCrossSection(z),bank=production&&landmark?(landmark.bank==='east'?crossSection.eastBankX:crossSection.westBankX):shorelineX(z),direction=production&&landmark?.bank==='west'?-1:1,offset=production&&landmark?landmark.offsetFromBankM:260,positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    if(bank===null)throw new Error('Waterfall landmark has no matching water bank');
     for(let i=0;i<=80;i++) {
-      const x=shore(z)+offset-i*(production?7.5:3.5);
+      const x=bank+direction*(offset-i*(production?7.5:3.5));
       for(const side of [-1,1]) {const sampleZ=z+side*(5+3*Math.sin(i/80*Math.PI));positions.push(x,Math.max(.6,this.terrain.sample(x,sampleZ).elevationM+1.3),sampleZ);uv.push((side+1)/2,1-i/80);}
       if(i>0){const a=(i-1)*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
     }
     const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{time:{value:0}},vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:`varying vec2 vUv; uniform float time; void main(){float streak=.65+.35*sin(vUv.x*80.0+sin(vUv.y*15.0-time*6.0));float fade=sin(vUv.x*3.14159);gl_FragColor=vec4(.76,.91,.91,fade*streak*.86);}`});
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex(indices);return new THREE.Mesh(geometry,material);
   }
-  private createShoreContact():THREE.Mesh<THREE.BufferGeometry,THREE.MeshBasicMaterial> {const positions:number[]=[],indices:number[]=[];if(this.terrain.widthM>4000&&this.modelState.world.generatorVersion===2)for(let bank=0;bank<2;bank++)for(let index=0;index<=160;index++){const z=index/160*this.terrain.depthM,fjord=norwayV2FjordAtZ(z),edge=fjord.centerX+(bank===0?-fjord.halfWidthM:fjord.halfWidthM),inside=bank===0?1:-1,base=positions.length/3;positions.push(edge,.32,z,edge+inside*5,.34,z);if(index>0){const previous=base-2;indices.push(previous,previous+1,base,previous+1,base+1,base);}}const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);const material=new THREE.MeshBasicMaterial({color:'#c6d8d3',transparent:true,opacity:.24,depthWrite:false,side:THREE.DoubleSide});const mesh=new THREE.Mesh(geometry,material);mesh.renderOrder=2;return mesh;}
-  private corridorX(z:number):number {return this.modelState.world.generatorVersion===2?norwayV2ValleyX(z):norwayCorridorX(z);}
+  private createShoreContact():THREE.Mesh<THREE.BufferGeometry,THREE.MeshBasicMaterial> {const positions:number[]=[],indices:number[]=[],middle=this.content.worldGenerator.landforms.waterCrossSection(this.terrain.depthM/2);if(this.terrain.widthM>4000&&middle.westBankX!==null&&middle.eastBankX!==null)for(const side of ['west','east'] as const)for(let index=0;index<=160;index++){const z=index/160*this.terrain.depthM,section=this.content.worldGenerator.landforms.waterCrossSection(z),edge=side==='west'?section.westBankX:section.eastBankX;if(edge===null)continue;const inside=side==='west'?1:-1,base=positions.length/3;positions.push(edge,.32,z,edge+inside*5,.34,z);if(index>0){const previous=base-2;indices.push(previous,previous+1,base,previous+1,base+1,base);}}const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);const material=new THREE.MeshBasicMaterial({color:'#c6d8d3',transparent:true,opacity:.24,depthWrite:false,side:THREE.DoubleSide});const mesh=new THREE.Mesh(geometry,material);mesh.renderOrder=2;return mesh;}
+  private corridorX(z:number):number {return this.content.worldGenerator.landforms.corridorX(z);}
   private createForest(count:number):THREE.Group {
     const group=new THREE.Group(),random=new SeededRandom(708),mat=new THREE.MeshStandardMaterial({color:'#e7eedc',roughness:1});
     const crowns=new THREE.InstancedMesh(new THREE.ConeGeometry(1,1,5,1),mat,count),trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.05,.07,1,4),new THREE.MeshStandardMaterial({color:'#574d39'}),count),dummy=new THREE.Object3D(),color=new THREE.Color();
     let placed=0;
     for(let tries=0;placed<count&&tries<count*30;tries++) {
       const x=random.next()*this.terrain.widthM,z=random.next()*this.terrain.depthM,y=this.terrain.sample(x,z).elevationM;
-      const production=this.terrain.widthM>4000,corridor=production?norwayCorridorX(z):shorelineX(z)+75;
+      const production=this.terrain.widthM>4000,corridor=production?this.corridorX(z):shorelineX(z)+75;
       if(y<10||y>this.profile.vegetation.treelineM||Math.abs(x-corridor)<24||Math.abs(z-(production?6100:2470))<24)continue;
       const h=9+random.next()*15;dummy.position.set(x,y+h*.58,z);dummy.rotation.set(0,random.next()*Math.PI*2,0);dummy.scale.set(h*.27,h,h*.27);dummy.updateMatrix();crowns.setMatrixAt(placed,dummy.matrix);
       color.setHSL(.27+random.next()*.08,.22+random.next()*.2,.18+random.next()*.12);crowns.setColorAt(placed,color);
@@ -232,7 +230,7 @@ export class FjordRenderer implements WorldRenderer {
     const palettes=['#b04f3d','#e2dac0','#be914f','#8b392e','#b8c0b4'];
     for(let i=0;i<count;i++) {
       const town=state.towns[i%state.towns.length]!;let x=town.position.x,z=town.position.z;
-      for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*(count>100?400:95);x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(this.terrain.widthM<=4000||Math.abs(x-norwayCorridorX(z))>58)break;}
+      for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=Math.sqrt(random.next())*(count>100?400:95);x=Math.max(2,Math.min(this.terrain.widthM-2,town.position.x+Math.cos(angle)*radius));z=Math.max(2,Math.min(this.terrain.depthM-2,town.position.z+Math.sin(angle)*radius));if(this.terrain.widthM<=4000||Math.abs(x-this.corridorX(z))>58)break;}
       const y=Math.max(.5,this.terrain.sample(x,z).elevationM);
       const w=7+random.next()*5,h=6+random.next()*7,d=9+random.next()*7,rotation=Math.round(random.next()*3)*Math.PI/2;
       dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));
@@ -353,7 +351,7 @@ export class CampaignRenderHost {
   readonly renderer:THREE.WebGLRenderer;
   private disposed=false;
   constructor(private readonly canvas:HTMLCanvasElement) {this.renderer=createWebGLRenderer(canvas);configureWebGLRenderer(this.renderer);}
-  create(terrain:Heightfield,state:GameState,content:CampaignContent):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');if(content.presentation.rendererId!=='fjord')throw new Error(`Unsupported renderer: ${content.presentation.rendererId}`);return new FjordRenderer(this.canvas,terrain,state,content.presentation,this.renderer);}
+  create(terrain:Heightfield,state:GameState,content:CampaignContent):FjordRenderer {if(this.disposed)throw new Error('Render host is disposed');if(content.presentation.rendererId!=='fjord')throw new Error(`Unsupported renderer: ${content.presentation.rendererId}`);return new FjordRenderer(this.canvas,terrain,state,content,this.renderer);}
   dispose():void {if(this.disposed)return;this.renderer.dispose();this.renderer.forceContextLoss();this.disposed=true;}
 }
 function createWebGLRenderer(canvas:HTMLCanvasElement):THREE.WebGLRenderer {return new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}
