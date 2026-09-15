@@ -25,7 +25,7 @@ function signedGrade(train:Train,network:RailNetwork):number {
 }
 
 function stepTrain(state:GameState,train:Train,network:RailNetwork,reservedNext:boolean):void {
-  if(train.phase==='dwelling'){advanceDwell(state,train,network);return;}
+  if(train.phase==='dwelling'||(train.phase==='blocked'&&train.motion.arrived)){advanceDwell(state,train,network);return;}
   if(train.phase!=='running'||train.motion.arrived)return;
   const traversal=train.motion.path[train.motion.leg];if(!traversal){train.phase='blocked';train.speedMps=0;return;}
   const geometry=network.geometry.get(traversal.edgeId);if(!geometry)throw new Error('Train path uses missing track');
@@ -45,7 +45,7 @@ export function createTrainSimulation():(state:GameState)=>void {
   return state=>{
     if(network===null||revision!==state.railway.revision){network=new RailNetwork(state.railway);revision=state.railway.revision;}
     const occupancy=updateReservations(state);
-    for(const train of [...state.trains].sort((a,b)=>a.id.localeCompare(b.id)))if(train.phase==='dwelling'||occupancy.allowed.has(train.id))stepTrain(state,train,network,occupancy.reservedNext.has(train.id));
+    for(const train of [...state.trains].sort((a,b)=>a.id.localeCompare(b.id)))if(train.phase==='dwelling'||(train.phase==='blocked'&&train.motion.arrived)||occupancy.allowed.has(train.id))stepTrain(state,train,network,occupancy.reservedNext.has(train.id));
   };
 }
 

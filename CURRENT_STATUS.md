@@ -19,7 +19,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Station content, rail/ground placement and deterministic closest town coverage. Six classes now progress from Rural Halt to Major Terminal; atomic upgrades charge only the cost difference, expand catchment/storage/platform capability, recalculate the served town and raise daily upkeep. Purchases and routes reject trains that exceed platform length.
 - Original Norway steam locomotive and coach content, atomic train purchase, connected route validation and route assignment from the train's current station.
 - Physical train simulation with consist mass/power/tractive force, signed grade, service braking, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
-- Deterministic edge reservations prevent opposing trains from sharing track and expose blocked service state.
+- Deterministic full-leg reservations prevent opposing trains from entering the same single-track corridor, retain safety for the whole consist until arrival and expose blocked service state.
 - Destination-weighted daily passenger demand, capacity-bound oldest-first boarding, distance-tracked delivery, exactly-once fares, daily maintenance and monthly capital/operating reports.
 - FIN-002 adds live company, month, train and route reports without changing schema 3. The Railway Office separates revenue, operating cost and capital; exposes historical track cost, owned asset value and cash-plus-assets company value; and shows profitability for assigned and unassigned rolling stock.
 - Connected-town, delivered-passenger and operating-profit campaign objectives with once-only completion.
@@ -28,7 +28,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - A responsive main menu now presents the Norway campaign, new/continue flows, settings and credits. Its company archive creates named manual slots and can resume, rename or confirm-delete any slot; unavailable browser storage produces recovery guidance without changing the running company.
 - The live HUD presents all three campaign goals from authoritative objective progress and marks completed goals directly from persisted completion state.
 - Players can now pick two terrain points for a free straight alignment, snap to existing rail nodes, review engineering spans/cost/errors and commit or cancel through the real construction command. A separate map-pick station tool validates rail proximity, ground level, occupancy, funds and settlement coverage before purchase.
-- The railway office now exposes consist purchase, two-stop route creation and stopped-train assignment through the command gateway. It also shows consist/cargo/service state, town demand, per-route result, reconciled cash/income/outgoings and recent ledger entries.
+- The railway office now exposes consist purchase, ordered multi-stop shuttle/loop creation and stopped-train assignment through the command gateway. It also shows consist/cargo/service state, town demand, per-route result, reconciled cash/income/outgoings and recent ledger entries.
 - The visible renderer now uses the deterministic 16 km Norway heightfield, production biome, 28,000 instanced trees, expanded settlement dressing, scaled fog/light/camera bounds and the full three-town corridor. The former 4 km scene remains only as an isolated architecture fixture.
 - Every owned train is rendered from the Blender Norway pack. The initial service visibly combines the authored Nord 2-6-0 with two passenger coaches; passenger and freight car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
 - QA-001 now passes as a separate empty-network browser journey: Norway selection, camera navigation, free track, two stations, locomotive/coach purchase, route assignment, physical service, passenger delivery, revenue and operating cost, reconciled cash, speed/pause, save, reload, exact load and resumed ticks with a clean console.
@@ -46,10 +46,11 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - VEHICLE-004 adds the official 1981 Di 4 delivery boundary and specifications with a distinct angular six-axle Blender model, sloping framed windscreens, high radiator banks, roof fans, exhaust and snowploughs. Both LODs carry complete UVs and remain inside the unchanged vehicle budgets.
 - VEHICLE-005 completes the researched locomotive set with the 1996 El 18: a separate swept four-axle electric Blender model with sealed glazing, doors, handholds, intakes and paired pantographs. Its exact 18.50 m rendered length and official performance values are tested against the existing power gates.
 - SAVE-003 adds versioned `.railfrontier.json` export and atomic import for every company slot. Imports accept portable or raw saves, enforce UTF-8 byte plus entity/geometry/operational collection limits before graph validation, reject unsupported content before writing, and never replace the live session. The archive reports browser storage usage and actionable quota/private-mode failures; one rejected write cannot poison later saves.
+- ROUTE-002 exposes arbitrary ordered station drafts plus shuttle/loop service in the Railway Office. The dispatcher now reserves every edge to the next station before departure and keeps that leg until arrival, so opposing trains wait outside a single-track corridor. A station-blocked service retries after its route or electrification becomes valid.
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 109 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 112 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -60,7 +61,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 6 plus strict sequential 1→2→3→4→5→6 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **109 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- **112 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -68,7 +69,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification and portable save archives are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. Arizona/River expansion and release/deployment remain later work.
+Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification, portable save archives, ordered services and safe corridor dispatch are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. Arizona/River expansion and release/deployment remain later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -99,4 +100,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next work is route and dispatch depth, then the separately scoped Arizona/River expansion.
+The next work is the separately scoped Arizona/River expansion. Advanced signaling remains a later system.
