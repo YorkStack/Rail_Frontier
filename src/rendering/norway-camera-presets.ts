@@ -1,7 +1,7 @@
-import type {Vec3} from '../domain/model.js';
+import type {CameraPreset} from '../content/presentation.js';
 
 export type NorwayCameraPresetId='regional'|'shore'|'station'|'train'|'forest-edge'|'rock-face'|'village';
-export interface NorwayCameraPreset {targetXZ:Readonly<{x:number;z:number}>;offset:Readonly<Vec3>}
+export type NorwayCameraPreset=CameraPreset;
 
 /** Fixed GFX comparison views. Target elevation is sampled from the active terrain. */
 export const norwayCameraPresets:Readonly<Record<NorwayCameraPresetId,NorwayCameraPreset>>=Object.freeze({

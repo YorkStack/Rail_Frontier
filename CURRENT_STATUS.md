@@ -38,7 +38,8 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - The Blender 4.0.2 Norway pack supplies two LODs each for 36 asset types / 72 GLBs plus 12 shared PNG maps, totaling 2.51 MiB: the detailed current railway kit, the 1922 Nord El 1, 1960 Nord Di 3B, 1981 Nord Di 4 and 1996 Nord El 18, mixed vegetation/rocks, eight timber-house finishes and dedicated farm/industry structures. No unrelated model pack is requested.
 - Three.js renders material-merged rolling stock/stations as LOD objects and batches the authored scenery, houses and bridge pieces. The final fixed Norway views measure 187–226 calls and 1.45–1.77 million triangles while preserving a 16.8 ms frame p95 in the documented local run.
 - The renderer now lives at the production boundary in `src/rendering/fjord-renderer.ts`. Trains and stations carry ephemeral pick identities; town and industry map labels use the same `WorldSelection` contract. A live contextual card reports authoritative state for all four entity kinds and follows a selected moving train.
-- EXP-001/002 establish the multi-campaign presentation and terrain boundaries. Registered campaign content selects and validates its renderer, biome, asset manifest and `WorldGenerator` before atomic scene creation. Norway V1/V2 expose their exact terrain, masks, corridor, water banks, anchors and waterfall through separate generator objects; shared orchestration no longer switches on Norway generator numbers.
+- EXP-001/002 establish the multi-campaign presentation and terrain boundaries. Registered campaign content selects and validates its renderer, biome, optional asset manifest, camera set and `WorldGenerator` before atomic scene creation. Norway V1/V2 expose their exact terrain, masks, corridor, water banks, anchors and waterfall through separate generator objects; shared orchestration no longer switches on Norway generator numbers.
+- EXP-003 registers the independent 24 km Arizona Basin terrain study. Its stable basin/range/plateau/mesa/canyon grammar provides three flat settlement sites and two feasible long corridors, including a direct 1.2 km canyon bridge. Layered desert materials, 10,500 procedural scrub/grass/cactus/dry-tree instances, 180 settlement blockouts and five content-owned cameras run without a Blender asset manifest.
 - Station catchment, industry-site and rail-traffic overlays are available from the strategy toolbar. Overlay geometry rebuilds only when the relevant station, industry or reservation signature changes, and map labels yield pointer input while a construction tool is active.
 - Schema 3 adds one economy record per town with local lumber demand and delivery, waiting mail, activity, service duration and fractional population growth. A pure 2→3 migration initializes these values while preserving all prior operations; schema 1 still migrates sequentially through schema 2.
 - ECON-004 turns waiting mail into addressed train cargo. Every passenger coach has 24 mail units beside its 48 seats; mail selects the farthest other settlement on the route, accrues real rail distance, remains aboard at intermediate stops and posts one dedicated income transaction at delivery. Schema 4 adds the global mail-delivery total through a strict 3→4 migration.
@@ -52,7 +53,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 115 Node tests and 18 real browser tests pass. Asset validation and the production build pass.
+- 120 Node tests and 19 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -63,7 +64,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 6 plus strict sequential 1→2→3→4→5→6 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **115 Node tests and 18 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both world versions, the full gameplay slice, graphics composition and resource disposal.
+- **120 Node tests and 19 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both Norway world versions, the Arizona study, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -71,7 +72,7 @@ Current milestone: the Norway passenger, mail, freight, production-asset, world-
 
 The map- and photo-informed Norway graphics enhancement is complete through [GFX-008](docs/art/GFX008_REGRESSION.md). V1 saves retain their exact terrain. V2 has two fjord banks, original PBR surfaces, mixed clustered forest/rocks, three deterministic villages with eight timber finishes plus dedicated industry buildings, detailed current steam/passenger/freight vehicles and camera-scaled scenery/shadows. Local Blender 4.0.2 generated the reproducible pack.
 
-Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification, portable save archives, ordered services and safe corridor dispatch are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. EXP-001/002 are complete; EXP-003 Arizona terrain study is next. Release/deployment remains later work.
+Mail transport, six-class station progression, the campaign calendar/catalogue boundary, the El 1, Di 3B, Di 4 and El 18 vehicle eras, route electrification, portable save archives, ordered services and safe corridor dispatch are complete. Town demand, onboard cargo, station capability, global deliveries, vehicle eligibility, overhead-line infrastructure and dedicated ledger income are visible in the browser and survive save/reload. EXP-001 through EXP-003 are complete; EXP-004 Arizona campaign content and original Blender art is next. Release/deployment remains later work.
 
 Read ARCHITECTURE.md, IMPLEMENTATION_PLAN.md, DATA_MODEL.md, ECONOMIC_CONTRACT.md, SAVEGAME_FORMAT.md, DECISIONS.md and ASSET_PIPELINE.md. The plan marks architecture gates complete and explicitly identifies existing kernels to reuse.
 
@@ -94,7 +95,7 @@ Conservative curve rejection, one-chunk terrain and remaining release-only cross
 
 ## Git state and reproduction
 
-Branch: implementation/passenger-slice. Remote: https://github.com/YorkStack/Rail_Frontier. The implementation branch starts from architecture checkpoint **3e65484** and is synchronized to the remote after each completed milestone. No deployment or main-branch modification has been performed.
+Branch: implementation/passenger-slice. Remote: https://github.com/YorkStack/Rail_Frontier. Completed milestones are synchronized to both `implementation/passenger-slice` and `main`, as requested. No deployment has been performed.
 
 Development: npm ci; npm run dev → http://127.0.0.1:5173.
 Production preview: npm run build; npm run preview → http://127.0.0.1:4173.
@@ -102,4 +103,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-The next work is the separately scoped Arizona/River expansion. Advanced signaling remains a later system.
+The next work is EXP-004 Arizona campaign content and original Blender art. Great River and advanced signaling remain later systems.

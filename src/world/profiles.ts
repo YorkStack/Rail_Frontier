@@ -4,6 +4,13 @@ export interface BiomeDefinition {
   palette: { water: string; lowland: string; forest: string; rock: string; snow: string; haze: string };
   lighting: { sunColor: string; sunIntensity: number; skyColor: string; groundColor: string };
   vegetation: { density: number; minHeightM: number; maxHeightM: number; treelineM: number };
+  surface?: {
+    scree: string;
+    sand: string;
+    soil: string;
+    snowLineM: number;
+    strata?: { colors: readonly string[]; bandHeightM: number; strength: number };
+  };
 }
 export const fjordProfile: BiomeDefinition = {
   id:'fjord-study',terrain:{widthM:4000,depthM:4000,cellM:20,peakM:780,seaLevelM:0},
