@@ -15,7 +15,7 @@ AWAITING_USER_MODEL_SWITCH=false
 
 Current milestone: **SOL implementation in progress; GFX-R01/R02, the UX-001 readability foundation and CON-01/02 are complete. CON-03 is next.** A new company now starts by placing oriented stations on open ground, shaping a live spline through optional waypoints and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this rework, not the historically implemented GFX-001–008.
 
-Runtime checkpoint: `7f05a49ec5c4a1afc8f0ff6e3f799dec8b9b37f1`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R01/R02 corrected Norwegian roofs and the opening composition, UX-001 added persistent interface scaling and core English/German labels, and CON-01 introduced schema 7 station layouts with level platform track and stable connection ports.
+Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R01/R02 corrected Norwegian roofs and the opening composition, UX-001 added persistent interface scaling and core English/German labels, CON-01 introduced schema 7 station layouts with level platform track and stable connection ports, and CON-02 added live multi-waypoint alignment planning plus atomic construction.
 
 ## Implementation completed after handoff
 
