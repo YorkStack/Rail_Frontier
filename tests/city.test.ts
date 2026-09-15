@@ -9,7 +9,7 @@ const line=(a:Vec3,b:Vec3):CubicCurve=>({p0:a,p1:{x:(2*a.x+b.x)/3,y:(2*a.y+b.y)/
 function connectedState():GameState {
   const state=createInitialState(),a=state.towns[0]!.position,b=state.towns[1]!.position;
   state.railway={revision:1,nodes:[{id:'node:5',position:a},{id:'node:6',position:b}],edges:[{id:'edge:7',from:'node:5',to:'node:6',curve:line(a,b),speedLimitMps:20,ownerId:'company:1'}]};
-  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[]},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'town-station',storage:[]}];state.routes=[{id:'route:10',stops:['station:8','station:9'],mode:'shuttle'}];state.trains=[{id:'train:11',routeId:'route:10',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],motion:{path:[],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'idle',dwellTicks:0,cargo:[]}];state.nextEntityId=12;return state;
+  state.stations=[{id:'station:8',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:9',nodeId:'node:6',townId:'town:3',classId:'town-station',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:7_500_000}];state.routes=[{id:'route:10',stops:['station:8','station:9'],mode:'shuttle'}];state.trains=[{id:'train:11',routeId:'route:10',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],motion:{path:[],leg:0,distanceM:0,arrived:false},speedMps:0,phase:'idle',dwellTicks:0,cargo:[]}];state.nextEntityId=12;return state;
 }
 
 test('unserved towns accumulate bounded lumber and mail demand without growing',()=>{

@@ -1,15 +1,15 @@
 # Data model
 
-**Planned extension, 2026-09-15:** See [station-first station and alignment model](docs/construction/STATION_TRACK_DESIGN.md). It specifies the next implementation and coordinated schema changes; the implemented contracts described below remain the current runtime until those slices land.
+**Construction extension, 2026-09-15:** CON-01 implements the station layout portion of the [station-first station and alignment model](docs/construction/STATION_TRACK_DESIGN.md). Alignment project records follow in later construction slices.
 
-Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 6 is implemented; contracts remain pre-release rather than a released save API.
+Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 7 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
 |---|---|---|
 | WorldDefinition | seed + generatorVersion + biomeId | Reproducible terrain inputs; 4 km study and 16 km Norway generators implemented |
 | RailNode | node:N, position | Graph connectivity |
 | RailEdge | edge:N, from/to, ownerId | Cubic curve and speed limit |
-| Station | station:N, nodeId, optional townId | Class-driven coverage, platform and cargo storage |
+| Station | station:N, stop node, optional townId, layout, construction cost | Legacy-node or oriented single-platform layout with stable rail ports, class-driven coverage and cargo storage |
 | Route | route:N, ordered station IDs | Shuttle or loop service |
 | Train | train:N, routeId | Consist content IDs, phase, speed, cargo and motion |
 | MotionState | ordered edge traversal IDs | Current leg, distance along traversal, arrival |
@@ -32,4 +32,4 @@ Derived caches (arc tables, route adjacency, scene entities, spatial indices, qu
 
 StationDefinition provides purchase cost, daily maintenance, catchment radius, storage capacity and platform length for six station classes. `upgradeStation` changes the saved class ID without another schema field; it permits only capability-increasing classes and posts the purchase-cost difference as capital spending.
 
-Schema 6 includes the campaign starting year, demand queues, per-train service and financial state, exclusive reservations, built engineering spans, base upkeep, edge electrification cost/status/upkeep, industry cycles, per-town economy state, passenger/mail/timber/lumber delivery totals, completed objectives, monthly accounts and command sequence. Schema 3 introduced town economies; schema 4 added mail; schema 5 made the campaign epoch authoritative; schema 6 adds explicit electrification records and migrates every older edge to unelectrified. VehicleDefinition includes a display name and availability year beside its physical and economic fields. StationDefinition and IndustryRecipe fix their reusable content fields. Any breaking state change needs an explicit migration.
+Schema 7 includes the campaign starting year, demand queues, per-train service and financial state, exclusive reservations, built engineering spans, base upkeep, edge electrification cost/status/upkeep, industry cycles, per-town economy state, passenger/mail/timber/lumber delivery totals, completed objectives, monthly accounts, command sequence and station layouts. Schema 3 introduced town economies; schema 4 added mail; schema 5 made the campaign epoch authoritative; schema 6 added explicit electrification records; schema 7 adds station-owned platform rails and ports. The 6→7 migration preserves the old graph and numerical operation state. Any breaking state change needs an explicit migration.

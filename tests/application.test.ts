@@ -20,7 +20,7 @@ const json=(value:unknown)=>JSON.stringify(value);
 test('gateway commits a successful handler once and rejects its replay',()=>{
   const handlers:CommandHandlers={buildStation:(state,command)=>{
     const stationId=allocateId(state,'station');
-    state.stations.push({id:stationId,nodeId:command.nodeId,townId:null,classId:command.classId,storage:[]});
+    state.stations.push({id:stationId,nodeId:command.nodeId,townId:null,classId:command.classId,storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000});
     postExpense(state,'construction',500,stationId,'Station construction');
     return {createdIds:[stationId]};
   }};

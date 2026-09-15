@@ -19,6 +19,7 @@ import { industryName } from '../content/industries.js';
 import {generateNorwayScenery} from './scenery-placement.js';
 import {generateNorwaySettlements} from './settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
+import type {StationSite} from '../rail/station-layout.js';
 
 export interface RenderStats { calls:number;triangles:number;geometries:number;textures:number;trees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -172,7 +173,7 @@ export class FjordRenderer implements WorldRenderer {
   }
   private syncStationModels(state:Readonly<GameState>):void {
     if(!this.assetLevels.has('norway-station'))return;for(const model of this.stationModels.values())model.visible=false;
-    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod('norway-station',260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=this.inspectionModel===null;}
+    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod('norway-station',260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=this.inspectionModel===null;}
   }
   private rebuildAuthoredInfrastructure(state:Readonly<GameState>):void {
     if(!this.assetLevels.has('norway-bridge-span'))return;this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
@@ -284,6 +285,14 @@ export class FjordRenderer implements WorldRenderer {
     if(!geometry)return;
     const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));
     this.preview=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color,depthTest:false}));this.preview.renderOrder=10;this.scene.add(this.preview);
+  }
+  setStationPreview(site:StationSite|null,valid=true):void {
+    if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
+    if(!site)return;
+    const color=valid?'#edc879':'#d7795f',group=new THREE.Group(),material=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.28,depthTest:false}),pad=new THREE.Mesh(new THREE.BoxGeometry(site.widthM,.35,site.lengthM),material),rail=new THREE.Line(new THREE.BufferGeometry().setFromPoints([site.portA,site.portB].map(point=>new THREE.Vector3(point.x,point.y+1,point.z))),new THREE.LineBasicMaterial({color,depthTest:false,linewidth:2}));
+    pad.position.set(site.center.x,site.center.y+.35,site.center.z);pad.rotation.y=site.orientationRad;group.add(pad,rail);
+    for(const point of [site.portA,site.portB]){const ring=new THREE.Mesh(new THREE.TorusGeometry(5,.8,8,32),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;ring.position.set(point.x,point.y+1.2,point.z);group.add(ring);}
+    group.renderOrder=10;this.preview=group;this.scene.add(group);
   }
   setMarker(position:Vec3|null,color='#edc879'):void {
     if(this.marker){this.scene.remove(this.marker);disposeObject(this.marker);this.marker=null;}

@@ -12,7 +12,7 @@ The Norway vertical slice is playable now. It has the complete build → station
 
 An isolated Arizona terrain study is also available at `http://127.0.0.1:5173/?skip-menu=1&world=arizona`. It previews the versioned 24 km basin, plateau, mesas, canyon, desert materials and procedural vegetation without the Norway HUD. Original Arizona Blender architecture is now planned in GFX-R07; Arizona gameplay and campaign selection follow later in EXP-004/005.
 
-**2026-09-15 planning update:** [Station-first construction design](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [readable controls, tutorial and progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md) are ready for SOL implementation. The revised construction design starts with freely placed stations, then editable spline waypoints, automatic bridges/tunnels and an atomic whole-route purchase; corridor routing and engineering preferences follow in defined slices. The plans include reference sources, user evidence, diagnosed defects and concrete acceptance checks. Implementation is paused for the requested model switch; these improvements are not in the current build yet.
+**2026-09-15 implementation update:** [Station-first construction design](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [readable controls, tutorial and progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md) are active in SOL. CON-01/02 now let a player place and rotate a station on suitable terrain before any external track exists. Each new station owns a level platform track and two visible connection ports; catchment assignment and train purchase remain inactive until an external rail connection exists. The next construction slice expands the current two-point alignment into editable spline waypoints and engineering review.
 
 The runtime checkpoint `031261f` passed 120 Node tests and 19 real-Chrome journeys plus TypeScript, asset and production-build validation. Those results do not establish visual quality or intuitive controls. The following screenshots show the earlier build and will be replaced after the new work passes actual visual review.
 
@@ -35,12 +35,13 @@ Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WA
 
 ### First company
 
-1. Choose **Survey track**, select **Choose two points on the map**, and click near two settlements. Review the quote and build the alignment.
-2. Choose **Place station**. Select each free rail endpoint from **Build at**, choose a station class and build. Stations currently require an endpoint or junction; extend the track to create another build point.
-3. Open **Operations**, buy a consist at a station, add at least two ordered stops, create the route and assign the train.
-4. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
+1. Choose **Build station**. Click suitable ground near Sundvik, rotate the platform toward Granli and build. The preview shows the platform footprint, internal track and both connection rings.
+2. Build a second station near Granli and point it along the same corridor.
+3. Choose **Build tracks**, select **Choose two points on the map**, and click the outward connection ring at each station. Review the terrain-aware quote and build the alignment.
+4. Open **Trains & lines**, buy a locomotive with one or more cars, add both stations as ordered stops, create the route and assign the train.
+5. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
 
-The commissioned preview already contains a three-station railway and a passenger train. If every build point is occupied, extend the line before placing another station.
+The commissioned preview already contains a legacy three-station railway and a passenger train. **Start new company** opens the new station-first construction flow.
 
 The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an early playable interface and remains subject to release polish.
 

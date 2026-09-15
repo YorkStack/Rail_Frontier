@@ -1,19 +1,11 @@
 import { test,expect } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
-test('map picks build a free alignment and a station through the UI',async({page})=>{
+test('station-first placement builds an oriented platform on open ground',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
-  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);await page.evaluate(()=>window.__railProbe.regional());
+  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Start new company'}).click();await expect(page.locator('#main-menu')).toBeHidden();await page.evaluate(()=>window.__railProbe.regional());
   const before=await page.evaluate(()=>({revision:window.__railProbe.snapshot().railway.revision,stations:window.__railProbe.snapshot().stations.length}));
-  await page.locator('#place-station').click();await expect(page.locator('#station-valid')).toContainText('Every current rail point already has a station');await expect(page.getByLabel('Build at')).toBeDisabled();await page.getByRole('button',{name:'Close station placement'}).click();
-  await page.getByRole('button',{name:'Build tracks'}).click();await page.getByLabel('Corridor').selectOption('free');
-  const points=await page.evaluate(()=>[
-    window.__railProbe.project({x:3000,y:51.17727902987974,z:3600}),
-    window.__railProbe.project({x:3300,y:48.83904632407689,z:3900})
-  ]);
-  expect(points.every(point=>point.visible)).toBe(true);for(const point of points)await page.mouse.click(point.x,point.y);
-  await expect(page.locator('#quote-valid')).toContainText('Feasible');mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/free-alignment.png'});await page.getByRole('button',{name:'Build this alignment'}).click();
-  await page.waitForFunction(revision=>window.__railProbe.snapshot().railway.revision===revision+1,before.revision);
-  await page.locator('#place-station').click();await expect(page.getByLabel('Build at')).toBeEnabled();await expect(page.locator('#station-valid')).toContainText('Ready');await page.locator('#commit-station').click();await page.waitForFunction(count=>window.__railProbe?.snapshot().stations.length===count+1,before.stations);
+  await page.locator('#place-station').click();await page.getByLabel('Platform direction').fill('35');await expect(page.locator('#station-valid')).toContainText('Ready');mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/station-first-preview.png'});await page.locator('#commit-station').click();await page.waitForFunction(count=>window.__railProbe?.snapshot().stations.length===count+1,before.stations);
+  const after=await page.evaluate(()=>{const state=window.__railProbe.snapshot(),layout=state.stations[0]?.layout;return {revision:state.railway.revision,nodes:state.railway.nodes.length,edges:state.railway.edges.length,kind:layout?.kind,orientationRad:layout?.kind==='single-platform'?layout.orientationRad:null};});expect(after.revision).toBe(before.revision+1);expect(after.nodes).toBe(3);expect(after.edges).toBe(2);expect(after.kind).toBe('single-platform');expect(after.orientationRad).toBeCloseTo(35*Math.PI/180);
   expect(errors).toEqual([]);
 });

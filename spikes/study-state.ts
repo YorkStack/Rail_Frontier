@@ -16,7 +16,7 @@ export function createStudyState():GameState {
   const stops=[850,1370,2050,2850];
   state.railway={revision:1,nodes:stops.map((z,i)=>({id:`node:${5+i}`,position:railPoint(z)})),edges:stops.slice(1).map((z,i)=>({id:`edge:${9+i}`,from:`node:${5+i}`,to:`node:${6+i}`,curve:studyCurve(stops[i]!,z),speedLimitMps:18,ownerId:'company:1'}))};
   state.towns=state.towns.map((town,i)=>({...town,position:{...railPoint([920,2040,2790][i]!),x:railPoint([920,2040,2790][i]!).x+60}}));
-  state.stations=[{id:'station:12',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[]},{id:'station:13',nodeId:'node:8',townId:'town:4',classId:'rural-halt',storage:[]}];
+  state.stations=[{id:'station:12',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:13',nodeId:'node:8',townId:'town:4',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];
   state.routes=[{id:'route:14',stops:['station:12','station:13'],mode:'shuttle'}];
   state.trains=[{id:'train:15',routeId:'route:14',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],speedMps:18,phase:'running',dwellTicks:0,cargo:[],motion:{path:findPath(state.railway,'node:5','node:8')!,leg:1,distanceM:120,arrived:false}}];
   state.operations.trainServices['train:15']={nextStopIndex:1,direction:1,ageDays:0,condition:1,distanceM:0,revenue:0,operatingCosts:0,costRemainder:0};

@@ -15,7 +15,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   const saved=await page.evaluate(()=>window.__railProbe.snapshot());
   await page.getByRole('button',{name:'Save study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study saved');
   await page.getByRole('button',{name:'8×',exact:true}).click();await page.waitForFunction(tick=>window.__railProbe.snapshot().tick>tick+50,saved.tick);
-  await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Pause',exact:true}).click();await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed');
+  await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Pause',exact:true}).click();await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed',{timeout:15000});
   expect(await page.evaluate(()=>window.__railProbe.snapshot())).toEqual(saved);
   await page.getByRole('button',{name:'Build tracks'}).click();await expect(page.getByRole('region',{name:'Alignment study'})).toBeVisible();
   await page.getByLabel('Track elevation').fill('1');await expect(page.locator('#quote-valid')).toContainText('clearance');

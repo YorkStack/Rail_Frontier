@@ -17,7 +17,7 @@ function network():RailGraph {
 }
 export function fixture():GameState {
   const state=createInitialState();state.railway=network();state.nextEntityId=15;
-  state.stations=[{id:'station:10',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[]},{id:'station:11',nodeId:'node:7',townId:'town:3',classId:'rural-halt',storage:[]}];
+  state.stations=[{id:'station:10',nodeId:'node:5',townId:'town:2',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000},{id:'station:11',nodeId:'node:7',townId:'town:3',classId:'rural-halt',storage:[],layout:{kind:'legacy-node',version:1},constructionCost:2_500_000}];
   state.routes=[{id:'route:12',stops:['station:10','station:11'],mode:'shuttle'}];
   state.trains=[{id:'train:13',routeId:'route:12',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],motion:{path:findPath(state.railway,'node:5','node:7')!,leg:0,distanceM:0,arrived:false},speedMps:10,phase:'running',dwellTicks:0,cargo:[{kind:'passengers',quantity:12,originId:'station:10',destinationId:'station:11',loadedTick:0,distanceM:0}]}];
   state.company.ledger=[{id:'transaction:14',tick:0,category:'construction',amount:-100000,entityId:'edge:8',description:'Test construction'}];state.company.cash-=100000;
@@ -89,7 +89,7 @@ test('built-state fixture survives mid-run save/reload and deterministic continu
   for(let i=0;i<350;i++){step(state);step(loaded);}assert.deepEqual(loaded,state);assert.equal(loaded.trains[0]!.motion.arrived,true);
 });
 test('save loader rejects future schemas, malformed data and dangling references',()=>{
-  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":6','"schemaVersion":99')));
+  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":7','"schemaVersion":99')));
   assert.throws(()=>deserialize('{'));assert.throws(()=>deserialize(json.replace('station:11','station:999')));
 });
 test('save loader rejects unreconciled finance and stale entity counters',()=>{

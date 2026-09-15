@@ -14,6 +14,8 @@ import { RailNetwork } from '../src/rail/graph.js';
 import { snapshotState } from '../src/application/snapshot.js';
 import { emptyOperations,initialTownEconomy } from '../src/domain/operations.js';
 
+const schemaSixState=(state:ReturnType<typeof createStudyState>)=>({...state,stations:state.stations.map(({layout:_,constructionCost:__,...station})=>station)});
+
 test('terrain diagonal interpolation matches triangles rather than bilinear saddle',()=>{
   const terrain=new Heightfield(2,2,10,new Float64Array([0,0,0,10]));assert.equal(terrain.sample(5,5).elevationM,5);assert.equal(terrain.sample(7,3).elevationM,3);assert.equal(terrain.sample(3,7).elevationM,3);
 });
@@ -46,25 +48,29 @@ test('cubic root isolation includes tangent contact with a boundary',()=>{
   const roots=cubicRoots([.25,-1/12,-1/12,.25],0);assert.ok(roots.some(t=>Math.abs(t-.5)<1e-8));
 });
 test('schema 1 migrates without mutating legacy state; nonadvancing migrations fail',()=>{
-  const state=createStudyState(),{operations,startingYear:_,...legacyState}=state,legacy={schemaVersion:1,gameVersion:'0.1.0',state:legacyState},json=JSON.stringify(legacy);
+  const state=createStudyState(),historical=schemaSixState(state),{operations,startingYear:_,...legacyState}=historical,legacy={schemaVersion:1,gameVersion:'0.1.0',state:legacyState},json=JSON.stringify(legacy);
   const loaded=deserialize(json);assert.deepEqual(loaded,{...state,operations:emptyOperations(state.towns)});assert.equal(JSON.stringify(legacy),json);
   const migrate=migrations.get(1)!;migrations.set(1,value=>value);try{assert.throws(()=>deserialize(json),/advance/);}finally{migrations.set(1,migrate);}
 });
 test('schema 2 adds deterministic town economies without changing prior operations',()=>{
-  const state=createStudyState(),{startingYear:_,...historicalState}=state,{townEconomy,delivered,...rest}=state.operations,{mail,...legacyDelivered}=delivered,operations={...rest,delivered:legacyDelivered},legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...historicalState,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{startingYear:_,...historicalState}=schemaSixState(state),{townEconomy,delivered,...rest}=state.operations,{mail,...legacyDelivered}=delivered,operations={...rest,delivered:legacyDelivered},legacy={schemaVersion:2,gameVersion:'0.2.0',state:{...historicalState,operations}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,{...state,operations:{...operations,townEconomy:initialTownEconomy(state.towns),delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(townEconomy!==undefined&&mail===0,true);
 });
 test('schema 3 adds mail delivery totals without changing prior town economy',()=>{
-  const state=createStudyState(),{startingYear:_,...historicalState}=state,{mail,...legacyDelivered}=state.operations.delivered,legacy={schemaVersion:3,gameVersion:'0.3.0',state:{...historicalState,operations:{...state.operations,delivered:legacyDelivered}}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{startingYear:_,...historicalState}=schemaSixState(state),{mail,...legacyDelivered}=state.operations.delivered,legacy={schemaVersion:3,gameVersion:'0.3.0',state:{...historicalState,operations:{...state.operations,delivered:legacyDelivered}}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,{...state,operations:{...state.operations,delivered:{...legacyDelivered,mail:0}}});assert.equal(JSON.stringify(legacy),json);assert.equal(mail,0);
 });
 test('schema 4 adds the campaign starting year without changing operational state',()=>{
-  const state=createStudyState(),{startingYear,...historicalState}=state,legacy={schemaVersion:4,gameVersion:'0.4.0',state:historicalState},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{startingYear,...historicalState}=schemaSixState(state),legacy={schemaVersion:4,gameVersion:'0.4.0',state:historicalState},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.deepEqual(loaded,state);assert.equal(loaded.startingYear,1900);assert.equal(JSON.stringify(legacy),json);assert.equal(startingYear,1900);
 });
 test('schema 5 adds authoritative unelectrified infrastructure records',()=>{
-  const state=createStudyState(),infrastructure=Object.fromEntries(state.railway.edges.map(edge=>{const length=compileCurve(edge.curve).lengthM;return [edge.id,{spans:[{startM:0,endM:length,kind:'ground'}],constructionCost:1000,maintenancePerDay:10}];})),legacy={schemaVersion:5,gameVersion:'0.5.0',state:{...state,operations:{...state.operations,infrastructure}}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),infrastructure=Object.fromEntries(state.railway.edges.map(edge=>{const length=compileCurve(edge.curve).lengthM;return [edge.id,{spans:[{startM:0,endM:length,kind:'ground'}],constructionCost:1000,maintenancePerDay:10}];})),legacy={schemaVersion:5,gameVersion:'0.5.0',state:{...schemaSixState(state),operations:{...state.operations,infrastructure}}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.equal(JSON.stringify(legacy),json);for(const item of Object.values(loaded.operations.infrastructure)){assert.equal(item.electrified,false);assert.equal(item.electrificationCost,0);assert.equal(item.electrificationMaintenancePerDay,0);}
+});
+test('schema 6 adds legacy station layouts without changing rail topology',()=>{
+  const state=createStudyState(),historical=schemaSixState(state),legacy={schemaVersion:6,gameVersion:'0.6.0',state:historical},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.equal(JSON.stringify(legacy),json);assert.deepEqual(loaded.railway,state.railway);assert.deepEqual(loaded.stations,state.stations);
 });
 test('save validation rejects conflicting edge reservations',()=>{
   const state=createStudyState();state.operations.reservations=[{edgeId:'edge:9',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}];assert.throws(()=>serialize(state),/Conflicting/);
