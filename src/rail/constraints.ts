@@ -1,6 +1,6 @@
 import type { CubicCurve, Vec3 } from '../domain/model.js';
-export interface RailConstraints { maxGrade:number; minRadiusM:number; minHorizontalDerivative:number }
-export const standardRail:RailConstraints={maxGrade:0.04,minRadiusM:100,minHorizontalDerivative:0.01};
+export interface RailConstraints { maxGrade:number; minRadiusM:number; minVerticalRadiusM:number; minHorizontalDerivative:number }
+export const standardRail:RailConstraints={maxGrade:0.04,minRadiusM:100,minVerticalRadiusM:500,minHorizontalDerivative:0.01};
 const length=(v:Vec3)=>Math.hypot(v.x,v.y,v.z);
 const subtract=(a:Vec3,b:Vec3):Vec3=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z});
 export function derivative(c:CubicCurve,t:number):Vec3 {
@@ -22,16 +22,19 @@ export function certifyCurve(curve:CubicCurve,limits:RailConstraints=standardRai
     const horizontalMin=Math.hypot(near(dx),near(dz));
     const maxY=Math.max(Math.abs(dy.min),Math.abs(dy.max));
     const horizontalMax=Math.max(...d.map(p=>Math.hypot(p.x,p.z)));
-    const secondMax=Math.max(...q.map(p=>Math.hypot(p.x,p.z)));
+    const secondMax=Math.max(...q.map(p=>Math.hypot(p.x,p.z))),secondYMax=Math.max(...q.map(p=>Math.abs(p.y)));
     // |cross(d,d2)| <= |d| |d2|, intentionally conservative.
     const curvatureUpper=horizontalMin>0?horizontalMax*secondMax/horizontalMin**3:Infinity;
+    const verticalCurvatureUpper=horizontalMin>0?(horizontalMax*secondYMax+maxY*secondMax)/horizontalMin**3:Infinity;
     const scale=2**depth;
-    if(horizontalMin*scale>=limits.minHorizontalDerivative && maxY<=horizontalMin*limits.maxGrade+1e-12 && curvatureUpper<=1/limits.minRadiusM) {leaves++;return;}
+    if(horizontalMin*scale>=limits.minHorizontalDerivative && maxY<=horizontalMin*limits.maxGrade+1e-12 && curvatureUpper<=1/limits.minRadiusM&&verticalCurvatureUpper<=1/limits.minVerticalRadiusM) {leaves++;return;}
     const m=derivative(c,.5),h=Math.hypot(m.x,m.z);
     if(h*scale<limits.minHorizontalDerivative) {reasons.add('Alignment has a cusp or vertical tangent');return;}
-    if(Math.abs(m.y)>h*limits.maxGrade+1e-10) {reasons.add('Grade exceeds 4%');return;}
+    if(Math.abs(m.y)>h*limits.maxGrade+1e-10) {reasons.add(`Grade exceeds ${(limits.maxGrade*100).toFixed(2)}%`);return;}
     const acceleration={x:(q[0]!.x+q[1]!.x)/2,z:(q[0]!.z+q[1]!.z)/2};
     if(Math.abs(m.x*acceleration.z-m.z*acceleration.x)/h**3>1/limits.minRadiusM) {reasons.add('Curve radius below minimum');return;}
+    const verticalAcceleration=(q[0]!.y+q[1]!.y)/2,horizontalAcceleration=(m.x*acceleration.x+m.z*acceleration.z)/h,verticalCurvature=Math.abs(h*verticalAcceleration-m.y*horizontalAcceleration)/(h*h+m.y*m.y)**1.5;
+    if(verticalCurvature>1/limits.minVerticalRadiusM) {reasons.add('Vertical curve radius below minimum');return;}
     if(depth>=16) {reasons.add('Curve cannot certify minimum radius or grade');return;}
     const a=mid(c.p0,c.p1),b=mid(c.p1,c.p2),e=mid(c.p2,c.p3),f=mid(a,b),g=mid(b,e),p=mid(f,g);
     visit({p0:c.p0,p1:a,p2:f,p3:p},depth+1);

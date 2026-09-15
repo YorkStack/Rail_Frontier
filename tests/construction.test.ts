@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { RailFrontierGame } from '../src/application/game.js';
 import { createInitialState } from '../src/content/norway.js';
 import type { CubicCurve, GameState, Vec3 } from '../src/domain/model.js';
-import { pointAt } from '../src/rail/geometry.js';
+import { compileCurve,pointAt } from '../src/rail/geometry.js';
 import { solveHorizontalAlignment } from '../src/rail/alignment-solver.js';
+import {trackClasses} from '../src/content/track-classes.js';
+import {ENGINEERING_RULES_VERSION} from '../src/content/engineering-rules.js';
+import {quoteTrack} from '../src/rail/planner.js';
 import { deserialize, serialize } from '../src/persistence/save.js';
 import { Heightfield } from '../src/world/terrain.js';
 
@@ -72,4 +75,15 @@ test('invalid or stale multi-section alignment is atomic',()=>{
   assert.equal(JSON.stringify(game.snapshot()),before);
   assert.deepEqual(game.dispatch({sequence:1,command:{type:'buildAlignment',curves,from:{position:curves[0]!.p0},to:{position:curves[1]!.p3},expectedRevision:1,quotedCost:cost}}),{ok:false,reason:'Track preview is stale'});
   assert.equal(JSON.stringify(game.snapshot()),before);
+});
+
+test('track class revalidation sets its authoritative speed and exact premium',()=>{
+  const game=new RailFrontierGame(createInitialState(),terrain()),curve=line({x:20,y:0,z:100},{x:480,y:0,z:100}),definition=trackClasses.regional,quote=quoteTrack(compileCurve(curve),terrain(),definition.constraints,definition.costMultiplier),local=game.previewTrack(curve);
+  assert.ok(quote.cost>local.cost);assert.equal(game.dispatch({sequence:1,command:{type:'buildTrack',curve,from:{position:curve.p0},to:{position:curve.p3},expectedRevision:0,quotedCost:quote.cost,trackClassId:'regional',rulesVersion:ENGINEERING_RULES_VERSION}}).ok,true);
+  const edge=game.snapshot().railway.edges[0]!;assert.equal(edge.speedLimitMps,definition.speedLimitMps);assert.equal(game.snapshot().operations.infrastructure[edge.id]!.constructionCost,quote.cost);
+});
+
+test('stale engineering rules reject classed construction atomically',()=>{
+  const game=new RailFrontierGame(createInitialState(),terrain()),curve=line({x:20,y:0,z:100},{x:180,y:0,z:100}),before=JSON.stringify(game.snapshot()),quote=game.previewTrack(curve);
+  assert.deepEqual(game.dispatch({sequence:1,command:{type:'buildTrack',curve,from:{position:curve.p0},to:{position:curve.p3},expectedRevision:0,quotedCost:quote.cost,trackClassId:'local',rulesVersion:ENGINEERING_RULES_VERSION+1}}),{ok:false,reason:'Engineering rules have changed'});assert.equal(JSON.stringify(game.snapshot()),before);
 });

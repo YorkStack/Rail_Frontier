@@ -13,7 +13,7 @@ AWAITING_USER_MODEL_SWITCH=false
 
 # Current status — station-first construction implementation, 2026-09-15
 
-Current milestone: **SOL implementation in progress; GFX-R01/R02, the UX-001 readability foundation and CON-01/02 are complete. CON-03 is next.** A new company now starts by placing oriented stations on open ground, shaping a live spline through optional waypoints and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this rework, not the historically implemented GFX-001–008.
+Current milestone: **SOL implementation in progress; GFX-R01/R02, the UX-001 readability foundation and CON-01–03 are complete. GFX-R03 is next.** A new company now starts by placing oriented stations on open ground, shaping a live horizontal and vertical spline through optional waypoints, choosing a track standard and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this rework, not the historically implemented GFX-001–008.
 
 Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R01/R02 corrected Norwegian roofs and the opening composition, UX-001 added persistent interface scaling and core English/German labels, CON-01 introduced schema 7 station layouts with level platform track and stable connection ports, and CON-02 added live multi-waypoint alignment planning plus atomic construction.
 
@@ -25,7 +25,7 @@ Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses
 - Construction handler with live terrain quote/revision checks, funds, engineering span persistence, terminal tangent checks, endpoint junction splitting, inherited infrastructure cost/upkeep and disconnected interior crossings.
 - Station content, rail/ground placement and deterministic closest town coverage. Six classes now progress from Rural Halt to Major Terminal; atomic upgrades charge only the cost difference, expand catchment/storage/platform capability, recalculate the served town and raise daily upkeep. Purchases and routes reject trains that exceed platform length.
 - Original Norway steam locomotive and coach content, atomic train purchase, connected route validation and route assignment from the train's current station.
-- Physical train simulation with consist mass/power/tractive force, signed grade, service braking, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
+- Physical train simulation with consist mass/power/tractive force, signed grade, service braking, advance braking for slower downstream track, exact station arrival, dwell, shuttle reversal and revision-owned graph caching.
 - Deterministic full-leg reservations prevent opposing trains from entering the same single-track corridor, retain safety for the whole consist until arrival and expose blocked service state.
 - Destination-weighted daily passenger demand, capacity-bound oldest-first boarding, distance-tracked delivery, exactly-once fares, daily maintenance and monthly capital/operating reports.
 - FIN-002 adds live company, month, train and route reports without changing schema 3. The Railway Office separates revenue, operating cost and capital; exposes historical track cost, owned asset value and cash-plus-assets company value; and shows profitability for assigned and unassigned rolling stock.
@@ -36,6 +36,7 @@ Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses
 - The live HUD presents all three campaign goals from authoritative objective progress and marks completed goals directly from persisted completion state.
 - Station placement now begins on open ground. The player picks a location, rotates a live level platform preview, reviews relief, cost and nearby settlement, and confirms a single atomic purchase. Each new station owns two visible rail ports; its internal platform track alone does not activate catchment or train purchase.
 - Players connect available station/network ports with a live cubic spline chain. Left click adds intermediate waypoints, mouse movement updates the ghost, another rail connection finishes the draft, and right click or the visible Undo action removes the latest point. All sections retain terrain, grade, radius and engineering checks and commit as one atomic expense and graph revision.
+- CON-03 separates the vertical profile from horizontal alignment, makes platform approaches level, preserves continuous waypoint grades and certifies grade plus vertical curvature. Local, regional and main-line standards apply progressively tighter grade/radius rules, distinct construction premiums and authoritative operating speeds; versioned engineering rules are revalidated at commit.
 - The railway office now exposes consist purchase, ordered multi-stop shuttle/loop creation and stopped-train assignment through the command gateway. It also shows consist/cargo/service state, town demand, per-route result, reconciled cash/income/outgoings and recent ledger entries.
 - The visible renderer now uses the deterministic 16 km Norway heightfield, production biome, 28,000 instanced trees, expanded settlement dressing, scaled fog/light/camera bounds and the full three-town corridor. The former 4 km scene remains only as an isolated architecture fixture.
 - Every owned train is rendered from the Blender Norway pack. The initial service visibly combines the authored Nord 2-6-0 with two passenger coaches; passenger and freight car placement samples distance behind the locomotive across graph legs, and load replacement hides absent consists.
@@ -60,7 +61,7 @@ Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 128 Node tests pass. Focused real-browser construction and passenger journeys pass: waypoint/undo/port/atomic-build assertions plus the complete station → alignment → consist → route → passenger/mail delivery → save/reload loop. Browser tests now run a static test-mode production bundle, avoiding Vite HMR reconnect reloads during the heavy Three.js scene. The prior 19-case browser baseline remains the wider regression target. Asset validation and the production build pass.
+- 135 Node tests pass. Focused real-browser construction and passenger journeys pass: waypoint/undo/port/atomic-build assertions plus the complete station → alignment → consist → route → passenger/mail delivery → save/reload loop with the new profile and braking logic. Browser tests now run a static test-mode production bundle, avoiding Vite HMR reconnect reloads during the heavy Three.js scene. The prior 19-case browser baseline remains the wider regression target. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -71,7 +72,7 @@ Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 7 plus strict sequential 1→2→3→4→5→6→7 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **128 Node tests pass; the focused CON-02 construction journey and complete passenger/save journey pass in Chrome.** The previous 19-browser-test baseline remains the wider regression target. Type check, Blender asset checks and production build pass.
+- **135 Node tests pass; the focused CON-03 construction journey and complete passenger/save journey pass in Chrome.** The previous 19-browser-test baseline remains the wider regression target. Type check, Blender asset checks and production build pass.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -79,13 +80,13 @@ Runtime checkpoint: `544e28a679a5dd12893eb891852f5887d92439c4`. The runtime uses
 
 The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 next → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Correct gable geometry, settlement entry cameras and readable/scalable core controls are complete. CON-02 now has live multi-waypoint splines, port snapping, undo/cancel and one atomic multi-section build. Complete first-service translations will land with CON-03. The tutorial must be tested against the reworked Norway terrain.
+Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 ✓ → GFX-R03 next → GFX-R04–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Correct gable geometry, settlement entry cameras, readable/scalable core controls, station-first construction and continuous horizontal/vertical planning are complete. Complete first-service translations will land with the tutorial slice. The tutorial must be tested against the reworked Norway terrain.
 
 Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
 
-The user’s construction brief supersedes the earlier track-first UX: standalone stations, visible ports, editable spline alignment, automatic engineering and whole-route purchase are now required. Architecture review is recorded in ASTRA_ESCALATIONS.md. No runtime changes were made. Save schema remains 6 until implementation, with proposed coordinated 6→7→8→9 migrations.
+The user’s construction brief supersedes the earlier track-first UX: standalone stations, visible ports, editable spline alignment, automatic engineering and whole-route purchase are required. Architecture review is recorded in ASTRA_ESCALATIONS.md. CON-01–03 are implemented on schema 7; semantic terrain operations begin with CON-04 and the next coordinated migration.
 
-Read the three active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Continue with CON-03 vertical profiles, track classes and speed anticipation; the requested SOL handoff has been completed.
+Read the three active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Continue with GFX-R03 natural terrain materials; the requested SOL handoff has been completed.
 
 ## Stable contracts
 
@@ -100,7 +101,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-Graphics and first-use UX are not yet visually/product accepted. Readable UI scaling, station-first placement and live waypoint alignment planning are implemented; independent vertical profiles and the hands-on tutorial remain. The full Node suite plus focused construction and passenger browser journeys were rerun for this checkpoint.
+Graphics and first-use UX are not yet visually/product accepted. Readable UI scaling, station-first placement and continuous horizontal/vertical waypoint planning are implemented; semantic earthworks and the hands-on tutorial remain. The full Node suite plus focused construction and passenger browser journeys were rerun for this checkpoint.
 
 The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack, including dedicated farm, timber-yard and sawmill structures.
 
@@ -116,4 +117,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-Next: implement CON-03 vertical profiles, class-specific constraints and speed anticipation. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
+Next: implement GFX-R03 natural terrain materials, then the remaining graphics rework through GFX-R07 before CON-04. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.

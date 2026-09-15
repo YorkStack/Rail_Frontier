@@ -5,6 +5,8 @@ import { certifyCurve, tangentCompatible } from '../rail/constraints.js';
 import { compileCurve, distance, pointAt, type TrackGeometry } from '../rail/geometry.js';
 import { engineeringSpans, quoteTrack } from '../rail/planner.js';
 import { postExpense } from '../simulation/finance.js';
+import {trackClass} from '../content/track-classes.js';
+import {requireEngineeringRulesVersion} from '../content/engineering-rules.js';
 
 type BuildTrack=Extract<GameCommand,{type:'buildTrack'}>;
 type BuildAlignment=Extract<GameCommand,{type:'buildAlignment'}>;
@@ -97,7 +99,8 @@ function commitAnchor(state:GameState,plan:AnchorPlan,createdIds:string[]):Id<'n
 }
 
 export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context)=>{
-  const geometry=compileCurve(command.curve),certificate=certifyCurve(command.curve),quote=quoteTrack(geometry,context.terrain);
+  requireEngineeringRulesVersion(command.rulesVersion);const definition=trackClass(command.trackClassId);
+  const geometry=compileCurve(command.curve),certificate=certifyCurve(command.curve,definition.constraints),quote=quoteTrack(geometry,context.terrain,definition.constraints,definition.costMultiplier);
   if(!certificate.valid||!quote.valid)throw new Error([...certificate.reasons,...quote.reasons].join(' · '));
   if(quote.cost!==command.quotedCost)throw new Error('Track quote has changed');
   if(state.company.cash<quote.cost)throw new Error('Insufficient funds');
@@ -112,7 +115,7 @@ export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context
   const createdIds:string[]=[],from=commitAnchor(state,fromPlan,createdIds),to=commitAnchor(state,toPlan,createdIds);
   if(from===to)throw new Error('Track endpoints must be different nodes');
   const edgeId=allocateId(state,'edge');
-  state.railway.edges.push({id:edgeId,from,to,curve:structuredClone(command.curve),speedLimitMps:22.22,ownerId:state.company.id});
+  state.railway.edges.push({id:edgeId,from,to,curve:structuredClone(command.curve),speedLimitMps:definition.speedLimitMps,ownerId:state.company.id});
   const spans=engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind}));
   state.operations.infrastructure[edgeId]={spans,constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
   postExpense(state,'construction',quote.cost,edgeId,'Track construction');
@@ -122,7 +125,8 @@ export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context
 };
 
 export const buildAlignmentHandler:CommandHandler<BuildAlignment>=(state,command,context)=>{
-  const curves=command.curves.map(curve=>structuredClone(curve)),geometries=curves.map(curve=>compileCurve(curve)),certificates=curves.map(curve=>certifyCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,context.terrain));
+  requireEngineeringRulesVersion(command.rulesVersion);const definition=trackClass(command.trackClassId);
+  const curves=command.curves.map(curve=>structuredClone(curve)),geometries=curves.map(curve=>compileCurve(curve)),certificates=curves.map(curve=>certifyCurve(curve,definition.constraints)),quotes=geometries.map(geometry=>quoteTrack(geometry,context.terrain,definition.constraints,definition.costMultiplier));
   const reasons=[...certificates.flatMap(certificate=>certificate.reasons),...quotes.flatMap(quote=>quote.reasons)];
   if(certificates.some(certificate=>!certificate.valid)||quotes.some(quote=>!quote.valid))throw new Error(reasons.join(' · '));
   for(let index=0;index<curves.length-1;index++) {
@@ -148,7 +152,7 @@ export const buildAlignmentHandler:CommandHandler<BuildAlignment>=(state,command
   let firstEdgeId:Id<'edge'>|null=null;
   for(let index=0;index<curves.length;index++) {
     const edgeId=allocateId(state,'edge'),quote=quotes[index]!;firstEdgeId??=edgeId;
-    state.railway.edges.push({id:edgeId,from:nodes[index]!,to:nodes[index+1]!,curve:curves[index]!,speedLimitMps:22.22,ownerId:state.company.id});
+    state.railway.edges.push({id:edgeId,from:nodes[index]!,to:nodes[index+1]!,curve:curves[index]!,speedLimitMps:definition.speedLimitMps,ownerId:state.company.id});
     state.operations.infrastructure[edgeId]={spans:engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind})),constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
     createdIds.push(edgeId);
   }

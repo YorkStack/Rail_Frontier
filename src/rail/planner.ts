@@ -1,12 +1,13 @@
 import { Heightfield,type Terrain } from '../world/terrain.js';
 import { pointAt,type TrackGeometry } from './geometry.js';
-import { certifyCurve } from './constraints.js';
+import { certifyCurve,type RailConstraints,standardRail } from './constraints.js';
 import { cubicRoots,curveInterval } from '../domain/curve-math.js';
 export interface EngineeringInterval { startM:number;endM:number;kind:'ground'|'bridge'|'tunnel';grade:number;cost:number }
 export interface EngineeringQuote { valid:boolean;reasons:string[];cost:number;maxGrade:number;intervals:EngineeringInterval[] }
 /** Split at terrain triangles, water intersections and engineering classification boundaries. */
-export function quoteTrack(geometry:TrackGeometry,terrain:Terrain):EngineeringQuote {
-  const intervals:EngineeringInterval[]=[],reasons=new Set(certifyCurve(geometry.curve).reasons);
+export function quoteTrack(geometry:TrackGeometry,terrain:Terrain,limits:RailConstraints=standardRail,costMultiplier=1):EngineeringQuote {
+  if(!Number.isFinite(costMultiplier)||costMultiplier<=0)throw new Error('Invalid track cost multiplier');
+  const intervals:EngineeringInterval[]=[],reasons=new Set(certifyCurve(geometry.curve,limits).reasons);
   const breaks=terrain instanceof Heightfield?terrain.curveBreakpoints(geometry.curve):[0,1];
   if(!(terrain instanceof Heightfield))reasons.add('Terrain must provide triangle intersection analysis');
   const parameters=[...breaks,...geometry.samples.map(s=>s.t)];
@@ -35,7 +36,7 @@ export function quoteTrack(geometry:TrackGeometry,terrain:Terrain):EngineeringQu
     const wet=sample.waterLevelM!==null&&sample.elevationM<sample.waterLevelM;
     if(wet&&p.y<sample.waterLevelM!+2-1e-8)reasons.add('Rail lacks 2 m water clearance');
     const kind=clearance < -4?'tunnel':wet||clearance>6?'bridge':'ground',rate=kind==='tunnel'?180000:kind==='bridge'?120000:12000;
-    const startM=distanceAt(t0),endM=distanceAt(t1),amount=Math.round((endM-startM)*(rate+Math.abs(clearance)*1500+sample.forest*4000+sample.rock*8000+sample.urban*20000));
+    const startM=distanceAt(t0),endM=distanceAt(t1),amount=Math.round((endM-startM)*(rate+Math.abs(clearance)*1500+sample.forest*4000+sample.rock*8000+sample.urban*20000)*costMultiplier);
     intervals.push({startM,endM,kind,grade,cost:amount});cost+=amount;
   }
   if(!Number.isSafeInteger(cost))reasons.add('Quote exceeds finance range');
