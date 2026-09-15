@@ -5,6 +5,7 @@ export type RailAnchor={nodeId:Id<'node'>}|{position:Vec3};
 export type GameCommand =
   | { type:'setSpeed'; speed:Speed }
   | { type:'buildTrack'; curve:CubicCurve; from:RailAnchor; to:RailAnchor; expectedRevision:number; quotedCost:number }
+  | { type:'buildAlignment'; curves:CubicCurve[]; from:RailAnchor; to:RailAnchor; expectedRevision:number; quotedCost:number }
   | { type:'placeStation'; classId:string; position:{x:number;z:number}; orientationRad:number; expectedRevision:number; quotedCost:number }
   | { type:'buildStation'; nodeId:Id<'node'>; classId:string }
   | { type:'upgradeStation'; stationId:Id<'station'>; classId:string }

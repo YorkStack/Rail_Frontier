@@ -12,7 +12,7 @@ The Norway vertical slice is playable now. It has the complete build → station
 
 An isolated Arizona terrain study is also available at `http://127.0.0.1:5173/?skip-menu=1&world=arizona`. It previews the versioned 24 km basin, plateau, mesas, canyon, desert materials and procedural vegetation without the Norway HUD. Original Arizona Blender architecture is now planned in GFX-R07; Arizona gameplay and campaign selection follow later in EXP-004/005.
 
-**2026-09-15 implementation update:** [Station-first construction design](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [readable controls, tutorial and progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md) are active in SOL. CON-01/02 now let a player place and rotate a station on suitable terrain before any external track exists. Each new station owns a level platform track and two visible connection ports; catchment assignment and train purchase remain inactive until an external rail connection exists. The next construction slice expands the current two-point alignment into editable spline waypoints and engineering review.
+**2026-09-15 implementation update:** [Station-first construction design](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [readable controls, tutorial and progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md) are active in SOL. CON-01/02 now let a player place and rotate stations before external track exists, start from a glowing rail port, shape a live spline through optional waypoints, undo/cancel and buy the complete alignment in one transaction. Catchment assignment and train purchase remain inactive until an external rail connection exists. CON-03 adds the independent vertical profile, track classes and speed anticipation.
 
 The runtime checkpoint `031261f` passed 120 Node tests and 19 real-Chrome journeys plus TypeScript, asset and production-build validation. Those results do not establish visual quality or intuitive controls. The following screenshots show the earlier build and will be replaced after the new work passes actual visual review.
 
@@ -37,7 +37,7 @@ Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WA
 
 1. Choose **Build station**. Click suitable ground near Sundvik, rotate the platform toward Granli and build. The preview shows the platform footprint, internal track and both connection rings.
 2. Build a second station near Granli and point it along the same corridor.
-3. Choose **Build tracks**, select **Choose two points on the map**, and click the outward connection ring at each station. Review the terrain-aware quote and build the alignment.
+3. Choose **Build tracks**, select **Plan between rail connections**, and click the outward connection ring at the first station. Move the pointer to preview the spline, click open land for optional waypoints, then click the second station's glowing connection. Use **Undo point** or right click to revise, review the quote and build the complete alignment.
 4. Open **Trains & lines**, buy a locomotive with one or more cars, add both stations as ordered stops, create the route and assign the train.
 5. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
 
@@ -58,7 +58,7 @@ npm run build
 npm run preview
 ```
 
-Browser tests require installed Google Chrome (Playwright channel chrome). They start/reuse the local Vite server. Build emits a static site in dist; preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The 640.71 KB Three.js chunk produces Vite's normal size advisory; 160.48 KB gzip, within the current total download budget.
+Browser tests require installed Google Chrome (Playwright channel chrome). They build and serve a static test-mode bundle on port 5173; the normal preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The Three.js chunk produces Vite's normal size advisory and remains within the current compressed download budget.
 
 README screenshots are captured from the running application with `npm run screenshots:readme`. Set `RAIL_FRONTIER_URL` to capture a server other than `http://127.0.0.1:5173`.
 

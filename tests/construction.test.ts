@@ -4,6 +4,7 @@ import { RailFrontierGame } from '../src/application/game.js';
 import { createInitialState } from '../src/content/norway.js';
 import type { CubicCurve, GameState, Vec3 } from '../src/domain/model.js';
 import { pointAt } from '../src/rail/geometry.js';
+import { solveHorizontalAlignment } from '../src/rail/alignment-solver.js';
 import { deserialize, serialize } from '../src/persistence/save.js';
 import { Heightfield } from '../src/world/terrain.js';
 
@@ -52,4 +53,23 @@ test('an interior crossing does not create connectivity without an endpoint anch
   assert.equal(build(game,2,line({x:150,y:0,z:50},{x:150,y:0,z:250})).ok,true);
   assert.equal(game.snapshot().railway.nodes.length,4);
   assert.equal(game.snapshot().railway.edges.length,2);
+});
+
+test('multi-section alignment commits once with smooth waypoint joins',()=>{
+  const game=new RailFrontierGame(createInitialState(),terrain()),points=[{x:20,y:0,z:100},{x:240,y:0,z:130},{x:460,y:0,z:100}],curves=solveHorizontalAlignment(points),quotedCost=curves.reduce((sum,curve)=>sum+game.previewTrack(curve).cost,0);
+  assert.equal(curves.length,2);
+  const result=game.dispatch({sequence:1,command:{type:'buildAlignment',curves,from:{position:points[0]!},to:{position:points[2]!},expectedRevision:0,quotedCost}});
+  assert.equal(result.ok,true);
+  const state=game.snapshot();
+  assert.equal(state.railway.revision,1);assert.equal(state.railway.edges.length,2);assert.equal(state.railway.nodes.length,3);assert.equal(state.company.ledger.length,1);assert.equal(state.company.ledger[0]!.amount,-quotedCost);
+  assert.equal(state.operations.infrastructure[state.railway.edges[0]!.id]!.constructionCost+state.operations.infrastructure[state.railway.edges[1]!.id]!.constructionCost,quotedCost);
+});
+
+test('invalid or stale multi-section alignment is atomic',()=>{
+  const game=new RailFrontierGame(createInitialState(),terrain()),curves=solveHorizontalAlignment([{x:20,y:0,z:100},{x:240,y:0,z:130},{x:460,y:0,z:100}]),cost=curves.reduce((sum,curve)=>sum+game.previewTrack(curve).cost,0),before=JSON.stringify(game.snapshot());
+  const broken=structuredClone(curves);broken[1]!.p0.x+=1;
+  assert.equal(game.dispatch({sequence:1,command:{type:'buildAlignment',curves:broken,from:{position:broken[0]!.p0},to:{position:broken[1]!.p3},expectedRevision:0,quotedCost:cost}}).ok,false);
+  assert.equal(JSON.stringify(game.snapshot()),before);
+  assert.deepEqual(game.dispatch({sequence:1,command:{type:'buildAlignment',curves,from:{position:curves[0]!.p0},to:{position:curves[1]!.p3},expectedRevision:1,quotedCost:cost}}),{ok:false,reason:'Track preview is stale'});
+  assert.equal(JSON.stringify(game.snapshot()),before);
 });

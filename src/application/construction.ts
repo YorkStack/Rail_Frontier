@@ -7,6 +7,7 @@ import { engineeringSpans, quoteTrack } from '../rail/planner.js';
 import { postExpense } from '../simulation/finance.js';
 
 type BuildTrack=Extract<GameCommand,{type:'buildTrack'}>;
+type BuildAlignment=Extract<GameCommand,{type:'buildAlignment'}>;
 type AnchorPlan=
   | {kind:'node';nodeId:Id<'node'>}
   | {kind:'new';position:Vec3}
@@ -120,4 +121,40 @@ export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context
   return {createdIds};
 };
 
-export const constructionCommandHandlers:CommandHandlers={buildTrack:buildTrackHandler};
+export const buildAlignmentHandler:CommandHandler<BuildAlignment>=(state,command,context)=>{
+  const curves=command.curves.map(curve=>structuredClone(curve)),geometries=curves.map(curve=>compileCurve(curve)),certificates=curves.map(curve=>certifyCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,context.terrain));
+  const reasons=[...certificates.flatMap(certificate=>certificate.reasons),...quotes.flatMap(quote=>quote.reasons)];
+  if(certificates.some(certificate=>!certificate.valid)||quotes.some(quote=>!quote.valid))throw new Error(reasons.join(' · '));
+  for(let index=0;index<curves.length-1;index++) {
+    const current=curves[index]!,next=curves[index+1]!;
+    if(distance(current.p3,next.p0)>.001)throw new Error('Alignment sections must be contiguous');
+    if(!tangentCompatible(current,next))throw new Error('Alignment sections must join smoothly');
+  }
+  const cost=quotes.reduce((sum,quote)=>sum+quote.cost,0);
+  if(!Number.isSafeInteger(cost)||cost!==command.quotedCost)throw new Error('Track quote has changed');
+  if(state.company.cash<cost)throw new Error('Insufficient funds');
+  const fromPlan=planAnchor(state,command.from,curves[0]!.p0),toPlan=planAnchor(state,command.to,curves.at(-1)!.p3);
+  if(fromPlan.kind==='node')requireTerminalTangent(state,fromPlan.nodeId,curves[0]!,true);
+  if(toPlan.kind==='node')requireTerminalTangent(state,toPlan.nodeId,curves.at(-1)!,false);
+  if(fromPlan.kind==='split'&&toPlan.kind==='split'&&fromPlan.edgeId===toPlan.edgeId)throw new Error('Both anchors cannot split the same edge');
+  if(state.trains.some(train=>train.motion.path.some(leg=>(fromPlan.kind==='split'&&leg.edgeId===fromPlan.edgeId)||(toPlan.kind==='split'&&leg.edgeId===toPlan.edgeId))))throw new Error('Cannot split track used by a train path');
+  if(state.operations.reservations.some(item=>(fromPlan.kind==='split'&&item.edgeId===fromPlan.edgeId)||(toPlan.kind==='split'&&item.edgeId===toPlan.edgeId)))throw new Error('Cannot split reserved track');
+  const allocations=curves.length*2+10+(fromPlan.kind==='split'?2:0)+(toPlan.kind==='split'?2:0);
+  if(state.nextEntityId+allocations>Number.MAX_SAFE_INTEGER)throw new Error('Invalid ID counter');
+  const createdIds:string[]=[],from=commitAnchor(state,fromPlan,createdIds),to=commitAnchor(state,toPlan,createdIds),nodes:[Id<'node'>,...Id<'node'>[]]=[from];
+  for(let index=0;index<curves.length-1;index++) {const nodeId=allocateId(state,'node');state.railway.nodes.push({id:nodeId,position:structuredClone(curves[index]!.p3)});createdIds.push(nodeId);nodes.push(nodeId);}
+  nodes.push(to);
+  if(new Set(nodes).size!==nodes.length)throw new Error('Alignment nodes must be distinct');
+  let firstEdgeId:Id<'edge'>|null=null;
+  for(let index=0;index<curves.length;index++) {
+    const edgeId=allocateId(state,'edge'),quote=quotes[index]!;firstEdgeId??=edgeId;
+    state.railway.edges.push({id:edgeId,from:nodes[index]!,to:nodes[index+1]!,curve:curves[index]!,speedLimitMps:22.22,ownerId:state.company.id});
+    state.operations.infrastructure[edgeId]={spans:engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind})),constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
+    createdIds.push(edgeId);
+  }
+  postExpense(state,'construction',cost,firstEdgeId!,'Railway alignment construction');
+  state.railway.revision++;
+  return {createdIds};
+};
+
+export const constructionCommandHandlers:CommandHandlers={buildTrack:buildTrackHandler,buildAlignment:buildAlignmentHandler};

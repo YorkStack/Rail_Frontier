@@ -55,6 +55,7 @@ export class FjordRenderer implements WorldRenderer {
   private buildings=new THREE.Group();
   private preview:THREE.Object3D|null=null;
   private marker:THREE.Object3D|null=null;
+  private portHandles:THREE.Object3D|null=null;
   private selectionMarker:THREE.Object3D|null=null;
   private selection:WorldSelection|null=null;
   private inspectionModel:THREE.LOD|null=null;
@@ -281,10 +282,14 @@ export class FjordRenderer implements WorldRenderer {
     const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),material,bars.length);bars.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.computeBoundingSphere();this.infrastructureModels.add(mesh);
   }
   setPreview(geometry:TrackGeometry|null,color='#edc879'):void {
+    this.setAlignmentPreview(geometry?[geometry]:[],color);
+  }
+  setAlignmentPreview(geometries:readonly TrackGeometry[],color='#edc879'):void {
     if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
-    if(!geometry)return;
-    const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));
-    this.preview=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color,depthTest:false}));this.preview.renderOrder=10;this.scene.add(this.preview);
+    if(geometries.length===0)return;
+    const group=new THREE.Group(),material=new THREE.LineBasicMaterial({color,depthTest:false});
+    for(const geometry of geometries){const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material));}
+    group.renderOrder=10;this.preview=group;this.scene.add(group);
   }
   setStationPreview(site:StationSite|null,valid=true):void {
     if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
@@ -298,6 +303,13 @@ export class FjordRenderer implements WorldRenderer {
     if(this.marker){this.scene.remove(this.marker);disposeObject(this.marker);this.marker=null;}
     if(!position)return;
     const group=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(9,.7,8,36),new THREE.MeshBasicMaterial({color,depthTest:false})),pin=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,16,8),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;pin.position.y=8;group.add(ring,pin);group.position.set(position.x,position.y+1.2,position.z);group.renderOrder=11;this.marker=group;this.scene.add(group);
+  }
+  setRailPortHandles(points:readonly Vec3[]):void {
+    if(this.portHandles){this.scene.remove(this.portHandles);disposeObject(this.portHandles);this.portHandles=null;}
+    if(points.length===0)return;
+    const group=new THREE.Group(),material=new THREE.MeshBasicMaterial({color:'#edc879',depthTest:false});
+    for(const point of points){const ring=new THREE.Mesh(new THREE.TorusGeometry(6,.8,8,32),material);ring.rotation.x=Math.PI/2;ring.position.set(point.x,point.y+1.2,point.z);group.add(ring);}
+    group.renderOrder=12;this.portHandles=group;this.scene.add(group);
   }
   setSelection(selection:WorldSelection|null,state:Readonly<GameState>):void {
     this.selection=selection;
