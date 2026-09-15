@@ -29,6 +29,15 @@ npm run dev
 
 Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WASD pans. F follows the train, R restores the regional camera, Space pauses/resumes, and Escape closes the active panel. Map labels and rendered trains/stations open live detail cards. The Operations panel reports cash, monthly results, infrastructure and owned-asset value, plus train and route profitability. The Overlays panel shows station catchments, industry sites and current track reservations. Background tabs pause explicitly. Save/load persists the company to IndexedDB; the company archive can export and import portable `.railfrontier.json` backups.
 
+### First company
+
+1. Choose **Survey track**, select **Choose two points on the map**, and click near two settlements. Review the quote and build the alignment.
+2. Choose **Place station**. Select each free rail endpoint from **Build at**, choose a station class and build. Stations currently require an endpoint or junction; extend the track to create another build point.
+3. Open **Operations**, buy a consist at a station, add at least two ordered stops, create the route and assign the train.
+4. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
+
+The commissioned preview already contains a three-station railway and a passenger train. If every build point is occupied, extend the line before placing another station.
+
 The diagnostics button exposes tree visibility and a clearly identified rendering stress scene. Debug programmatic inspection is available only in development builds. The visible shell is an early playable interface and remains subject to release polish.
 
 ## Validate and build
