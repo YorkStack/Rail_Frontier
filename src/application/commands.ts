@@ -17,9 +17,11 @@ export function validateCommand(state:GameState,command:GameCommand):void {
     case 'setSpeed':
       if(![0,1,2,4,8].includes(command.speed))throw new Error('Invalid simulation speed');
       return;
-    case 'buildTrack': {
+    case 'buildTrack':
+    case 'buildAlignment': {
       if(!Number.isSafeInteger(command.expectedRevision)||command.expectedRevision!==state.railway.revision)throw new Error('Track preview is stale');
       if(!Number.isSafeInteger(command.quotedCost)||command.quotedCost<0)throw new Error('Invalid quoted cost');
+      if(command.type==='buildAlignment'&&(command.curves.length<1||command.curves.length>127))throw new Error('An alignment must contain 1 to 127 sections');
       for(const anchor of [command.from,command.to]) {
         if('nodeId' in anchor&&!state.railway.nodes.some(node=>node.id===anchor.nodeId))throw new Error(`Unknown rail anchor: ${anchor.nodeId}`);
         if('position' in anchor&&!finitePosition(anchor.position))throw new Error('Invalid rail anchor position');
