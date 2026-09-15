@@ -2,6 +2,10 @@
 
 Date: 2026-09-15. Status: **planning complete, implementation not started**. User requested planning with Astra and a pause before implementation with SOL. This plan and [the graphics rework](../art/GRAPHICS_REWORK_PLAN.md) supersede the previous assumption that only minor release polish remained. Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. No code or gameplay behavior changed during this planning pass.
 
+## Station-first revision from the user
+
+The subsequently supplied [construction brief](../construction/USER_CONSTRUCTION_BRIEF.md) changes the core interaction: place and orient a station before external track, start at visible station ports, shape a continuous railway with editable waypoints, inspect automatic engineering, then build atomically. [STATION_TRACK_DESIGN.md](../construction/STATION_TRACK_DESIGN.md) is authoritative for UX-002, construction algorithms, schema sequencing and integration order. The former two-click/track-first recommendation is withdrawn. No implementation of either plan has started.
+
 ## Evidence and objective
 
 The user cannot readily identify how to start, place a station or build track, and must zoom the browser to read menus. [Their station-placement screenshot](../art/graphics-review-baseline/station-placement-ui.png) shows a tiny side panel, an empty-looking location selector, a disabled purchase button and a click on a pale village path. The existing three-step text has not solved the problem.
@@ -45,25 +49,17 @@ Scene: a player uses an ordinary desktop or laptop in daylight and repeatedly lo
 
 Acceptance: first-service and settings screens readable at native 1440×900 and approximately 2560×1360, at 100% and 150% UI scale, plus 200% browser zoom and 390×844 responsive layout. No hidden primary action, overlapping panel, focus loss or truncated cost. Text contrast target 4.5:1 and non-text controls 3:1, measured against the actual panel background. No claim of complete mobile gameplay support solely from a responsive screenshot.
 
-## UX-002 — Build a connection from understandable map targets
+## UX-002 — Station-first planning with editable railway alignments
 
-The beginner action is **Städte verbinden**. Selecting Sundvik in the world, its label or the town list opens **Verbindung planen**. The helper asks for a destination and presents valid station-site candidates near the two towns, with name, coverage and terrain preview. A player chooses each site; these remain drafts until construction succeeds.
+Implement the user’s [station and track design](../construction/STATION_TRACK_DESIGN.md), CON-01–06. **Bauen → Bahnhof** starts a movable, rotatable ghost on suitable terrain, with footprint, approach direction, nearby settlement, catchment and cost. Confirmation purchases the station with its own finite platform track and visible connection handles. A station can exist before external railway and shows **Noch nicht verbunden**.
 
-The first implementation uses a content-authored, certified first corridor with a small set of feasible alternatives, passed through the real planner at the current world version. It is not an unimplemented arbitrary terrain-routing solver. Show the proposed track, endpoints, distance and total estimated track plus station cost. Each commitment has its own explicit cost and confirmation: **Gleise bauen · NOK …**, then each **Bahnhof bauen · NOK …**. Reserve no money invisibly and never create fake graph nodes on town selection.
+Selecting a port starts a draft railway. Left click adds waypoints; dragging refines them; right click removes the last point; Escape cancels without expenditure. Compatible destination station/rail targets finish the draft. Smooth horizontal curves and a separate vertical design produce automatic bridge, tunnel and earthwork previews. Review length, gradient, tightest radius, structures and cost; **Strecke bauen** confirms the entire alignment in one transaction. The detailed plan resolves mouse/camera arbitration, safe snapping, old stations and terrain publication.
 
-Keep **Frei planen** available: click start, click finish, review the line and cost, commit. A sticky one-line prompt says what the next click does. Backspace removes the last draft point; Escape cancels without expenditure. A future curved waypoint editor must reuse curvature/grade certificates and is a later extension, not a dependency for first success.
+A new player can place Station B before drawing, or suspend the route draft to place it at the selected destination town. **Bahnhof bauen** never tells an empty company to build external track first. Lists and keyboard controls offer the same actions as map handles. Village paths remain visually distinct and never acquire rail affordances. Invalid terrain/curves show an actionable reason; no empty selector as the only explanation.
 
-Map feedback:
+The initial waypoint solver and existing hard engineering checks are followed by full cut/fill and corridor search. Balanced is the default design preference; Low Cost/Fast become available when CON-06 genuinely computes alternatives. An authored tutorial corridor is a hint/test fixture, not a substitute for player-directed planning. The new public planner initially connects ports and eligible endpoints; mid-edge junction insertion remains CON-08, with the existing active-edge split protections retained.
 
-- Built railway has rails/sleepers or its clear strategic line; draft railway is dashed with endpoint markers; village paths are textured ground features. A path never gets rail node affordances.
-- In station mode show valid free endpoints with a station glyph and town name, minimum 44 px screen-space hit regions, world-anchored but zoom-independent. Overlapping targets become a chooser; do not silently choose the wrong endpoint.
-- Snap a nearby click to a displayed target using screen distance, then revalidate its world position. Show a ghost station, track alignment, catchment and the exact served town from the same logic used by the command.
-- Clicking a town with no usable railway opens **Hier fehlt noch ein Gleis. Verbindung planen**. With a valid nearby node, show the station preview directly. With an occupied station, open its context instead of offering a duplicate.
-- Clicking the middle of an unsplit track highlights the nearest eligible endpoints and offers **Baupunkt zeigen**. If none fits the town, offer extending/planning track. Arbitrary mid-edge station insertion is explicitly later work: safe splitting must remap routes, motion, reservations, electrification and historical costs atomically. Do not bypass these contracts for a convenient click.
-- The location list has named candidates with distance and service area, not raw node IDs. When no candidate exists, replace the empty selector and irrelevant station-class fields with the actionable explanation and **Gleise bauen**.
-- Report errors at the preview with the next useful action: **Zu weit von Sundvik entfernt → Standort zeigen**, **Zu steil → flachere Variante zeigen**, **Nicht genug Geld → Kosten ansehen**. Terrain invalidity must remain visible without relying on red alone.
-
-Acceptance: reproduce the user's town/path clicks from an empty company and always reach a useful next action. Place both stations with map clicks and, separately, list/keyboard controls. Wrong paths cannot become purchased stations. Current-world funds, coverage and ground rules are rechecked at commit. Drafts survive panel resizing but cannot leak across company replacement.
+Acceptance is CON-01–05’s complete station-first milestone, including several editable waypoints, a valley bridge, a mountain tunnel, atomic build and reload. CON-06 completes automatic routing/modes before the whole planning system is declared done. Retain the map/list and readable-error tests from this UX plan.
 
 ## UX-003 — Locomotive, wagons and service in one understandable flow
 
@@ -87,22 +83,22 @@ Use Norway's actual first corridor and production commands. Add a version-keyed 
 
 | Step | What the player does | Completion evidence |
 | --- | --- | --- |
-| 1. Sundvik kennenlernen | Focus the town and choose “Städte verbinden” | Correct town selection and an active connection draft |
-| 2. Strecke planen | Choose Granli and the marked sites, inspect the quote, build track | Successful construction command and a connected path between the chosen nodes |
-| 3. Bahnhöfe bauen | Preview catchment, build Sundvik, then Granli | Two distinct authoritative stations covering the intended distinct towns |
-| 4. Zug zusammenstellen | Select the locomotive and add passenger coaches, inspect length/cost, buy | The recorded successful purchase contains the selected compatible consist |
-| 5. Linie festlegen | Choose the two stations in order, create the shuttle, assign the train | The selected train references the intended valid route |
-| 6. Erste Fahrt | Resume, follow the train; optionally choose 4×/8× | Actual departure, passenger delivery and fare ledger entry after lesson baseline |
-| 7. Weiterbauen | Save, examine first operating income/cost, choose next goal | Save success reported separately; guidance graduates after service success |
+| 1. Ersten Bahnhof bauen | Focus Sundvik, place and orient its station, inspect catchment/cost and confirm | Successful station purchase with real platform track, no external line required |
+| 2. Zielbahnhof bauen | Choose Granli, place and confirm its station | Second distinct station covering the intended destination |
+| 3. Strecke planen | Select Sundvik’s port, add and move waypoints, snap to Granli | Finished draft with the chosen endpoints and certified continuous geometry |
+| 4. Strecke bauen | Inspect grade, structures and quote, confirm | One committed alignment joining both stations, exactly one track debit |
+| 5. Zug zusammenstellen | Choose locomotive/coaches, inspect length/cost, buy | Recorded purchase of the compatible consist |
+| 6. Linie starten | Set the two stops, create the shuttle, assign train and resume | Selected train references the intended route and departs |
+| 7. Erste Einnahmen | Observe delivery/fares, save and choose the next goal | Actual passenger delivery/fare after lesson baseline; save success reported separately |
 
-One compact coaching panel shows the current action, e.g. **Schritt 3 von 7 · Baue den Bahnhof in Sundvik**, plus one short instruction, **Ort zeigen**, **Hinweis**, **Einführung beenden**. The player performs the real action; “Weiter” cannot substitute for construction/purchase/delivery. Completion acknowledgement may advance narrative only after the evidence is true. Short text, no tutorial wall or obligatory introductory video.
+One compact coaching panel shows the current action, e.g. **Schritt 1 von 7 · Baue den Bahnhof in Sundvik**, plus one short instruction, **Ort zeigen**, **Hinweis**, **Einführung beenden**. The player performs the real action; “Weiter” cannot substitute for construction/purchase/delivery. Completion acknowledgement may advance narrative only after the evidence is true. Short text, no tutorial wall or obligatory introductory video.
 
 Pause during first construction/purchase learning and say so visibly. **Fahrt starten** explains/resumes time; optional faster simulation is explicit and reversible. Never silently change the player's normal speed after finishing. If no passengers are ready, display the next demand update and **Zeit schneller laufen lassen**. Tune the lesson for a short wait using normal demand rules and feasible corridor choice; do not inject secret revenue or bypass motion. If the budget cannot fund the recommended full service plus reasonable operating reserve, revise the explicit new-company starting balance or the corridor, with a content-version decision. No hidden bailout, altered price or endless free refunds.
 
 Technical design:
 
 - New `src/ui/tutorial.ts` implements a versioned reducer over immutable snapshots and successful command results; view state is separate from simulation authority. Extract controller modules from `src/main.ts` so tutorial, build and service UI share actions instead of duplicating handlers.
-- Persist a small optional `learning` record in a versioned save: lesson ID/version, completed stages, bound created entity IDs and initial delivery/ledger baseline. Use the next unused save schema (6 is current; therefore 7 if unchanged at implementation). Migration defaults to no active lesson for older saves. Strictly validate fields and cap collections; never replay saved command payloads.
+- Persist a small optional `learning` record in a versioned save: lesson ID/version, completed stages, bound created entity IDs and initial delivery/ledger baseline. Follow the construction plan’s coordinated migrations: CON-01 uses 6→7, CON-04 uses 7→8, then tutorial state uses 8→9 unless explicitly consolidated before implementation. Migration defaults to no active lesson for older saves. Strictly validate fields and cap collections; never replay saved command payloads.
 - Presentation settings (language, UI scale, “hide guidance”) live in the user settings store. They cannot rewrite ownership, year, unlocks or finances. Failed settings writes keep controls usable.
 - On resume validate bound IDs and current prerequisites. Existing builds can satisfy eligible steps; historical unrelated deliveries cannot complete a fresh lesson. Do not assume raw ID equality between different companies. Imports, continue, new company and renderer replacement clear old transient highlights/subscriptions.
 - Save before lesson suspension through existing archive behavior; browser-storage failure shows a retry/export path. A failed save cannot falsely tick “saved”. Avoid rewards entirely in the first tutorial to remove double-payout risk.
@@ -129,15 +125,15 @@ Optional follow-on lessons: first timber service; improve a crowded station; und
 | Checkpoint | Work | Exit gate |
 | --- | --- | --- |
 | UX-001 | Readable HUD, sizes, settings, vocabulary and DE/EN first-service copy | Native-size and zoom screenshots, keyboard/focus/contrast checks |
-| UX-002 | Contextual town-to-track flow and real station targets | Empty-network path/town-click reproduction and successful purchases |
+| UX-002 | Station-first construction surface, delivered by CON-01–06 | Two standalone stations, editable alignment, structures, atomic build and reload |
 | UX-003 | Consist and service sequence | First service plus failure/retry paths with exactly-once purchases |
 | UX-004 | Stateful hands-on lesson and save migration | Whole lesson, interrupt/reload/import/skip/storage failure journeys |
 | UX-005 | Progressive disclosure and follow-on hooks | Beginner and advanced/old-save access with unchanged technology rules |
 | UX-006 | Integrated acceptance | Independent cold-start walkthrough and full application regression |
 
-Integration sequence with art: **GFX-R01 roofs → GFX-R02 entry cameras → UX-001–003 → GFX-R03–07 → UX-004–005 → GFX-R08–09 + UX-006**. This makes the existing game readable early, then certifies the final tutorial against the new authoritative terrain before art/UX acceptance. Further campaign economy expansion waits for this pass. The existing runtime has none of these new UX checkpoints completed.
+Integration sequence: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. UX-002 is delivered by CON-01–06, not as a second track editor. CON-07 integrates the tutorial and existing consist/service flow. Refer to the construction design for the exact dependencies. Further campaign economy expansion waits for this pass. No new checkpoint is implemented.
 
-Tests: focused reducer/command evidence and migration tests; browser journey from menu through track, both stations, consist, line, departure, delivered passengers/fares, save/reload/resume. Cover tutorial skip, replay in a separate company, accidental double click, rejected stale quote, no free rail point, wrong village path, platform mismatch, no demand yet, 1996 save and full-tools opt-out. Assert meaningful outcomes rather than hardcoded tooltip sequences. Retain all existing economy, dispatch and old-save regressions.
+Tests: focused reducer/command evidence and migration tests; browser journey from menu through both stations, editable track planning/build, consist, line, departure, delivered passengers/fares, save/reload/resume. Cover tutorial skip, replay in a separate company, accidental double click, rejected stale quote, no free rail point, wrong village path, platform mismatch, no demand yet, 1996 save and full-tools opt-out. Assert meaningful outcomes rather than hardcoded tooltip sequences. Retain all existing economy, dispatch and old-save regressions.
 
 Manual acceptance must be separate from automation: a person unfamiliar with this UI attempts the first railway without external coaching. Record time to first track/station/departure/revenue, hesitations and recovery. Target no required browser zoom and no unexplained dead end. If no independent tester is available, report that gate as pending; an automated guided run is not evidence of intuitiveness. Continue useful engineering without marking this product gate passed.
 

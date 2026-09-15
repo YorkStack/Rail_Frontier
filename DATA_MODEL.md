@@ -1,5 +1,7 @@
 # Data model
 
+**Planned extension, 2026-09-15:** See [station-first station and alignment model](docs/construction/STATION_TRACK_DESIGN.md). It specifies the next implementation and coordinated schema changes; the implemented contracts described below remain the current runtime until those slices land.
+
 Code authority: `src/domain/model.ts`; runtime save schema: `src/persistence/save.ts`. Operations and content contracts also live in src/domain/operations.ts. Schema 6 is implemented; contracts remain pre-release rather than a released save API.
 
 | Record | Identity/reference | Authority |
