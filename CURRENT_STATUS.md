@@ -7,13 +7,13 @@ GRAPHICS_IMPLEMENTATION_COMPLETE=false
 CONSTRUCTION_DESIGN_COMPLETE=true
 CONSTRUCTION_IMPLEMENTATION_STARTED=false
 UX_PLANNING_COMPLETE=true
-UX_IMPLEMENTATION_STARTED=false
+UX_IMPLEMENTATION_STARTED=true
 UX_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_MODEL_SWITCH=false
 
 # Current status — graphics and onboarding rework handoff, 2026-09-15
 
-Current milestone: **SOL implementation in progress; GFX-R01 and GFX-R02 are implemented and verified.** The user rejected the previous graphics and found basic construction/menu interaction unclear. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this new rework, not the historically implemented GFX-001–008.
+Current milestone: **SOL implementation in progress; GFX-R01/R02 are complete and UX-001 readability work is active.** The user rejected the previous graphics and found basic construction/menu interaction unclear. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this new rework, not the historically implemented GFX-001–008.
 
 Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pass changed only documentation and preserved user screenshots; it did not fix runtime graphics or controls. The actual renderer remains Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 was verified and used for read-only exported-roof inspection. Preserve completed Norway gameplay and schema-6 contracts.
 
@@ -60,7 +60,7 @@ Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pa
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 120 Node tests and 19 real browser tests pass. Asset validation and the production build pass.
+- 122 Node tests and 19 real browser tests pass. Asset validation and the production build pass.
 
 ## Completed work
 
@@ -71,7 +71,7 @@ Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pa
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 6 plus strict sequential 1→2→3→4→5→6 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **120 Node tests and 19 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both Norway world versions, the Arizona study, the full gameplay slice, graphics composition and resource disposal.
+- **122 Node tests and 19 browser tests pass**. Type check, Blender asset checks and production build pass. Browser tests fail on console warnings and exercise both Norway world versions, the Arizona study, the full gameplay slice, graphics composition and resource disposal.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -79,7 +79,7 @@ Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. This planning pa
 
 The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Correct gable geometry now ships in every Norwegian pitched-roof asset, with ridge/eave validation across both LODs. Campaign sessions now open at a settlement-scale entry camera; regional overview remains explicit. Arizona has a close settlement entry, clustered blockouts, correct full-world shadow reach and an honest landscape-study panel with camera controls and a Norway return link. The next task is UX-001: readable controls and scale settings. The tutorial must be tested against the reworked Norway terrain.
+Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 ◐ → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Correct gable geometry and settlement entry cameras are complete. UX-001 now has persistent 100/125/150% interface size, browser-language detection, an English/German core-control dictionary, 14–16 px task text, 44 px targets, scrollable task panels and a labelled compact toolbar. The large marketing headline collapses during play. Complete first-service translations will land with the replacement CON-01–03 station-first flow so obsolete track-first copy is not expanded. The tutorial must be tested against the reworked Norway terrain.
 
 Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
 

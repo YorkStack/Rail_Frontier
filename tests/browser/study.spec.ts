@@ -17,7 +17,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   await page.getByRole('button',{name:'8×',exact:true}).click();await page.waitForFunction(tick=>window.__railProbe.snapshot().tick>tick+50,saved.tick);
   await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Pause',exact:true}).click();await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed');
   expect(await page.evaluate(()=>window.__railProbe.snapshot())).toEqual(saved);
-  await page.getByRole('button',{name:'Survey track'}).click();await expect(page.getByRole('region',{name:'Alignment study'})).toBeVisible();
+  await page.getByRole('button',{name:'Build tracks'}).click();await expect(page.getByRole('region',{name:'Alignment study'})).toBeVisible();
   await page.getByLabel('Track elevation').fill('1');await expect(page.locator('#quote-valid')).toContainText('clearance');
   await page.getByLabel('Track elevation').fill('15');await expect(page.locator('#quote-valid')).toContainText('Feasible');
   await page.getByLabel('Corridor').selectOption('tunnel');await expect(page.locator('#quote-kind')).toContainText('tunnel');
@@ -25,7 +25,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   await page.getByRole('button',{name:'Close alignment study'}).click();
   await page.getByRole('button',{name:'Follow train'}).click();await page.waitForFunction(()=>window.__railProbe.stats().lod===0);
   mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/train-close.png'});
-  await page.getByRole('button',{name:'Regional view'}).click();await page.waitForFunction(()=>window.__railProbe.stats().lod===1);
+  await page.getByRole('button',{name:'Overview'}).click();await page.waitForFunction(()=>window.__railProbe.stats().lod===1);
   await page.screenshot({path:'artifacts/evidence/norway-desktop.png'});
   await page.getByRole('button',{name:/Sundvik Harbour/}).click();await page.screenshot({path:'artifacts/evidence/station-close.png'});
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/evidence/norway-mobile.png'});
