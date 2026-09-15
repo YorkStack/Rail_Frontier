@@ -6,6 +6,7 @@ import {createInitialState} from '../src/content/norway.js';
 import {Heightfield} from '../src/world/terrain.js';
 import type {CampaignDefinition,GameState} from '../src/domain/model.js';
 import {norwayBiome} from '../src/world/biome.js';
+import type {WorldGenerator} from '../src/world/generator.js';
 
 class FakeRenderer implements PreparedWorldRenderer {
   disposed=false;
@@ -19,7 +20,7 @@ class FakeFactory implements WorldRendererFactory {
   create(_terrain:Heightfield,_state:GameState,entry:CampaignContent){this.presentations.push(entry.presentation.id);const renderer=new FakeRenderer(this.failNext);this.failNext=false;this.created.push(renderer);return renderer;}
   dispose(){this.disposed=true;}
 }
-const content=(campaign:CampaignDefinition):CampaignContent=>({campaign,presentation:{id:'test',rendererId:'test',assetManifestUrl:'/test.json',biome:norwayBiome},validateWorld(world){if(world.widthM!==campaign.world.widthM)throw new Error('wrong width');},generateWorld(){return new Heightfield(2,2,campaign.world.widthM,new Float64Array(4));}});
+const content=(campaign:CampaignDefinition):CampaignContent=>{const worldGenerator:WorldGenerator={id:'test',biomeId:campaign.world.biomeId,version:campaign.world.generatorVersion,landforms:{anchors:{},corridorX:()=>0,waterCrossSection:()=>({westBankX:null,eastBankX:null}),waterfall:null},validate(world){if(world.widthM!==campaign.world.widthM)throw new Error('wrong width');},elevation:()=>0,generate(){return new Heightfield(2,2,campaign.world.widthM,new Float64Array(4));}};return {campaign,presentation:{id:'test',rendererId:'test',assetManifestUrl:'/test.json',biome:norwayBiome},worldGenerator,validateWorld:worldGenerator.validate};};
 
 test('session host stages a paused replacement before disposing the live renderer',async()=>{
   const initial=createInitialState(),factory=new FakeFactory(),host=new ActiveSessionHost(new ContentRegistry([content({id:initial.campaignId,version:initial.campaignVersion,title:'test',startingYear:1900,startingCash:1,world:initial.world,towns:[],objectives:[]})]),factory);
@@ -46,5 +47,10 @@ test('content registry rejects unknown and modified world definitions',()=>{
 
 test('content registry rejects a presentation for a different biome',()=>{
   const initial=createInitialState(),entry=content({id:initial.campaignId,version:initial.campaignVersion,title:'test',startingYear:1900,startingCash:1,world:{...initial.world,biomeId:'desert'},towns:[],objectives:[]});
-  assert.throws(()=>new ContentRegistry([entry]),/presentation biome does not match/);
+  assert.throws(()=>new ContentRegistry([entry]),/content does not match/);
+});
+
+test('content registry composes a synthetic world generator without central dispatch',()=>{
+  const initial=createInitialState(),campaign={id:'synthetic-world',version:1,title:'Synthetic',startingYear:1900,startingCash:1,world:initial.world,towns:[],objectives:[]},entry=content(campaign),registry=new ContentRegistry([entry]),resolved=registry.resolve({campaignId:campaign.id,campaignVersion:campaign.version,world:campaign.world});
+  assert.equal(resolved.worldGenerator.id,'test');assert.equal(resolved.worldGenerator.generate(campaign.world).widthM,campaign.world.widthM);
 });

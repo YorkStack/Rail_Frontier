@@ -30,11 +30,13 @@ Acceptance: presentation biome must match the versioned world; renderer selectio
 
 ### EXP-002 — Reusable terrain feature contract
 
-Status: next. Replace generator-number dispatch and Norway-only helper exports with registered `WorldGenerator` content. Define deterministic height, water, vegetation, rock, urban and build-cost masks plus named landform anchors for cameras, settlements and industry placement. Move fjord-only shoreline/corridor rules behind the Norway generator. Keep the exact V1/V2 fingerprints and old-save compatibility.
+Status: complete. `WorldGenerator` is a content-owned contract for version/biome validation, elevation and complete heightfield generation. Its landform record exposes named anchors, the principal rail corridor, cross-sectional water banks and an optional waterfall. Norway V1 and V2 implement that contract separately; the central generator-number switch and compatibility exports are gone. Terrain height plus water, forest, rock and urban/construction-cost masks retain their exact generated values. The renderer and bridge survey consume the resolved campaign generator instead of importing Norway shoreline, valley or fjord helpers.
 
-Acceptance: adding a synthetic test biome requires no edit to a central `if (generatorVersion)` switch; Norway generation and construction quotes are byte-for-byte stable; renderer inputs contain no Norway helper import.
+Acceptance: adding a synthetic test biome requires no edit to a central `if (generatorVersion)` switch; Norway generation fingerprints and construction quotes are byte-for-byte stable; renderer terrain composition contains no Norway landform-helper import. Covered by synthetic registry composition, landform-contract and existing V1/V2 fingerprint tests.
 
 ### EXP-003 — Arizona terrain study
+
+Status: next.
 
 Create a separately versioned 24 km test world with a broad basin, plateau rim, two mesas, one tributary canyon, a long low-grade railway shelf and at least three viable settlement sites. Author layered rock/soil materials and procedural scrub, grass, cactus and dry-tree placement. Establish fixed regional, canyon, settlement, industry and train cameras before Blender asset work.
 

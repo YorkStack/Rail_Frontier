@@ -10,7 +10,7 @@ Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**
 
 The Norway vertical slice is playable now. It has the complete build → station → consist → route → delivery → revenue loop, passenger, mail and timber traffic, town growth, objectives, save archives and safe single-track dispatch. The next public-alpha step is release hardening: publish the static build, define the supported browser/device matrix, keep permanent released-save upgrade fixtures and complete a focused onboarding/accessibility/manual-QA pass. Arizona and Great River are later content expansions and do not block a first Norway release.
 
-The latest checkpoint passes 113 Node tests and 18 real-Chrome journeys in addition to TypeScript, asset and production-build validation.
+The latest checkpoint passes 115 Node tests and 18 real-Chrome journeys in addition to TypeScript, asset and production-build validation.
 
 | Norwegian fjord landscape and live HUD | Steam passenger service |
 | --- | --- |

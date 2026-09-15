@@ -10,7 +10,7 @@ export interface WorldRendererFactory<Renderer extends PreparedWorldRenderer=Pre
   create(terrain:Heightfield,state:GameState,content:CampaignContent):Renderer;
   dispose():void;
 }
-interface ActiveSession<Renderer extends PreparedWorldRenderer> {game:RailFrontierGame;terrain:Heightfield;renderer:Renderer}
+interface ActiveSession<Renderer extends PreparedWorldRenderer> {game:RailFrontierGame;terrain:Heightfield;renderer:Renderer;content:CampaignContent}
 
 /** Builds candidate sessions off-screen and publishes only fully prepared content. */
 export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWorldRenderer> {
@@ -20,6 +20,7 @@ export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWo
   get game():RailFrontierGame {if(!this.active)throw new Error('Session host is not initialized');return this.active.game;}
   get renderer():Renderer {if(!this.active)throw new Error('Session host is not initialized');return this.active.renderer;}
   get terrain():Heightfield {if(!this.active)throw new Error('Session host is not initialized');return this.active.terrain;}
+  get content():CampaignContent {if(!this.active)throw new Error('Session host is not initialized');return this.active.content;}
   async initialize(initial:GameState):Promise<void> {if(this.active)throw new Error('Session host is already initialized');this.active=await this.prepare(initial,1);}
   async replace(candidate:GameState):Promise<Readonly<GameState>> {
     if(!this.active)throw new Error('Session host is not initialized');
@@ -34,8 +35,8 @@ export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWo
   }
   dispose():void {this.active?.renderer.dispose();this.active=null;this.renderers.dispose();}
   private async prepare(value:GameState,initialSpeed:0|1):Promise<ActiveSession<Renderer>> {
-    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),terrain=content.generateWorld(state.world),game=new RailFrontierGame(state,terrain,{initialSpeed}),renderer=this.renderers.create(terrain,state,content);
-    try {await renderer.loadAssets();return {game,terrain,renderer};}
+    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),terrain=content.worldGenerator.generate(state.world),game=new RailFrontierGame(state,terrain,{initialSpeed}),renderer=this.renderers.create(terrain,state,content);
+    try {await renderer.loadAssets();return {game,terrain,renderer,content};}
     catch(error){renderer.dispose();throw error;}
   }
 }

@@ -1,21 +1,23 @@
-import type { WorldDefinition } from '../domain/model.js';
-import { Heightfield } from './terrain.js';
-import {generateNorwayV1World,norwayV1CorridorX,norwayV1Elevation,norwayV1ShorelineX} from './norway-v1.js';
-import {generateNorwayV2World,norwayV2Elevation} from './norway-v2.js';
+import type {WorldDefinition} from '../domain/model.js';
+import type {Heightfield} from './terrain.js';
 
-// Compatibility exports for callers that still render V1-specific landmarks.
-export const norwayShorelineX=norwayV1ShorelineX;
-export const norwayCorridorX=norwayV1CorridorX;
-export const norwayElevation=norwayV1Elevation;
-
-export function generateWorld(definition:WorldDefinition):Heightfield {
-  if(definition.generatorVersion===1)return generateNorwayV1World(definition);
-  if(definition.generatorVersion===2)return generateNorwayV2World(definition);
-  throw new Error('Unsupported world generator');
+export interface WorldPoint {readonly x:number;readonly z:number}
+export interface WaterCrossSection {readonly westBankX:number|null;readonly eastBankX:number|null}
+export interface WaterfallLandmark {readonly z:number;readonly bank:'west'|'east';readonly offsetFromBankM:number}
+export interface WorldLandforms {
+  readonly anchors:Readonly<Record<string,WorldPoint>>;
+  corridorX(z:number):number;
+  waterCrossSection(z:number):WaterCrossSection;
+  readonly waterfall:WaterfallLandmark|null;
 }
 
-export function norwayElevationForWorld(definition:WorldDefinition,x:number,z:number):number {
-  if(definition.generatorVersion===1)return norwayV1Elevation(x,z,definition.seed);
-  if(definition.generatorVersion===2)return norwayV2Elevation(x,z,definition.seed);
-  throw new Error('Unsupported world generator');
+/** Versioned world content. New biomes register an implementation with CampaignContent. */
+export interface WorldGenerator {
+  readonly id:string;
+  readonly biomeId:string;
+  readonly version:number;
+  readonly landforms:WorldLandforms;
+  validate(definition:WorldDefinition):void;
+  elevation(x:number,z:number,seed:number):number;
+  generate(definition:WorldDefinition):Heightfield;
 }
