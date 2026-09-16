@@ -1,6 +1,6 @@
 # Graphics rework — Norway and Arizona
 
-Date: 2026-09-16. **Planning complete; SOL implementation active. GFX-R01–03 are complete; GFX-R04 is next.**
+Date: 2026-09-16. **Planning complete; SOL implementation active. GFX-R01–03 and the Norway portion of GFX-R04 are complete; Arizona vegetation is next.**
 
 This is the active graphics handoff. It supersedes the visual acceptance claims of GFX-001–008 and EXP-003, while preserving those checkpoints as engineering history. The user rejected the current appearance: plain terrain, toy trees, missing visible cliffs/waterfalls, box buildings in Arizona, inverted Norwegian roofs and a board-like opening view. Passing tests and counting assets did not establish acceptable art quality.
 
@@ -81,6 +81,8 @@ Use world-space blending by slope, landform/material region and visual moisture.
 Define original material atlases at 512²/1024² to start, normal/roughness maps in linear space and base color in sRGB. Grain is subordinate to silhouette. Calibrate through a neutral gray/wood/rock swatch scene before landscape tinting. Acceptance: close soil/rock and distant slope show readable material regions without repetitive waves or crawling; both dev and production builds load the intended maps. Preserve old-world numeric fingerprints.
 
 ## GFX-R04 — Camera-dependent vegetation with credible crowns
+
+**Norway runtime checkpoint: `44892b7`; Arizona portion remains open.** Deterministic scenery identity no longer contains an RNG-assigned LOD. Two bounded instance buffers per asset retain every tree while camera distance and hysteresis select detail; understorey alone is distance-culled. Diagnostics distinguish generated, detailed and simplified tree totals. Local Blender 4.0.2 regenerated asymmetric pine, narrow spruce, birch and alder crowns with visible branches/forks. The fixed forest camera reports 293 detailed plus 27,707 simplified trees; regional view reports all 28,000 simplified, with a clean console and no context loss. Arizona still needs habitat-aware grouping and equivalent camera-dependent diagnostics before GFX-R04 is complete.
 
 Remove RNG-assigned visual LOD from scenery identity. Generate deterministic species, transform and habitat first; choose detail each frame or on camera cell changes using projected size/distance. Start with 256–512 m spatial chunks, cull invisible chunks, and select near/mid/far bands with hysteresis. Do not render 28,000 detailed trees at once, or switch the entire forest when camera-to-target distance crosses 550 m. Far crowns must retain coherent canopy coverage instead of dropping two thirds of visible trees to thin sticks.
 
