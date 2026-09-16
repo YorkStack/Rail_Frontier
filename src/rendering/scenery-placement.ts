@@ -4,7 +4,7 @@ import {SeededRandom} from '../world/random.js';
 import {compileGraph} from '../rail/graph.js';
 
 export type SceneryCategory='tree'|'understorey'|'rock';
-export interface SceneryPlacement {id:string;assetId:string;category:SceneryCategory;x:number;y:number;z:number;rotationY:number;scale:number;lod:0|1}
+export interface SceneryPlacement {id:string;assetId:string;category:SceneryCategory;x:number;y:number;z:number;rotationY:number;scale:number}
 export interface SceneryTargets {trees:number;understorey:number;rocks:number}
 const defaults:SceneryTargets={trees:28000,understorey:3200,rocks:1800};
 const cellKey=(x:number,z:number,size:number)=>`${Math.floor(x/size)}:${Math.floor(z/size)}`;
@@ -43,19 +43,19 @@ export function generateNorwayScenery(terrain:Heightfield,state:Pick<GameState,'
     for(let attempt=0;accepted<count&&attempt<count*110;attempt++){
       const x=1+random.next()*(terrain.widthM-2),z=1+random.next()*(terrain.depthM-2),roll=random.next(),choice=random.next(),scaleRoll=random.next(),lodRoll=random.next(),rotationRoll=random.next(),sample=terrain.sample(x,z),plane=terrain.planeAt(x,z),slope=Math.hypot(plane.dx,plane.dz),moisture=Math.sin(x*.0013-z*.0019)+Math.sin((x+z)*.00041),patch=.5+.5*Math.sin(x*.0021+Math.sin(z*.00071)*2.4)*Math.cos(z*.0017-x*.00033),rockPatch=.5+.5*Math.sin(x*.0037-z*.0011+Math.sin(z*.0009)*1.7)*Math.cos(z*.0029+x*.0004);
       if(sample.elevationM<=1.6||closeToTrack(x,z,tracks,category==='rock'?16:13)||closeToOperations(x,z,state))continue;
-      let assetId='',scale=1,lod:0|1=1,clearanceCell=5;
+      let assetId='',scale=1,clearanceCell=5;
       if(category==='tree'){
         if(sample.elevationM>810||slope>.78||sample.forest<.18||patch<.34||roll>Math.min(.96,sample.forest*.7+patch*.44))continue;
-        assetId=treeAsset(sample.elevationM,sample.rock,moisture,choice);scale=.68+scaleRoll*.72;lod=lodRoll<.018?0:1;
+        assetId=treeAsset(sample.elevationM,sample.rock,moisture,choice);scale=.68+scaleRoll*.72;
       }else if(category==='understorey'){
         if(sample.elevationM>650||slope>.48||sample.forest<.24||patch<.28||roll>.72)continue;
-        assetId=moisture>.05?'norway-fern':'norway-shrub';scale=.55+scaleRoll*.9;lod=lodRoll<.035?0:1;clearanceCell=4;
+        assetId=moisture>.05?'norway-fern':'norway-shrub';scale=.55+scaleRoll*.9;clearanceCell=4;
       }else{
         if(sample.elevationM>1100||slope>.98||sample.rock<.2||rockPatch<.46||roll>Math.min(.9,sample.rock*.92+slope*.45))continue;
-        assetId=choice<.24?'norway-boulder-a':choice<.48?'norway-boulder-b':choice<.66?'norway-outcrop-a':choice<.82?'norway-outcrop-b':'norway-scree';scale=.7+scaleRoll*1.15;lod=lodRoll<.08?0:1;clearanceCell=16;
+        assetId=choice<.24?'norway-boulder-a':choice<.48?'norway-boulder-b':choice<.66?'norway-outcrop-a':choice<.82?'norway-outcrop-b':'norway-scree';scale=.7+scaleRoll*1.15;clearanceCell=16;
       }
       const occupancy=cellKey(x,z,clearanceCell);if(occupied.has(`${category}:${occupancy}`))continue;occupied.add(`${category}:${occupancy}`);
-      result.push({id:`${category}:${seedOffset+attempt}`,assetId,category,x,y:sample.elevationM,z,rotationY:rotationRoll*Math.PI*2,scale,lod});accepted++;
+      void lodRoll;result.push({id:`${category}:${seedOffset+attempt}`,assetId,category,x,y:sample.elevationM,z,rotationY:rotationRoll*Math.PI*2,scale});accepted++;
     }
     if(accepted<count)throw new Error(`Could place only ${accepted}/${count} ${category} scenery records`);
   };
