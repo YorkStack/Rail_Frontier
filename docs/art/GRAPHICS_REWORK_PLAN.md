@@ -1,12 +1,12 @@
 # Graphics rework — Norway and Arizona
 
-Date: 2026-09-15. **Planning complete; implementation pending the user's switch to SOL.**
+Date: 2026-09-16. **Planning complete; SOL implementation active. GFX-R01–03 are complete; GFX-R04 is next.**
 
 This is the active graphics handoff. It supersedes the visual acceptance claims of GFX-001–008 and EXP-003, while preserving those checkpoints as engineering history. The user rejected the current appearance: plain terrain, toy trees, missing visible cliffs/waterfalls, box buildings in Arizona, inverted Norwegian roofs and a board-like opening view. Passing tests and counting assets did not establish acceptable art quality.
 
 ## Checkpoint and resume order
 
-- Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`, on both `main` and `implementation/passenger-slice` at this review.
+- Runtime checkpoint: `82e65d89069fc34f3bec7f8ac8f00b8052ccdbfe`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
 - EXP-003 is a technical Arizona terrain prototype, **not a finished or playable Arizona campaign**. Its hidden HUD, empty railway and primitive buildings must be described accordingly.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
@@ -71,6 +71,8 @@ Replace the green/brown blanket haze with region-specific sky and distance fog; 
 Files: presentation/registry, camera presets, renderer camera/light handling, `main.ts`, scoped UI CSS. Acceptance: cold launch, new game and resume on 1440×900, approximately 2560×1360 and 390×844; no overlapping essential HUD or masked focal building; visual reference cards for entry and regional cameras.
 
 ## GFX-R03 — Natural terrain materials
+
+**Status: complete at runtime checkpoint `82e65d8`.** Original deterministic 512² color/normal/roughness atlases supply four families per biome. Heightfield forest, rock and urban masks plus slope drive regions; steep rock is triplanar, macro variation is non-periodic, Arizona strata use irregular widths and all color-space/mipmap/anisotropy settings are explicit. Six fixed Norway/Arizona Chrome views passed shader-console, terrain-agreement and geometry/call budgets after visual review; world fingerprints and authoritative elevations remain unchanged.
 
 Replace the periodic sine texture with original rock, gravel/soil, meadow and forest-floor families for Norway; sandstone/limestone, talus, dusty soil and compacted street material for Arizona. Separate macro variation (roughly 100–800 m), patches (8–60 m) and micro detail (0.2–3 m). These are art starting scales. Avoid regular checker grids, equal-width color contours and grain large enough to look like fields.
 
