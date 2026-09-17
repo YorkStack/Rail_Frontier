@@ -12,9 +12,9 @@ The Norway vertical slice is playable now. It has the complete build → station
 
 An isolated Arizona terrain study is also available at `http://127.0.0.1:5173/?skip-menu=1&world=arizona`. It previews the versioned 24 km basin, plateau, mesas, canyon, desert materials and procedural vegetation without the Norway HUD. Original Arizona Blender architecture is now planned in GFX-R07; Arizona gameplay and campaign selection follow later in EXP-004/005.
 
-**2026-09-16 implementation update:** CON-01–03 deliver station-first placement and continuous horizontal/vertical alignment planning. GFX-R03 replaces periodic terrain waves with original Norway and Arizona material atlases. The Norway portion of GFX-R04 retains all 28,000 generated trees, chooses detail around the camera with hysteresis and adds richer local-Blender pine, narrow spruce, birch and alder crowns. Arizona habitat vegetation completes GFX-R04 next.
+**2026-09-17 implementation update:** CON-01–03 deliver station-first placement and continuous horizontal/vertical alignment planning. GFX-R03 replaces periodic terrain waves with original material atlases. GFX-R04 retains all 28,000 Norway trees, selects richer local-Blender crowns around the camera, and groups 10,500 Arizona shrubs, grasses, saguaros, junipers and mesquites into terrain-aware habitat patches with near/far detail.
 
-Runtime checkpoint `44892b7` passes the focused scenery browser test, TypeScript, Blender asset validation and the test build. The forest-edge proof renders 293 detailed plus 27,707 simplified trees; the regional proof retains all 28,000 as simplified silhouettes. The following screenshots still show an earlier broad build and will be replaced after the remaining Arizona vegetation and landform tasks.
+Runtime checkpoint `b92f8d2` passes focused Norway and Arizona scenery checks, TypeScript, asset validation and test builds. The forest-edge proof renders 293 detailed plus 27,707 simplified trees; regional view retains all 28,000. Arizona has a dedicated close vegetation review camera. The following screenshots will be replaced after GFX-R05–07 landforms and architecture.
 
 | Norwegian fjord landscape and live HUD | Steam passenger service |
 | --- | --- |
