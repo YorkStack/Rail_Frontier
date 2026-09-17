@@ -1,17 +1,17 @@
 # Graphics rework — Norway and Arizona
 
-Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–05 are complete; GFX-R06 is next.**
+Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–06 are complete; GFX-R07 is next.**
 
 This is the active graphics handoff. It supersedes the visual acceptance claims of GFX-001–008 and EXP-003, while preserving those checkpoints as engineering history. The user rejected the current appearance: plain terrain, toy trees, missing visible cliffs/waterfalls, box buildings in Arizona, inverted Norwegian roofs and a board-like opening view. Passing tests and counting assets did not establish acceptable art quality.
 
 ## Checkpoint and resume order
 
-- Runtime checkpoint: `602be58b488c56f832549f739b21f2d790db6725`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
+- Runtime checkpoint: `603bffec927aacbea4bdb670d71f693f696de84d`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
 - EXP-003 is a technical Arizona terrain prototype, **not a finished or playable Arizona campaign**. Its hidden HUD, empty railway and primitive buildings must be described accordingly.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
 - Combined order after the user switches model and asks to continue: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. The [station-first construction design](../construction/STATION_TRACK_DESIGN.md) supersedes the initial UX-002 proposal; see also [ONBOARDING_AND_CONTROLS_PLAN.md](../ux/ONBOARDING_AND_CONTROLS_PLAN.md). SOL is an LLM selection; Three.js remains the renderer.
-- This planning turn changes documentation and preserves the user's screenshots only. It does not regenerate assets, change runtime code or claim new implementation test passes.
+- Implementation checkpoints update this plan only after the matching runtime, fixed browser views and regression tests pass.
 
 ## Evidence and diagnosed causes
 
@@ -107,6 +107,8 @@ Author a watercourse descriptor with upstream channel, lip, falling segment, plu
 Acceptance: neutral clay terrain already reads as a fjord with rock walls; waterfall silhouette and outlet are visible from a named landmark view and detectable from a settlement approach. All settlement pads and commissioned/empty-company build journeys pass against V3, and old worlds retain exact numeric samples. Add cliff, wet-rock and waterfall close screenshots; availability in the asset list is not evidence of visibility.
 
 ## GFX-R06 — Arizona escarpments and geological variety
+
+**Status: complete at runtime checkpoint `603bffe`.** Arizona V2 is now the default terrain study while V1 remains registered with its unchanged fingerprint. The authoritative 24 km heightfield adds irregular stepped mesas, a broken plateau rim, talus fans and connected main/north/south drainage instead of the V1 straight trench. Dustier sandstone families and eight revised cameras expose the basin, canyon branches, escarpments, wash and settlement scale. Three build pads remain flat; both long corridors remain feasible and the northern route records an 809.081 m bridge with a NOK 413,434,970 total quote. The 137-test Node suite, TypeScript/test build, fixed Chrome geology/material views, clean shader console and sub-0.001 m terrain agreement pass. The visible settlement boxes are deliberately still temporary and become original Blender architecture in GFX-R07; 40 m terrain cells remain visible on the sharpest close cliff edges and receive final composition review in GFX-R08/09.
 
 Create **Arizona study world/campaign V2**, preserving V1. Break circular mesa symmetry with branching erosional cuts, stepped resistant ledges, irregular caprock and talus fans. Replace the straight trench impression with connected, meandering main/side drainage and a narrower incised gorge. Keep broad basin openness but introduce gravel washes, outcrops, low relief fans and habitat patches that are legible at street/rail scale.
 
