@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "campaignId": "arizona-terrain-study",
+  "generator": {
+    "blender": "4.0.2",
+    "script": "tools/blender/generate_arizona_architecture.py",
+    "referenceEra": "Arizona circa 1900 interpretation"
+  },
+  "textures": [
+    {
+      "id": "painted-wood-base",
+      "path": "/textures/arizona/painted-wood-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "painted-wood-normal",
+      "path": "/textures/arizona/painted-wood-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "painted-wood-roughness",
+      "path": "/textures/arizona/painted-wood-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "masonry-base",
+      "path": "/textures/arizona/masonry-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "masonry-normal",
+      "path": "/textures/arizona/masonry-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "masonry-roughness",
+      "path": "/textures/arizona/masonry-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "weathered-roof-base",
+      "path": "/textures/arizona/weathered-roof-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "weathered-roof-normal",
+      "path": "/textures/arizona/weathered-roof-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "weathered-roof-roughness",
+      "path": "/textures/arizona/weathered-roof-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    }
+  ],
+  "materialBindings": [
+    {
+      "materialPrefix": "RF_AZ_Wood_",
+      "map": "painted-wood-base",
+      "normalMap": "painted-wood-normal",
+      "roughnessMap": "painted-wood-roughness",
+      "repeat": [
+        2,
+        3
+      ]
+    },
+    {
+      "materialPrefix": "RF_AZ_Masonry_",
+      "map": "masonry-base",
+      "normalMap": "masonry-normal",
+      "roughnessMap": "masonry-roughness",
+      "repeat": [
+        3,
+        3
+      ]
+    },
+    {
+      "materialPrefix": "RF_AZ_Roof_",
+      "map": "weathered-roof-base",
+      "normalMap": "weathered-roof-normal",
+      "roughnessMap": "weathered-roof-roughness",
+      "repeat": [
+        3,
+        4
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "arizona-timber-house-gable",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-timber-house-gable_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-timber-house-gable_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-timber-house-hipped",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-timber-house-hipped_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-timber-house-hipped_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-adobe-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-adobe-house_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-adobe-house_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-brick-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-brick-house_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-brick-house_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-shop-false-front",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-shop-false-front_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-shop-false-front_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-shop-awning",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-shop-awning_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-shop-awning_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-depot",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-depot_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-depot_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-water-tower",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-water-tower_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-water-tower_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-freight-shed",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-freight-shed_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-freight-shed_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-mine-headframe",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se"
+      ],
+      "maxDimensionsM": [
+        32,
+        24,
+        32
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-mine-headframe_lod0.glb",
+          "maxTriangles": 6500,
+          "maxBytes": 420000
+        },
+        {
+          "path": "/models/arizona/arizona-mine-headframe_lod1.glb",
+          "maxTriangles": 1800,
+          "maxBytes": 170000
+        }
+      ]
+    }
+  ]
+}

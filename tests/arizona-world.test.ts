@@ -10,6 +10,7 @@ import {arizonaV1WorldGenerator} from '../src/world/arizona-v1.js';
 import {arizonaV2MainDrainage,arizonaV2WorldGenerator} from '../src/world/arizona-v2.js';
 import type {CampaignDefinition} from '../src/domain/model.js';
 import type {WorldGenerator} from '../src/world/generator.js';
+import {arizonaBuildingAssets,generateArizonaSettlements} from '../src/rendering/arizona-settlement-placement.js';
 
 const fingerprint=(campaign:CampaignDefinition,generator:WorldGenerator,seed=campaign.world.seed)=>{const definition={...campaign.world,seed},terrain=generator.generate(definition),values:string[]=[];for(let z=0;z<=definition.depthM;z+=800)for(let x=0;x<=definition.widthM;x+=800){const sample=terrain.sample(x,z);values.push(sample.elevationM.toFixed(6),sample.forest.toFixed(6),sample.rock.toFixed(6),sample.urban.toFixed(6));}return createHash('sha256').update(values.join('|')).digest('hex');};
 
@@ -44,5 +45,12 @@ test('two long Arizona V2 corridors remain feasible and the northern one crosses
 test('Arizona V1 remains loadable while the V2 study owns the expanded review cameras',()=>{
   const resolved=campaignContentRegistry.resolve({campaignId:arizonaTerrainStudy.id,campaignVersion:arizonaTerrainStudy.version,world:arizonaTerrainStudy.world});
   const legacy=campaignContentRegistry.resolve({campaignId:arizonaV1.id,campaignVersion:arizonaV1.version,world:arizonaV1.world});
-  assert.equal(legacy.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,null);assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','vegetation','industry','train']);
+  assert.equal(legacy.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,'/packs/arizona.json');assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','street','house-close','vegetation','industry','train']);
+});
+
+test('Arizona architecture occupies deterministic street plots with the complete building kit',()=>{
+  const terrain=arizonaV2WorldGenerator.generate(arizonaV2.world),placements=generateArizonaSettlements(terrain,{world:arizonaV2.world,towns:arizonaV2.towns});
+  assert.equal(placements.length,180);assert.equal(new Set(placements.map(item=>item.id)).size,180);assert.deepEqual([...new Set(placements.map(item=>item.assetId))].sort(),[...arizonaBuildingAssets].sort());
+  for(const item of placements)assert.ok(Math.abs(item.y-terrain.sample(item.x,item.z).elevationM)<1e-9);
+  for(const town of arizonaV2.towns)assert.equal(placements.filter(item=>item.townId===town.id).length,60);
 });

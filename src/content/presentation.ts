@@ -11,6 +11,7 @@ export interface CampaignPresentation {
   readonly id:string;
   readonly rendererId:string;
   readonly assetManifestUrl:string|null;
+  readonly assetRoles:Readonly<{station?:string;bridgeSpan?:string;tunnelPortal?:string}>;
   readonly biome:Readonly<BiomeDefinition>;
   readonly cameraPresets:Readonly<Record<string,CameraPreset>>;
   readonly entryCameraId:string;

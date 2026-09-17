@@ -18,8 +18,8 @@ export interface CampaignContent {
   validateWorld(world:WorldDefinition):void;
 }
 
-const norwayPresentation:CampaignPresentation=Object.freeze({id:'norway-fjord-v1',rendererId:'fjord',assetManifestUrl:'/packs/norway.json',biome:norwayBiome,cameraPresets:norwayCameraPresets,entryCameraId:'entry',cameraSweep:Object.freeze(['regional','shore','waterfall','forest-edge','train']),proceduralScenery:'norway-fallback'});
-const arizonaPresentation:CampaignPresentation=Object.freeze({id:'arizona-basin-study-v2',rendererId:'terrain-study',assetManifestUrl:null,biome:arizonaBiome,cameraPresets:arizonaCameraPresets,entryCameraId:'entry',cameraSweep:Object.freeze(['regional','escarpment','canyon','wash','settlement','vegetation','industry','train']),proceduralScenery:'southwest-study'});
+const norwayPresentation:CampaignPresentation=Object.freeze({id:'norway-fjord-v1',rendererId:'fjord',assetManifestUrl:'/packs/norway.json',assetRoles:Object.freeze({station:'norway-station',bridgeSpan:'norway-bridge-span',tunnelPortal:'norway-tunnel-portal'}),biome:norwayBiome,cameraPresets:norwayCameraPresets,entryCameraId:'entry',cameraSweep:Object.freeze(['regional','shore','waterfall','forest-edge','train']),proceduralScenery:'norway-fallback'});
+const arizonaPresentation:CampaignPresentation=Object.freeze({id:'arizona-basin-study-v2',rendererId:'terrain-study',assetManifestUrl:'/packs/arizona.json',assetRoles:Object.freeze({}),biome:arizonaBiome,cameraPresets:arizonaCameraPresets,entryCameraId:'entry',cameraSweep:Object.freeze(['regional','escarpment','canyon','wash','settlement','street','house-close','vegetation','industry','train']),proceduralScenery:'southwest-study'});
 const validateNorwayWorld=(world:WorldDefinition,generator:WorldGenerator,seed:number,label:string)=>{try{generator.validate(world);}catch{throw new Error(`Save world definition is not compatible with ${label}`);}if(world.seed!==seed)throw new Error(`Save world definition is not compatible with ${label}`);};
 
 const norwayV1:CampaignContent=Object.freeze({
