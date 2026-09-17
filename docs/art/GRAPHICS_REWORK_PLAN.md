@@ -1,12 +1,12 @@
 # Graphics rework — Norway and Arizona
 
-Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–04 are complete; GFX-R05 is next.**
+Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–05 are complete; GFX-R06 is next.**
 
 This is the active graphics handoff. It supersedes the visual acceptance claims of GFX-001–008 and EXP-003, while preserving those checkpoints as engineering history. The user rejected the current appearance: plain terrain, toy trees, missing visible cliffs/waterfalls, box buildings in Arizona, inverted Norwegian roofs and a board-like opening view. Passing tests and counting assets did not establish acceptable art quality.
 
 ## Checkpoint and resume order
 
-- Runtime checkpoint: `82e65d89069fc34f3bec7f8ac8f00b8052ccdbfe`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
+- Runtime checkpoint: `602be58b488c56f832549f739b21f2d790db6725`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
 - EXP-003 is a technical Arizona terrain prototype, **not a finished or playable Arizona campaign**. Its hidden HUD, empty railway and primitive buildings must be described accordingly.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
@@ -95,6 +95,8 @@ Arizona uses lower, patchy shrubs, grass tufts, prickly pear/cholla-like origina
 Acceptance: tree fills 150–300 px in a near view and shows branches/foliage separation; 30–80 px trees still read as crowns; camera travel through LOD bands has no mass extinction or obvious silhouette swap; tree and rock count diagnostics report drawn detail as well as generated totals. Construction removes only intersecting scenery, with stable remaining IDs.
 
 ## GFX-R05 — Norway cliffs, shore and visible waterfalls
+
+**Status: complete at runtime checkpoint `602be58`.** Norway V3 is now the default new-company world while V1/V2 generators and saves remain registered. Three deterministic cliff clusters add hard faces, buttresses and gullies to the authoritative heightfield without disturbing the three settlement terraces or first rail corridor. A directed watercourse owns upstream, lip, plunge, outlet and camera-anchor positions; the renderer follows it with an animated narrow ribbon, a roughly 250 m terrain drop, impact foam and mist. Steep rock masks now participate in the world-space terrain blend. Fixed waterfall, rock-face and regional captures prove visibility, terrain/render agreement stays below 0.001 m, and V1↔V3 replacement keeps one WebGL context. The 137-test Node suite, empty construction journey, full passenger/mail/save journey, asset validation, TypeScript and test build pass. Final performance and free-camera art polish remain the later GFX-R08/09 gate.
 
 Create **Norway world/campaign V3** for authoritative landform changes; retain Norway V1/V2 generators and save loading. Sculpt directed rock buttresses, irregular gullies, exposed steep faces and talus at their bases, with narrow settlement terraces and an inland valley. Establish at least three named cliff clusters, one visible across the fjord from the entry camera and another beside a railway approach. Choose hard/soft slope transitions deliberately rather than increasing random noise everywhere.
 
