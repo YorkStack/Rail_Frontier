@@ -18,6 +18,7 @@ import { stationDefinition } from '../content/stations.js';
 import { industryName } from '../content/industries.js';
 import {generateNorwayScenery,type SceneryCategory} from './scenery-placement.js';
 import {generateNorwaySettlements} from './settlement-placement.js';
+import {generateArizonaSettlements} from './arizona-settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
 import type {StationSite} from '../rail/station-layout.js';
 
@@ -178,19 +179,28 @@ export class FjordRenderer implements WorldRenderer {
     for(let index=0;index<state.towns.length;index++){const town=state.towns[index]!,path=new THREE.Mesh(pathGeometry.clone(),pathMaterial.clone()),length=index===1?310:360;path.position.set(town.position.x,town.position.y+.22,town.position.z);path.rotation.y=index===0?Math.PI/2:(index===1 ? .62 : 0);path.scale.set(3.2,.1,length);path.receiveShadow=true;group.add(path);}
     this.buildingCount=records.length;return group;
   }
+  private authoredArizonaSettlements(state:Readonly<GameState>):THREE.Group {
+    const records=generateArizonaSettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
+    for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
+    for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
+    const roadMaterial=new THREE.MeshStandardMaterial({color:'#8b6748',roughness:1}),roadGeometry=new THREE.BoxGeometry(1,1,1);
+    for(const town of state.towns){for(const xOffset of [0,-142,142]){const road=new THREE.Mesh(roadGeometry.clone(),roadMaterial.clone());road.position.set(town.position.x+xOffset,town.position.y+.12,town.position.z);road.scale.set(xOffset===0?16:7,.12,620);road.receiveShadow=true;group.add(road);}for(const zOffset of [-188,0,188]){const road=new THREE.Mesh(roadGeometry.clone(),roadMaterial.clone());road.position.set(town.position.x,town.position.y+.14,town.position.z+zOffset);road.scale.set(370,.12,7);road.receiveShadow=true;group.add(road);}}
+    this.buildingCount=records.length;return group;
+  }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
-    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);
-    this.scene.remove(this.buildings);disposeObject(this.buildings);this.buildings=this.assetLevels.has('norway-house-red-white')?this.authoredSettlements(state):this.legacyAuthoredBuildings(state,360);this.scene.add(this.buildings);
+    if(this.content.presentation.proceduralScenery==='norway-fallback'){this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);}
+    this.scene.remove(this.buildings);disposeObject(this.buildings);
+    this.buildings=this.content.presentation.proceduralScenery==='southwest-study'?this.authoredArizonaSettlements(state):this.assetLevels.has('norway-house-red-white')?this.authoredSettlements(state):this.legacyAuthoredBuildings(state,360);this.scene.add(this.buildings);
   }
   private syncStationModels(state:Readonly<GameState>):void {
-    if(!this.assetLevels.has('norway-station'))return;for(const model of this.stationModels.values())model.visible=false;
-    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod('norway-station',260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=this.inspectionModel===null;}
+    const assetId=this.content.presentation.assetRoles.station;if(!assetId||!this.assetLevels.has(assetId))return;for(const model of this.stationModels.values())model.visible=false;
+    for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod(assetId,260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=this.inspectionModel===null;}
   }
   private rebuildAuthoredInfrastructure(state:Readonly<GameState>):void {
-    if(!this.assetLevels.has('norway-bridge-span'))return;this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
+    const bridgeAsset=this.content.presentation.assetRoles.bridgeSpan,tunnelAsset=this.content.presentation.assetRoles.tunnelPortal;if(!bridgeAsset||!tunnelAsset||!this.assetLevels.has(bridgeAsset)||!this.assetLevels.has(tunnelAsset))return;this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
     const bridgePlacements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){const track=this.geometry.get(edgeId as `edge:${number}`);if(!track)continue;for(const span of infrastructure.spans.filter(item=>item.kind==='bridge'))for(let distance=span.startM+12;distance<span.endM;distance+=24){const p=sampleDistance(track,Math.min(distance,span.endM)),q=sampleDistance(track,Math.min(distance+1,track.lengthM));dummy.position.set(p.x,p.y-.9,p.z);dummy.rotation.set(0,Math.atan2(-(q.x-p.x),-(q.z-p.z)),0);dummy.scale.setScalar(1);dummy.updateMatrix();bridgePlacements.push(dummy.matrix.clone());}}
-    if(bridgePlacements.length>0)this.infrastructureModels.add(this.instancedAsset('norway-bridge-span',0,bridgePlacements));
-    for(const track of this.geometry.values()){let inside=false;for(const sample of track.samples){const p=sample.position,buried=this.terrain.sample(p.x,p.z).elevationM>p.y+5;if(buried!==inside){inside=buried;const q=sampleDistance(track,Math.min(track.lengthM,sample.distanceM+1)),model=this.cloneLod('norway-tunnel-portal',280);model.position.set(p.x,p.y,p.z);model.rotation.y=Math.atan2(-(q.x-p.x),-(q.z-p.z));this.infrastructureModels.add(model);}}}
+    if(bridgePlacements.length>0)this.infrastructureModels.add(this.instancedAsset(bridgeAsset,0,bridgePlacements));
+    for(const track of this.geometry.values()){let inside=false;for(const sample of track.samples){const p=sample.position,buried=this.terrain.sample(p.x,p.z).elevationM>p.y+5;if(buried!==inside){inside=buried;const q=sampleDistance(track,Math.min(track.lengthM,sample.distanceM+1)),model=this.cloneLod(tunnelAsset,280);model.position.set(p.x,p.y,p.z);model.rotation.y=Math.atan2(-(q.x-p.x),-(q.z-p.z));this.infrastructureModels.add(model);}}}
     this.scene.add(this.infrastructureModels);
   }
   private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {
