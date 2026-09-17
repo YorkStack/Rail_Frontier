@@ -41,7 +41,7 @@ function familyHeight(x:number,y:number,family:number,seed:number):number {
 }
 
 const norwayTints=[[.88,.96,.82],[.68,.78,.63],[.84,.76,.62],[.78,.8,.77]] as const;
-const arizonaTints=[[1,.86,.68],[.91,.7,.53],[.82,.64,.49],[.98,.66,.48]] as const;
+const arizonaTints=[[.91,.78,.62],[.79,.64,.5],[.72,.58,.45],[.82,.61,.49]] as const;
 
 function dataTexture(data:Uint8Array,colorSpace:THREE.ColorSpace):THREE.DataTexture {
   const texture=new THREE.DataTexture(data,TERRAIN_ATLAS_SIZE,TERRAIN_ATLAS_SIZE,THREE.RGBAFormat);

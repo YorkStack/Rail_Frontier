@@ -1,41 +1,48 @@
 import {createHash} from 'node:crypto';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arizonaTerrainStudy} from '../src/content/arizona.js';
+import {arizonaTerrainStudy,arizonaV1,arizonaV2} from '../src/content/arizona.js';
 import {campaignContentRegistry} from '../src/content/registry.js';
 import {straightCurve} from '../src/content/norway-preview.js';
 import {compileCurve} from '../src/rail/geometry.js';
 import {engineeringSpans,quoteTrack} from '../src/rail/planner.js';
 import {arizonaV1WorldGenerator} from '../src/world/arizona-v1.js';
+import {arizonaV2MainDrainage,arizonaV2WorldGenerator} from '../src/world/arizona-v2.js';
+import type {CampaignDefinition} from '../src/domain/model.js';
+import type {WorldGenerator} from '../src/world/generator.js';
 
-const fingerprint=(seed:number)=>{const definition={...arizonaTerrainStudy.world,seed},terrain=arizonaV1WorldGenerator.generate(definition),values:string[]=[];for(let z=0;z<=definition.depthM;z+=800)for(let x=0;x<=definition.widthM;x+=800){const sample=terrain.sample(x,z);values.push(sample.elevationM.toFixed(6),sample.forest.toFixed(6),sample.rock.toFixed(6),sample.urban.toFixed(6));}return createHash('sha256').update(values.join('|')).digest('hex');};
+const fingerprint=(campaign:CampaignDefinition,generator:WorldGenerator,seed=campaign.world.seed)=>{const definition={...campaign.world,seed},terrain=generator.generate(definition),values:string[]=[];for(let z=0;z<=definition.depthM;z+=800)for(let x=0;x<=definition.widthM;x+=800){const sample=terrain.sample(x,z);values.push(sample.elevationM.toFixed(6),sample.forest.toFixed(6),sample.rock.toFixed(6),sample.urban.toFixed(6));}return createHash('sha256').update(values.join('|')).digest('hex');};
 
-test('Arizona terrain study has a stable versioned fingerprint',()=>{
-  assert.equal(fingerprint(arizonaTerrainStudy.world.seed),'e6c668d8fc0545e0bb29cdc6f881275d0b213dc3c66f7a73d49f19786bff30a5');
-  assert.notEqual(fingerprint(arizonaTerrainStudy.world.seed+1),fingerprint(arizonaTerrainStudy.world.seed));
+test('Arizona V1 and V2 retain separate stable fingerprints',()=>{
+  assert.equal(fingerprint(arizonaV1,arizonaV1WorldGenerator),'e6c668d8fc0545e0bb29cdc6f881275d0b213dc3c66f7a73d49f19786bff30a5');
+  assert.equal(fingerprint(arizonaV2,arizonaV2WorldGenerator),'369ae3086e050523b1ee522e2bcd7ceba5ebf3d4e2a045d40320dd5a67d6a7fd');
+  assert.notEqual(fingerprint(arizonaV2,arizonaV2WorldGenerator,arizonaV2.world.seed+1),fingerprint(arizonaV2,arizonaV2WorldGenerator));
 });
 
-test('Arizona landform cross-sections express basin, mesas, canyon and plateau rim',()=>{
-  const terrain=arizonaV1WorldGenerator.generate(arizonaTerrainStudy.world);
+test('Arizona V2 cross-sections express basin, stepped mesas, incised drainage and plateau rim',()=>{
+  const terrain=arizonaV2WorldGenerator.generate(arizonaV2.world);
   assert.ok(terrain.sample(2000,12000).elevationM>terrain.sample(12000,12000).elevationM+400);
   assert.ok(terrain.sample(22000,12000).elevationM>terrain.sample(12000,12000).elevationM+400);
-  assert.ok(terrain.sample(7000,6700).elevationM>terrain.sample(9300,6700).elevationM+300);
+  assert.ok(terrain.sample(6900,6750).elevationM>terrain.sample(9300,6750).elevationM+400);
   assert.ok(terrain.sample(15400,17700).elevationM>terrain.sample(12600,17700).elevationM+300);
-  assert.ok(terrain.sample(12000,13900).elevationM<terrain.sample(12000,12800).elevationM-100);
+  assert.ok(terrain.sample(11900,14050).elevationM<terrain.sample(11900,13200).elevationM-180);
+  assert.ok(terrain.sample(17900,9600).elevationM>terrain.sample(16800,9600).elevationM+90);
+  assert.ok(arizonaV2MainDrainage.length>=7);
 });
 
 test('all Arizona settlements occupy flat buildable terrain',()=>{
-  const terrain=arizonaV1WorldGenerator.generate(arizonaTerrainStudy.world);
-  for(const town of arizonaTerrainStudy.towns){const sample=terrain.sample(town.position.x,town.position.z),east=terrain.sample(town.position.x+40,town.position.z).elevationM,south=terrain.sample(town.position.x,town.position.z+40).elevationM;assert.ok(Math.abs(sample.elevationM-town.position.y)<1e-9);assert.ok(sample.urban>.9);assert.ok(Math.hypot(east-sample.elevationM,south-sample.elevationM)/40<.01);}
+  const terrain=arizonaV2WorldGenerator.generate(arizonaV2.world);
+  for(const town of arizonaV2.towns){const sample=terrain.sample(town.position.x,town.position.z),east=terrain.sample(town.position.x+40,town.position.z).elevationM,south=terrain.sample(town.position.x,town.position.z+40).elevationM;assert.ok(Math.abs(sample.elevationM-town.position.y)<1e-9);assert.ok(sample.urban>.9);assert.ok(Math.hypot(east-sample.elevationM,south-sample.elevationM)/40<.01);}
 });
 
-test('two long Arizona corridors are feasible and the northern one bridges the tributary canyon',()=>{
-  const terrain=arizonaV1WorldGenerator.generate(arizonaTerrainStudy.world),quotes=[1,2].map(index=>quoteTrack(compileCurve(straightCurve(arizonaTerrainStudy.towns[index-1]!.position,arizonaTerrainStudy.towns[index]!.position)),terrain));
+test('two long Arizona V2 corridors remain feasible and the northern one crosses an 809 m bridge',()=>{
+  const terrain=arizonaV2WorldGenerator.generate(arizonaV2.world),quotes=[1,2].map(index=>quoteTrack(compileCurve(straightCurve(arizonaV2.towns[index-1]!.position,arizonaV2.towns[index]!.position)),terrain));
   for(const quote of quotes){assert.equal(quote.valid,true,quote.reasons.join(' · '));assert.ok(quote.intervals.length>100);assert.ok(quote.maxGrade<.01);}
-  const spans=engineeringSpans(quotes[1]!);assert.ok(spans.some(span=>span.kind==='bridge'&&span.endM-span.startM>900));
+  const bridge=engineeringSpans(quotes[1]!).find(span=>span.kind==='bridge');assert.ok(bridge);assert.ok(bridge.endM-bridge.startM>800&&bridge.endM-bridge.startM<820);assert.equal(quotes[1]!.cost,413_434_970);
 });
 
-test('Arizona study resolves as independent content with fixed review cameras',()=>{
+test('Arizona V1 remains loadable while the V2 study owns the expanded review cameras',()=>{
   const resolved=campaignContentRegistry.resolve({campaignId:arizonaTerrainStudy.id,campaignVersion:arizonaTerrainStudy.version,world:arizonaTerrainStudy.world});
-  assert.equal(resolved.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,null);assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','settlement','vegetation','industry','train']);
+  const legacy=campaignContentRegistry.resolve({campaignId:arizonaV1.id,campaignVersion:arizonaV1.version,world:arizonaV1.world});
+  assert.equal(legacy.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,null);assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','vegetation','industry','train']);
 });
