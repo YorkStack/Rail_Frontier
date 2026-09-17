@@ -18,9 +18,10 @@ const nearestTown=(state:Parameters<CommandHandler<BuildStation>>[0],position:{x
 export const placeStationHandler:CommandHandler<PlaceStation>=(state,command,context)=>{
   const definition=stationDefinition(command.classId);
   if(!definition)throw new Error(`Unknown station class: ${command.classId}`);
-  if(command.quotedCost!==definition.purchaseCost)throw new Error('Station quote is stale');
-  if(state.company.cash<definition.purchaseCost)throw new Error('Insufficient funds');
   const site=surveyStationSite(context.terrain,command.position,command.orientationRad,definition.platformLengthM);
+  const totalCost=definition.purchaseCost+site.earthworkCost;
+  if(!Number.isSafeInteger(totalCost)||command.quotedCost!==totalCost)throw new Error('Station quote is stale');
+  if(state.company.cash<totalCost)throw new Error('Insufficient funds');
   const overlaps=state.stations.some(station=>{
     const existing=station.layout.kind==='single-platform'?station.layout.pad:undefined;
     const center=existing?.center??state.railway.nodes.find(node=>node.id===station.nodeId)?.position;
@@ -36,11 +37,11 @@ export const placeStationHandler:CommandHandler<PlaceStation>=(state,command,con
   state.railway.edges.push(edgeA,edgeB);state.railway.revision++;
   for(const edge of [edgeA,edgeB])state.operations.infrastructure[edge.id]={spans:[{startM:0,endM:site.lengthM/2,kind:'station'}],constructionCost:0,maintenancePerDay:0,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
   state.stations.push({
-    id:stationId,nodeId:stopNodeId,townId:nearestTown(state,site.center,definition.coverageRadiusM),classId:definition.id,storage:[],constructionCost:definition.purchaseCost,
+    id:stationId,nodeId:stopNodeId,townId:nearestTown(state,site.center,definition.coverageRadiusM),classId:definition.id,storage:[],constructionCost:totalCost,
     layout:{kind:'single-platform',version:1,orientationRad:site.orientationRad,stopNodeId,ports:[{key:'a',nodeId:portANodeId,outward:{x:-site.direction.x,z:-site.direction.z},trackClassId:'local',gaugeM:1.435,attachmentCapacity:1},{key:'b',nodeId:portBNodeId,outward:site.direction,trackClassId:'local',gaugeM:1.435,attachmentCapacity:1}],internalEdgeIds:[edgeAId,edgeBId],pad:{center:site.center,lengthM:site.lengthM,widthM:site.widthM,maxReliefM:site.maxReliefM}}
   });
   const terrainSequence=state.operations.terrain.revision+1;state.operations.terrain.operations.push(stationPadTerrainOperation(stationId,site.center,site.orientationRad,site.lengthM,site.widthM,terrainSequence));state.operations.terrain.revision=terrainSequence;
-  postExpense(state,'construction',definition.purchaseCost,stationId,'Station construction');
+  postExpense(state,'construction',totalCost,stationId,'Station construction');
   return {createdIds:[stationId,stopNodeId,portANodeId,portBNodeId,edgeAId,edgeBId]};
 };
 

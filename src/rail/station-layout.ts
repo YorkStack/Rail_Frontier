@@ -2,10 +2,12 @@ import type { CubicCurve,GameState,Id,Station,Vec3 } from '../domain/model.js';
 import type { Terrain } from '../world/terrain.js';
 
 export const STATION_PAD_WIDTH_M=18;
-export const STATION_MAX_RELIEF_M=2.5;
+export const STATION_MAX_RELIEF_M=12;
+export const STATION_CUT_COST_PER_M3=18_000;
+export const STATION_FILL_COST_PER_M3=14_000;
 
 export interface StationSite {
-  center:Vec3;portA:Vec3;portB:Vec3;direction:{x:number;z:number};orientationRad:number;lengthM:number;widthM:number;maxReliefM:number;
+  center:Vec3;portA:Vec3;portB:Vec3;direction:{x:number;z:number};orientationRad:number;lengthM:number;widthM:number;maxReliefM:number;cutVolumeM3:number;fillVolumeM3:number;earthworkCost:number;
 }
 
 const normalizeAngle=(angle:number):number=>{
@@ -26,10 +28,12 @@ export function surveyStationSite(terrain:Terrain,position:{x:number;z:number},o
     {x:position.x+direction.x*half-side.x*halfWidth,z:position.z+direction.z*half-side.z*halfWidth}
   ];
   if(planar.some(point=>point.x<0||point.z<0||point.x>terrain.widthM||point.z>terrain.depthM))throw new Error('Station footprint lies outside the map');
-  const elevations=planar.map(point=>terrain.sample(point.x,point.z).elevationM),maxReliefM=Math.max(...elevations)-Math.min(...elevations);
+  const alongSteps=Math.max(1,Math.ceil(lengthM/10)),acrossSteps=Math.max(1,Math.ceil(STATION_PAD_WIDTH_M/6)),cellArea=lengthM/alongSteps*STATION_PAD_WIDTH_M/acrossSteps,samples:number[]=[];
+  for(let alongIndex=0;alongIndex<alongSteps;alongIndex++)for(let acrossIndex=0;acrossIndex<acrossSteps;acrossIndex++){const along=-half+(alongIndex+.5)*lengthM/alongSteps,across=-halfWidth+(acrossIndex+.5)*STATION_PAD_WIDTH_M/acrossSteps,x=position.x+direction.x*along+side.x*across,z=position.z+direction.z*along+side.z*across;samples.push(terrain.sample(x,z).elevationM);}
+  const elevations=[...planar.map(point=>terrain.sample(point.x,point.z).elevationM),...samples],maxReliefM=Math.max(...elevations)-Math.min(...elevations);
   if(maxReliefM>STATION_MAX_RELIEF_M)throw new Error(`Station site is too steep (${maxReliefM.toFixed(1)} m relief; maximum ${STATION_MAX_RELIEF_M.toFixed(1)} m)`);
-  const y=elevations[0]!;
-  return {center:{...position,y},portA:{x:planar[1]!.x,y,z:planar[1]!.z},portB:{x:planar[2]!.x,y,z:planar[2]!.z},direction,orientationRad:angle,lengthM,widthM:STATION_PAD_WIDTH_M,maxReliefM};
+  const sorted=[...samples].sort((a,b)=>a-b),y=sorted[Math.floor(sorted.length/2)]!,cutVolumeM3=samples.reduce((sum,elevation)=>sum+Math.max(0,elevation-y)*cellArea,0),fillVolumeM3=samples.reduce((sum,elevation)=>sum+Math.max(0,y-elevation)*cellArea,0),earthworkCost=Math.ceil(cutVolumeM3*STATION_CUT_COST_PER_M3+fillVolumeM3*STATION_FILL_COST_PER_M3);
+  return {center:{...position,y},portA:{x:planar[1]!.x,y,z:planar[1]!.z},portB:{x:planar[2]!.x,y,z:planar[2]!.z},direction,orientationRad:angle,lengthM,widthM:STATION_PAD_WIDTH_M,maxReliefM,cutVolumeM3,fillVolumeM3,earthworkCost};
 }
 
 export function straightCurve(from:Vec3,to:Vec3):CubicCurve {

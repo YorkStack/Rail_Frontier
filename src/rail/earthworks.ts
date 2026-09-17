@@ -7,6 +7,8 @@ import type {EngineeringInterval} from './planner.js';
 export const TERRAIN_PATCH_GENERATOR_VERSION=1 as const;
 export const FORMATION_WIDTH_M=6;
 export const EARTHWORK_SHOULDER_M=9;
+export const STATION_PAD_LEVEL_MARGIN_M=6;
+export const STATION_PAD_BLEND_M=8;
 const RAIL_TO_FORMATION_M=.55;
 
 const boundsForCurve=(curve:CubicCurve,margin:number)=>({
@@ -39,6 +41,6 @@ export function alignmentTerrainOperation(sourceId:string,curve:CubicCurve,terra
 }
 
 export function stationPadTerrainOperation(stationId:`station:${number}`,center:{x:number;y:number;z:number},orientationRad:number,lengthM:number,widthM:number,sequence:number):TerrainOperation {
-  const margin=8,half=Math.hypot(lengthM/2,widthM/2)+margin;
+  const margin=STATION_PAD_LEVEL_MARGIN_M+STATION_PAD_BLEND_M,half=Math.hypot(lengthM/2,widthM/2)+margin;
   return {id:`terrain:${sequence}:${stationId}`,kind:'station-pad',version:1,sequence,stationId,center:structuredClone(center),orientationRad,lengthM,widthM,targetElevationM:center.y,bounds:{minX:center.x-half,minZ:center.z-half,maxX:center.x+half,maxZ:center.z+half}};
 }
