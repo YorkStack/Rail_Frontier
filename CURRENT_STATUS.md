@@ -13,9 +13,9 @@ AWAITING_USER_MODEL_SWITCH=false
 
 # Current status — graphics and station-first construction implementation, 2026-09-16
 
-Current milestone: **SOL implementation in progress; GFX-R01–03, the Norway half of GFX-R04, the UX-001 readability foundation and CON-01–03 are complete. Arizona vegetation completes GFX-R04 next.** A new company now starts by placing oriented stations on open ground, shaping a live horizontal and vertical spline through optional waypoints, choosing a track standard and connecting visible rail ports. Norway and Arizona use biome-specific terrain material families with terrain-mask and slope blending; Norway now keeps its full forest while choosing detail per camera. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md). The flags above refer to this rework, not the historically implemented GFX-001–008.
+Current milestone: **SOL implementation in progress; GFX-R01–04, the UX-001 readability foundation and CON-01–03 are complete. GFX-R05 is next.** Norway and Arizona use biome-specific terrain materials and camera-selected vegetation. A new company starts by placing oriented stations on open ground, shaping a live horizontal and vertical spline, choosing a track standard and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md).
 
-Runtime checkpoint: `44892b70e5b821bb11dd0601df9b4edfef964185`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R01–03 corrected Norwegian roofs and opening composition and replaced periodic terrain waves with original terrain atlases and slope-aware rock. The Norway GFX-R04 slice removes RNG-selected LOD, retains all 28,000 trees and selects detailed or simplified models with hysteresis around the camera; locally regenerated pine, spruce, birch and alder assets have asymmetric crowns, forks and branch clusters. UX-001 and CON-01–03 remain complete.
+Runtime checkpoint: `b92f8d240db8f14a8c846995efbb15f190b61669`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R04 removes RNG-selected Norway LOD, retains all 28,000 trees and selects richer crowns around the camera. Arizona keeps 10,500 objects in habitat patches and selects near/far forms for shrub, grass, saguaro, juniper and mesquite; a fixed vegetation camera supports honest review.
 
 ## Implementation completed after handoff
 
@@ -81,13 +81,13 @@ Runtime checkpoint: `44892b70e5b821bb11dd0601df9b4edfef964185`. The runtime uses
 
 The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 ✓ → GFX-R03 ✓ → GFX-R04 Norway ✓ / Arizona next → GFX-R05–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Correct gable geometry, settlement entry cameras, readable/scalable core controls, station-first construction, continuous horizontal/vertical planning, natural terrain materials and camera-selected Norway forest detail are complete. Complete first-service translations will land with the tutorial slice.
+Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 ✓ → GFX-R03 ✓ → GFX-R04 ✓ → GFX-R05 next → GFX-R06–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Camera-selected vegetation and habitat grouping now join the completed roofs, cameras, controls, construction planning and terrain materials.
 
 Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
 
 The user’s construction brief supersedes the earlier track-first UX: standalone stations, visible ports, editable spline alignment, automatic engineering and whole-route purchase are required. Architecture review is recorded in ASTRA_ESCALATIONS.md. CON-01–03 are implemented on schema 7; semantic terrain operations begin with CON-04 and the next coordinated migration.
 
-Read the three active plans and IMPLEMENTATION_PLAN.md first, then the architecture/data/economic/save/asset contracts as needed. Continue with the Arizona habitat and LOD portion of GFX-R04; the requested SOL handoff has been completed.
+Read the three active plans and IMPLEMENTATION_PLAN.md first. Continue with GFX-R05: Norway V3 landforms, cliffs, shore detail and visible waterfall.
 
 ## Stable contracts
 
