@@ -1,11 +1,13 @@
 import type {CameraPreset} from '../content/presentation.js';
 
-export type ArizonaCameraPresetId='entry'|'regional'|'canyon'|'settlement'|'vegetation'|'industry'|'train';
+export type ArizonaCameraPresetId='entry'|'regional'|'canyon'|'escarpment'|'wash'|'settlement'|'vegetation'|'industry'|'train';
 export const arizonaCameraPresets:Readonly<Record<ArizonaCameraPresetId,CameraPreset>>=Object.freeze({
-  entry:Object.freeze({targetXZ:Object.freeze({x:11976,z:10500}),offset:Object.freeze({x:160,y:72,z:200})}),
-  regional:Object.freeze({targetXZ:Object.freeze({x:12000,z:12000}),offset:Object.freeze({x:13600,y:7600,z:12800})}),
-  canyon:Object.freeze({targetXZ:Object.freeze({x:11900,z:14200}),offset:Object.freeze({x:-760,y:440,z:-980})}),
-  settlement:Object.freeze({targetXZ:Object.freeze({x:11970,z:10500}),offset:Object.freeze({x:430,y:210,z:520})}),
+  entry:Object.freeze({targetXZ:Object.freeze({x:11930,z:10500}),offset:Object.freeze({x:170,y:78,z:210})}),
+  regional:Object.freeze({targetXZ:Object.freeze({x:12000,z:12400}),offset:Object.freeze({x:9200,y:5400,z:8500})}),
+  canyon:Object.freeze({targetXZ:Object.freeze({x:12600,z:13920}),offset:Object.freeze({x:-4300,y:2650,z:-3900})}),
+  escarpment:Object.freeze({targetXZ:Object.freeze({x:17900,z:9600}),offset:Object.freeze({x:-5200,y:3000,z:-4300})}),
+  wash:Object.freeze({targetXZ:Object.freeze({x:10500,z:11700}),offset:Object.freeze({x:-3700,y:2250,z:-3300})}),
+  settlement:Object.freeze({targetXZ:Object.freeze({x:11930,z:10500}),offset:Object.freeze({x:440,y:220,z:530})}),
   vegetation:Object.freeze({targetXZ:Object.freeze({x:12840,z:10540}),offset:Object.freeze({x:82,y:38,z:105})}),
   industry:Object.freeze({targetXZ:Object.freeze({x:17700,z:8500}),offset:Object.freeze({x:950,y:470,z:820})}),
   train:Object.freeze({targetXZ:Object.freeze({x:11700,z:13500}),offset:Object.freeze({x:120,y:65,z:155})})
