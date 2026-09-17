@@ -12,7 +12,7 @@ Completed 2026-09-14 on branch `implementation/passenger-slice` after the map- a
 
 The browser suite covers the original passenger, timber-freight, city, reporting, construction, operations, context/overlay, menu/archive and save/load flows. It also covers the V1 visual baseline, V2 terrain agreement, terrain PBR shader compilation, mixed scenery, all timber finishes, all current rolling-stock views, the 60-second composition/performance sweep, and final resource disposal.
 
-Five alternating V1/V2 scene replacements keep exactly one WebGL context. Warm resource counters repeat at 91 geometries / 12 uploaded textures for the empty V2 company and 127 / 15 for the commissioned V1 save. One RAF driver records 73 frames in a 1.2-second sample. Final disposal returns the renderer geometry counter to zero and explicitly loses the shared context.
+The original alternating-version evidence is historical. The maintained regression now repeats new/load replacement of the current world on exactly one WebGL context and verifies final disposal.
 
 Desktop 1440×900 and mobile 390×844 screenshots were rendered and visually inspected under `artifacts/evidence/gfx-008/`. Mobile document and canvas width both remain 390 px, the map remains readable and the compact strategy/speed controls stay visible.
 

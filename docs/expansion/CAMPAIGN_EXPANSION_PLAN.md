@@ -32,9 +32,9 @@ Acceptance: presentation biome must match the versioned world; renderer selectio
 
 ### EXP-002 — Reusable terrain feature contract
 
-Status: complete. `WorldGenerator` is a content-owned contract for version/biome validation, elevation and complete heightfield generation. Its landform record exposes named anchors, the principal rail corridor, cross-sectional water banks and an optional waterfall. Norway V1 and V2 implement that contract separately; the central generator-number switch and compatibility exports are gone. Terrain height plus water, forest, rock and urban/construction-cost masks retain their exact generated values. The renderer and bridge survey consume the resolved campaign generator instead of importing Norway shoreline, valley or fjord helpers.
+Status: complete. `WorldGenerator` is a content-owned contract for version/biome validation, elevation and complete heightfield generation. Its landform record exposes named anchors, the principal rail corridor, cross-sectional water banks and an optional waterfall. Pre-release V1 implementations were deleted; the current Norway and Arizona generators remain content-owned. The renderer and bridge survey consume the resolved campaign generator instead of importing campaign-specific helpers.
 
-Acceptance: adding a synthetic test biome requires no edit to a central `if (generatorVersion)` switch; Norway generation fingerprints and construction quotes are byte-for-byte stable; renderer terrain composition contains no Norway landform-helper import. Covered by synthetic registry composition, landform-contract and existing V1/V2 fingerprint tests.
+Acceptance: adding a synthetic test biome requires no edit to a central `if (generatorVersion)` switch; current generation fingerprints and construction quotes are stable; renderer terrain composition contains no campaign landform-helper import.
 
 ### EXP-003 — Arizona terrain study
 

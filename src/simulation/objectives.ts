@@ -1,9 +1,9 @@
-import { norway,norwayV1 } from '../content/norway.js';
+import { norway } from '../content/norway.js';
 import type { CampaignDefinition, GameState, Id } from '../domain/model.js';
 import { townCoverage } from './coverage.js';
 
 const fjordStudy:CampaignDefinition={...norway,id:'fjord-study',title:'The Northern Line'};
-const registry=new Map<string,CampaignDefinition>([[`${norwayV1.id}@${norwayV1.version}`,norwayV1],[`${norway.id}@${norway.version}`,norway],[`${fjordStudy.id}@${fjordStudy.version}`,fjordStudy]]);
+const registry=new Map<string,CampaignDefinition>([[`${norway.id}@${norway.version}`,norway],[`${fjordStudy.id}@${fjordStudy.version}`,fjordStudy]]);
 
 function connectedCoveredTowns(state:GameState):number {
   const coverage=townCoverage(state),stationById=new Map(state.stations.map(station=>[station.id,station])),adjacency=new Map<Id<'node'>,Id<'node'>[]>();

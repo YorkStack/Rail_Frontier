@@ -1,12 +1,11 @@
 import {createHash} from 'node:crypto';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arizonaTerrainStudy,arizonaV1,arizonaV2} from '../src/content/arizona.js';
+import {arizonaTerrainStudy,arizonaV2} from '../src/content/arizona.js';
 import {campaignContentRegistry} from '../src/content/registry.js';
 import {straightCurve} from '../src/content/norway-preview.js';
 import {compileCurve} from '../src/rail/geometry.js';
 import {engineeringSpans,quoteTrack} from '../src/rail/planner.js';
-import {arizonaV1WorldGenerator} from '../src/world/arizona-v1.js';
 import {arizonaV2MainDrainage,arizonaV2WorldGenerator} from '../src/world/arizona-v2.js';
 import type {CampaignDefinition} from '../src/domain/model.js';
 import type {WorldGenerator} from '../src/world/generator.js';
@@ -14,8 +13,7 @@ import {arizonaBuildingAssets,generateArizonaSettlements} from '../src/rendering
 
 const fingerprint=(campaign:CampaignDefinition,generator:WorldGenerator,seed=campaign.world.seed)=>{const definition={...campaign.world,seed},terrain=generator.generate(definition),values:string[]=[];for(let z=0;z<=definition.depthM;z+=800)for(let x=0;x<=definition.widthM;x+=800){const sample=terrain.sample(x,z);values.push(sample.elevationM.toFixed(6),sample.forest.toFixed(6),sample.rock.toFixed(6),sample.urban.toFixed(6));}return createHash('sha256').update(values.join('|')).digest('hex');};
 
-test('Arizona V1 and V2 retain separate stable fingerprints',()=>{
-  assert.equal(fingerprint(arizonaV1,arizonaV1WorldGenerator),'e6c668d8fc0545e0bb29cdc6f881275d0b213dc3c66f7a73d49f19786bff30a5');
+test('production Arizona terrain has a stable fingerprint',()=>{
   assert.equal(fingerprint(arizonaV2,arizonaV2WorldGenerator),'369ae3086e050523b1ee522e2bcd7ceba5ebf3d4e2a045d40320dd5a67d6a7fd');
   assert.notEqual(fingerprint(arizonaV2,arizonaV2WorldGenerator,arizonaV2.world.seed+1),fingerprint(arizonaV2,arizonaV2WorldGenerator));
 });
@@ -42,10 +40,10 @@ test('two long Arizona V2 corridors remain feasible and the northern one crosses
   const bridge=engineeringSpans(quotes[1]!).find(span=>span.kind==='bridge');assert.ok(bridge);assert.ok(bridge.endM-bridge.startM>800&&bridge.endM-bridge.startM<820);assert.equal(quotes[1]!.cost,413_434_970);
 });
 
-test('Arizona V1 remains loadable while the V2 study owns the expanded review cameras',()=>{
+test('Arizona exposes only the current study and rejects removed V1 content',()=>{
   const resolved=campaignContentRegistry.resolve({campaignId:arizonaTerrainStudy.id,campaignVersion:arizonaTerrainStudy.version,world:arizonaTerrainStudy.world});
-  const legacy=campaignContentRegistry.resolve({campaignId:arizonaV1.id,campaignVersion:arizonaV1.version,world:arizonaV1.world});
-  assert.equal(legacy.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,'/packs/arizona.json');assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','street','house-close','vegetation','industry','train']);
+  assert.throws(()=>campaignContentRegistry.resolve({campaignId:'arizona-terrain-study',campaignVersion:1,world:{...arizonaV2.world,generatorVersion:1}}),/Unsupported campaign content/);
+  assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,'/packs/arizona.json');assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','street','house-close','vegetation','industry','train']);
 });
 
 test('Arizona architecture occupies deterministic street plots with the complete building kit',()=>{

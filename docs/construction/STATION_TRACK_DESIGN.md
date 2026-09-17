@@ -23,7 +23,7 @@ This **supersedes UX-002's track-first workflow, two-click-only scope and deferr
 | `rendering/track-mesh.ts`, portals/trusses in renderer | Derived rails/ballast/sleepers, heuristic supports from clearance. Renderer also builds portals and trusses. | Render from authoritative classified spans; eliminate competing support/portal classifications. Use lightweight ghosts during editing. |
 | `tools/blender/*`, runtime pack, `ASSET_PIPELINE.md` | Local Blender 4.0.2 produces GLB modules. Runtime +Y up differs from Blender +Z up; conversion is already established. | Blender for platforms, buildings, buffers, piers, decks, portal/retaining modules. Dynamic rail alignment and terrain stay procedural. |
 
-Current checkpoint tests: 144 Node tests plus focused Chrome construction and complete passenger/save journeys. Station-first placement, a live waypoint plus undo, continuous vertical profile, class/rules revalidation, advance braking, port connection, one atomic multi-section command, persisted earthworks, quoted moderate-slope station pads, triangle-identical rendered terrain, revenue and exact reload are covered. Finished retaining/structure transitions remain pending.
+Current checkpoint tests: 143 Node tests plus focused Chrome construction and complete passenger/save journeys. Station-first placement, a live waypoint plus undo, continuous vertical profile, class/rules revalidation, advance braking, port connection, one atomic multi-section command, persisted earthworks, quoted moderate-slope station pads, triangle-identical rendered terrain, revenue and exact reload are covered. Finished retaining/structure transitions remain pending.
 
 ## 2. Decisions and user-facing flow
 

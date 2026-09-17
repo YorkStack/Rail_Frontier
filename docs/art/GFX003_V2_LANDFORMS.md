@@ -12,8 +12,7 @@ V2 biome masks now use complete X/Z surface gradients: steep/high terrain produc
 
 ## Version and loading behavior
 
-- `norwayV1` is campaign version 1 / generator 1; `norwayV2` and the default `norway` export are version 2 / generator 2.
-- The content registry validates and generates both combinations independently. New game and the commissioned preview use V2. The browser-only `?world=v1` switch exists for regression captures.
+- This file records the historical V2 landform checkpoint. Pre-release V1 code and its browser comparison switch were later deleted.
 - The objectives registry recognizes both campaign versions. Save schema remains 3 because the existing world descriptor already carries campaign and generator versions.
 - Waterfall/corridor rendering selects its matching V1 or V2 descriptor. No V1 shoreline function is used to place V2 scenery landmarks.
 

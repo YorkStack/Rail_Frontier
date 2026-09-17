@@ -5,7 +5,7 @@ import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/libre-caslon-display/latin-400.css';
 import './ui/study.css';
 import { createNorwayPreviewState,straightCurve } from './content/norway-preview.js';
-import { createInitialState,norway,norwayV1 } from './content/norway.js';
+import { createInitialState,norway } from './content/norway.js';
 import {arizonaTerrainStudy} from './content/arizona.js';
 import { createNorwayGameState,industryDefinition,industryName } from './content/industries.js';
 import { availableVehicles,vehicleDefinition } from './content/vehicles.js';
@@ -193,7 +193,7 @@ applyInterfaceLanguage(document,initialPreferences.language);
 const toast=(message:string)=>{element('#toast').textContent=message;element('#toast').classList.add('visible');window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>element('#toast').classList.remove('visible'),4200);};
 let toastTimer=0;
 async function start():Promise<void> {
-  const query=new URLSearchParams(location.search),world=query.get('world'),initialCampaign=world==='v1'?norwayV1:world==='arizona'?arizonaTerrainStudy:norway,initialContent=campaignContentRegistry.resolve({campaignId:initialCampaign.id,campaignVersion:initialCampaign.version,world:initialCampaign.world}),terrain=initialContent.worldGenerator.generate(initialCampaign.world),initial=initialCampaign.id===arizonaTerrainStudy.id?createInitialState(initialCampaign):createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
+  const query=new URLSearchParams(location.search),world=query.get('world'),initialCampaign=world==='arizona'?arizonaTerrainStudy:norway,initialContent=campaignContentRegistry.resolve({campaignId:initialCampaign.id,campaignVersion:initialCampaign.version,world:initialCampaign.world}),terrain=initialContent.worldGenerator.generate(initialCampaign.world),initial=initialCampaign.id===arizonaTerrainStudy.id?createInitialState(initialCampaign):createNorwayPreviewState(terrain,initialCampaign),store=new IndexedDbSaveStore(),renderHost=new CampaignRenderHost(element<HTMLCanvasElement>('#world')),sessionHost=new ActiveSessionHost(campaignContentRegistry,renderHost);
   document.body.classList.toggle('terrain-study-mode',initialCampaign.id===arizonaTerrainStudy.id);element<HTMLCanvasElement>('#world').ariaLabel=initialCampaign.id===arizonaTerrainStudy.id?'Arizona basin terrain study. Drag to orbit, right drag to pan, scroll to zoom.':'Norwegian fjord landscape. Drag to orbit, right drag to pan, scroll to zoom.';
   await sessionHost.initialize(initial);
   const validateSaveContent=(candidate:GameState)=>{campaignContentRegistry.resolve(candidate);};

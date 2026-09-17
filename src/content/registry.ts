@@ -1,13 +1,12 @@
 import type {CampaignDefinition,GameState,WorldDefinition} from '../domain/model.js';
 import type {WorldGenerator} from '../world/generator.js';
-import {norwayV1 as norwayV1Campaign,norwayV2,norwayV3} from './norway.js';
+import {norwayV2,norwayV3} from './norway.js';
 import {norwayBiome} from '../world/biome.js';
 import type {CampaignPresentation} from './presentation.js';
-import {norwayV1WorldGenerator,norwayV2WorldGenerator,norwayV3WorldGenerator} from '../world/norway-generators.js';
+import {norwayV2WorldGenerator,norwayV3WorldGenerator} from '../world/norway-generators.js';
 import {norwayCameraPresets} from '../rendering/norway-camera-presets.js';
-import {arizonaTerrainStudy,arizonaV1,arizonaV2} from './arizona.js';
+import {arizonaV2} from './arizona.js';
 import {arizonaBiome} from '../world/biome.js';
-import {arizonaV1WorldGenerator} from '../world/arizona-v1.js';
 import {arizonaV2WorldGenerator} from '../world/arizona-v2.js';
 import {arizonaCameraPresets} from '../rendering/arizona-camera-presets.js';
 
@@ -22,12 +21,6 @@ const norwayPresentation:CampaignPresentation=Object.freeze({id:'norway-fjord-v1
 const arizonaPresentation:CampaignPresentation=Object.freeze({id:'arizona-basin-study-v2',rendererId:'terrain-study',assetManifestUrl:'/packs/arizona.json',assetRoles:Object.freeze({}),biome:arizonaBiome,cameraPresets:arizonaCameraPresets,entryCameraId:'entry',cameraSweep:Object.freeze(['regional','escarpment','canyon','wash','settlement','street','house-close','vegetation','industry','train']),proceduralScenery:'southwest-study'});
 const validateNorwayWorld=(world:WorldDefinition,generator:WorldGenerator,seed:number,label:string)=>{try{generator.validate(world);}catch{throw new Error(`Save world definition is not compatible with ${label}`);}if(world.seed!==seed)throw new Error(`Save world definition is not compatible with ${label}`);};
 
-const norwayV1:CampaignContent=Object.freeze({
-  campaign:norwayV1Campaign,
-  presentation:norwayPresentation,
-  worldGenerator:norwayV1WorldGenerator,
-  validateWorld(world:WorldDefinition):void {validateNorwayWorld(world,norwayV1WorldGenerator,norwayV1Campaign.world.seed,'Norway V1');}
-});
 const norwayV2Content:CampaignContent=Object.freeze({
   campaign:norwayV2,
   presentation:norwayPresentation,
@@ -38,10 +31,6 @@ const norwayV3Content:CampaignContent=Object.freeze({
   campaign:norwayV3,presentation:norwayPresentation,worldGenerator:norwayV3WorldGenerator,
   validateWorld(world:WorldDefinition):void {validateNorwayWorld(world,norwayV3WorldGenerator,norwayV3.world.seed,'Norway V3');}
 });
-const arizonaV1Content:CampaignContent=Object.freeze({
-  campaign:arizonaV1,presentation:arizonaPresentation,worldGenerator:arizonaV1WorldGenerator,
-  validateWorld(world:WorldDefinition):void {try{arizonaV1WorldGenerator.validate(world);}catch{throw new Error('Save world definition is not compatible with Arizona terrain study V1');}if(world.seed!==arizonaV1.world.seed)throw new Error('Save world definition is not compatible with Arizona terrain study V1');}
-});
 const arizonaV2Content:CampaignContent=Object.freeze({
   campaign:arizonaV2,presentation:arizonaPresentation,worldGenerator:arizonaV2WorldGenerator,
   validateWorld(world:WorldDefinition):void {try{arizonaV2WorldGenerator.validate(world);}catch{throw new Error('Save world definition is not compatible with Arizona terrain study V2');}if(world.seed!==arizonaV2.world.seed)throw new Error('Save world definition is not compatible with Arizona terrain study V2');}
@@ -49,7 +38,7 @@ const arizonaV2Content:CampaignContent=Object.freeze({
 
 export class ContentRegistry {
   private readonly content=new Map<string,CampaignContent>();
-  constructor(entries:readonly CampaignContent[]=[norwayV1,norwayV2Content,norwayV3Content,arizonaV1Content,arizonaV2Content]) {for(const entry of entries){const key=this.key(entry.campaign.id,entry.campaign.version,entry.campaign.world.generatorVersion);if(entry.presentation.biome.id!==entry.campaign.world.biomeId||entry.worldGenerator.biomeId!==entry.campaign.world.biomeId||entry.worldGenerator.version!==entry.campaign.world.generatorVersion)throw new Error(`Campaign content does not match world definition: ${key}`);if(this.content.has(key))throw new Error(`Duplicate campaign content: ${key}`);this.content.set(key,entry);}}
+  constructor(entries:readonly CampaignContent[]=[norwayV2Content,norwayV3Content,arizonaV2Content]) {for(const entry of entries){const key=this.key(entry.campaign.id,entry.campaign.version,entry.campaign.world.generatorVersion);if(entry.presentation.biome.id!==entry.campaign.world.biomeId||entry.worldGenerator.biomeId!==entry.campaign.world.biomeId||entry.worldGenerator.version!==entry.campaign.world.generatorVersion)throw new Error(`Campaign content does not match world definition: ${key}`);if(this.content.has(key))throw new Error(`Duplicate campaign content: ${key}`);this.content.set(key,entry);}}
   resolve(state:Pick<GameState,'campaignId'|'campaignVersion'|'world'>):CampaignContent {
     const key=this.key(state.campaignId,state.campaignVersion,state.world.generatorVersion),entry=this.content.get(key);
     if(!entry)throw new Error(`Unsupported campaign content: ${key}`);
