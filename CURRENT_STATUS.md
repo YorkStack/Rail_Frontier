@@ -11,11 +11,11 @@ UX_IMPLEMENTATION_STARTED=true
 UX_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_MODEL_SWITCH=false
 
-# Current status — graphics and station-first construction implementation, 2026-09-16
+# Current status — graphics and station-first construction implementation, 2026-09-17
 
-Current milestone: **SOL implementation in progress; GFX-R01–04, the UX-001 readability foundation and CON-01–03 are complete. GFX-R05 is next.** Norway and Arizona use biome-specific terrain materials and camera-selected vegetation. A new company starts by placing oriented stations on open ground, shaping a live horizontal and vertical spline, choosing a track standard and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md).
+Current milestone: **SOL implementation in progress; GFX-R01–05, the UX-001 readability foundation and CON-01–03 are complete. GFX-R06 is next.** Norway V3 adds authoritative cliff clusters and a connected visible waterfall while V1/V2 remain loadable. A new company starts by placing oriented stations on open ground, shaping a live horizontal and vertical spline, choosing a track standard and connecting visible rail ports. Active plans: [station-first construction architecture](docs/construction/STATION_TRACK_DESIGN.md), [graphics rework](docs/art/GRAPHICS_REWORK_PLAN.md) and [controls/tutorial/progression](docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md).
 
-Runtime checkpoint: `b92f8d240db8f14a8c846995efbb15f190b61669`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R04 removes RNG-selected Norway LOD, retains all 28,000 trees and selects richer crowns around the camera. Arizona keeps 10,500 objects in habitat patches and selects near/far forms for shrub, grass, saguaro, juniper and mesquite; a fixed vegetation camera supports honest review.
+Runtime checkpoint: `602be58b488c56f832549f739b21f2d790db6725`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. GFX-R05 makes Norway V3 the default new-company content with three deterministic cliff clusters, stronger exposed-rock blending and a directed upstream/lip/plunge/outlet waterfall with foam, mist and a fixed review camera. V1/V2 content and old saves remain available.
 
 ## Implementation completed after handoff
 
@@ -62,7 +62,7 @@ Runtime checkpoint: `b92f8d240db8f14a8c846995efbb15f190b61669`. The runtime uses
 - Towns count as connected only when a route uses their covered station. Connection and same-day lumber supply raise economic activity; activity above the threshold produces deterministic population growth. Lumber delivery is capped by local demand, with unpaid excess retained aboard.
 - Town context cards and the railway office show population, passenger queues, economic activity, lumber demand/supply, mail, connected days and latest growth. A browser run observes the first daily update from 35 to 60 activity in the commissioned corridor.
 - Responsive desktop/mobile layouts were visually checked. The regional, station and train-follow views were captured against the production world at roughly 53–60 FPS on the current machine.
-- 136 Node tests pass. Focused real-browser terrain, construction and passenger journeys pass: six fixed Norway/Arizona material views with a clean shader console, waypoint/undo/port/atomic-build assertions, and the complete station → alignment → consist → route → passenger/mail delivery → save/reload loop. Browser tests run a static test-mode production bundle; its startup allowance covers slower local Vite builds. The prior 19-case browser baseline remains the wider regression target. Asset validation and the production build pass.
+- 137 Node tests pass. Focused real-browser terrain, V3 landform, construction and passenger journeys pass: fixed Norway/Arizona material views with a clean shader console, V1↔V3 replacement, waypoint/undo/port/atomic-build assertions, and the complete station → alignment → consist → route → passenger/mail delivery → save/reload loop. Browser tests run a static test-mode production bundle; its startup allowance covers slower local Vite builds. Asset validation and the test build pass.
 
 ## Completed work
 
@@ -73,7 +73,7 @@ Runtime checkpoint: `b92f8d240db8f14a8c846995efbb15f190b61669`. The runtime uses
 - Triangle-exact terrain queries/rendering, cubic root isolation for terrain/water/engineering boundaries, conservative curve grade/radius/cusp certificate and tangent continuity.
 - Immutable RailNetwork adjacency/min-heap/geometry cache; isolated frozen snapshots; fixed application, economic, vehicle/station/industry and operational-state contracts.
 - Schema 7 plus strict sequential 1→2→3→4→5→6→7 migrations and semantic validation; real IndexedDB browser save/reload/load/resume with exact state equivalence.
-- **136 Node tests pass; the focused GFX-R03 terrain, GFX-R04 Norway scenery, CON-03 construction and complete passenger/save journeys pass in Chrome.** The GFX-R04 proof reports 293 detailed plus 27,707 simplified trees near the forest and all 28,000 simplified trees regionally, with no extinction or WebGL errors. Type check, Blender asset checks and the test build pass.
+- **137 Node tests pass; the focused GFX-R03 terrain, GFX-R04 scenery, GFX-R05 landforms, CON-03 construction and complete passenger/save journeys pass in Chrome.** The named waterfall, rock-face and regional views retain authoritative terrain agreement within 0.001 m and no WebGL errors. Type check, Blender asset checks and the test build pass.
 - Actual 5k-edge/100-query and 100-train movement kernel tests; local rendering scale test with 20k trees, 2k buildings, 100 train bodies and 5k strategic rail segments. Around 60 FPS on Apple M2 Pro / Chrome 153 at 1440×900. Full economy/occupancy is not part of that benchmark.
 - Resource replacement returns to baseline; final disposal releases geometries and explicitly releases the WebGL context. License/font notices included in production distribution. Documentation, backlog and compact benchmark evidence updated.
 
@@ -81,13 +81,13 @@ Runtime checkpoint: `b92f8d240db8f14a8c846995efbb15f190b61669`. The runtime uses
 
 The 2026-09-15 review reopens visual acceptance. Confirmed defects include inverted exported Norwegian roof slopes, RNG-assigned low-detail trees, repeated terrain patterns, an Arizona shadow-depth mismatch, untextured Arizona building blockouts and excessively distant opening cameras. UI inspection confirms tiny fonts, hidden station prerequisites and fragmented train/service setup. Historical GFX-008 technical results remain evidence of that build, not acceptance of the appearance or intuitiveness.
 
-Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 ✓ → GFX-R03 ✓ → GFX-R04 ✓ → GFX-R05 next → GFX-R06–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Camera-selected vegetation and habitat grouping now join the completed roofs, cameras, controls, construction planning and terrain materials.
+Implementation sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 foundation ✓ → CON-01 ✓ → CON-02 ✓ → CON-03 ✓ → GFX-R03 ✓ → GFX-R04 ✓ → GFX-R05 ✓ → GFX-R06 next → GFX-R07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. Versioned Norwegian cliffs and connected water now join the completed roofs, cameras, controls, construction planning, terrain materials and vegetation.
 
 Completed Norway gameplay, locomotive eras, electrification, portable saves and safe dispatch remain intact. EXP-001–003 provide expansion foundations; Arizona is a terrain-only study, not a playable campaign. The Arizona architecture part of EXP-004 moves into GFX-R07; economy, full campaign selection and Great River wait until the rework review. Do not duplicate art work or restart completed systems.
 
 The user’s construction brief supersedes the earlier track-first UX: standalone stations, visible ports, editable spline alignment, automatic engineering and whole-route purchase are required. Architecture review is recorded in ASTRA_ESCALATIONS.md. CON-01–03 are implemented on schema 7; semantic terrain operations begin with CON-04 and the next coordinated migration.
 
-Read the three active plans and IMPLEMENTATION_PLAN.md first. Continue with GFX-R05: Norway V3 landforms, cliffs, shore detail and visible waterfall.
+Read the three active plans and IMPLEMENTATION_PLAN.md first. Continue with GFX-R06: Arizona V2 escarpments, incised drainage, talus and geological variety. GFX-R07 then replaces the visible Arizona building boxes with the planned circa-1900 Blender architecture.
 
 ## Stable contracts
 
@@ -118,4 +118,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-Next: implement GFX-R04 camera-dependent vegetation and credible crowns, then GFX-R05–07 before CON-04. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
+Next: implement GFX-R06 Arizona landforms and GFX-R07 Arizona architecture before CON-04. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
