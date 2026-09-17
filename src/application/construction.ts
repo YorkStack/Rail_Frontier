@@ -7,6 +7,7 @@ import { engineeringSpans, quoteTrack } from '../rail/planner.js';
 import { postExpense } from '../simulation/finance.js';
 import {trackClass} from '../content/track-classes.js';
 import {requireEngineeringRulesVersion} from '../content/engineering-rules.js';
+import {alignmentTerrainOperation} from '../rail/earthworks.js';
 
 type BuildTrack=Extract<GameCommand,{type:'buildTrack'}>;
 type BuildAlignment=Extract<GameCommand,{type:'buildAlignment'}>;
@@ -118,6 +119,7 @@ export const buildTrackHandler:CommandHandler<BuildTrack>=(state,command,context
   state.railway.edges.push({id:edgeId,from,to,curve:structuredClone(command.curve),speedLimitMps:definition.speedLimitMps,ownerId:state.company.id});
   const spans=engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind}));
   state.operations.infrastructure[edgeId]={spans,constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
+  const terrainSequence=state.operations.terrain.revision+1;state.operations.terrain.operations.push(alignmentTerrainOperation(edgeId,command.curve,context.terrain,quote.intervals,terrainSequence));state.operations.terrain.revision=terrainSequence;
   postExpense(state,'construction',quote.cost,edgeId,'Track construction');
   state.railway.revision++;
   createdIds.push(edgeId);
@@ -149,14 +151,16 @@ export const buildAlignmentHandler:CommandHandler<BuildAlignment>=(state,command
   for(let index=0;index<curves.length-1;index++) {const nodeId=allocateId(state,'node');state.railway.nodes.push({id:nodeId,position:structuredClone(curves[index]!.p3)});createdIds.push(nodeId);nodes.push(nodeId);}
   nodes.push(to);
   if(new Set(nodes).size!==nodes.length)throw new Error('Alignment nodes must be distinct');
-  let firstEdgeId:Id<'edge'>|null=null;
+  let firstEdgeId:Id<'edge'>|null=null;const terrainSequence=state.operations.terrain.revision+1;
   for(let index=0;index<curves.length;index++) {
     const edgeId=allocateId(state,'edge'),quote=quotes[index]!;firstEdgeId??=edgeId;
     state.railway.edges.push({id:edgeId,from:nodes[index]!,to:nodes[index+1]!,curve:curves[index]!,speedLimitMps:definition.speedLimitMps,ownerId:state.company.id});
     state.operations.infrastructure[edgeId]={spans:engineeringSpans(quote).map(({startM,endM,kind})=>({startM,endM,kind})),constructionCost:quote.cost,maintenancePerDay:Math.max(1,Math.round(quote.cost*.00005)),electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0};
+    state.operations.terrain.operations.push(alignmentTerrainOperation(edgeId,curves[index]!,context.terrain,quote.intervals,terrainSequence));
     createdIds.push(edgeId);
   }
   postExpense(state,'construction',cost,firstEdgeId!,'Railway alignment construction');
+  state.operations.terrain.revision=terrainSequence;
   state.railway.revision++;
   return {createdIds};
 };

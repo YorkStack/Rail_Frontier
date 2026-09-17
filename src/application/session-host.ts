@@ -1,5 +1,5 @@
 import type {GameState} from '../domain/model.js';
-import type {Heightfield} from '../world/terrain.js';
+import type {GridTerrain,Heightfield} from '../world/terrain.js';
 import {validateState} from '../persistence/save.js';
 import type {CampaignContent,ContentRegistry} from '../content/registry.js';
 import {RailFrontierGame} from './game.js';
@@ -7,10 +7,10 @@ import type {WorldRenderer} from './ports.js';
 
 export interface PreparedWorldRenderer extends WorldRenderer {loadAssets():Promise<void>}
 export interface WorldRendererFactory<Renderer extends PreparedWorldRenderer=PreparedWorldRenderer> {
-  create(terrain:Heightfield,state:GameState,content:CampaignContent):Renderer;
+  create(terrain:GridTerrain,state:GameState,content:CampaignContent):Renderer;
   dispose():void;
 }
-interface ActiveSession<Renderer extends PreparedWorldRenderer> {game:RailFrontierGame;terrain:Heightfield;renderer:Renderer;content:CampaignContent}
+interface ActiveSession<Renderer extends PreparedWorldRenderer> {game:RailFrontierGame;terrain:GridTerrain;renderer:Renderer;content:CampaignContent}
 
 /** Builds candidate sessions off-screen and publishes only fully prepared content. */
 export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWorldRenderer> {
@@ -19,7 +19,7 @@ export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWo
   constructor(private readonly registry:ContentRegistry,private readonly renderers:WorldRendererFactory<Renderer>) {}
   get game():RailFrontierGame {if(!this.active)throw new Error('Session host is not initialized');return this.active.game;}
   get renderer():Renderer {if(!this.active)throw new Error('Session host is not initialized');return this.active.renderer;}
-  get terrain():Heightfield {if(!this.active)throw new Error('Session host is not initialized');return this.active.terrain;}
+  get terrain():GridTerrain {if(!this.active)throw new Error('Session host is not initialized');return this.active.terrain;}
   get content():CampaignContent {if(!this.active)throw new Error('Session host is not initialized');return this.active.content;}
   async initialize(initial:GameState):Promise<void> {if(this.active)throw new Error('Session host is already initialized');this.active=await this.prepare(initial,1);}
   async replace(candidate:GameState):Promise<Readonly<GameState>> {
@@ -35,7 +35,7 @@ export class ActiveSessionHost<Renderer extends PreparedWorldRenderer=PreparedWo
   }
   dispose():void {this.active?.renderer.dispose();this.active=null;this.renderers.dispose();}
   private async prepare(value:GameState,initialSpeed:0|1):Promise<ActiveSession<Renderer>> {
-    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),terrain=content.worldGenerator.generate(state.world),game=new RailFrontierGame(state,terrain,{initialSpeed}),renderer=this.renderers.create(terrain,state,content);
+    const state=validateState(structuredClone(value)),content=this.registry.resolve(state),baseTerrain:Heightfield=content.worldGenerator.generate(state.world),game=new RailFrontierGame(state,baseTerrain,{initialSpeed}),terrain=game.terrain,renderer=this.renderers.create(terrain,state,content);
     try {await renderer.loadAssets();return {game,terrain,renderer,content};}
     catch(error){renderer.dispose();throw error;}
   }

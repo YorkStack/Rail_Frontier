@@ -1,5 +1,5 @@
 import type {GameState} from '../domain/model.js';
-import type {Heightfield} from '../world/terrain.js';
+import type {GridTerrain} from '../world/terrain.js';
 import {SeededRandom} from '../world/random.js';
 import {compileGraph} from '../rail/graph.js';
 
@@ -36,7 +36,7 @@ function treeAsset(y:number,rock:number,moisture:number,roll:number):string {
 }
 
 /** Pure scenery generation. It consumes its own RNG and never advances simulation state. */
-export function generateNorwayScenery(terrain:Heightfield,state:Pick<GameState,'world'|'railway'|'towns'|'industries'|'stations'>,targets:Partial<SceneryTargets>={}):ReadonlyArray<SceneryPlacement> {
+export function generateNorwayScenery(terrain:GridTerrain,state:Pick<GameState,'world'|'railway'|'towns'|'industries'|'stations'>,targets:Partial<SceneryTargets>={}):ReadonlyArray<SceneryPlacement> {
   const desired={...defaults,...targets},tracks=trackBuckets(state),result:SceneryPlacement[]=[],occupied=new Set<string>();
   const generate=(category:SceneryCategory,count:number,seedOffset:number)=>{
     const random=new SeededRandom((state.world.seed^0x51ce7e11^seedOffset)>>>0);let accepted=0;

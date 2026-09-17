@@ -23,6 +23,8 @@ test('legal affordable construction commits graph, spans and one debit',()=>{
   assert.equal(state.railway.revision,1);assert.equal(state.railway.edges.length,1);assert.equal(state.company.ledger.length,1);
   assert.equal(state.company.cash,state.company.openingCash-quote.cost);
   assert.equal(state.operations.infrastructure['edge:7']!.constructionCost,quote.cost);
+  assert.equal(state.operations.terrain.revision,1);assert.equal(state.operations.terrain.operations.length,1);assert.equal(state.operations.terrain.operations[0]!.kind,'alignment');
+  assert.ok(Math.abs(game.terrain.sample(100,100).elevationM+.55)<.01);
   assert.deepEqual(deserialize(serialize(structuredClone(state) as GameState)),state);
 });
 

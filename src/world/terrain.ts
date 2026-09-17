@@ -2,12 +2,19 @@ import type { CubicCurve } from '../domain/model.js';
 import { cubicRoots } from '../domain/curve-math.js';
 export interface TerrainSample { elevationM: number; waterLevelM: number | null; forest: number; rock: number; urban: number }
 export interface Terrain {
-  readonly widthM: number; readonly depthM: number;
+  readonly widthM: number; readonly depthM: number;readonly waterLevelM:number|null;
   sample(x: number, z: number): TerrainSample;
+}
+export interface TriangleTerrain extends Terrain {
+  planeAt(x:number,z:number):{dx:number;dz:number;constant:number};
+  curveBreakpoints(curve:CubicCurve):number[];
+}
+export interface GridTerrain extends TriangleTerrain {
+  readonly columns:number;readonly rows:number;readonly cellM:number;readonly waterLevelM:number|null;
 }
 export interface TerrainLayers {forest?:Float32Array;rock?:Float32Array;urban?:Float32Array}
 /** Samples the same two triangles used by the runtime mesh (diagonal NW to SE). */
-export class Heightfield implements Terrain {
+export class Heightfield implements GridTerrain {
   readonly widthM: number;
   readonly depthM: number;
   private readonly heights: Float64Array;
