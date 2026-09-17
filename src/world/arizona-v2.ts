@@ -1,7 +1,6 @@
 import type {WorldDefinition} from '../domain/model.js';
 import type {WorldGenerator} from './generator.js';
 import {Heightfield} from './terrain.js';
-import {arizonaV1CorridorX} from './arizona-v1.js';
 
 const clamp01=(value:number)=>Math.max(0,Math.min(1,value));
 const smooth=(start:number,end:number,value:number)=>{const t=clamp01((value-start)/(end-start));return t*t*(3-2*t);};
@@ -11,7 +10,7 @@ const valueNoise=(x:number,z:number,seed:number,scale:number)=>{const gx=x/scale
 const noise=(x:number,z:number,seed:number)=>valueNoise(x,z,seed,3100)*.5+valueNoise(x,z,seed^0x7421,1250)*.31+valueNoise(x,z,seed^0x39a7,430)*.19;
 
 export const arizonaV2WorldProfile=Object.freeze({biomeId:'southwest',widthM:24000,depthM:24000,cellM:40,peakM:1450,generatorVersion:2});
-export const arizonaV2CorridorX=(z:number)=>arizonaV1CorridorX(z)+70*Math.sin(z/2700);
+export const arizonaV2CorridorX=(z:number)=>11700+280*Math.sin((z-3500)/5000)+70*Math.sin(z/2700);
 export const arizonaV2SettlementSites=Object.freeze([3500,10500,20500].map(z=>Object.freeze({x:arizonaV2CorridorX(z),z})));
 
 export const arizonaV2MainDrainage=Object.freeze([

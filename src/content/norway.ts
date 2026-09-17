@@ -2,19 +2,9 @@ import type { CampaignDefinition, GameState } from '../domain/model.js';
 import { emptyOperations } from '../domain/operations.js';
 import {norwayV2WorldProfile} from '../world/norway-v2.js';
 import {norwayV3WorldProfile} from '../world/norway-v3.js';
-import {norwayV1WorldGenerator,norwayV2WorldGenerator,norwayV3WorldGenerator} from '../world/norway-generators.js';
+import {norwayV2WorldGenerator,norwayV3WorldGenerator} from '../world/norway-generators.js';
 const seed=140919;
 const objectives:CampaignDefinition['objectives']=[{id:'first-connection',type:'connectTowns',target:2},{id:'first-passengers',type:'deliverPassengers',target:200},{id:'profitable-railway',type:'operatingProfit',target:1000000}];
-export const norwayV1:CampaignDefinition={
-  id:'norwegian-fjords',version:1,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
-  world:{seed, widthM:16000,depthM:16000,cellM:25,generatorVersion:1,biomeId:'fjord'},
-  towns:[
-    {id:'town:2',name:'Sundvik',position:{x:2200,y:norwayV1WorldGenerator.elevation(2200,3200,seed),z:3200},population:1800},
-    {id:'town:3',name:'Granli',position:{x:4700,y:norwayV1WorldGenerator.elevation(4700,4900,seed),z:4900},population:1250},
-    {id:'town:4',name:'Fjellhavn',position:{x:8500,y:norwayV1WorldGenerator.elevation(8500,7800,seed),z:7800},population:3200}
-  ],
-  objectives
-};
 export const norwayV2:CampaignDefinition={
   id:'norwegian-fjords',version:2,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
   world:{seed,widthM:norwayV2WorldProfile.widthM,depthM:norwayV2WorldProfile.depthM,cellM:norwayV2WorldProfile.cellM,generatorVersion:2,biomeId:norwayV2WorldProfile.biomeId},
