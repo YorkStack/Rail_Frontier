@@ -6,7 +6,7 @@ This is the active graphics handoff. It supersedes the visual acceptance claims 
 
 ## Checkpoint and resume order
 
-- Runtime checkpoint: `ee098f483da55ee9c8c6c6073d80046995e67f2c`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
+- Current integrated runtime checkpoint: `a701fb8e40fbd9730d6d72b2f9f120e1243b16e8`; GFX-R07 itself remains recorded at `ee098f4`. Both `main` and `implementation/passenger-slice` are synchronized.
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
 - EXP-003 established the technical Arizona terrain prototype; GFX-R06/07 subsequently replaced its geology and primitive buildings. Arizona still has a hidden Norway HUD and empty railway and is **not a finished or playable Arizona campaign**.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
