@@ -8,6 +8,7 @@ import { Heightfield } from '../src/world/terrain.js';
 import { deserialize,serialize } from '../src/persistence/save.js';
 import { stationDefinitions } from '../src/content/stations.js';
 import { initialTownEconomy } from '../src/domain/operations.js';
+import {surveyStationSite} from '../src/rail/station-layout.js';
 
 const line=(p0:Vec3,p3:Vec3):CubicCurve=>({p0,p1:{x:(2*p0.x+p3.x)/3,y:(2*p0.y+p3.y)/3,z:(2*p0.z+p3.z)/3},p2:{x:(p0.x+2*p3.x)/3,y:(p0.y+2*p3.y)/3,z:(p0.z+2*p3.z)/3},p3});
 const terrain=()=>new Heightfield(2,2,500,new Float64Array(4));
@@ -65,6 +66,14 @@ test('station survey rejects stale, misquoted and steep placements atomically',(
   assert.deepEqual(game.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position:{x:100,z:100},orientationRad:0,expectedRevision:1,quotedCost:cost}}),{ok:false,reason:'Station preview is stale'});assert.equal(JSON.stringify(game.snapshot()),before);
   assert.deepEqual(game.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position:{x:100,z:100},orientationRad:0,expectedRevision:0,quotedCost:cost+1}}),{ok:false,reason:'Station quote is stale'});assert.equal(JSON.stringify(game.snapshot()),before);
   const steep=new Heightfield(2,2,500,new Float64Array([0,100,0,100])),steepGame=new RailFrontierGame(createInitialState(),steep),steepBefore=JSON.stringify(steepGame.snapshot()),result=steepGame.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position:{x:250,z:250},orientationRad:Math.PI/2,expectedRevision:0,quotedCost:cost}});assert.equal(result.ok,false);if(!result.ok)assert.match(result.reason,/too steep/);assert.equal(JSON.stringify(steepGame.snapshot()),steepBefore);
+});
+
+test('station survey quotes and publishes balanced cut and fill on a moderate slope',()=>{
+  const slope=new Heightfield(2,2,500,new Float64Array([0,50,0,50])),position={x:250,z:250},orientationRad=Math.PI/2,definition=stationDefinitions['rural-halt'],site=surveyStationSite(slope,position,orientationRad,definition.platformLengthM),quotedCost=definition.purchaseCost+site.earthworkCost,game=new RailFrontierGame(createInitialState(),slope),beforeCash=game.snapshot().company.cash;
+  assert.ok(site.maxReliefM>2.5&&site.maxReliefM<12);assert.ok(site.cutVolumeM3>0);assert.ok(site.fillVolumeM3>0);assert.ok(site.earthworkCost>0);
+  assert.deepEqual(game.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position,orientationRad,expectedRevision:0,quotedCost}}),{ok:true,createdIds:['station:5','node:6','node:7','node:8','edge:9','edge:10']});
+  const built=game.snapshot(),station=built.stations[0]!;assert.equal(station.constructionCost,quotedCost);assert.equal(built.company.cash,beforeCash-quotedCost);assert.equal(built.operations.terrain.operations[0]?.kind,'station-pad');
+  for(const point of [site.center,site.portA,site.portB])assert.ok(Math.abs(game.terrain.sample(point.x,point.z).elevationM-site.center.y)<.001);
 });
 
 test('town coverage chooses one closest station with stable ID tie-breaking',()=>{

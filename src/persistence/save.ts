@@ -7,6 +7,7 @@ import { stationDefinition } from '../content/stations.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { currentYear } from '../simulation/calendar.js';
 import {compileCurve} from '../rail/geometry.js';
+import {STATION_MAX_RELIEF_M} from '../rail/station-layout.js';
 
 export const SAVE_LIMITS=Object.freeze({
   bytes:20_000_000,nodes:25_000,edges:25_000,stations:5_000,trains:2_000,routes:5_000,towns:5_000,industries:5_000,ledger:100_000,
@@ -119,7 +120,7 @@ export function validateState(value: unknown): GameState {
     if(layout.kind==='single-platform') {
       requireRef(layout.stopNodeId);layout.ports.forEach(port=>requireRef(port.nodeId));layout.internalEdgeIds.forEach(requireRef);
       if(station.nodeId!==layout.stopNodeId||layout.ports[0].key!=='a'||layout.ports[1].key!=='b'||new Set([layout.stopNodeId,...layout.ports.map(port=>port.nodeId)]).size!==3||new Set(layout.internalEdgeIds).size!==2)throw new Error('Invalid station topology');
-      if(layout.orientationRad<0||layout.orientationRad>=Math.PI*2||Math.abs(layout.pad.lengthM-definition.platformLengthM)>.001||layout.pad.maxReliefM>2.5)throw new Error('Invalid station layout');
+      if(layout.orientationRad<0||layout.orientationRad>=Math.PI*2||Math.abs(layout.pad.lengthM-definition.platformLengthM)>.001||layout.pad.maxReliefM>STATION_MAX_RELIEF_M)throw new Error('Invalid station layout');
       const center=state.railway.nodes.find(node=>node.id===layout.stopNodeId)!,ports=layout.ports.map(port=>state.railway.nodes.find(node=>node.id===port.nodeId)!);
       if(Math.hypot(center.position.x-layout.pad.center.x,center.position.y-layout.pad.center.y,center.position.z-layout.pad.center.z)>.001)throw new Error('Station pad is detached from stop node');
       for(const [index,port] of layout.ports.entries()) {

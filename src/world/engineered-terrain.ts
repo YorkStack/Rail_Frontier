@@ -1,7 +1,7 @@
 import type {TerrainEngineeringState,TerrainOperation} from '../domain/operations.js';
 import {compileCurve,sampleDistance} from '../rail/geometry.js';
 import type {CubicCurve} from '../domain/model.js';
-import {TERRAIN_PATCH_GENERATOR_VERSION} from '../rail/earthworks.js';
+import {STATION_PAD_BLEND_M,STATION_PAD_LEVEL_MARGIN_M,TERRAIN_PATCH_GENERATOR_VERSION} from '../rail/earthworks.js';
 import type {GridTerrain,TerrainSample} from './terrain.js';
 
 interface AlignmentCache {operation:Extract<TerrainOperation,{kind:'alignment'}>;points:{x:number;y:number;z:number;distanceM:number;tx:number;tz:number}[]}
@@ -31,9 +31,9 @@ export class EngineeredTerrain implements GridTerrain {
     for(const operation of this.state.operations) {
       if(x<operation.bounds.minX||x>operation.bounds.maxX||z<operation.bounds.minZ||z>operation.bounds.maxZ)continue;
       if(operation.kind==='station-pad') {
-        const sin=Math.sin(operation.orientationRad),cos=Math.cos(operation.orientationRad),dx=x-operation.center.x,dz=z-operation.center.z,along=dx*sin+dz*cos,side=dx*cos-dz*sin,outerAlong=operation.lengthM/2+8,outerSide=operation.widthM/2+8;
+        const sin=Math.sin(operation.orientationRad),cos=Math.cos(operation.orientationRad),dx=x-operation.center.x,dz=z-operation.center.z,along=dx*sin+dz*cos,side=dx*cos-dz*sin,innerAlong=operation.lengthM/2+STATION_PAD_LEVEL_MARGIN_M,innerSide=operation.widthM/2+STATION_PAD_LEVEL_MARGIN_M,outerAlong=innerAlong+STATION_PAD_BLEND_M,outerSide=innerSide+STATION_PAD_BLEND_M;
         if(Math.abs(along)>outerAlong||Math.abs(side)>outerSide)continue;
-        const edge=Math.max(0,(Math.abs(along)-operation.lengthM/2)/8,(Math.abs(side)-operation.widthM/2)/8),weight=1-smooth(edge);elevation=elevation+(operation.targetElevationM-elevation)*weight;
+        const edge=Math.max(0,(Math.abs(along)-innerAlong)/STATION_PAD_BLEND_M,(Math.abs(side)-innerSide)/STATION_PAD_BLEND_M),weight=1-smooth(edge);elevation=elevation+(operation.targetElevationM-elevation)*weight;
       } else {
         const cache=this.alignments.find(item=>item.operation.id===operation.id)!;let best:{distance2:number;point:AlignmentCache['points'][number]}|null=null;
         for(const point of cache.points){const dx=x-point.x,dz=z-point.z,distance2=dx*dx+dz*dz;if(best===null||distance2<best.distance2)best={distance2,point};}
