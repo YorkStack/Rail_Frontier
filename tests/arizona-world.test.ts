@@ -37,5 +37,5 @@ test('two long Arizona corridors are feasible and the northern one bridges the t
 
 test('Arizona study resolves as independent content with fixed review cameras',()=>{
   const resolved=campaignContentRegistry.resolve({campaignId:arizonaTerrainStudy.id,campaignVersion:arizonaTerrainStudy.version,world:arizonaTerrainStudy.world});
-  assert.equal(resolved.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,null);assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','settlement','industry','train']);
+  assert.equal(resolved.worldGenerator.id,'arizona-basin-v1');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,null);assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','settlement','vegetation','industry','train']);
 });
