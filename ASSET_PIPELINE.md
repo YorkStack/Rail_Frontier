@@ -13,12 +13,13 @@ Generate:
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_pack.py
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_scenery.py
 "/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_norway_architecture.py
+"/Applications/Blender.app/Contents/MacOS/Blender" --background --factory-startup --python tools/blender/generate_arizona_architecture.py
 npm run validate:assets
 ```
 
 Use an equivalent Blender executable path on other machines. Script targets Blender 4.0+; other versions need the same validation before adoption. No manual editing is required.
 
-Directories: `tools/blender/` contains authoritative generators; `assets/source/blender/` contains generated editable `.blend` intermediates (ignored); `assets/runtime/models/core/` retains the isolated architecture probes; `assets/runtime/models/norway/` contains the tracked production GLBs; and `assets/runtime/packs/norway.json` is the selected-campaign manifest. Generated runtime models are intentional distribution source assets, not bundled build output.
+Directories: `tools/blender/` contains authoritative generators; `assets/source/blender/` contains generated editable `.blend` intermediates (ignored); `assets/runtime/models/core/` retains the isolated architecture probes; `assets/runtime/models/norway/` and `assets/runtime/models/arizona/` contain the tracked production GLBs; and `assets/runtime/packs/norway.json` plus `assets/runtime/packs/arizona.json` are the selected-campaign manifests. Generated runtime models are intentional distribution source assets, not bundled build output.
 
 Units: metres, Blender scale_length=1. Source: +Z up and +Y vehicle forward. Runtime glTF: +Y up and −Z forward, right handed. X remains X. Runtime transform from source is `(x,z,-y)`. The exporter performs this conversion once; do not apply it a second time in the importer. Object scale applied, no nonuniform runtime scale. Root coordinate (0,0,0) is wheel-contact plane at vehicle center. Position origin remains identical across LODs.
 
@@ -36,4 +37,6 @@ VEHICLE-002 extends that pack to 33 asset types / 66 GLBs and 1.45 MiB without a
 
 Runtime selection: Three.js first requests `/packs/norway.json`, then loads exactly that manifest's model and shared texture files in parallel. Blender parts are merged by shared material before distance-switched vehicle/station cloning or prop instancing. Detailed vegetation and rocks use deterministic, frustum-cullable 8 km quadrants; a matching sampled distant-canopy representation serves regional views. Houses and bridge parts remain instanced. Texture role, colour space, repeat and material-prefix bindings live in the manifest. Collision remains on logical footprints and the track graph. GFX-007 records 187–226 calls and 1.45–1.77 million triangles across its four fixed normal views. No compression extension is used.
 
-Status: Blender → GLB → Three.js is validated for both the architecture probe and the production Norway pack. Blender 4.0.2 generated the checked-in artifacts locally; the browser validated all normals, bounds, LODs, selected-pack requests, close/strategic views and complete WebGL disposal. Astra is a Codex model, not an engine. GLB remains the runtime asset format.
+GFX-R07 adds the required `/packs/arizona.json` selection path. Its ten original architecture types use 20 LOD GLBs and nine shared timber, masonry and weathered-roof PNG maps (base colour, normal and roughness), totaling roughly 652 KiB. Runtime placement builds 180 deterministic, street-oriented plots and clones the requested near/far assets through the same loader. Validation additionally checks UV coverage, roof ridge height and type-specific windows, doors, awnings, porches, tanks or headframe details. The fixed entry scene records 116 calls and 1,110,250 main-pass triangles.
+
+Status: Blender → GLB → Three.js is validated for the architecture probe and both production Norway and Arizona packs. Blender 4.0.2 generated the checked-in artifacts locally; the browser validated all normals, bounds, UVs, LODs, selected-pack requests, close/strategic views and complete WebGL disposal. Astra is a Codex model, not an engine. GLB remains the runtime asset format.
