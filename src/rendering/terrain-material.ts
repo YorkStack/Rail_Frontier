@@ -28,7 +28,8 @@ vec4 terrainSample(sampler2D atlas,float family,vec2 uv){
 
 const MAP_FRAGMENT=`
 vec3 terrainN=normalize(vTerrainNormalWorld);
-float terrainSteep=smoothstep(.12,.48,1.0-abs(terrainN.y));
+float terrainRockMask=smoothstep(.24,.72,vTerrainMask.y);
+float terrainSteep=max(smoothstep(.1,.4,1.0-abs(terrainN.y)),terrainRockMask*.88);
 float terrainLarge=terrainMacro(vTerrainWorld.xz/430.0);
 float terrainPatch=terrainMacro(vTerrainWorld.xz/47.0+19.0);
 #ifdef TERRAIN_DESERT

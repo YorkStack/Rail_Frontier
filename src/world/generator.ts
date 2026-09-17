@@ -4,11 +4,13 @@ import type {Heightfield} from './terrain.js';
 export interface WorldPoint {readonly x:number;readonly z:number}
 export interface WaterCrossSection {readonly westBankX:number|null;readonly eastBankX:number|null}
 export interface WaterfallLandmark {readonly z:number;readonly bank:'west'|'east';readonly offsetFromBankM:number}
+export interface WatercourseLandmark {readonly upstream:WorldPoint;readonly lip:WorldPoint;readonly plunge:WorldPoint;readonly outlet:WorldPoint;readonly cameraAnchor:WorldPoint}
 export interface WorldLandforms {
   readonly anchors:Readonly<Record<string,WorldPoint>>;
   corridorX(z:number):number;
   waterCrossSection(z:number):WaterCrossSection;
   readonly waterfall:WaterfallLandmark|null;
+  readonly watercourse?:WatercourseLandmark;
 }
 
 /** Versioned world content. New biomes register an implementation with CampaignContent. */

@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {norwayV2} from '../src/content/norway.js';
-import {generateNorwayV2World} from '../src/world/norway-v2.js';
+import {norwayV3} from '../src/content/norway.js';
+import {generateNorwayV3World} from '../src/world/norway-v3.js';
 import {generateNorwayScenery} from '../src/rendering/scenery-placement.js';
 import type {GameState,RailEdge,RailNode} from '../src/domain/model.js';
 
 function input(){
-  const terrain=generateNorwayV2World(norwayV2.world),state={world:norwayV2.world,railway:{nodes:[],edges:[],revision:0},towns:norwayV2.towns,industries:[],stations:[]} as unknown as GameState;return {terrain,state};
+  const terrain=generateNorwayV3World(norwayV3.world),state={world:norwayV3.world,railway:{nodes:[],edges:[],revision:0},towns:norwayV3.towns,industries:[],stations:[]} as unknown as GameState;return {terrain,state};
 }
 
 test('Norway scenery is deterministic, varied and respects masks',()=>{
