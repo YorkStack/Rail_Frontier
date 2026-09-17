@@ -1,14 +1,14 @@
 # Graphics rework — Norway and Arizona
 
-Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–06 are complete; GFX-R07 is next.**
+Date: 2026-09-17. **Planning complete; SOL implementation active. GFX-R01–07 are complete; CON-04–06 are next.**
 
 This is the active graphics handoff. It supersedes the visual acceptance claims of GFX-001–008 and EXP-003, while preserving those checkpoints as engineering history. The user rejected the current appearance: plain terrain, toy trees, missing visible cliffs/waterfalls, box buildings in Arizona, inverted Norwegian roofs and a board-like opening view. Passing tests and counting assets did not establish acceptable art quality.
 
 ## Checkpoint and resume order
 
-- Runtime checkpoint: `603bffec927aacbea4bdb670d71f693f696de84d`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
+- Runtime checkpoint: `ee098f483da55ee9c8c6c6073d80046995e67f2c`; synchronization to both `main` and `implementation/passenger-slice` follows the documentation checkpoint.
 - Existing gameplay: Norway construction, stations, passenger/mail/freight, routes, electrification, locomotive eras, saves and reports are implemented. Preserve this work.
-- EXP-003 is a technical Arizona terrain prototype, **not a finished or playable Arizona campaign**. Its hidden HUD, empty railway and primitive buildings must be described accordingly.
+- EXP-003 established the technical Arizona terrain prototype; GFX-R06/07 subsequently replaced its geology and primitive buildings. Arizona still has a hidden Norway HUD and empty railway and is **not a finished or playable Arizona campaign**.
 - Pause EXP-004 economy/cargo work, EXP-005 full campaign selector and Great River until the graphics rework passes. The Arizona art portion of EXP-004 is incorporated below; avoid duplicate asset work later.
 - Combined order after the user switches model and asks to continue: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. The [station-first construction design](../construction/STATION_TRACK_DESIGN.md) supersedes the initial UX-002 proposal; see also [ONBOARDING_AND_CONTROLS_PLAN.md](../ux/ONBOARDING_AND_CONTROLS_PLAN.md). SOL is an LLM selection; Three.js remains the renderer.
 - Implementation checkpoints update this plan only after the matching runtime, fixed browser views and regression tests pass.
@@ -118,6 +118,8 @@ Acceptance: clay and textured views each show escarpment, mesa, canyon and basin
 
 ## GFX-R07 — Arizona architecture around 1900 and composed towns
 
+**Status: complete at runtime checkpoint `ee098f4`.** Local Blender 4.0.2 generated ten original asset types at two LODs (20 GLBs) and nine shared timber, masonry and weathered-roof base/normal/roughness maps. The pack includes two timber houses, adobe and brick homes, two street-facing shops, depot, water tower, freight shed and mine headframe. Deterministic main/cross streets orient doors, setbacks and foundations for 180 plots across three towns. Arizona now requires its own manifest; generic presentation asset roles remove the former Norway-specific shared-loader assumption, and missing assets surface as a load failure. Validation covers GLB 2.0 structure, finite bounds/normals, UVs, LOD simplification, ridge-above-eave geometry and type-specific detail nodes. Entry, street and house-close Chrome views load all assets and retain 10,500 vegetation instances at 116 calls and 1,110,250 main-pass triangles, with terrain error below 0.001 m and no shader/context errors. Arizona remains a non-playable terrain/scenery study.
+
 Replace all visible two-box buildings with an original Blender pack. Minimum kit: two timber houses, one adobe/plastered masonry house, one modest brick/stone building, two street-facing shops, a timber depot, water tower, freight shed and mine shed/headframe exterior. Each needs actual windows/door openings or inset representations, glazing/frames, roof structure, weathered boards/plaster/masonry and foundation contact. Homes use documented gabled/hipped or adobe roof forms. Commercial false-front facades must reveal a plausible roof behind them. Porches, boardwalks, awnings, chimneys, crates and fences give period scale. No modern glass curtain walls, air conditioners, satellite dishes, road markings or invented generic neon Western scenery.
 
 Start with asset-specific historical reference pairs; the photographs above establish the overall vocabulary, not measured building plans. All color choices are art interpretation unless documented. Reuse earlier Norwegian locomotive detail requirements for windows/doors/pipes/grilles, but do not relabel Norwegian rolling stock as historically accurate American equipment. US trains/economic content belong to the remaining EXP-004 task.
@@ -158,4 +160,4 @@ Refresh README screenshots from the final **actual game**, labeled by campaign/v
 
 ## Planning handoff
 
-Planning is ready for SOL implementation. **Stop here until the user switches to SOL and asks to continue.** This pause is explicitly requested by the user, not an additional approval rule. Start at GFX-R01 with the roof fix and real exported-asset comparison, then follow the combined graphics/UX order above. Mark graphics implementation complete only after GFX-R09's visual and technical gates pass. Resume the unfinished EXP-004 campaign/economy portion after the integrated graphics/UX review; any pending independent UX acceptance must be reported explicitly.
+The requested SOL switch is complete and GFX-R01–07 are implemented. Continue at CON-04–06, then follow the combined graphics/UX order above. Mark graphics implementation complete only after GFX-R09's visual and technical gates pass. Resume the unfinished EXP-004 campaign/economy portion after the integrated graphics/UX review; any pending independent UX acceptance must be reported explicitly.
