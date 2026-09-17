@@ -1,4 +1,4 @@
-import { Heightfield,type Terrain } from '../world/terrain.js';
+import { type Terrain,type TriangleTerrain } from '../world/terrain.js';
 import { pointAt,type TrackGeometry } from './geometry.js';
 import { certifyCurve,type RailConstraints,standardRail } from './constraints.js';
 import { cubicRoots,curveInterval } from '../domain/curve-math.js';
@@ -8,14 +8,14 @@ export interface EngineeringQuote { valid:boolean;reasons:string[];cost:number;m
 export function quoteTrack(geometry:TrackGeometry,terrain:Terrain,limits:RailConstraints=standardRail,costMultiplier=1):EngineeringQuote {
   if(!Number.isFinite(costMultiplier)||costMultiplier<=0)throw new Error('Invalid track cost multiplier');
   const intervals:EngineeringInterval[]=[],reasons=new Set(certifyCurve(geometry.curve,limits).reasons);
-  const breaks=terrain instanceof Heightfield?terrain.curveBreakpoints(geometry.curve):[0,1];
-  if(!(terrain instanceof Heightfield))reasons.add('Terrain must provide triangle intersection analysis');
+  const triangleTerrain=terrain as Partial<TriangleTerrain>,hasTriangles=typeof triangleTerrain.curveBreakpoints==='function'&&typeof triangleTerrain.planeAt==='function',breaks=hasTriangles?triangleTerrain.curveBreakpoints!(geometry.curve):[0,1];
+  if(!hasTriangles)reasons.add('Terrain must provide triangle intersection analysis');
   const parameters=[...breaks,...geometry.samples.map(s=>s.t)];
   for(let i=1;i<breaks.length;i++) {
     const start=breaks[i-1]!,end=breaks[i]!,mid=pointAt(geometry.curve,(start+end)/2);
     if(mid.x<0||mid.z<0||mid.x>terrain.widthM||mid.z>terrain.depthM){reasons.add('Alignment leaves terrain');continue;}
-    if(!(terrain instanceof Heightfield))continue;
-    const plane=terrain.planeAt(mid.x,mid.z),part=curveInterval(geometry.curve,start,end),controls=[part.p0,part.p1,part.p2,part.p3];
+    if(!hasTriangles)continue;
+    const plane=triangleTerrain.planeAt!(mid.x,mid.z),part=curveInterval(geometry.curve,start,end),controls=[part.p0,part.p1,part.p2,part.p3];
     const ground=controls.map(p=>plane.dx*p.x+plane.dz*p.z+plane.constant),clearance=controls.map((p,j)=>p.y-ground[j]!);
     const add=(values:number[],level:number)=>parameters.push(...cubicRoots(values,level).map(t=>start+t*(end-start)));
     add(clearance,-4);add(clearance,6);

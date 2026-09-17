@@ -37,7 +37,7 @@ test('portable archive export and import preserve a canonical save without repla
   const {game,store,manager}=setup();await manager.save('manual','Sundvik & Fjellhavn');const portable=await manager.exportSlot('manual');
   assert.equal(portable.filename,'Sundvik-Fjellhavn.railfrontier.json');const archive=JSON.parse(portable.json);assert.equal(archive.format,'rail-frontier-save');assert.equal(archive.formatVersion,1);assert.equal(archive.name,'Sundvik & Fjellhavn');
   game.advance(1);const running=JSON.stringify(game.snapshot()),imported=await manager.importArchive(portable.json);assert.equal(imported.name,'Sundvik & Fjellhavn');assert.equal(JSON.stringify(game.snapshot()),running);
-  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,7);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);
+  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,8);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);
 });
 
 test('public import rejects malformed, incompatible and over-limit content before writing a slot',async()=>{

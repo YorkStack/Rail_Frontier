@@ -11,7 +11,8 @@ import { validateState } from '../persistence/save.js';
 import { compileCurve } from '../rail/geometry.js';
 import { quoteTrack, type EngineeringQuote } from '../rail/planner.js';
 import { SimulationClock } from '../simulation/clock.js';
-import type { Terrain } from '../world/terrain.js';
+import type { GridTerrain } from '../world/terrain.js';
+import {EngineeredTerrain} from '../world/engineered-terrain.js';
 import { createSimulationSystems } from '../simulation/systems.js';
 
 export interface GameOptions {
@@ -36,9 +37,11 @@ export class RailFrontierGame implements GameApplication {
   private readonly stepSystems:(state:GameState)=>void;
   private clock:SimulationClock;
   private runtimeSpeed:Speed;
+  readonly terrain:EngineeredTerrain;
 
-  constructor(initialState:GameState,readonly terrain:Terrain,options:GameOptions={}) {
+  constructor(initialState:GameState,baseTerrain:GridTerrain,options:GameOptions={}) {
     this.state=validateState(structuredClone(initialState));
+    this.terrain=new EngineeredTerrain(baseTerrain,this.state.operations.terrain);
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
     this.handlers={...baseCommandHandlers,...constructionCommandHandlers,...stationCommandHandlers,...trainCommandHandlers,...routeCommandHandlers,...electrificationCommandHandlers,...options.handlers};
@@ -57,6 +60,7 @@ export class RailFrontierGame implements GameApplication {
       const effect=executeCommand(working,envelope.command,{terrain:this.terrain,speed:this.runtimeSpeed},this.handlers);
       working.operations.lastCommandSequence=envelope.sequence;
       const committed=validateState(working);
+      this.terrain.publish(committed.operations.terrain);
       this.state=committed;
       this.previousPublished=this.published;
       this.published=snapshotState(committed);
@@ -81,7 +85,7 @@ export class RailFrontierGame implements GameApplication {
   pauseForVisibility():void {this.runtimeSpeed=0;}
 
   replaceState(nextState:GameState):void {
-    this.state=validateState(structuredClone(nextState));
+    this.state=validateState(structuredClone(nextState));this.terrain.publish(this.state.operations.terrain);
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
     this.runtimeSpeed=0;

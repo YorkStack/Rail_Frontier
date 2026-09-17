@@ -1,5 +1,5 @@
 import type {GameState} from '../domain/model.js';
-import type {Heightfield} from '../world/terrain.js';
+import type {GridTerrain} from '../world/terrain.js';
 import {SeededRandom} from '../world/random.js';
 
 export type ArizonaSettlementComposition='rail-outpost'|'commercial-grid'|'mining-town';
@@ -18,7 +18,7 @@ const townAssets=[
 ] as const satisfies ReadonlyArray<ReadonlyArray<(typeof arizonaBuildingAssets)[number]>>;
 
 /** Deterministic visual plots arranged around a main street and four cross streets. */
-export function generateArizonaSettlements(terrain:Heightfield,state:Pick<GameState,'world'|'towns'>):ReadonlyArray<ArizonaBuildingPlacement> {
+export function generateArizonaSettlements(terrain:GridTerrain,state:Pick<GameState,'world'|'towns'>):ReadonlyArray<ArizonaBuildingPlacement> {
   const records:ArizonaBuildingPlacement[]=[],random=new SeededRandom((state.world.seed^0xa21d1900)>>>0),compositions:ArizonaSettlementComposition[]=['rail-outpost','commercial-grid','mining-town'];
   for(let townIndex=0;townIndex<state.towns.length;townIndex++){
     const town=state.towns[townIndex]!,composition=compositions[townIndex]!,assets=townAssets[townIndex]!;

@@ -1,5 +1,5 @@
 import type {GameState} from '../domain/model.js';
-import type {Heightfield} from '../world/terrain.js';
+import type {GridTerrain} from '../world/terrain.js';
 import {SeededRandom} from '../world/random.js';
 import {compileGraph} from '../rail/graph.js';
 
@@ -13,7 +13,7 @@ function nearTrack(x:number,z:number,tracks:{x:number;z:number}[][],clearance=30
 function overlaps(x:number,z:number,radius:number,records:ReadonlyArray<BuildingPlacement>):boolean {return records.some(item=>Math.hypot(x-item.x,z-item.z)<radius+item.footprintRadiusM+3);}
 
 /** Deterministic visual settlement content. It is derived data and never enters saves. */
-export function generateNorwaySettlements(terrain:Heightfield,state:Pick<GameState,'world'|'railway'|'towns'|'industries'>,housesPerTown=15):ReadonlyArray<BuildingPlacement> {
+export function generateNorwaySettlements(terrain:GridTerrain,state:Pick<GameState,'world'|'railway'|'towns'|'industries'>,housesPerTown=15):ReadonlyArray<BuildingPlacement> {
   const records:BuildingPlacement[]=[],tracks=trackSamples(state),random=new SeededRandom((state.world.seed^0x6a11a9e)>>>0);
   const compositions:SettlementComposition[]=['harbour-row','farm-courts','mountain-terraces'];
   for(let townIndex=0;townIndex<state.towns.length;townIndex++){

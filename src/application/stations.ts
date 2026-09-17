@@ -5,6 +5,7 @@ import { allocateId, type Id } from '../domain/model.js';
 import { distance } from '../rail/geometry.js';
 import { straightCurve,surveyStationSite } from '../rail/station-layout.js';
 import { postExpense } from '../simulation/finance.js';
+import {stationPadTerrainOperation} from '../rail/earthworks.js';
 
 type BuildStation=Extract<GameCommand,{type:'buildStation'}>;
 type PlaceStation=Extract<GameCommand,{type:'placeStation'}>;
@@ -38,6 +39,7 @@ export const placeStationHandler:CommandHandler<PlaceStation>=(state,command,con
     id:stationId,nodeId:stopNodeId,townId:nearestTown(state,site.center,definition.coverageRadiusM),classId:definition.id,storage:[],constructionCost:definition.purchaseCost,
     layout:{kind:'single-platform',version:1,orientationRad:site.orientationRad,stopNodeId,ports:[{key:'a',nodeId:portANodeId,outward:{x:-site.direction.x,z:-site.direction.z},trackClassId:'local',gaugeM:1.435,attachmentCapacity:1},{key:'b',nodeId:portBNodeId,outward:site.direction,trackClassId:'local',gaugeM:1.435,attachmentCapacity:1}],internalEdgeIds:[edgeAId,edgeBId],pad:{center:site.center,lengthM:site.lengthM,widthM:site.widthM,maxReliefM:site.maxReliefM}}
   });
+  const terrainSequence=state.operations.terrain.revision+1;state.operations.terrain.operations.push(stationPadTerrainOperation(stationId,site.center,site.orientationRad,site.lengthM,site.widthM,terrainSequence));state.operations.terrain.revision=terrainSequence;
   postExpense(state,'construction',definition.purchaseCost,stationId,'Station construction');
   return {createdIds:[stationId,stopNodeId,portANodeId,portBNodeId,edgeAId,edgeBId]};
 };

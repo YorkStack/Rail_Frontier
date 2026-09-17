@@ -6,10 +6,11 @@ import { industryDefinition } from '../content/industries.js';
 import { stationDefinition } from '../content/stations.js';
 import { vehicleDefinition } from '../content/vehicles.js';
 import { currentYear } from '../simulation/calendar.js';
+import {compileCurve} from '../rail/geometry.js';
 
 export const SAVE_LIMITS=Object.freeze({
   bytes:20_000_000,nodes:25_000,edges:25_000,stations:5_000,trains:2_000,routes:5_000,towns:5_000,industries:5_000,ledger:100_000,
-  demand:50_000,reservations:25_000,monthlyAccounts:10_000,objectives:1_000,vehicleIdsPerTrain:128,pathEdgesPerTrain:25_000,cargoLotsPerEntity:2_048,stopsPerRoute:512,spansPerEdge:2_048
+  demand:50_000,reservations:25_000,monthlyAccounts:10_000,objectives:1_000,vehicleIdsPerTrain:128,pathEdgesPerTrain:25_000,cargoLotsPerEntity:2_048,stopsPerRoute:512,spansPerEdge:2_048,terrainOperations:50_000,earthworkSections:2_048
 });
 const record=(value:unknown):Record<string,unknown>|null=>typeof value==='object'&&value!==null&&!Array.isArray(value)?value as Record<string,unknown>:null;
 const limitedArray=(owner:Record<string,unknown>|null,key:string,limit:number,label:string):unknown[]=>{
@@ -32,6 +33,7 @@ function preflightEnvelope(value:unknown):void {
   for(const item of trains){const train=record(item);limitedArray(train,'vehicleIds',SAVE_LIMITS.vehicleIdsPerTrain,'vehicles per train');limitedArray(record(train?.motion),'path',SAVE_LIMITS.pathEdgesPerTrain,'path edge per train');limitedArray(train,'cargo',SAVE_LIMITS.cargoLotsPerEntity,'train cargo lot');}
   for(const item of routes)limitedArray(record(item),'stops',SAVE_LIMITS.stopsPerRoute,'route stop');
   for(const item of Object.values(limitedRecord(operations,'infrastructure',SAVE_LIMITS.edges,'infrastructure record')))limitedArray(record(item),'spans',SAVE_LIMITS.spansPerEdge,'engineering span per edge');
+  const terrain=record(operations?.terrain);for(const item of limitedArray(terrain,'operations',SAVE_LIMITS.terrainOperations,'terrain operation'))limitedArray(record(item),'sections',SAVE_LIMITS.earthworkSections,'earthwork section');
 }
 
 const finite=z.number().finite(), integer=z.number().int().safe(), nonnegative=integer.nonnegative();
@@ -55,7 +57,15 @@ const townEconomySchema=z.record(id('town'),z.strictObject({lumberDemand:nonnega
 const operationsV3Schema=operationsV2Schema.extend({townEconomy:townEconomySchema});
 const operationsV5Schema=operationsV3Schema.extend({delivered:z.strictObject({passengers:nonnegative,mail:nonnegative,timber:nonnegative,lumber:nonnegative})});
 const operationsV6Schema=operationsV5Schema.extend({infrastructure:infrastructureV6Schema});
-const operationsSchema=operationsV5Schema.extend({infrastructure:infrastructureSchema});
+const operationsV7Schema=operationsV5Schema.extend({infrastructure:infrastructureSchema});
+const boundsSchema=z.strictObject({minX:finite,minZ:finite,maxX:finite,maxZ:finite});
+const earthworkSectionSchema=z.strictObject({startM:finite.nonnegative(),endM:finite.positive(),kind:z.enum(['cut','fill','formation']),maxDepthM:finite.nonnegative(),crossSectionAreaM2:finite.nonnegative(),volumeM3:finite.nonnegative()});
+const terrainOperationSchema=z.discriminatedUnion('kind',[
+  z.strictObject({id:z.string().min(1).max(160),kind:z.literal('station-pad'),version:z.literal(1),sequence:integer.positive(),stationId:id('station'),center:vec,orientationRad:finite,lengthM:finite.positive(),widthM:finite.positive(),targetElevationM:finite,bounds:boundsSchema}),
+  z.strictObject({id:z.string().min(1).max(160),kind:z.literal('alignment'),version:z.literal(1),sequence:integer.positive(),sourceId:z.string().min(1).max(80),curve:z.strictObject({p0:vec,p1:vec,p2:vec,p3:vec}),formationWidthM:finite.positive(),shoulderWidthM:finite.positive(),sections:z.array(earthworkSectionSchema),bounds:boundsSchema})
+]);
+const terrainEngineeringSchema=z.strictObject({revision:nonnegative,patchGeneratorVersion:z.literal(1),operations:z.array(terrainOperationSchema)});
+const operationsSchema=operationsV7Schema.extend({terrain:terrainEngineeringSchema});
 const stationV6Schema=z.strictObject({id:id('station'),nodeId:id('node'),townId:id('town').nullable(),classId:z.string().min(1),storage:z.array(cargo)});
 const stationPortSchema=z.strictObject({key:z.enum(['a','b']),nodeId:id('node'),outward:z.strictObject({x:finite,z:finite}),trackClassId:z.literal('local'),gaugeM:z.literal(1.435),attachmentCapacity:z.literal(1)});
 const stationLayoutSchema=z.discriminatedUnion('kind',[
@@ -76,7 +86,8 @@ const stateV6Schema=z.strictObject({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','mail','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))}),
   objectiveProgress:z.record(z.string(),nonnegative)
 });
-const stateSchema=stateV6Schema.extend({operations:operationsSchema,stations:z.array(stationSchema)}) satisfies z.ZodType<GameState>;
+const stateV7Schema=stateV6Schema.extend({operations:operationsV7Schema,stations:z.array(stationSchema)});
+const stateSchema=stateV7Schema.extend({operations:operationsSchema}) satisfies z.ZodType<GameState>;
 const stateV5Schema=stateV6Schema.extend({operations:operationsV5Schema});
 const stateV4Schema=stateV5Schema.omit({startingYear:true});
 const stateV3Schema=stateV4Schema.extend({
@@ -87,7 +98,8 @@ const stateV3Schema=stateV4Schema.extend({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))})
 });
 const stateV2Schema=stateV3Schema.extend({operations:operationsV2Schema});
-const envelope=z.strictObject({schemaVersion:z.literal(7),gameVersion:z.literal('0.7.0'),state:stateSchema});
+const envelope=z.strictObject({schemaVersion:z.literal(8),gameVersion:z.literal('0.8.0'),state:stateSchema});
+const versionSevenEnvelope=z.strictObject({schemaVersion:z.literal(7),gameVersion:z.literal('0.7.0'),state:stateV7Schema});
 const versionSixEnvelope=z.strictObject({schemaVersion:z.literal(6),gameVersion:z.literal('0.6.0'),state:stateV6Schema});
 const versionFiveEnvelope=z.strictObject({schemaVersion:z.literal(5),gameVersion:z.literal('0.5.0'),state:stateV5Schema});
 const versionFourEnvelope=z.strictObject({schemaVersion:z.literal(4),gameVersion:z.literal('0.4.0'),state:stateV4Schema});
@@ -146,6 +158,9 @@ export function validateState(value: unknown): GameState {
   for(const reservation of state.operations.reservations){requireRef(reservation.edgeId);requireRef(reservation.trainId);if(reserved.has(reservation.edgeId))throw new Error('Conflicting edge reservations');reserved.add(reservation.edgeId);}
   for(const [trainId,service] of Object.entries(state.operations.trainServices)){requireRef(trainId);const train=state.trains.find(t=>t.id===trainId)!;const route=state.routes.find(r=>r.id===train.routeId);if(route&&service.nextStopIndex>=route.stops.length)throw new Error('Invalid service stop');}
   for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){requireRef(edgeId);let end=0;for(const span of infrastructure.spans){if(Math.abs(span.startM-end)>.001||span.endM<=span.startM)throw new Error('Invalid engineering span');end=span.endM;}const edge=state.railway.edges.find(e=>e.id===edgeId)!;if(Math.abs(end-geometry.get(edge.id)!.lengthM)>.01)throw new Error('Engineering spans must cover entire edge');if(infrastructure.electrified?(infrastructure.electrificationCost<=0||infrastructure.electrificationMaintenancePerDay<=0):(infrastructure.electrificationCost!==0||infrastructure.electrificationMaintenancePerDay!==0))throw new Error('Invalid electrification record');}
+  const terrainOperationIds=new Set<string>();let lastTerrainSequence=0;
+  for(const operation of state.operations.terrain.operations){if(terrainOperationIds.has(operation.id))throw new Error('Duplicate terrain operation');terrainOperationIds.add(operation.id);if(operation.sequence<lastTerrainSequence||operation.sequence>state.operations.terrain.revision)throw new Error('Invalid terrain operation sequence');lastTerrainSequence=operation.sequence;if(operation.bounds.minX>operation.bounds.maxX||operation.bounds.minZ>operation.bounds.maxZ)throw new Error('Invalid terrain operation bounds');if(operation.kind==='station-pad'){requireRef(operation.stationId);const station=state.stations.find(item=>item.id===operation.stationId);if(!station||station.layout.kind!=='single-platform'||Math.abs(station.layout.pad.center.x-operation.center.x)>.001||Math.abs(station.layout.pad.center.z-operation.center.z)>.001||Math.abs(station.layout.pad.center.y-operation.targetElevationM)>.001)throw new Error('Invalid station terrain operation');}else{const length=compileCurve(operation.curve).lengthM;let end=0;for(const section of operation.sections){if(section.startM<end-1e-6||section.endM<=section.startM||section.endM>length+.01)throw new Error('Invalid earthwork section');end=section.endM;}}}
+  if((state.operations.terrain.operations.length===0)!==(state.operations.terrain.revision===0))throw new Error('Invalid terrain revision');
   for(const industryId of Object.keys(state.operations.industryCycleTicks))requireRef(industryId);
   for(const industry of state.industries) {
     const recipe=industryDefinition(industry.definitionId);if(!recipe)throw new Error(`Unknown industry: ${industry.definitionId}`);
@@ -162,23 +177,24 @@ export function validateState(value: unknown): GameState {
   if(cash!==state.company.cash) throw new Error('Ledger does not reconcile');
   return state;
 }
-const emptyVersionTwoOperations=()=>{const {townEconomy:_,delivered,...previous}=emptyOperations();const {mail:__,...legacyDelivered}=delivered;return {...previous,delivered:legacyDelivered};};
+const emptyVersionTwoOperations=()=>{const {townEconomy:_,terrain:___,delivered,...previous}=emptyOperations();const {mail:__,...legacyDelivered}=delivered;return {...previous,delivered:legacyDelivered};};
 export const migrations=new Map<number,(value:unknown)=>unknown>([
   [1,(value)=>{const legacy=legacyEnvelope.parse(value);return {schemaVersion:2,gameVersion:'0.2.0',state:{...legacy.state,operations:emptyVersionTwoOperations()}};}],
   [2,(value)=>{const previous=versionTwoEnvelope.parse(value);return {schemaVersion:3,gameVersion:'0.3.0',state:{...previous.state,operations:{...previous.state.operations,townEconomy:initialTownEconomy(previous.state.towns)}}};}],
   [3,(value)=>{const previous=versionThreeEnvelope.parse(value);return {schemaVersion:4,gameVersion:'0.4.0',state:{...previous.state,operations:{...previous.state.operations,delivered:{...previous.state.operations.delivered,mail:0}}}};}],
   [4,(value)=>{const previous=versionFourEnvelope.parse(value);return {schemaVersion:5,gameVersion:'0.5.0',state:{...previous.state,startingYear:1900}};}],
   [5,(value)=>{const previous=versionFiveEnvelope.parse(value);return {schemaVersion:6,gameVersion:'0.6.0',state:{...previous.state,operations:{...previous.state.operations,infrastructure:Object.fromEntries(Object.entries(previous.state.operations.infrastructure).map(([edgeId,infrastructure])=>[edgeId,{...infrastructure,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0}]))}}};}],
-  [6,(value)=>{const previous=versionSixEnvelope.parse(value);return {schemaVersion:7,gameVersion:'0.7.0',state:{...previous.state,stations:previous.state.stations.map(station=>({...station,layout:{kind:'legacy-node' as const,version:1 as const},constructionCost:stationDefinition(station.classId)?.purchaseCost??0}))}};}]
+  [6,(value)=>{const previous=versionSixEnvelope.parse(value);return {schemaVersion:7,gameVersion:'0.7.0',state:{...previous.state,stations:previous.state.stations.map(station=>({...station,layout:{kind:'legacy-node' as const,version:1 as const},constructionCost:stationDefinition(station.classId)?.purchaseCost??0}))}};}],
+  [7,(value)=>{const previous=versionSevenEnvelope.parse(value);return {schemaVersion:8,gameVersion:'0.8.0',state:{...previous.state,operations:{...previous.state.operations,terrain:{revision:0,patchGeneratorVersion:1 as const,operations:[]}}}};}]
 ]);
-export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:7,gameVersion:'0.7.0',state:validateState(state)}); }
+export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:8,gameVersion:'0.8.0',state:validateState(state)}); }
 export function deserialize(json:string):GameState {
   if(json.length>SAVE_LIMITS.bytes||new TextEncoder().encode(json).byteLength>SAVE_LIMITS.bytes) throw new Error('Save exceeds 20 MB limit');
   let value:unknown=JSON.parse(json);
   preflightEnvelope(value);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
-  if(version>7) throw new Error('Save was created by a newer game');
-  while(version<7) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
+  if(version>8) throw new Error('Save was created by a newer game');
+  while(version<8) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
   return validateState(envelope.parse(value).state);
 }
