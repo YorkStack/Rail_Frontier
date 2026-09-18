@@ -18,7 +18,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
   await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Pause',exact:true}).click();await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed',{timeout:15000});
   expect(await page.evaluate(()=>window.__railProbe.snapshot())).toEqual(saved);
   await page.getByRole('button',{name:'Build tracks'}).click();await expect(page.getByRole('region',{name:'Alignment study'})).toBeVisible();
-  await page.getByLabel('Track elevation').fill('1');await expect(page.locator('#quote-valid')).toContainText('clearance');
+  await page.getByLabel('Track elevation').fill('-5');await expect(page.locator('#quote-valid')).toContainText('Feasible');await expect(page.locator('#quote-kind')).toContainText('tunnel');
   await page.getByLabel('Track elevation').fill('15');await expect(page.locator('#quote-valid')).toContainText('Feasible');
   await page.getByLabel('Corridor').selectOption('tunnel');await expect(page.locator('#quote-kind')).toContainText('tunnel');
   mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/tunnel-waterfall.png'});
