@@ -22,6 +22,7 @@ import {generateNorwaySettlements} from './settlement-placement.js';
 import {generateArizonaSettlements} from './arizona-settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
 import type {StationSite} from '../rail/station-layout.js';
+import {BRIDGE_MODULE_LENGTH_M,deriveInfrastructurePlacements} from './infrastructure-placement.js';
 
 export interface RenderStats { calls:number;triangles:number;terrainTriangles:number;terrainPatchTriangles:number;geometries:number;textures:number;trees:number;detailedTrees:number;simplifiedTrees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;terrainPatchCells:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -102,7 +103,7 @@ export class FjordRenderer implements WorldRenderer {
     this.rebuildTracks(state);
     this.trees=content.presentation.proceduralScenery==='southwest-study'?this.createSouthwestVegetation(this.profile.vegetation.density):this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
     if(content.presentation.proceduralScenery==='southwest-study')this.createSouthwestBuildings(state,180);else this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
-    this.createPortals();this.createBridgeTrusses();this.scene.add(this.infrastructureModels);
+    this.rebuildAuthoredInfrastructure(state);
     this.labels=[
       ...state.towns.map(town=>({name:town.name,position:town.position,selection:{kind:'town' as const,id:town.id}})),
       ...state.industries.map(industry=>({name:industryName(industry.definitionId),position:industry.position,selection:{kind:'industry' as const,id:industry.id}}))
@@ -199,10 +200,17 @@ export class FjordRenderer implements WorldRenderer {
     for(const station of state.stations){if(!this.stationModels.has(station.id)){const model=this.cloneLod(assetId,260);model.userData.selection={kind:'station',id:station.id} satisfies WorldSelection;this.scene.add(model);this.stationModels.set(station.id,model);}const model=this.stationModels.get(station.id)!,node=state.railway.nodes.find(candidate=>candidate.id===station.nodeId),edge=state.railway.edges.find(candidate=>candidate.from===station.nodeId||candidate.to===station.nodeId);if(!node||!edge)continue;const otherId=edge.from===node.id?edge.to:edge.from,other=state.railway.nodes.find(candidate=>candidate.id===otherId);if(!other)continue;const yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z));model.position.set(node.position.x+Math.cos(yaw)*4.2,node.position.y,node.position.z-Math.sin(yaw)*4.2);model.rotation.y=yaw;model.visible=this.inspectionModel===null;}
   }
   private rebuildAuthoredInfrastructure(state:Readonly<GameState>):void {
-    const bridgeAsset=this.content.presentation.assetRoles.bridgeSpan,tunnelAsset=this.content.presentation.assetRoles.tunnelPortal;if(!bridgeAsset||!tunnelAsset||!this.assetLevels.has(bridgeAsset)||!this.assetLevels.has(tunnelAsset))return;this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
-    const bridgePlacements:THREE.Matrix4[]=[],dummy=new THREE.Object3D();for(const [edgeId,infrastructure] of Object.entries(state.operations.infrastructure)){const track=this.geometry.get(edgeId as `edge:${number}`);if(!track)continue;for(const span of infrastructure.spans.filter(item=>item.kind==='bridge'))for(let distance=span.startM+12;distance<span.endM;distance+=24){const p=sampleDistance(track,Math.min(distance,span.endM)),q=sampleDistance(track,Math.min(distance+1,track.lengthM));dummy.position.set(p.x,p.y-.9,p.z);dummy.rotation.set(0,Math.atan2(-(q.x-p.x),-(q.z-p.z)),0);dummy.scale.setScalar(1);dummy.updateMatrix();bridgePlacements.push(dummy.matrix.clone());}}
-    if(bridgePlacements.length>0)this.infrastructureModels.add(this.instancedAsset(bridgeAsset,0,bridgePlacements));
-    for(const track of this.geometry.values()){let inside=false;for(const sample of track.samples){const p=sample.position,buried=this.terrain.sample(p.x,p.z).elevationM>p.y+5;if(buried!==inside){inside=buried;const q=sampleDistance(track,Math.min(track.lengthM,sample.distanceM+1)),model=this.cloneLod(tunnelAsset,280);model.position.set(p.x,p.y,p.z);model.rotation.y=Math.atan2(-(q.x-p.x),-(q.z-p.z));this.infrastructureModels.add(model);}}}
+    this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
+    const layout=deriveInfrastructurePlacements(this.geometry,state.operations.infrastructure,state.operations.terrain),bridgeAsset=this.content.presentation.assetRoles.bridgeSpan,tunnelAsset=this.content.presentation.assetRoles.tunnelPortal,dummy=new THREE.Object3D();
+    const bridgeMatrices=layout.bridgeModules.map(item=>{dummy.position.set(item.position.x,item.position.y-.9,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(1,1,item.lengthM/BRIDGE_MODULE_LENGTH_M);dummy.updateMatrix();return dummy.matrix.clone();});
+    if(bridgeMatrices.length>0){if(bridgeAsset&&this.assetLevels.has(bridgeAsset))this.infrastructureModels.add(this.instancedAsset(bridgeAsset,0,bridgeMatrices));else{const deckMatrices=layout.bridgeModules.map(item=>{dummy.position.set(item.position.x,item.position.y-.72,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(7,.8,item.lengthM);dummy.updateMatrix();return dummy.matrix.clone();}),deck=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:'#40514e',roughness:.68,metalness:.3}),deckMatrices.length);deckMatrices.forEach((matrix,index)=>deck.setMatrixAt(index,matrix));deck.castShadow=true;deck.receiveShadow=true;deck.computeBoundingSphere();this.infrastructureModels.add(deck);}}
+    const tunnelPortals=layout.transitions.filter(item=>item.kind==='tunnel-portal');
+    if(tunnelAsset&&this.assetLevels.has(tunnelAsset))for(const item of tunnelPortals){const model=this.cloneLod(tunnelAsset,280);model.position.set(item.position.x,item.position.y,item.position.z);model.rotation.y=item.rotationY;this.infrastructureModels.add(model);}else if(tunnelPortals.length>0){const material=new THREE.MeshStandardMaterial({color:'#8b887c',roughness:.98});for(const item of tunnelPortals){const portal=new THREE.Group();for(const x of [-3.3,3.3]){const pillar=new THREE.Mesh(new THREE.BoxGeometry(1.5,5,3),material);pillar.position.set(x,2.1,0);portal.add(pillar);}const arch=new THREE.Mesh(new THREE.TorusGeometry(3.3,.8,7,18,Math.PI),material);arch.position.y=4.6;portal.add(arch);portal.position.set(item.position.x,item.position.y,item.position.z);portal.rotation.y=item.rotationY;this.infrastructureModels.add(portal);}}
+    const abutmentMatrices:THREE.Matrix4[]=[],cutMatrices:THREE.Matrix4[]=[],fillMatrices:THREE.Matrix4[]=[];
+    for(const item of layout.transitions.filter(item=>item.kind==='bridge-abutment')){const ground=this.terrain.sample(item.position.x,item.position.z).elevationM,top=item.position.y-.7,height=Math.max(1.5,Math.min(12,Math.abs(top-ground)));dummy.position.set(item.position.x,Math.min(top,ground)+height/2,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(9,height,3.2);dummy.updateMatrix();abutmentMatrices.push(dummy.matrix.clone());}
+    for(const item of layout.retainingWalls){const formationY=item.position.y-.55,centerY=item.earthwork==='cut'?formationY+item.heightM/2:formationY-item.heightM/2;dummy.position.set(item.position.x,centerY,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(.7,item.heightM,item.lengthM);dummy.updateMatrix();(item.earthwork==='cut'?cutMatrices:fillMatrices).push(dummy.matrix.clone());}
+    const addMasonry=(matrices:THREE.Matrix4[],color:string)=>{if(matrices.length===0)return;const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color,roughness:.96}),matrices.length);matrices.forEach((matrix,index)=>mesh.setMatrixAt(index,matrix));mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();this.infrastructureModels.add(mesh);};
+    addMasonry(abutmentMatrices,'#81796a');addMasonry(cutMatrices,'#76766d');addMasonry(fillMatrices,'#696d67');
     this.scene.add(this.infrastructureModels);
   }
   private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {
@@ -302,26 +310,6 @@ export class FjordRenderer implements WorldRenderer {
     const random=new SeededRandom(519),dummy=new THREE.Object3D(),body=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({roughness:1}),count),roof=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:'#6f4a38',roughness:1}),count),palettes=['#c9865d','#d7aa78','#b96949','#e0c092','#8f5544'];
     for(let i=0;i<count;i++){const town=state.towns[i%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=25+Math.sqrt(random.next())*300;x=Math.max(3,Math.min(this.terrain.widthM-3,town.position.x+Math.cos(angle)*radius));z=Math.max(3,Math.min(this.terrain.depthM-3,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-this.corridorX(z))>70)break;}const y=this.terrain.sample(x,z).elevationM,w=7+random.next()*9,h=3.5+random.next()*4,d=8+random.next()*11,rotation=Math.round(random.next()*3)*Math.PI/2;dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));dummy.position.y=y+h+.28;dummy.scale.set(w+1,.55,d+1);dummy.updateMatrix();roof.setMatrixAt(i,dummy.matrix);}
     body.castShadow=true;roof.castShadow=true;body.computeBoundingSphere();roof.computeBoundingSphere();this.buildings.add(body,roof);this.buildingCount=count;
-  }
-  private createPortals():void {
-    const material=new THREE.MeshStandardMaterial({color:'#a4a497',roughness:1});
-    // Find actual tunnel transitions on the authoritative profile, then place open arch geometry.
-    let inside=false;
-    for(const geometry of this.geometry.values())for(const sample of geometry.samples){const p=sample.position,buried=this.terrain.sample(p.x,p.z).elevationM>p.y+5;
-      if(buried!==inside){inside=buried;const q=sampleDistance(geometry,Math.min(geometry.lengthM,sample.distanceM+1)),portal=new THREE.Group();
-        for(const x of [-3.3,3.3]){const pillar=new THREE.Mesh(new THREE.BoxGeometry(1.5,5,3),material);pillar.position.set(x,2.1,0);portal.add(pillar);}
-        const arch=new THREE.Mesh(new THREE.TorusGeometry(3.3,.8,5,14,Math.PI),material);arch.position.y=4.6;portal.add(arch);portal.position.set(p.x,p.y,p.z);portal.rotation.y=Math.atan2(q.x-p.x,q.z-p.z);this.infrastructureModels.add(portal);
-      }
-    }
-  }
-  private createBridgeTrusses():void {
-    const material=new THREE.MeshStandardMaterial({color:'#314f4b',roughness:.65,metalness:.35});
-    const bars:THREE.Matrix4[]=[],dummy=new THREE.Object3D(),axis=new THREE.Vector3(0,1,0);
-    const add=(a:THREE.Vector3,b:THREE.Vector3,width:number)=>{const direction=b.clone().sub(a);dummy.position.copy(a).add(b).multiplyScalar(.5);dummy.quaternion.setFromUnitVectors(axis,direction.clone().normalize());dummy.scale.set(width,direction.length(),width);dummy.updateMatrix();bars.push(dummy.matrix.clone());};
-    for(const track of this.geometry.values())for(let s=8;s<track.lengthM-8;s+=12){const p=sampleDistance(track,s),q=sampleDistance(track,s+12);if(this.terrain.sample(p.x,p.z).elevationM>0)continue;
-      for(const side of [-3,3]) {const a=new THREE.Vector3(p.x+side,p.y,p.z),b=new THREE.Vector3(q.x+side,q.y,q.z);add(a.clone().add(new THREE.Vector3(0,5,0)),b.clone().add(new THREE.Vector3(0,5,0)),.38);add(a,b,.5);add(a,b.clone().add(new THREE.Vector3(0,5,0)),.3);add(a,a.clone().add(new THREE.Vector3(0,5,0)),.3);}
-    }
-    const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),material,bars.length);bars.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.computeBoundingSphere();this.infrastructureModels.add(mesh);
   }
   setPreview(geometry:TrackGeometry|null,color='#edc879'):void {
     this.setAlignmentPreview(geometry?[geometry]:[],color);
