@@ -1,6 +1,6 @@
 # Readable controls and a playable first railway
 
-Date: 2026-09-15. Status: **planning complete, implementation not started**. User requested planning with Astra and a pause before implementation with SOL. This plan and [the graphics rework](../art/GRAPHICS_REWORK_PLAN.md) supersede the previous assumption that only minor release polish remained. Runtime checkpoint: `031261f5942a8d234ab9e073e32027a8c87db803`. No code or gameplay behavior changed during this planning pass.
+Date: 2026-09-20. Status: **UX-001 and UX-003 complete; UX-004–006 remain**. The first-service builder is implemented at runtime checkpoint `053f79e`; the hands-on seven-step tutorial and its persisted learning state are next. This plan and [the graphics rework](../art/GRAPHICS_REWORK_PLAN.md) supersede the previous assumption that only minor release polish remained.
 
 ## Station-first revision from the user
 
@@ -126,12 +126,12 @@ Optional follow-on lessons: first timber service; improve a crowded station; und
 | --- | --- | --- |
 | UX-001 | Readable HUD, sizes, settings, vocabulary and DE/EN first-service copy | Native-size and zoom screenshots, keyboard/focus/contrast checks |
 | UX-002 | Station-first construction surface, delivered by CON-01–06 | Two standalone stations, editable alignment, structures, atomic build and reload |
-| UX-003 | Consist and service sequence | First service plus failure/retry paths with exactly-once purchases |
+| UX-003 ✓ | Consist and service sequence | First service plus failure/retry paths with exactly-once purchases |
 | UX-004 | Stateful hands-on lesson and save migration | Whole lesson, interrupt/reload/import/skip/storage failure journeys |
 | UX-005 | Progressive disclosure and follow-on hooks | Beginner and advanced/old-save access with unchanged technology rules |
 | UX-006 | Integrated acceptance | Independent cold-start walkthrough and full application regression |
 
-Integration sequence: **GFX-R01 → GFX-R02 → UX-001 → CON-01–03 → GFX-R03–07 → CON-04–06 → UX-003 + UX-004–005 / CON-07 → GFX-R08–09 + UX-006**. UX-002 is delivered by CON-01–06, not as a second track editor. CON-07 integrates the tutorial and existing consist/service flow. Refer to the construction design for the exact dependencies. Further campaign economy expansion waits for this pass. No new checkpoint is implemented.
+Integration sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 ✓ → CON-01–03 ✓ → GFX-R03–07 ✓ → CON-04–06 ✓ → UX-003 ✓ → UX-004–005 / CON-07 next → GFX-R08–09 + UX-006**. UX-002 is delivered by CON-01–06, not as a second track editor. CON-07 integrates the tutorial with the completed consist/service flow. Refer to the construction design for the exact dependencies. Further campaign economy expansion waits for this pass.
 
 Tests: focused reducer/command evidence and migration tests; browser journey from menu through both stations, editable track planning/build, consist, line, departure, delivered passengers/fares, save/reload/resume. Cover tutorial skip, replay in a separate company, accidental double click, rejected stale quote, no free rail point, wrong village path, platform mismatch, no demand yet, 1996 save and full-tools opt-out. Assert meaningful outcomes rather than hardcoded tooltip sequences. Retain all existing economy, dispatch and old-save regressions.
 
