@@ -42,6 +42,8 @@ export class RailFrontierGame implements GameApplication {
 
   constructor(initialState:GameState,baseTerrain:GridTerrain,options:GameOptions={}) {
     this.state=validateState(structuredClone(initialState));
+    updateLearningFromSimulation(this.state);
+    this.state=validateState(this.state);
     this.terrain=new EngineeredTerrain(baseTerrain,this.state.operations.terrain);
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
@@ -87,7 +89,7 @@ export class RailFrontierGame implements GameApplication {
   pauseForVisibility():void {this.runtimeSpeed=0;}
 
   replaceState(nextState:GameState):void {
-    this.state=validateState(structuredClone(nextState));this.terrain.publish(this.state.operations.terrain);
+    this.state=validateState(structuredClone(nextState));updateLearningFromSimulation(this.state);this.state=validateState(this.state);this.terrain.publish(this.state.operations.terrain);
     this.published=snapshotState(this.state);
     this.previousPublished=this.published;
     this.runtimeSpeed=0;

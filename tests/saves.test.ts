@@ -7,6 +7,7 @@ import { createInitialState } from '../src/content/norway.js';
 import { Heightfield } from '../src/world/terrain.js';
 import { deserialize,SAVE_LIMITS } from '../src/persistence/save.js';
 import { campaignContentRegistry } from '../src/content/registry.js';
+import {createFirstRailwayLearning} from '../src/ui/tutorial.js';
 
 class MemoryStore implements SaveStore {
   slots=new Map<string,{name:string;json:string;modifiedAt:string}>();
@@ -16,7 +17,7 @@ class MemoryStore implements SaveStore {
   async read(id:string){const value=this.slots.get(id);if(!value)throw new Error('Save slot does not exist');return value.json;}
   async remove(id:string){this.slots.delete(id);}
 }
-const setup=()=>{const state=createInitialState(),game=new RailFrontierGame(state,new Heightfield(2,2,16000,new Float64Array(4))),store=new MemoryStore(),manager=new GameSaveManager(game,store,{campaignId:state.campaignId,campaignVersion:state.campaignVersion,worldGeneratorVersion:state.world.generatorVersion});return {game,store,manager};};
+const setup=(learning=false)=>{const state=createInitialState();if(learning)state.learning=createFirstRailwayLearning(state);const game=new RailFrontierGame(state,new Heightfield(2,2,16000,new Float64Array(4))),store=new MemoryStore(),manager=new GameSaveManager(game,store,{campaignId:state.campaignId,campaignVersion:state.campaignVersion,worldGeneratorVersion:state.world.generatorVersion});return {game,store,manager};};
 
 test('manual, autosave, list, continue and delete use transactional slots',async()=>{
   const {game,store,manager}=setup();await manager.save('manual','Before expansion');game.advance(1);await manager.autosave();
@@ -33,11 +34,11 @@ test('corrupt and incompatible loads preserve the running game',async()=>{
   await assert.rejects(()=>manager.load('other'),/not compatible/);assert.equal(JSON.stringify(game.snapshot()),before);
 });
 
-test('portable archive export and import preserve a canonical save without replacing the running game',async()=>{
-  const {game,store,manager}=setup();await manager.save('manual','Sundvik & Fjellhavn');const portable=await manager.exportSlot('manual');
+test('portable archive export and import preserve a canonical save and active introduction without replacing the running game',async()=>{
+  const {game,store,manager}=setup(true);await manager.save('manual','Sundvik & Fjellhavn');const portable=await manager.exportSlot('manual');
   assert.equal(portable.filename,'Sundvik-Fjellhavn.railfrontier.json');const archive=JSON.parse(portable.json);assert.equal(archive.format,'rail-frontier-save');assert.equal(archive.formatVersion,1);assert.equal(archive.name,'Sundvik & Fjellhavn');
   game.advance(1);const running=JSON.stringify(game.snapshot()),imported=await manager.importArchive(portable.json);assert.equal(imported.name,'Sundvik & Fjellhavn');assert.equal(JSON.stringify(game.snapshot()),running);
-  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,9);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);
+  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,9);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);assert.equal(saved.state.learning.status,'active');
 });
 
 test('public import rejects malformed, incompatible and over-limit content before writing a slot',async()=>{
@@ -49,6 +50,6 @@ test('public import rejects malformed, incompatible and over-limit content befor
   const unsupported=JSON.parse(await store.read('seed'));unsupported.state.world.widthM+=1;const guarded=new GameSaveManager(game,store,undefined,candidate=>{campaignContentRegistry.resolve(candidate);});await assert.rejects(()=>guarded.importArchive(JSON.stringify(unsupported)),/not compatible/);assert.deepEqual([...store.slots.keys()],['seed']);
 });
 
-test('a failed storage write does not poison later save operations',async()=>{
-  const {store,manager}=setup();store.failNextWrite=true;await assert.rejects(()=>manager.save('first','First'),/quota/);await manager.save('second','Second');assert.deepEqual([...store.slots.keys()],['second']);
+test('a failed storage write does not poison later save operations or tutorial state',async()=>{
+  const {game,store,manager}=setup(true);store.failNextWrite=true;await assert.rejects(()=>manager.save('first','First'),/quota/);assert.equal(game.snapshot().learning?.status,'active');await manager.save('second','Second');assert.deepEqual([...store.slots.keys()],['second']);
 });
