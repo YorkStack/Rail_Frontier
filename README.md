@@ -12,15 +12,21 @@ Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**
 
 The panel follows **Start → Draw path → Build**. Track standards sit under settings, and the purchase summary appears after choosing a destination. Named endpoints remain on the map; station selection keeps the camera in place. The first proposal and build button remain visible at 1280×720.
 
-The game compares certified **whole-route** proposals with actual construction prices, gradients and bridge/tunnel lengths. A separate smoothing proposal can stay closer to the valley when a hand-drawn bend would require expensive tunnelling. Nothing is built until you confirm the displayed price. Construction uses the real company ledger, terrain and save system. Local obstacle-by-obstacle decisions remain the next step; this is an initial playtest, not final usability acceptance.
+New normal companies start with **NOK 5 million**. Drawing practices start with **NOK 10 million before buying the two prepared stations**. Existing companies keep their current cash.
 
-With the development server running: [open the drawing practice in German](http://127.0.0.1:5173/?draw-practice=1&lang=de). The older illustrated prototype is not the game.
+Try three construction exercises in order: **valley → inlet → mountain ridge**. After connecting the stations, continue to the next exercise in a new company; your current railway is saved first. Other exercises are also available under **More building challenges / Weitere Bauaufgaben** in the main menu. These are construction exercises on the real map, not completed campaign progression.
 
-![Choose a named station and sketch directly in the landscape](docs/screenshots/drawn-route-start.png)
+The game offers your drawn course first, then distinct alternatives with actual costs, gradients and structure lengths. Click a **bridge or tunnel marker** to compare solutions for that obstacle and its approaches. Other route sections remain unchanged. If the comparison spans the whole route, the panel says so. A mountain detour may shorten a tunnel without removing it entirely. Confirm the price to buy the exact reviewed geometry. Redrawing or starting a global wider search replaces the current local comparison; drafts are not yet saved.
 
-| Draw and compare actual routes | Inspect the tunnel alternative |
+With the development server running: [valley drawing practice](http://127.0.0.1:5173/?draw-practice=1&lang=de), [inlet: bridge or land route](http://127.0.0.1:5173/?draw-practice=1&lesson=inlet&lang=de), [ridge: compare tunnels and detours](http://127.0.0.1:5173/?draw-practice=1&lesson=ridge&lang=de). The older illustrated prototype is not the game.
+
+| Inlet crossing following the sketch | Ground route around the inlet |
 | --- | --- |
-| ![Real Norway route drawing and construction review](docs/screenshots/drawn-route-planner.png) | ![A separately priced tunnel proposal follows a different real alignment](docs/screenshots/drawn-route-tunnel-option.png) |
+| ![Actual bridge proposal, price and clickable engineering marker](docs/screenshots/construction-inlet-bridge.png) | ![A certified land alternative with its real construction cost](docs/screenshots/construction-inlet-land.png) |
+
+![Ridge comparison with the current design retained as an option](docs/screenshots/construction-ridge-options.png)
+
+**Validation:** 173 core tests, TypeScript and production build; eight focused browser scenarios cover station placement, drawing/editing/keyboard/compact layouts, the new practice progression and archive, bridge/tunnel persistence and the full passenger-revenue/save loop. Human playability acceptance and broader performance/accessibility work remain. The Norway V3 seabed bug is also fixed: water crossings now use genuinely submerged terrain.
 
 ## Current build
 
@@ -69,7 +75,7 @@ Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WA
 
 1. Choose **Build station**. Click suitable ground near Sundvik, rotate the platform toward Granli and build. The preview shows the platform footprint, internal track and both connection rings.
 2. Build a second station near Granli and point it along the same corridor.
-3. Choose **Build tracks**, select **Plan between rail connections** and choose a local, regional or main-line standard. Click the outward connection ring at the first station, add optional waypoints, then click the second station's glowing connection. The preview fits a smooth vertical profile and level platform approaches. Use **Undo point** or right click to revise, review the quote and build the complete alignment.
+3. Choose **Build tracks**, click the named starting station and sketch by clicking or dragging through the landscape. Finish on the destination station sign. Drag the dashed line to reshape it, compare bridge/tunnel solutions and confirm the construction price. **Undo/Redo** revises the sketch; right-drag pans the camera. Track standards are under the optional settings disclosure.
 4. Open **Trains & lines**, buy a locomotive with one or more cars, add both stations as ordered stops, create the route and assign the train.
 5. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
 
@@ -92,7 +98,7 @@ npm run preview
 
 Browser tests require installed Google Chrome (Playwright channel chrome). They build and serve a static test-mode bundle on port 5173; the normal preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The Three.js chunk produces Vite's normal size advisory and remains within the current compressed download budget.
 
-README screenshots are captured from the running application with `npm run screenshots:readme`. Set `RAIL_FRONTIER_URL` to capture a server other than `http://127.0.0.1:5173`.
+General README screenshots are captured from the running application with `npm run screenshots:readme`; the new terrain-choice images use `npx tsx tools/capture-construction-lessons.ts`. Set `RAIL_FRONTIER_URL` to capture a server other than `http://127.0.0.1:5173`.
 
 ## Reproduce Blender assets
 

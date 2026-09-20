@@ -33,7 +33,10 @@ function watercourseTarget(x:number,z:number):{weight:number;height:number} {
 }
 
 export function norwayV3Elevation(x:number,z:number,seed:number):number {
-  let elevation=norwayV2Elevation(x,z,seed)+cliffRelief(x,z),channel=watercourseTarget(x,z);elevation=mix(elevation,channel.height,channel.weight*.94);
+  const base=norwayV2Elevation(x,z,seed);
+  // Preserve the fjord seabed. The land-only clamp below must never raise water to dry ground.
+  if(base<0)return base;
+  let elevation=base+cliffRelief(x,z),channel=watercourseTarget(x,z);elevation=mix(elevation,channel.height,channel.weight*.94);
   for(const site of norwayV3SettlementSites){const distance=Math.hypot(x-site.x,z-site.z),weight=1-smooth(90,340,distance),floor=norwayV2Landforms.valley.find(point=>point.x===site.x&&point.z===site.z)!.floorM;elevation=mix(elevation,floor,weight);}
   return Math.max(4,Math.min(norwayV3WorldProfile.peakM,elevation));
 }
