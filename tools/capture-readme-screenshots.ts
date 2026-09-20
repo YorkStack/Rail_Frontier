@@ -34,6 +34,13 @@ try{
   await capture('train-service.png','train');
   await capture('sundvik-station.png','station');
 
+  await page.locator('#operations').click();
+  await expectVisible(page,'#consist-preview');
+  await page.locator('#operations-panel').evaluate(element=>{element.scrollTop=0;});
+  await settle(page);
+  await page.screenshot({path:resolve(outputDirectory,'first-service-builder.png'),fullPage:true});
+  await page.getByRole('button',{name:'Close railway operations'}).click();
+
   await page.evaluate(()=>window.__railProbe.cameraPreset('regional'));
   await page.locator('#plan').click();
   await page.getByLabel('Corridor').selectOption('bridge');
@@ -58,7 +65,7 @@ try{
   await page.screenshot({path:resolve(outputDirectory,'arizona-canyon.png'),fullPage:true});
 
   if(errors.length>0)throw new Error(`Browser reported errors:\n${errors.join('\n')}`);
-  console.log(`Captured seven README screenshots in ${outputDirectory}`);
+  console.log(`Captured eight README screenshots in ${outputDirectory}`);
 }finally{
   await browser.close();
 }
