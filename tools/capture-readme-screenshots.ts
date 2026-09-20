@@ -34,13 +34,33 @@ try{
   await capture('train-service.png','train');
   await capture('sundvik-station.png','station');
 
-  await page.getByRole('button',{name:'Open main menu'}).click();
+  await page.evaluate(()=>window.__railProbe.cameraPreset('regional'));
+  await page.locator('#plan').click();
+  await page.getByLabel('Corridor').selectOption('bridge');
+  await expectVisible(page,'#engineering-review');
+  await page.locator('#engineering-profile').scrollIntoViewIfNeeded();
+  await settle(page);
+  await page.screenshot({path:resolve(outputDirectory,'alignment-engineering.png'),fullPage:true});
+  await page.getByRole('button',{name:'Close alignment study'}).click();
+
+  await page.locator('#open-menu').click();
   await page.locator('[data-menu-view="settings"]').click();
   await settle(page);
   await page.screenshot({path:resolve(outputDirectory,'settings-menu.png'),fullPage:true});
 
+  await page.goto(`${baseUrl}/?skip-menu=1&world=arizona`,{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>window.__railProbe?.ready===true);
+  await page.evaluate(()=>{window.__railProbe.setSpeed(0);window.__railProbe.cameraPreset('street');});
+  await settle(page);
+  await page.screenshot({path:resolve(outputDirectory,'arizona-street.png'),fullPage:true});
+  await page.evaluate(()=>window.__railProbe.cameraPreset('canyon'));
+  await settle(page);
+  await page.screenshot({path:resolve(outputDirectory,'arizona-canyon.png'),fullPage:true});
+
   if(errors.length>0)throw new Error(`Browser reported errors:\n${errors.join('\n')}`);
-  console.log(`Captured four README screenshots in ${outputDirectory}`);
+  console.log(`Captured seven README screenshots in ${outputDirectory}`);
 }finally{
   await browser.close();
 }
+
+async function expectVisible(page:Page,selector:string):Promise<void>{await page.locator(selector).waitFor({state:'visible'});}
