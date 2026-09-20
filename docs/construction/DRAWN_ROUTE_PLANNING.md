@@ -1,8 +1,18 @@
 # Draw the railway: player intent, engineering choices, construction
 
-Date: 2026-09-20. **Astra design complete; DRAW-01–06 are not implemented. Pause for the user's SOL switch.** Runtime baseline: `e70bddd`; repository checkpoint before this design: `dcd777e`. This brief takes priority over the waypoint and route-mode UX in STATION_TRACK_DESIGN.md and ONBOARDING_AND_CONTROLS_PLAN.md. Their geometry, economy, terrain and transaction contracts still apply.
+Date: 2026-09-20. **First integrated drawing slice implemented for playtesting. The user requested continued Astra implementation; the earlier SOL pause is superseded.** Runtime baseline: `e70bddd`; repository checkpoint before this design: `dcd777e`. This brief takes priority over the waypoint and route-mode UX in STATION_TRACK_DESIGN.md and ONBOARDING_AND_CONTROLS_PLAN.md. Their geometry, economy, terrain and transaction contracts still apply.
 
 The user rejects the current construction experience as abstract. A passing automated build test does not resolve that feedback. CON-02/05/06 remain technical foundations; their player-facing acceptance and UX-002 are reopened. Finish this work before further graphics or campaign expansion.
+
+## Implementation checkpoint: first real-map slice
+
+The runtime now supports drag drawing and point mode, draggable/keyboard-movable handles, undo/redo, gesture cancellation, retained drafts when closing the tool, explicit endpoint selection, camera isolation, visible cost/geometry choices and a whole-alignment build through the existing command gateway. **Try track drawing** opens a separate company with two stations paid through real placement commands, on the current Norway terrain. An active company is archived before replacement. The practice remains playable and saveable after construction; no fake money or mock terrain is used.
+
+`wish-path.ts` simplifies horizontal strokes. `wish-corridor.ts` currently evaluates a bounded family of fits, grade-constrained smoothed terrain-height candidates and lateral offsets, plus an explicitly labelled endpoint-chord smoothing candidate only when the wish path stays within 150 m of it. Intermediate pointer Y does not constrain rail height. Candidate certification/quotation is shared with the existing worker/main/command pipeline. Up to three distinct proposals are displayed with real grade, length and bridge/tunnel lengths. Selection changes the real preview; ghost bridge supports/tunnel portals and screen-space line patterns distinguish structures. Direct drawing replaces the old click/mousemove handlers.
+
+**Scope differences from the full target below:** this first slice uses bounded candidate fitting (up to 30 candidate attempts), not the proposed ordered-lattice/vertical dynamic search. Alternatives currently change and revalidate the **whole route**, not a fixed local splice. Wider offsets are 300 m; the worker is stopped after eight seconds if unresolved. UI text and first-route guidance are partly localized, while detailed engineering errors/profile labels retain existing English copy. No claim of optimal routing, complete keyboard/no-drag parity, exhaustive boundary handling or measured 2-second/performance acceptance is made. Drafts remain session-only. These items and human acceptance remain work, rather than being marked complete by the first passing journey.
+
+Immediate review task: draw Sundvik → Granli, move a bend, compare a terrain-following/smoothed route with a more structural option, build and run a train. Continue with Astra after the player's feedback; reconsider SOL once this interaction works well for them. The original contracts below are the remaining implementation target, not a list of completed features.
 
 ## 1. The intended experience
 
@@ -159,12 +169,20 @@ Reuse `alignment-solver.ts`, `vertical-profile.ts`, `corridor-lattice.ts`, `corr
 
 ## 10. Handoff and resume instruction
 
-**ARCHITECTURE/DESIGN COMPLETE – SAFE TO SWITCH TO SOL FOR IMPLEMENTATION**
+**Historical planning handoff, superseded by the user’s request to continue implementation with Astra.**
 
-No DRAW runtime work has been completed in this planning turn. The next action after the user switches is **DRAW-01**, then DRAW-02; deliver a usable real-map draw/edit/build slice before polishing comparison panels. Do not stop with another static mock or only change labels. DRAW-03–06 complete the requested experience. Run relevant checks for each completed slice, record evidence and sync the tested checkpoint to both `implementation/passenger-slice` and `main` on `YorkStack/Rail_Frontier`. Do not force-push.
+At the original planning checkpoint no DRAW runtime work had been completed. That instruction is now historical; see the implementation checkpoint above. The original proposed order was **DRAW-01**, then DRAW-02; deliver a usable real-map draw/edit/build slice before polishing comparison panels. Do not stop with another static mock or only change labels. DRAW-03–06 complete the requested experience. Run relevant checks for each completed slice, record evidence and sync the tested checkpoint to both `implementation/passenger-slice` and `main` on `YorkStack/Rail_Frontier`. Do not force-push.
 
 Suggested user continuation: **„Weiter mit SOL ab IMPLEMENTATION_PLAN.md, DRAW-01. Setze den gezeichneten Streckenplaner gemäß docs/construction/DRAWN_ROUTE_PLANNING.md um.“**
 
 ### Planning-turn verification
 
 The standalone HTML concept was exercised in installed Chrome with Playwright: freehand start-to-destination stroke, point-mode completion, handle drag, undo/redo, keyboard history, Escape rollback, ridge variant geometry change and both bridge/detour states. No page errors were observed. Screenshots at desktop and 1280×720 were visually inspected; a 720 px layout check found no horizontal overflow. Evidence is local under `artifacts/evidence/drawn-route/` (ignored artifacts, not gameplay screenshots). Relative links in the changed plans and `git diff --check` were checked. No game runtime, save data or assets changed, so the game's regression suite was not rerun. These checks accept the concept's interaction only; DRAW implementation and human gameplay acceptance are still pending.
+
+### First runtime verification
+
+- Core suite: 168 Node tests, including new hill/tunnel versus land-detour, bridge versus land-detour, wish-height independence, bend preservation and impossible-grade coverage.
+- TypeScript and production build pass. The existing Three.js chunk-size advisory remains.
+- Thirteen relevant browser scenarios were exercised in batches: construction, freehand/history/variant/build/reload, two engineering structures, two runtime/scale checks, full passenger/mail first-fare/save flow, menu/archive, session replacement and four tutorial/practice scenarios. Updated selectors distinguish the wish ribbon from classified preview paths and allow the new explicit connection buttons. The final midpoint-editability change was followed by the construction and drawn-route browser tests again.
+- The German direct practice link was exercised, screenshots inspected at 1440×900 and 1280×720, and the compact purchase button checked inside the viewport. New real-game screenshots are in docs/screenshots/drawn-route-*.png. This is focused desktop evidence, not the full cross-device/performance acceptance from DRAW-06.
+- The player has not yet tried this checkpoint. Keep usability/enjoyment acceptance open and continue with Astra after feedback.

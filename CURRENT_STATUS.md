@@ -1,5 +1,5 @@
-ASTRA_PHASE_COMPLETE=true
-RECOMMENDED_MODEL=SOL
+ASTRA_PHASE_COMPLETE=false
+RECOMMENDED_MODEL=ASTRA
 ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
 GRAPHICS_IMPLEMENTATION_STARTED=true
@@ -9,18 +9,19 @@ CONSTRUCTION_IMPLEMENTATION_STARTED=true
 UX_PLANNING_COMPLETE=true
 UX_IMPLEMENTATION_STARTED=true
 UX_IMPLEMENTATION_COMPLETE=false
-AWAITING_USER_MODEL_SWITCH=true
+AWAITING_USER_MODEL_SWITCH=false
 DRAW_PLANNING_COMPLETE=true
-DRAW_IMPLEMENTATION_STARTED=false
+DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
+AWAITING_USER_PLAYTEST=true
 
 # Current status — drawn-route planning handoff, 2026-09-20
 
-Current milestone: **Astra design complete; waiting for the user's SOL switch before DRAW-01.** The current track planner is still too abstract for the user. [Drawn-route planning](docs/construction/DRAWN_ROUTE_PLANNING.md) now takes priority: draw a wish path, reshape it, compare real local tunnel/climb/bridge/detour geometry, then review and buy the exact route. The [interactive concept](docs/prototypes/drawn-route.html) is a standalone interaction study with fictional example prices, not game implementation.
+Current milestone: **first integrated drawn-route slice ready for user playtesting; stay with Astra for the feedback pass.** The user explicitly asked Astra to implement the first real loop before reconsidering SOL. Start **Gleisbau ausprobieren / Try track drawing** for a separate company with two paid stations in the actual Norway terrain. Draw and reshape a route, compare full-route engineering/cost proposals and buy the exact reviewed geometry. The current company is archived before starting practice when one is active.
 
-**No DRAW runtime changes yet.** CON-02/05/06 engineering foundations remain, but their player-facing acceptance and UX-002 are reopened. GFX-R01–07, UX-001, UX-003–004 and existing CON-01–07 technical work remain the previous checkpoint; automated UX-006 results do not establish human usability. Continue with DRAW-01–06 before GFX-R08–09 and further expansion. See IMPLEMENTATION_PLAN.md for the exact order.
+Implemented: pointer ownership, freehand/point input, screen-sized handles, gesture history/cancellation, worker-generated wish-path candidates whose intermediate terrain heights do not pin rail elevation, nearby smoothing and lateral alternatives, classified previews, fixed visible purchase summary, atomic construction and save/reload integration. **This is a playtest checkpoint, not completion of DRAW-01–06.** Local ridge/inlet decision markers and splice-preserving alternatives, the more capable ordered-corridor search, exhaustive input/accessibility/performance checks and human usability acceptance remain. See [drawn-route planning](docs/construction/DRAWN_ROUTE_PLANNING.md).
 
-Runtime checkpoint: `e70bddd`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. CON-04 persists station pads and alignment earthworks over the immutable base terrain, CON-05 presents engineering review and CON-06 adds worker-based corridor alternatives. UX-003 joins train purchase, ordered stops and line launch in one guided Railway Office flow. CON-07 persists a seven-step real-action introduction in schema 9, resumes at the first unmet action, preserves evidence through archives and storage failures, and repeats safely in a separately named practice company. The Railway Office promotes advanced growth tools after the first passenger fare. Camera-distance vegetation submission retains 28,000 authored placements in data; fixed tested Norway views stay below two million submitted triangles. Distant landscape appearance still needs visual acceptance. Pre-release Norway and Arizona V1 generators, registrations and comparison paths have been deleted.
+Previous runtime checkpoint: `e70bddd`; drawn-route planning checkpoint: `aca73c8`. The runtime uses Three.js; Astra and Sol refer only to Codex models. Local Blender 4.0.2 remains the asset-production tool. CON-04 persists station pads and alignment earthworks over the immutable base terrain, CON-05 presents engineering review and CON-06 adds worker-based corridor alternatives. UX-003 joins train purchase, ordered stops and line launch in one guided Railway Office flow. CON-07 persists a seven-step real-action introduction in schema 9, resumes at the first unmet action, preserves evidence through archives and storage failures, and repeats safely in a separately named practice company. The Railway Office promotes advanced growth tools after the first passenger fare. Camera-distance vegetation submission retains 28,000 authored placements in data; fixed tested Norway views stay below two million submitted triangles. Distant landscape appearance still needs visual acceptance. Pre-release Norway and Arizona V1 generators, registrations and comparison paths have been deleted.
 
 ## Implementation completed after handoff
 
@@ -92,11 +93,9 @@ Runtime checkpoint: `e70bddd`. The runtime uses Three.js; Astra and Sol refer on
 
 ## Currently working
 
-The user has requested an Astra design pass for playful track drawing and a pause before SOL implementation. The new brief records the current input/solver limitations, complete gesture/state contracts, a soft ordered wish corridor, free rail-elevation search, local engineering alternatives, exact whole-route review and six bounded implementation slices. The interactive concept demonstrates drawing, draggable points, undo/redo and illustrative comparisons separately from the game.
+The first real-map drawing loop is implemented for the user's trial. Next: respond to their experience of control, legibility and routing, then deepen local engineering choices with Astra. Read IMPLEMENTATION_PLAN.md and the implementation checkpoint in DRAWN_ROUTE_PLANNING.md. Do not resume the earlier SOL-pause instruction.
 
-Next after the explicit model-switch continuation: **DRAW-01 → DRAW-02 → DRAW-03 → DRAW-04 → DRAW-05 → DRAW-06**. The prior runtime is `e70bddd`; the preceding documentation checkpoint is `dcd777e`. Do not restart CON-06, tutorial or graphics work from the obsolete continuation paragraphs.
-
-Norway V3 and Arizona V2 remain current; pre-release V1 generators were removed at the user's request. Arizona remains a terrain study, with economy/full campaign and Great River deferred. Current station/graph/economy/save behavior remains the integration foundation. The new drawing UI replaces the old player planner rather than adding a legacy switch.
+Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campaign expansion and further graphics work wait behind the track-planning review. Existing built saves remain schema 9; unbuilt route sketches are transient and not persisted.
 
 ## Stable contracts
 
@@ -111,7 +110,7 @@ Do not casually change units/axes, graph identity/connectivity, tick cadence/ord
 
 ## Known limits and remaining product work
 
-Graphics and first-use UX are not yet visually/product accepted. Readable UI scaling, station-first placement, waypoint planning, semantic engineering structures, corridor alternatives and the hands-on tutorial are implemented. Continuous freehand drawing, draggable route edits and local engineering choices are designed in DRAW-01–06 and remain unimplemented. This planning checkpoint changes documentation and the standalone concept only; prior game-test evidence belongs to the earlier runtime checkpoint.
+Graphics and first-use UX are not yet visually/product accepted. Readable UI scaling, station-first placement, waypoint planning, semantic engineering structures, corridor alternatives and the hands-on tutorial are implemented. Freehand drawing, draggable route edits and complete-route comparisons now run in the game. Local engineering choices remain planned. Product acceptance awaits the user’s actual playtest.
 
 The preview commissions its first railway, stations, passenger service and industry stock automatically, while “Start new company” begins with empty track and empty industry inventories. The Norway production objects use the authored Blender pack, including dedicated farm, timber-yard and sawmill structures.
 
@@ -127,4 +126,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-Next: wait for the user to switch to SOL, then implement DRAW-01 from docs/construction/DRAWN_ROUTE_PLANNING.md. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
+Next: user playtest of the drawn-route slice, then Astra refinement and local engineering choices. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.

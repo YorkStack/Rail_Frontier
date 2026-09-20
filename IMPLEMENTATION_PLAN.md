@@ -2,13 +2,13 @@
 
 ## Current continuation — draw-first railway planning
 
-**2026-09-20 Astra planning handoff: pause for the user to switch to SOL.** The new request is to draw a wish path directly through the landscape and compare real bridge/tunnel/climb/detour solutions at obstacles. Read [DRAWN_ROUTE_PLANNING.md](docs/construction/DRAWN_ROUTE_PLANNING.md) first. It supersedes the old mandatory-waypoint and Balanced/Low Cost/Fast player workflow. [Interactive concept](docs/prototypes/drawn-route.html): input and presentation only, with explicitly fictional comparison prices.
+**2026-09-20: the user asked Astra to implement the first playable drawing loop before considering a SOL handoff.** A first integrated slice is now implemented: freehand and point input, draggable world handles, undo/redo/Escape, camera gesture ownership, wish-path proposals with independent rail elevation, visible geometry/cost comparisons, authoritative purchase and a separate two-station practice company. Enter from **Try track drawing / Gleisbau ausprobieren** or `/?draw-practice=1&lang=de`.
 
-**Next: DRAW-01 → DRAW-02 → DRAW-03 → DRAW-04 → DRAW-05 → DRAW-06**, then resume GFX-R08–09 and remaining UX-005 / UX-006 work. DRAW-01 delivers genuine drawing/drag editing on the real 3D map; DRAW-02 respects the wish corridor and independently solves rail elevation; DRAW-03 adds meaningful engineering alternatives; DRAW-04–06 finish preview, purchase, onboarding and acceptance. No DRAW runtime implementation has landed yet. Prior runtime checkpoint: `e70bddd`, previous repository checkpoint: `dcd777e`.
+Read [DRAWN_ROUTE_PLANNING.md](docs/construction/DRAWN_ROUTE_PLANNING.md), especially its implementation checkpoint. The full design remains the target. This slice uses bounded fitted candidates and explicit whole-route alternatives; it does **not** yet implement the ordered wish-corridor lattice, localized obstacle decisions with fixed splice boundaries, or the complete performance/accessibility acceptance suite. DRAW-01/02/04/05 have an integrated first slice; DRAW-03's local decisions and DRAW-06 human acceptance remain open.
 
-CON-02/05/06 are reusable technical foundations. Their player-facing acceptance and UX-002 are reopened by the user's current feedback. Automated journeys are regression evidence, not proof that track planning is intuitive or enjoyable. Keep the real command/finance/terrain/save contracts. Replace obsolete input/UI instead of maintaining two planners. Architecture details, budgets, gesture ownership, error handling, tests and the exact SOL continuation are in the new brief.
+**Next: let the user try drawing and reshaping an actual first railway. Stay with Astra for feedback and the next engineering-decision pass.** Do not automatically switch to SOL or call the planner product-accepted from automated tests. Then complete DRAW-01–06's remaining requirements before GFX-R08–09 and expansion. Existing station/terrain/finance/save contracts remain authoritative; no save schema or generated world change.
 
-**ARCHITECTURE/DESIGN COMPLETE – SAFE TO SWITCH TO SOL FOR IMPLEMENTATION**
+The [standalone concept](docs/prototypes/drawn-route.html) remains clearly marked as an illustration; use the real game link above for playtesting. The old mandatory-waypoint input handlers have been replaced. Authored engineering survey controls are hidden from ordinary gameplay and remain accessible with `?study-corridors=1` for reproducible regression fixtures.
 
 ## Previous implementation checkpoint — graphics and first-use experience
 
