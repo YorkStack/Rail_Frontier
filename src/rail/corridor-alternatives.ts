@@ -6,6 +6,7 @@ import {solveVerticalProfile} from './vertical-profile.js';
 import {compileCurve,type TrackGeometry} from './geometry.js';
 import {quoteTrack,type EngineeringQuote} from './planner.js';
 import {buildEngineeringProfile} from '../ui/engineering-profile.js';
+import {searchCorridorLattice} from './corridor-lattice.js';
 
 export type CorridorPreference='balanced'|'low-cost'|'fast';
 
@@ -54,13 +55,14 @@ export function findCorridorAlternatives(request:CorridorAlternativeRequest):Cor
 export function generateCorridorCurveCandidates(request:CorridorAlternativeRequest):CorridorCurveCandidate[] {
   const {anchors,terrain,trackClass}=request;if(anchors.length<2)throw new Error('Corridor search needs a start and destination');
   const budget=Math.max(1,Math.min(32,Math.floor(request.candidateBudget??9))),direct=Math.hypot(anchors.at(-1)!.x-anchors[0]!.x,anchors.at(-1)!.z-anchors[0]!.z),maxOffset=Math.max(0,Math.min(request.maxOffsetM??Math.min(650,direct*.22),direct*.35));
-  const patterns:number[][]=[[0],[-.35],[.35],[-.7],[.7],[-1],[1],[-.65,.65],[.65,-.65]].slice(0,budget),candidates:CorridorCurveCandidate[]=[];
-  for(let index=0;index<patterns.length;index++) {
-    const points=offsetAnchors(anchors,patterns[index]!,maxOffset);
+  const routes:{id:string;points:Vec3[]}[]=preferences.slice(0,budget).flatMap(preference=>{const points=latticeAnchors(anchors,request.tangents,terrain,trackClass,maxOffset,preference);return points?[{id:`lattice:${preference}`,points}]:[];}),patterns:number[][]=[[0],[-.35],[.35],[-.7],[.7],[-1],[1],[-.65,.65],[.65,-.65]];
+  for(let index=0;routes.length<budget&&index<patterns.length;index++)routes.push({id:`corridor:${index}`,points:offsetAnchors(anchors,patterns[index]!,maxOffset)});
+  const candidates:CorridorCurveCandidate[]=[];
+  for(const route of routes) {
     try {
-      const horizontal=solveHorizontalAlignment(points,request.tangents),curves=solveVerticalProfile(horizontal,points.map(point=>point.y),trackClass.constraints,{...(request.tangents?.start?{startGrade:0}:{}),...(request.tangents?.end?{endGrade:0}:{})}),geometries=curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));
+      const horizontal=solveHorizontalAlignment(route.points,request.tangents),curves=solveVerticalProfile(horizontal,route.points.map(point=>point.y),trackClass.constraints,{...(request.tangents?.start?{startGrade:0}:{}),...(request.tangents?.end?{endGrade:0}:{})}),geometries=curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));
       if(quotes.some(quote=>!quote.valid))continue;
-      candidates.push({id:`corridor:${index}`,curves});
+      candidates.push({id:route.id,curves});
     } catch {continue;}
   }
   return candidates;
@@ -86,6 +88,12 @@ function offsetAnchors(anchors:readonly Vec3[],pattern:readonly number[],maxOffs
     result.push({...b});
   }
   return result;
+}
+
+function latticeAnchors(anchors:readonly Vec3[],tangents:AlignmentTangents|undefined,terrain:Terrain,trackClass:TrackClassDefinition,maxOffsetM:number,preference:CorridorPreference):Vec3[]|null {
+  const result:Vec3[]=[];
+  for(let index=0;index<anchors.length-1;index++){const leg=searchCorridorLattice({start:anchors[index]!,end:anchors[index+1]!,...(index===0&&tangents?.start?{startDirection:tangents.start}:{}),...(index===anchors.length-2&&tangents?.end?{endDirection:tangents.end}:{}),terrain,trackClass,maxOffsetM,preference});if(!leg)return null;if(index)leg.shift();result.push(...leg);}
+  return result.length<=128?result:null;
 }
 
 function normalizer(values:readonly number[]):(value:number)=>number {const min=Math.min(...values),max=Math.max(...values),range=max-min;return range<1e-9?()=>0:value=>(value-min)/range;}
