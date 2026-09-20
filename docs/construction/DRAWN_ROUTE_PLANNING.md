@@ -6,7 +6,7 @@ The user rejects the current construction experience as abstract. A passing auto
 
 ## Implementation checkpoint: first real-map slice
 
-The runtime now supports drag drawing and point mode, draggable/keyboard-movable handles, undo/redo, gesture cancellation, retained drafts when closing the tool, explicit endpoint selection, camera isolation, visible cost/geometry choices and a whole-alignment build through the existing command gateway. **Try track drawing** opens a separate company with two stations paid through real placement commands, on the current Norway terrain. An active company is archived before replacement. The practice remains playable and saveable after construction; no fake money or mock terrain is used.
+The runtime now supports clicking and drag drawing in one tool, draggable/keyboard-movable handles, undo/redo, gesture cancellation, retained drafts when closing the tool, explicit endpoint selection, camera isolation, visible cost/geometry choices and a whole-alignment build through the existing command gateway. **Try track drawing** opens a separate company with two stations paid through real placement commands, on the current Norway terrain. An active company is archived before replacement. The practice remains playable and saveable after construction; no fake money or mock terrain is used.
 
 `wish-path.ts` simplifies horizontal strokes. `wish-corridor.ts` currently evaluates a bounded family of fits, grade-constrained smoothed terrain-height candidates and lateral offsets, plus an explicitly labelled endpoint-chord smoothing candidate only when the wish path stays within 150 m of it. Intermediate pointer Y does not constrain rail height. Candidate certification/quotation is shared with the existing worker/main/command pipeline. Up to three distinct proposals are displayed with real grade, length and bridge/tunnel lengths. Selection changes the real preview; ghost bridge supports/tunnel portals and screen-space line patterns distinguish structures. Direct drawing replaces the old click/mousemove handlers.
 
@@ -57,15 +57,13 @@ Preview uses the same accepted section/span data as construction, with lightweig
 
 ## 4. Precise input contract
 
-**Draw mode is the default.** Click a compatible port to arm the start, then press and drag to trace the landscape. Starting the drag directly on that port works too. Release on a highlighted compatible destination to finish; release on open land ends a stroke but retains the draft. Continue from its visible tip. A standalone click on the destination finishes the last gap with a visible provisional segment. A free-land click does not finish or buy a railway.
+**One tool for clicks and strokes.** Click a named station sign to arm the start, or start dragging directly from it. Click open land to append a coarse shape point, or drag to trace a stroke. Release anywhere without losing the draft; continue at any next location without returning to the tip. Show the provisional next segment at the pointer. Release near a compatible destination or click its sign to finish. A free-land click never finishes or buys a railway. Clicks and strokes share the same wish path and solver; no mode selector is needed. This replaces the original separate Draw/Points modes following player feedback.
 
-**Points mode** is an explicit alternative for players who prefer clicking. Click to add coarse shape points, then click a destination. These points shape the wish path rather than imposing ground elevations. The two modes feed exactly the same draft and solver.
-
-After a stroke or completed route, show a few large shape handles. Drag a handle to reshape the wish path; insert a handle on the line using **Punkt hinzufügen** or a deliberate click in edit mode. Select a handle and Delete removes it; endpoints require explicit reconnection. Entire gestures, not each pointer sample, are undoable. Undo/redo restores intent and selected engineering preferences, invalidates previous quotes and recomputes safely. Clicking terrain after completion must not erase the whole draft as it does today.
+After a stroke or completed route, show a few large shape handles. Drag a handle to reshape the wish path; grab any segment of the wish line to insert and drag a handle. Select a handle and Delete removes it; endpoints require explicit reconnection. Entire gestures, not each pointer sample, are undoable. Undo/redo restores intent and selected engineering preferences, invalidates previous quotes and recomputes safely. Clicking terrain after completion must not erase the whole draft as it does today.
 
 | Gesture | Drawing/editing tool behavior |
 | --- | --- |
-| Left drag | Draw from armed start/tip, or move a visible handle; never orbit simultaneously |
+| Left drag | Start from a station, extend the sketch anywhere, or reshape its line/handles; never orbit simultaneously |
 | Space + left drag; middle drag; right drag | Pan camera; suspend drawing first. Right-click without drag is not Undo |
 | Alt + left drag | Orbit while not in a captured drawing gesture; visible camera help explains it |
 | Wheel / trackpad scroll | Zoom while no stroke is captured; preserve world-space intent |
@@ -148,7 +146,7 @@ Tutorial completion uses actual accepted/built graph state and existing learning
 
 | ID / order | Concrete work | Completion gate |
 | --- | --- | --- |
-| DRAW-01 | Extract `src/ui/route-planner-controller.ts` and intent/history model; drawing, point mode, handles, keyboard; add explicit input ownership to `fjord-renderer.ts`; replace current map handlers | Real 3D stroke follows pointer without camera jump; edit/undo/redo/cancel work; world/cash unchanged |
+| DRAW-01 | Extract `src/ui/route-planner-controller.ts` and intent/history model; unified drawing/click input, line editing, handles, keyboard; add explicit input ownership to `fjord-renderer.ts`; replace current map handlers | Real 3D stroke follows pointer without camera jump; edit/undo/redo/cancel work; world/cash unchanged |
 | DRAW-02 | Extend existing worker identity/protocol, ordered wish corridor, free vertical search, exact preparation/quote; shared draft-to-proposal API | Bent shore route respected; drawing across ridge does not force summit height; no stale/uncertified build |
 | DRAW-03 | Derive issues and generate geometry-constrained local alternatives; splice boundaries and conflict handling | Real bridge vs detour and tunnel vs climb/contour when feasible; changed geometry, truthful totals and full-chain certification |
 | DRAW-04 | Lightweight world preview from actual spans; comparison panel, readable DE/EN summary, review/build; replace player study dropdowns | Changes visible on map; ordinary land free of engineering clutter; exact preview purchased atomically |
@@ -159,7 +157,7 @@ Reuse `alignment-solver.ts`, `vertical-profile.ts`, `corridor-lattice.ts`, `corr
 
 ### Required evidence
 
-- Input: true pointer drag and click-mode journeys, camera pan/orbit, release outside canvas, blur/cancel, port snapping at two zooms, completed-draft click safety, keyboard undo/redo and no accidental build.
+- Input: true pointer drag and mixed click/drag journeys, camera pan/orbit, release outside canvas, blur/cancel, port snapping at two zooms, completed-draft click safety, keyboard undo/redo and no accidental build.
 - Geometry: jitter normalization; U-shaped wish path does not take its chord; stable results across input sample rates; ridge picked heights are not rail constraints; endpoint tangency; local splice C1/grade continuity; impossible/exhausted candidates explicitly unavailable.
 - Choices: a genuine tunnel/climb or contour pair and bridge/detour pair, distinct exact curves and quotes; no forced three choices; preserving earlier decisions; wider edits clearly flagged; quote totals match ledger and saved spans.
 - Safety: edit/class/session/terrain change during job; stale response after new company; cancel/undo during solve; cash changes before purchase; double-click build; forced validation failure leaves complete state unchanged.
@@ -185,4 +183,18 @@ The standalone HTML concept was exercised in installed Chrome with Playwright: f
 - TypeScript and production build pass. The existing Three.js chunk-size advisory remains.
 - Thirteen relevant browser scenarios were exercised in batches: construction, freehand/history/variant/build/reload, two engineering structures, two runtime/scale checks, full passenger/mail first-fare/save flow, menu/archive, session replacement and four tutorial/practice scenarios. Updated selectors distinguish the wish ribbon from classified preview paths and allow the new explicit connection buttons. The final midpoint-editability change was followed by the construction and drawn-route browser tests again.
 - The German direct practice link was exercised, screenshots inspected at 1440×900 and 1280×720, and the compact purchase button checked inside the viewport. New real-game screenshots are in docs/screenshots/drawn-route-*.png. This is focused desktop evidence, not the full cross-device/performance acceptance from DRAW-06.
-- The player has not yet tried this checkpoint. Keep usability/enjoyment acceptance open and continue with Astra after feedback.
+- The player subsequently tried the first checkpoint and found it better but still unintuitive. The feedback pass below supersedes its mode-switching interaction; usability/enjoyment acceptance remains open.
+
+
+### Interaction feedback pass, 2026-09-20
+
+The player rejected the remaining friction in the first drawing slice. Replaced the separate draw/point modes with one interaction: choose a named station sign, click or drag a wish path, release anywhere, continue elsewhere, then choose the destination sign. The next segment follows the pointer before committing a click. Station targets have 44 px controls and full clickable labels, with a 42 px snap radius and highlighted destination feedback. A station presents its available port facing the start/other station; interior network connections remain available. Selecting a station no longer changes the camera.
+
+Completed wish-line segments can be grabbed between handles to insert and move a control point. Undo and Escape restore the exact prior draft. Existing handles support arrows and Delete. Start/end names remain visible during review. The dashed wish and coloured certified railway remain distinct, with explicit instructions about which is built. No solver, construction transaction, finance or save-schema changes are made by this pass.
+
+The panel follows Start → Draw path → Build; irrelevant purchase controls are absent while sketching, track standards are collapsed, history stays accessible, and the compact review exposes the first proposal and purchase button. The two drawing modes and the 40 px last-tip continuation gate were removed, with no legacy input path retained.
+
+Verification: unified click/drag continuation away from the tip, large-label station selection without camera movement, cursor preview, whole-segment reshaping/undo, keyboard endpoint selection/handle editing, 1280×720 first-action and review visibility, and the existing atomic build/save/reload scenario. Human acceptance remains pending. Local obstacle decisions and ordered corridor search remain the next functional work after interaction acceptance.
+
+
+Recorded checks for this feedback pass: 168 core tests; TypeScript and production build; seven focused browser scenarios (station-first construction, three drawing/keyboard/layout journeys, two persisted engineering-structure journeys, and the complete passenger-revenue/tutorial/save journey). A development-server reload interrupted an overlapping build/test run; the affected drawing scenario passed when repeated against the unchanged server. New screenshots were inspected at 1440×900 and 1280×720. These results do not replace the pending human playtest or the complete DRAW-06 performance/accessibility matrix.

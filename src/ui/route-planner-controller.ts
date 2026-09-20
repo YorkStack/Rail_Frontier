@@ -2,84 +2,141 @@ import type {Vec3} from '../domain/model.js';
 import {horizontalDistance,simplifyWishPath} from '../rail/wish-path.js';
 
 export interface RouteDraft {points:Vec3[];complete:boolean}
+export interface RouteConnection {point:Vec3;label:string}
 interface Adapter {
   canvas:HTMLCanvasElement;overlay:HTMLElement;enabled:()=>boolean;
   pick:(x:number,y:number)=>Vec3|null;surface:(x:number,z:number)=>number;project:(p:Vec3)=>{x:number;y:number;visible:boolean};
-  ports:()=>Vec3[];proposal:()=>{points:Vec3[];kind:string}[];pan:(active:boolean)=>void;lock:(value:boolean)=>void;
-  changed:(draft:RouteDraft,busy:boolean)=>void;notice:(de:string,en:string)=>void;
+  ports:()=>RouteConnection[];proposal:()=>{points:Vec3[];kind:string}[];pan:(active:boolean)=>void;lock:(value:boolean)=>void;
+  copy:(de:string,en:string)=>string;connectionName:(point:Vec3)=>string;changed:(draft:RouteDraft,busy:boolean)=>void;notice:(de:string,en:string)=>void;
 }
-/** One owner for drawing gestures; camera events never also add track points. */
+/** One gesture owner: clicking and drawing extend the same sketch, without camera movement. */
 export class RoutePlannerController {
-  draft:RouteDraft={points:[],complete:false};mode:'draw'|'points'='draw';
+  draft:RouteDraft={points:[],complete:false};
   private history:RouteDraft[]=[];private future:RouteDraft[]=[];
   private gesture:{id:number;before:RouteDraft;index:number|null;lastX:number;lastY:number}|null=null;
-  private frame=0;private space=false;private selected=-1;
+  private frame=0;private space=false;
+  private cursor:{x:number;y:number;point:Vec3|null;port:RouteConnection|null;segment:number|null}|null=null;
   constructor(private readonly a:Adapter){
     window.addEventListener('pointerdown',this.down,true);window.addEventListener('pointermove',this.move,true);window.addEventListener('pointerup',this.up,true);window.addEventListener('pointercancel',this.cancelEvent,true);window.addEventListener('blur',this.blur);window.addEventListener('keydown',this.key,true);window.addEventListener('keyup',this.keyUp,true);
     a.canvas.addEventListener('click',this.click,true);a.canvas.addEventListener('wheel',this.wheel,{capture:true,passive:false});this.frame=requestAnimationFrame(this.paint);
   }
   get canUndo(){return this.history.length>0;}get canRedo(){return this.future.length>0;}get busy(){return this.gesture!==null;}
   private emit(busy=false){this.a.changed(structuredClone(this.draft),busy);}
-  private save(before:RouteDraft){this.history.push(before);if(this.history.length>30)this.history.shift();this.future=[];}
-  clear(){this.cancel();if(this.draft.points.length)this.save(structuredClone(this.draft));this.draft={points:[],complete:false};this.emit();}
-  reset(){this.cancel();this.history=[];this.future=[];this.draft={points:[],complete:false};this.selected=-1;}
+  private save(before:RouteDraft){if(JSON.stringify(before)===JSON.stringify(this.draft))return;this.history.push(before);if(this.history.length>30)this.history.shift();this.future=[];}
+  clear(){this.cancel();const before=structuredClone(this.draft);this.draft={points:[],complete:false};this.save(before);this.emit();}
+  reset(){this.cancel();this.history=[];this.future=[];this.draft={points:[],complete:false};this.cursor=null;}
   undo(){this.cancel();const previous=this.history.pop();if(previous){this.future.push(structuredClone(this.draft));this.draft=previous;this.emit();}}
   redo(){this.cancel();const next=this.future.pop();if(next){this.history.push(structuredClone(this.draft));this.draft=next;this.emit();}}
   private editableMidpoint(){if(this.draft.complete&&this.draft.points.length===2){const [a,b]=this.draft.points as [Vec3,Vec3],x=(a.x+b.x)/2,z=(a.z+b.z)/2;this.draft.points.splice(1,0,{x,z,y:this.a.surface(x,z)});}}
   connect(point:Vec3){if(this.draft.complete)return;const before=structuredClone(this.draft);if(!this.draft.points.length)this.draft.points.push({...point});else if(horizontalDistance(point,this.draft.points[0]!)>10){this.draft.points.push({...point});this.draft.complete=true;}else return;this.editableMidpoint();this.save(before);this.emit();}
-  private snap(x:number,y:number):Vec3|null {let best:Vec3|null=null,distance=26;for(const point of this.a.ports()){const screen=this.a.project(point),d=Math.hypot(screen.x-x,screen.y-y);if(screen.visible&&d<distance){best=point;distance=d;}}return best?{...best}:null;}
+  private snap(x:number,y:number):RouteConnection|null {
+    let best:RouteConnection|null=null,distance=42;
+    for(const port of this.a.ports()){const screen=this.a.project(port.point),d=Math.hypot(screen.x-x,screen.y-y);if(screen.visible&&d<distance){best=port;distance=d;}}
+    return best;
+  }
+  /** Screen-space tolerance keeps grabbing the line equally easy at every zoom level. */
+  private segmentAt(x:number,y:number):number|null {
+    let best:number|null=null,distance=12;
+    const screens=this.draft.points.map(p=>this.a.project(p));
+    for(let i=1;i<screens.length;i++){
+      const a=screens[i-1]!,b=screens[i]!;if(!a.visible||!b.visible)continue;
+      const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1)));
+      const d=Math.hypot(x-a.x-t*dx,y-a.y-t*dy);
+      if(d<distance){best=i;distance=d;}
+    }return best;
+  }
+  private onMap(target:EventTarget|null){return target instanceof Element&&(target===this.a.canvas||Boolean(target.closest('[data-route-handle], [data-route-port]')));}
+  private portTarget(e:PointerEvent):RouteConnection|null {
+    const target=e.target instanceof Element?e.target.closest<HTMLElement>('[data-route-port]'):null;
+    return target?this.a.ports()[Number(target.dataset.routePort)]??null:this.snap(e.clientX,e.clientY);
+  }
   private stop(e:Event){e.preventDefault();e.stopImmediatePropagation();}
   private down=(e:PointerEvent)=>{
-    if(!this.a.enabled()||e.button!==0||(!(e.target instanceof Element))||(e.target!==this.a.canvas&&!e.target.closest('[data-route-handle], [data-route-port]')))return;
+    if(!this.a.enabled()||e.button!==0||!this.onMap(e.target))return;
     if(e.altKey||this.space){this.a.pan(this.space);return;}
     this.stop(e);if(this.gesture){this.cancel();return;}
-    const index=e.target.closest<HTMLElement>('[data-route-handle]')?.dataset.routeHandle;
-    if(this.draft.complete&&index===undefined)return;
-    this.a.lock(true);const point=this.a.pick(e.clientX,e.clientY),port=this.snap(e.clientX,e.clientY),before=structuredClone(this.draft);
-    if(index!==undefined){this.selected=Number(index);this.gesture={id:e.pointerId,before,index:this.selected,lastX:e.clientX,lastY:e.clientY};}
-    else if(!this.draft.points.length){if(!port){this.a.lock(false);this.a.notice('Beginne an einem hellen Bahnanschluss.','Start at a highlighted rail connection.');return;}this.draft.points.push(port);this.gesture={id:e.pointerId,before,index:null,lastX:e.clientX,lastY:e.clientY};}
-    else if(port&&horizontalDistance(port,this.draft.points[0]!)>10){this.draft.points.push(port);this.draft.complete=true;this.editableMidpoint();this.save(before);this.a.lock(false);this.emit();return;}
-    else if(this.mode==='points'&&point){this.draft.points.push(point);this.save(before);this.a.lock(false);this.emit();return;}
-    else {const tip=this.a.project(this.draft.points.at(-1)!);if(Math.hypot(tip.x-e.clientX,tip.y-e.clientY)>40){this.a.lock(false);this.a.notice('Zeichne an der hellen Spitze weiter. Zum Verschieben rechts ziehen.','Continue drawing at the highlighted tip. Right-drag to pan.');return;}this.gesture={id:e.pointerId,before,index:null,lastX:e.clientX,lastY:e.clientY};}
+    const target=e.target as Element,handle=target.closest<HTMLElement>('[data-route-handle]')?.dataset.routeHandle;
+    const point=this.a.pick(e.clientX,e.clientY),port=this.portTarget(e),before=structuredClone(this.draft);
+    // The unfinished tip remains a drawing affordance. Interior handles reshape the sketch.
+    let index=handle===undefined?null:Number(handle);
+    if(!this.draft.complete&&index===this.draft.points.length-1)index=null;
+    if(this.draft.complete&&index===null){
+      const segment=this.segmentAt(e.clientX,e.clientY);if(segment===null||!point)return;
+      if(this.draft.points.length>=64){this.a.notice('Entferne zuerst einen Punkt (Entf).','Remove a point first (Delete).');return;}
+      this.draft.points.splice(segment,0,point);index=segment;
+    }else if(index===null){
+      if(!this.draft.points.length){
+        if(!port){this.a.notice('Wähle einen Bahnhof mit dem Schild „Start hier“.','Choose a station marked “Start here”.');return;}
+        this.draft.points.push({...port.point});
+      }else if(port){this.connect(port.point);return;}
+      else if(point&&horizontalDistance(point,this.draft.points.at(-1)!)>3)this.draft.points.push(point);
+      else if(!point)return;
+    }
+    this.a.lock(true);this.gesture={id:e.pointerId,before,index,lastX:e.clientX,lastY:e.clientY};
     this.a.canvas.setPointerCapture(e.pointerId);this.emit(true);
   };
   private move=(e:PointerEvent)=>{
+    if(this.a.enabled()&&this.onMap(e.target)&&!e.altKey&&!this.space&&(e.buttons===0||e.buttons===1)){
+      this.cursor={x:e.clientX,y:e.clientY,point:this.a.pick(e.clientX,e.clientY),port:this.portTarget(e),segment:this.draft.complete?this.segmentAt(e.clientX,e.clientY):null};
+    }else this.cursor=null;
     const g=this.gesture;if(!g||e.pointerId!==g.id)return;this.stop(e);
     if(Math.hypot(e.clientX-g.lastX,e.clientY-g.lastY)<4)return;
     const p=this.a.pick(e.clientX,e.clientY);if(!p){this.cancel();this.a.notice('Strich abgebrochen: außerhalb des Geländes.','Stroke cancelled: outside the terrain.');return;}
     g.lastX=e.clientX;g.lastY=e.clientY;
     if(g.index!==null)this.draft.points[g.index]=p;
-    else if(this.mode==='draw'&&this.draft.points.length<2048&&horizontalDistance(p,this.draft.points.at(-1)!)>3)this.draft.points.push(p);
+    else if(this.draft.points.length<2048&&horizontalDistance(p,this.draft.points.at(-1)!)>3)this.draft.points.push(p);
     this.emit(true);
   };
   private up=(e:PointerEvent)=>{const g=this.gesture;if(!g||e.pointerId!==g.id)return;this.stop(e);const port=this.snap(e.clientX,e.clientY);
-    if(g.index===null&&port&&horizontalDistance(port,this.draft.points[0]!)>10){if(this.draft.points.length>1&&horizontalDistance(this.draft.points.at(-1)!,port)<35)this.draft.points.pop();this.draft.points.push(port);this.draft.complete=true;}
-    this.draft.points=simplifyWishPath(this.draft.points,8);this.editableMidpoint();
+    if(g.index===null&&port&&horizontalDistance(port.point,this.draft.points[0]!)>10){if(this.draft.points.length>1&&horizontalDistance(this.draft.points.at(-1)!,port.point)<35)this.draft.points.pop();this.draft.points.push({...port.point});this.draft.complete=true;}
+    if(g.index===null)this.draft.points=simplifyWishPath(this.draft.points,8);this.editableMidpoint();
     if(this.draft.points.length>64){this.draft=g.before;this.a.notice('Zu viele Kurven. Zeichne einen einfacheren Verlauf.','Too many bends. Draw a simpler route.');}else this.save(g.before);
     this.release();this.emit();
   };
   private release(){if(this.gesture&&this.a.canvas.hasPointerCapture(this.gesture.id))this.a.canvas.releasePointerCapture(this.gesture.id);this.gesture=null;this.a.lock(false);}
   cancel(){if(!this.gesture)return;this.draft=this.gesture.before;this.release();this.emit();}
-  private cancelEvent=()=>this.cancel();private blur=()=>{this.space=false;this.a.pan(false);this.cancel();};
+  private cancelEvent=()=>this.cancel();private blur=()=>{this.space=false;this.cursor=null;this.a.pan(false);this.cancel();};
   private click=(e:MouseEvent)=>{if(this.a.enabled())this.stop(e);};
-  private wheel=(e:WheelEvent)=>{if(this.gesture)this.stop(e);};
+  private wheel=(e:WheelEvent)=>{this.cursor=null;if(this.gesture)this.stop(e);};
   private key=(e:KeyboardEvent)=>{if(!this.a.enabled()||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement)return;
     if(e.code==='Space'&&e.target===this.a.canvas){this.space=true;this.stop(e);return;}
     if(e.code==='Escape'&&this.gesture){this.stop(e);this.cancel();return;}
     if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){this.stop(e);e.shiftKey?this.redo():this.undo();return;}
     const target=e.target instanceof HTMLElement?e.target.closest<HTMLElement>('[data-route-handle]'):null;if(!target)return;const index=Number(target.dataset.routeHandle),point=this.draft.points[index];if(!point)return;
-    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Delete','Backspace'].includes(e.key)){this.stop(e);this.save(structuredClone(this.draft));if(e.key==='Delete'||e.key==='Backspace')this.draft.points.splice(index,1);else{const step=e.shiftKey?25:5;point.x+=(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0);point.z+=(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0);}this.emit();}
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Delete','Backspace'].includes(e.key)){
+      this.stop(e);const before=structuredClone(this.draft);
+      if(e.key==='Delete'||e.key==='Backspace')this.draft.points.splice(index,1);
+      else{const step=e.shiftKey?25:5;point.x+=(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0);point.z+=(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0);point.y=this.a.surface(point.x,point.z);}
+      this.save(before);this.emit();
+    }
   };
   private keyUp=(e:KeyboardEvent)=>{if(e.code==='Space'){this.space=false;this.a.pan(false);}};
   private paint=()=>{
     const root=this.a.overlay;root.hidden=!this.a.enabled();
-    if(!root.hidden){const screens=this.draft.points.map(p=>this.a.project(p));let svg=root.querySelector<SVGSVGElement>('svg');if(!svg){root.innerHTML='<svg aria-hidden="true"><path /><g class="route-proposal"></g></svg><div class="route-grips"></div><div class="route-connections"></div>';svg=root.querySelector('svg')!;}
-      svg.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);svg.querySelector('path')!.setAttribute('d',screens.map((p,i)=>`${i&&screens[i-1]!.visible&&p.visible?'L':'M'}${p.x},${p.y}`).join(' '));
-      const proposal=svg.querySelector('.route-proposal')!,lines=this.a.proposal();while(proposal.children.length>lines.length)proposal.lastElementChild!.remove();while(proposal.children.length<lines.length)proposal.append(document.createElementNS('http://www.w3.org/2000/svg','path'));[...proposal.children].forEach((path,i)=>{const line=lines[i]!,ps=line.points.map(p=>this.a.project(p));path.setAttribute('d',ps.map((p,j)=>`${j&&ps[j-1]!.visible&&p.visible?'L':'M'}${p.x},${p.y}`).join(' '));path.setAttribute('class',line.kind);});
-      const ports=this.a.ports(),connections=root.querySelector<HTMLElement>('.route-connections')!;while(connections.children.length>ports.length)connections.lastElementChild!.remove();while(connections.children.length<ports.length){const button=document.createElement('button');button.type='button';button.className='route-port';connections.append(button);}[...connections.children].forEach((node,i)=>{const button=node as HTMLButtonElement,point=ports[i]!,screen=this.a.project(point);button.dataset.routePort=String(i);button.setAttribute('aria-label',`Rail connection ${i+1}`);button.hidden=!screen.visible||this.draft.complete;button.style.transform=`translate(${screen.x-22}px,${screen.y-22}px)`;button.onclick=e=>{if(e.detail===0)this.connect(point);};});
-      const grips=root.querySelector<HTMLElement>('.route-grips')!,count=Math.max(0,screens.length-1-(this.draft.complete?1:0));while(grips.children.length>count)grips.lastElementChild!.remove();while(grips.children.length<count){const button=document.createElement('button');button.type='button';button.className='route-handle';button.textContent='';grips.append(button);}
-      [...grips.children].forEach((el,i)=>{const button=el as HTMLButtonElement,p=screens[i+1]!;button.dataset.routeHandle=String(i+1);button.setAttribute('aria-label',`Route point ${i+1}, drag or use arrow keys`);button.hidden=!p.visible;button.style.transform=`translate(${p.x-22}px,${p.y-22}px)`;});
-    }this.frame=requestAnimationFrame(this.paint);
+    if(!root.hidden){
+      const screens=this.draft.points.map(p=>this.a.project(p));let svg=root.querySelector<SVGSVGElement>('svg');
+      if(!svg){root.innerHTML='<svg aria-hidden="true"><path /><g class="route-proposal"></g><g class="route-cursor"><path /></g></svg><div class="route-grips"></div><div class="route-connections"></div><div class="route-start-badge"></div><div class="route-end-badge"></div><div class="route-cursor-hint"></div>';svg=root.querySelector('svg')!;}
+      const pathData=(ps:typeof screens)=>ps.map((p,i)=>`${i&&ps[i-1]!.visible&&p.visible?'L':'M'}${p.x},${p.y}`).join(' ');
+      svg.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);svg.querySelector('path')!.setAttribute('d',pathData(screens));
+      const proposal=svg.querySelector('.route-proposal')!,lines=this.a.proposal();while(proposal.children.length>lines.length)proposal.lastElementChild!.remove();while(proposal.children.length<lines.length)proposal.append(document.createElementNS('http://www.w3.org/2000/svg','path'));[...proposal.children].forEach((path,i)=>{const line=lines[i]!;path.setAttribute('d',pathData(line.points.map(p=>this.a.project(p))));path.setAttribute('class',line.kind);});
+      const ports=this.a.ports(),connections=root.querySelector<HTMLElement>('.route-connections')!;
+      while(connections.children.length>ports.length)connections.lastElementChild!.remove();
+      while(connections.children.length<ports.length){const button=document.createElement('button');button.type='button';button.className='route-port';button.innerHTML='<span></span>';connections.append(button);}
+      [...connections.children].forEach((node,i)=>{const button=node as HTMLButtonElement,port=ports[i]!,screen=this.a.project(port.point),label=`${this.draft.points.length?this.a.copy('Ziel hier','Finish here'):this.a.copy('Start hier','Start here')} · ${port.label}`;
+        button.dataset.routePort=String(i);button.setAttribute('aria-label',label);button.querySelector('span')!.textContent=label;button.hidden=!screen.visible||this.draft.complete;button.classList.toggle('snap-ready',Boolean(this.cursor?.port&&horizontalDistance(this.cursor.port.point,port.point)<1));button.style.transform=`translate(${screen.x-22}px,${screen.y-22}px)`;button.onclick=e=>{if(e.detail===0)this.connect(port.point);};
+      });
+      const grips=root.querySelector<HTMLElement>('.route-grips')!,count=Math.max(0,screens.length-1-(this.draft.complete?1:0));while(grips.children.length>count)grips.lastElementChild!.remove();while(grips.children.length<count){const button=document.createElement('button');button.type='button';button.className='route-handle';grips.append(button);}
+      [...grips.children].forEach((el,i)=>{const button=el as HTMLButtonElement,p=screens[i+1]!;button.dataset.routeHandle=String(i+1);button.setAttribute('aria-label',this.a.copy(`Streckenpunkt ${i+1}, ziehen oder Pfeiltasten verwenden`,`Route point ${i+1}, drag or use arrow keys`));button.hidden=!p.visible;button.style.transform=`translate(${p.x-22}px,${p.y-22}px)`;});
+      const start=root.querySelector<HTMLElement>('.route-start-badge')!;start.hidden=!screens[0]?.visible;start.textContent=screens[0]?`${this.a.copy('Start','Start')} · ${this.a.connectionName(this.draft.points[0]!)}`:'';if(screens[0])start.style.transform=`translate(${screens[0].x}px,${screens[0].y}px)`;
+      const end=root.querySelector<HTMLElement>('.route-end-badge')!,last=screens.at(-1);end.hidden=!this.draft.complete||!last?.visible;if(last&&this.draft.complete){end.textContent=`${this.a.copy('Ziel','To')} · ${this.a.connectionName(this.draft.points.at(-1)!)}`;end.style.transform=`translate(${last.x}px,${last.y}px)`;}
+      const c=this.cursor,tip=screens.at(-1),ghost=svg.querySelector('.route-cursor path')!,hint=root.querySelector<HTMLElement>('.route-cursor-hint')!;
+      ghost.setAttribute('d',c?.point&&tip?.visible&&!this.draft.complete&&!this.gesture?pathData([tip,this.a.project(c.port?.point??c.point)]):'');
+      const text=c?.port&&!this.draft.complete?(this.draft.points.length?this.a.copy('Loslassen oder klicken: Ziel verbinden','Release or click to connect'):this.a.copy('Klicken oder loszeichnen','Click or start drawing')):c?.segment!==null&&this.draft.complete?this.a.copy('Hier ziehen: Verlauf ändern','Drag here to reshape'):this.draft.points.length&&!this.draft.complete?this.a.copy('Klicken oder ziehen: Weg fortsetzen','Click or drag to continue'):'';
+      hint.hidden=!c||!text||Boolean(this.gesture?.index!==null&&this.gesture);hint.textContent=text;
+      if(c)hint.style.transform=`translate(${Math.min(c.x+18,innerWidth-290)}px,${Math.min(c.y+26,innerHeight-55)}px)`;
+      this.a.canvas.style.cursor=this.gesture?'grabbing':this.draft.complete?(c?.segment!==null&&c?'grab':'default'):'crosshair';
+    }else{this.a.canvas.style.cursor='';this.cursor=null;}
+    this.frame=requestAnimationFrame(this.paint);
   };
-  dispose(){this.release();cancelAnimationFrame(this.frame);window.removeEventListener('pointerdown',this.down,true);window.removeEventListener('pointermove',this.move,true);window.removeEventListener('pointerup',this.up,true);window.removeEventListener('pointercancel',this.cancelEvent,true);window.removeEventListener('blur',this.blur);window.removeEventListener('keydown',this.key,true);window.removeEventListener('keyup',this.keyUp,true);this.a.canvas.removeEventListener('click',this.click,true);this.a.canvas.removeEventListener('wheel',this.wheel,true);this.a.overlay.replaceChildren();}
+  dispose(){this.release();cancelAnimationFrame(this.frame);window.removeEventListener('pointerdown',this.down,true);window.removeEventListener('pointermove',this.move,true);window.removeEventListener('pointerup',this.up,true);window.removeEventListener('pointercancel',this.cancelEvent,true);window.removeEventListener('blur',this.blur);window.removeEventListener('keydown',this.key,true);window.removeEventListener('keyup',this.keyUp,true);this.a.canvas.removeEventListener('click',this.click,true);this.a.canvas.removeEventListener('wheel',this.wheel,true);this.a.overlay.replaceChildren();this.a.canvas.style.cursor='';}
 }
