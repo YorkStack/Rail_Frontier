@@ -5,7 +5,7 @@ import type {CorridorCurveCandidate} from './corridor-alternatives.js';
 import type {TerrainWindowSnapshot} from './terrain-window.js';
 
 export interface CorridorPlanningIdentity {requestId:number;railwayRevision:number;terrainRevision:number;trackClassId:TrackClassId;draftKey:string}
-export interface CorridorWorkerRequest {type:'plan-corridors';identity:CorridorPlanningIdentity;anchors:Vec3[];tangents:AlignmentTangents;terrain:TerrainWindowSnapshot;candidateBudget:number}
+export interface CorridorWorkerRequest {type:'plan-corridors';identity:CorridorPlanningIdentity;anchors:Vec3[];tangents:AlignmentTangents;terrain:TerrainWindowSnapshot;candidateBudget:number;maxOffsetM:number;expansionBudget:number}
 export type CorridorWorkerResponse=
   | {type:'corridors-ready';identity:CorridorPlanningIdentity;candidates:CorridorCurveCandidate[]}
   | {type:'corridors-failed';identity:CorridorPlanningIdentity;reason:string};
