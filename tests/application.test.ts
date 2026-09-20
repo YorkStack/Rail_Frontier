@@ -30,7 +30,7 @@ test('gateway commits a successful handler once and rejects its replay',()=>{
   const after=json(game.snapshot());
   assert.deepEqual(game.dispatch(command),{ok:false,reason:'Expected command sequence 2'});
   assert.equal(json(game.snapshot()),after);
-  assert.equal(game.snapshot().company.cash,249_999_500);
+  assert.equal(game.snapshot().company.cash,game.snapshot().company.openingCash-500);
   assert.equal(game.snapshot().company.ledger.length,1);
 });
 

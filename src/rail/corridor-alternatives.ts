@@ -27,6 +27,7 @@ export interface CorridorAlternative {
 export interface CorridorAlternativeRequest {
   anchors:readonly Vec3[];
   tangents?:AlignmentTangents;
+  endpointGrades?:{start:number;end:number};
   terrain:Terrain;
   trackClass:TrackClassDefinition;
   maxOffsetM?:number;
@@ -77,8 +78,14 @@ export function evaluateCorridorAlternatives(curveCandidates:readonly CorridorCu
   const normalized={cost:normalizer(candidates.map(item=>item.cost)),time:normalizer(candidates.map(item=>item.estimatedTimeS)),grade:normalizer(candidates.map(item=>item.maxGrade)),structure:normalizer(candidates.map(item=>item.structureM)),radius:normalizer(candidates.map(item=>Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0))};
   for(const item of candidates)for(const preference of preferences){const weight=weights[preference];item.scores[preference]=weight.cost*normalized.cost(item.cost)+weight.time*normalized.time(item.estimatedTimeS)+weight.grade*normalized.grade(item.maxGrade)+weight.structure*normalized.structure(item.structureM)+weight.radius*normalized.radius(Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0);}
   if(keepGeometryChoices){
-    const ordered=[...candidates].sort((a,b)=>a.cost-b.cost),chosen:CorridorAlternative[]=[];
-    for(const item of ordered){const profile=buildEngineeringProfile(item.geometries,item.quotes,terrain);const duplicate=chosen.some(other=>{const p=buildEngineeringProfile(other.geometries,other.quotes,terrain);return Math.abs(item.lengthM-other.lengthM)<30&&Math.abs(profile.lengthByKind.bridge-p.lengthByKind.bridge)<30&&Math.abs(profile.lengthByKind.tunnel-p.lengthByKind.tunnel)<30&&Math.abs(item.maxGrade-other.maxGrade)<.003;});if(!duplicate)chosen.push({...item,recommendedFor:['balanced']});if(chosen.length===3)break;}return chosen;
+    const ordered=[...candidates].sort((a,b)=>a.cost-b.cost),chosen:CorridorAlternative[]=[],profiles=new Map(ordered.map(item=>[item.id,buildEngineeringProfile(item.geometries,item.quotes,terrain)]));
+    const family=(item:Candidate)=>{const {bridge,tunnel}=profiles.get(item.id)!.lengthByKind;return bridge<1&&tunnel<1?'land':tunnel<1?'bridge':bridge<1?'tunnel':'mixed';};
+    // Reserve space for different engineering solutions before small variations of one solution.
+    const families=new Set<string>(),near=ordered.find(item=>item.id.startsWith('wish:near:'));
+    // Honour the player's sketch first; lower-cost side routes remain explicit choices.
+    if(near){chosen.push({...near,recommendedFor:['balanced']});families.add(family(near));}
+    for(const item of ordered){const kind=family(item);if(families.has(kind))continue;families.add(kind);chosen.push({...item,recommendedFor:['balanced']});if(chosen.length===3)return chosen;}
+    for(const item of ordered){const profile=profiles.get(item.id)!;const duplicate=chosen.some(other=>{const p=profiles.get(other.id)!;return item.id===other.id||Math.abs(item.lengthM-other.lengthM)<30&&Math.abs(profile.lengthByKind.bridge-p.lengthByKind.bridge)<100&&Math.abs(profile.lengthByKind.tunnel-p.lengthByKind.tunnel)<100&&Math.abs(item.maxGrade-other.maxGrade)<.005;});if(!duplicate)chosen.push({...item,recommendedFor:['balanced']});if(chosen.length===3)break;}return chosen;
   }
   const selected=new Map<string,CorridorAlternative>();
   for(const preference of preferences){const best=[...candidates].sort((a,b)=>a.scores[preference]-b.scores[preference]||a.cost-b.cost||a.lengthM-b.lengthM||a.id.localeCompare(b.id))[0]!,known=selected.get(best.id);if(known)known.recommendedFor.push(preference);else selected.set(best.id,{id:best.id,recommendedFor:[preference],curves:best.curves,geometries:best.geometries,quotes:best.quotes,lengthM:best.lengthM,cost:best.cost,maxGrade:best.maxGrade,minimumRadiusM:best.minimumRadiusM,structureM:best.structureM,estimatedTimeS:best.estimatedTimeS});}

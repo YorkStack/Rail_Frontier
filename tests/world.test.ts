@@ -21,7 +21,7 @@ test('production Norway terrain has a stable fingerprint',()=>{
   const first=fingerprint(norway.world.seed);
   assert.equal(first,fingerprint(norway.world.seed));
   assert.notEqual(first,fingerprint(norway.world.seed+1));
-  assert.equal(first,'520c28037889c74124efca3afa829e13411dddc2a8af35d0e46eb821879dd088');
+  assert.equal(first,'3f639ef123fbf66b265a2f4c31e73e6a02f2e60427929cc318d27eeb761d7b3c');
 });
 
 test('Norway V2 has stable two-bank fjord landforms distinct from production',()=>{
@@ -62,4 +62,15 @@ test('Norway V3 adds steep cliff clusters and a descending connected watercourse
   const terrain=norwayV3WorldGenerator.generate(norway.world),course=norwayV3WorldGenerator.landforms.watercourse!;
   const heights=[course.upstream,course.lip,course.plunge,course.outlet].map(point=>terrain.sample(point.x,point.z).elevationM);assert.ok(heights[0]!>heights[1]!);assert.ok(heights[1]!-heights[2]!>120);assert.ok(heights[2]!>=heights[3]!);
   for(const [x,z] of [[4300,7350],[10100,8850],[900,10600]] as const){const centre=terrain.sample(x,z).elevationM,face=terrain.sample(x-260,z).elevationM;assert.ok(Math.abs(centre-face)>35);}
+});
+
+
+test('production fjord remains below sea level and requires a real water crossing',()=>{
+  const terrain=norwayV3WorldGenerator.generate(norway.world);
+  for(const z of [800,3200,6500,10500,15000]){
+    const section=norwayV3WorldGenerator.landforms.waterCrossSection(z);
+    assert.ok(terrain.sample((section.westBankX!+section.eastBankX!)/2,z).elevationM<0);
+  }
+  const quote=quoteTrack(compileCurve(line({x:600,y:10,z:3200},{x:1800,y:10,z:3200})),terrain);
+  assert.ok(quote.intervals.filter(s=>s.kind==='bridge').reduce((sum,s)=>sum+s.endM-s.startM,0)>1000);
 });

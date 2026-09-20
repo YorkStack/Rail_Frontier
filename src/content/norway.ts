@@ -15,7 +15,7 @@ export const norwayV2:CampaignDefinition={
   ],objectives
 };
 export const norwayV3:CampaignDefinition={
-  id:'norwegian-fjords',version:3,title:'Norwegian Fjords',startingYear:1900,startingCash:250_000_000,
+  id:'norwegian-fjords',version:3,title:'Norwegian Fjords',startingYear:1900,startingCash:500_000_000,
   world:{seed,widthM:norwayV3WorldProfile.widthM,depthM:norwayV3WorldProfile.depthM,cellM:norwayV3WorldProfile.cellM,generatorVersion:3,biomeId:norwayV3WorldProfile.biomeId},
   towns:[
     {id:'town:2',name:'Sundvik',position:{x:2200,y:norwayV3WorldGenerator.elevation(2200,3200,seed),z:3200},population:1800},

@@ -316,7 +316,19 @@ export class FjordRenderer implements WorldRenderer {
   }
   private planningGesture=false;
   setPlanningGesture(active:boolean):void {if(active&&!this.planningGesture){this.follow=false;this.controls.enableDamping=false;this.controls.update();this.controls.enableDamping=true;}this.planningGesture=active;this.controls.enabled=!active;}
-  frameRoute(points:readonly Vec3[]):void {if(!points.length)return;this.follow=false;const center=new THREE.Vector3();for(const p of points)center.add(new THREE.Vector3(p.x,p.y,p.z));center.multiplyScalar(1/points.length);const radius=Math.max(180,...points.map(p=>Math.hypot(p.x-center.x,p.z-center.z)));center.add(new THREE.Vector3(radius*.5,0,-radius*.12));this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(radius*.45,radius*1.5,radius*1.85));this.controls.update();}
+  frameRoute(points:readonly Vec3[],area?:{left:number;top:number;right:number;bottom:number}):void {
+    if(!points.length)return;this.follow=false;const center=new THREE.Vector3();for(const p of points)center.add(new THREE.Vector3(p.x,p.y,p.z));center.multiplyScalar(1/points.length);
+    const radius=Math.max(180,...points.map(p=>Math.hypot(p.x-center.x,p.z-center.z)));this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(radius*.45,radius*1.5,radius*1.85));this.controls.update();
+    if(!area)return;
+    const height=this.canvas.getBoundingClientRect().height;
+    // Fit the endpoints into the actually available map, above controls and beside the planner.
+    for(let pass=0;pass<7;pass++){
+      this.camera.updateMatrixWorld(true);const screens=points.map(p=>this.project(p,0)),xs=screens.map(p=>p.x),ys=screens.map(p=>p.y),left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys),scale=Math.max(1,(right-left)/(area.right-area.left),(bottom-top)/(area.bottom-area.top));
+      const offset=this.camera.position.clone().sub(this.controls.target);if(scale>1.001){this.camera.position.copy(this.controls.target).add(offset.multiplyScalar(scale*1.04));this.controls.update();continue;}
+      const dx=(left+right-area.left-area.right)/2,dy=(top+bottom-area.top-area.bottom)/2;if(Math.abs(dx)+Math.abs(dy)<.5)break;
+      const unit=2*offset.length()*Math.tan(THREE.MathUtils.degToRad(this.camera.fov/2))/height,rightAxis=new THREE.Vector3(1,0,0).applyQuaternion(this.camera.quaternion),upAxis=new THREE.Vector3(0,1,0).applyQuaternion(this.camera.quaternion),shift=rightAxis.multiplyScalar(dx*unit).add(upAxis.multiplyScalar(-dy*unit));this.controls.target.add(shift);this.camera.position.add(shift);this.controls.update();
+    }
+  }
   setPreview(geometry:TrackGeometry|null,color='#edc879'):void {
     this.setAlignmentPreview(geometry?[geometry]:[],color);
   }
