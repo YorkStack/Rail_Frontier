@@ -58,11 +58,15 @@ export function validateCommand(state:GameState,command:GameCommand):void {
     case 'assignRoute':
       if(!state.trains.some(train=>train.id===command.trainId))throw new Error(`Unknown train: ${command.trainId}`);
       if(!state.routes.some(route=>route.id===command.routeId))throw new Error(`Unknown route: ${command.routeId}`);
+      return;
+    case 'dismissTutorial':
+      if(state.learning?.status!=='active')throw new Error('No active introduction');
   }
 }
 
 export const baseCommandHandlers:CommandHandlers={
-  setSpeed:(_state,command)=>({createdIds:[],speed:command.speed})
+  setSpeed:(_state,command)=>({createdIds:[],speed:command.speed}),
+  dismissTutorial:(state)=>{if(state.learning)state.learning.status='dismissed';return {createdIds:[]};}
 };
 
 export function executeCommand(state:GameState,command:GameCommand,context:Readonly<CommandContext>,handlers:CommandHandlers):CommandEffect {

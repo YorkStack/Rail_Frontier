@@ -39,13 +39,19 @@ export interface CampaignDefinition {
   world: WorldDefinition; towns: Town[];
   objectives: { id: string; type: 'connectTowns' | 'deliverPassengers' | 'operatingProfit'; target: number }[];
 }
+export type TutorialStage='station-one'|'station-two'|'track-planned'|'track-built'|'train-bought'|'service-started'|'first-revenue';
+export interface LearningState {
+  lessonId:'norway-first-railway';version:1;status:'active'|'complete'|'dismissed';completedStages:TutorialStage[];
+  bound:{stationIds:Id<'station'>[];trainId:Id<'train'>|null;routeId:Id<'route'>|null};
+  baseline:{passengersDelivered:number;ledgerEntries:number};
+}
 export interface GameState {
   operations:OperationsState;
   tick: number; startingYear:number; nextEntityId: number; rngState: number; campaignId: string; campaignVersion: number;
   world: WorldDefinition; railway: RailGraph; stations: Station[]; trains: Train[];
   routes: Route[]; towns: Town[]; industries: Industry[];
   company: { id: Id<'company'>; cash: Money; openingCash: Money; ledger: Transaction[] };
-  objectiveProgress: Record<string, number>;
+  objectiveProgress: Record<string, number>;learning:LearningState|null;
 }
 export function allocateId<K extends EntityKind>(state: Pick<GameState, 'nextEntityId'>, kind: K): Id<K> {
   if (!Number.isSafeInteger(state.nextEntityId) || state.nextEntityId < 1 || state.nextEntityId >= Number.MAX_SAFE_INTEGER) throw new Error('Invalid ID counter');

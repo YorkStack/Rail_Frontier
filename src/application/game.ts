@@ -14,6 +14,7 @@ import { SimulationClock } from '../simulation/clock.js';
 import type { GridTerrain } from '../world/terrain.js';
 import {EngineeredTerrain} from '../world/engineered-terrain.js';
 import { createSimulationSystems } from '../simulation/systems.js';
+import {updateLearningAfterCommand,updateLearningFromSimulation} from '../ui/tutorial.js';
 
 export interface GameOptions {
   handlers?:CommandHandlers;
@@ -58,6 +59,7 @@ export class RailFrontierGame implements GameApplication {
     try {
       const working=structuredClone(this.state);
       const effect=executeCommand(working,envelope.command,{terrain:this.terrain,speed:this.runtimeSpeed},this.handlers);
+      updateLearningAfterCommand(working,envelope.command,effect.createdIds);
       working.operations.lastCommandSequence=envelope.sequence;
       const committed=validateState(working);
       this.terrain.publish(committed.operations.terrain);
@@ -96,6 +98,7 @@ export class RailFrontierGame implements GameApplication {
     this.previousPublished=this.published;
     this.state.tick++;
     this.stepSystems(this.state);
+    updateLearningFromSimulation(this.state);
     this.published=snapshotState(this.state);
   }
 }

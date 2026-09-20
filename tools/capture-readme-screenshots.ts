@@ -55,6 +55,14 @@ try{
   await settle(page);
   await page.screenshot({path:resolve(outputDirectory,'settings-menu.png'),fullPage:true});
 
+  await page.goto(`${baseUrl}/`,{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>window.__railProbe?.ready===true);
+  await page.getByRole('button',{name:/Start new company/}).click();
+  await expectVisible(page,'#tutorial-card');
+  await page.evaluate(()=>window.__railProbe.cameraPreset('regional'));
+  await settle(page);
+  await page.screenshot({path:resolve(outputDirectory,'guided-introduction.png'),fullPage:true});
+
   await page.goto(`${baseUrl}/?skip-menu=1&world=arizona`,{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.__railProbe?.ready===true);
   await page.evaluate(()=>{window.__railProbe.setSpeed(0);window.__railProbe.cameraPreset('street');});
@@ -65,7 +73,7 @@ try{
   await page.screenshot({path:resolve(outputDirectory,'arizona-canyon.png'),fullPage:true});
 
   if(errors.length>0)throw new Error(`Browser reported errors:\n${errors.join('\n')}`);
-  console.log(`Captured eight README screenshots in ${outputDirectory}`);
+  console.log(`Captured nine README screenshots in ${outputDirectory}`);
 }finally{
   await browser.close();
 }
