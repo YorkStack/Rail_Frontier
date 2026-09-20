@@ -1,6 +1,6 @@
 # Readable controls and a playable first railway
 
-Date: 2026-09-20. Status: **UX-001, UX-003 and UX-004 / CON-07 complete; the first UX-005 slice is implemented and UX-006 remains**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`, with active-step resume and archive/storage checks at `3521de4`. Repeating the lesson now creates named current-company and practice slots. The Railway Office keeps advanced tools available but collapsed until first revenue, then presents upgrades, freight, electrification and reporting as the next opportunity.
+Date: 2026-09-20. Status: **UX-001, UX-003 and UX-004 / CON-07 complete; the first UX-005 slice is implemented and UX-006 remains**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`, with active-step resume and archive/storage checks at `3521de4` and named practice companies plus first-revenue disclosure at `3963024`. The Railway Office keeps advanced tools available but collapsed until first revenue, then presents upgrades, freight, electrification and reporting as the next opportunity.
 
 ## Station-first revision from the user
 
