@@ -1,0 +1,11 @@
+import {test,expect} from '@playwright/test';
+
+test('introduction can be dismissed without changing the company and remains dismissed after reload',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});
+  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:/Start new company/}).click();await expect(page.locator('#tutorial-card')).toBeVisible();const before=await page.evaluate(()=>({cash:window.__railProbe.snapshot().company.cash,stations:window.__railProbe.snapshot().stations.length}));await page.getByRole('button',{name:'End introduction'}).click();await expect(page.locator('#tutorial-card')).toBeHidden();expect(await page.evaluate(()=>window.__railProbe.snapshot().learning?.status)).toBe('dismissed');expect(await page.evaluate(()=>({cash:window.__railProbe.snapshot().company.cash,stations:window.__railProbe.snapshot().stations.length}))).toEqual(before);
+  await page.getByRole('button',{name:'Save study'}).click();await expect(page.getByRole('status')).toContainText('Study saved');await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Continue latest'}).click();await expect(page.getByRole('region',{name:'Main menu'})).toBeHidden();await expect(page.locator('#tutorial-card')).toBeHidden();expect(await page.evaluate(()=>window.__railProbe.snapshot().learning?.status)).toBe('dismissed');expect(errors).toEqual([]);
+});
+
+test('free play starts with every tool available and no tutorial state',async({page})=>{
+  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.getByRole('button',{name:'Free play'}).click();await expect(page.getByRole('region',{name:'Main menu'})).toBeHidden();await expect(page.locator('#tutorial-card')).toBeHidden();expect(await page.evaluate(()=>window.__railProbe.snapshot().learning)).toBeNull();await expect(page.getByRole('button',{name:'Build station'})).toBeEnabled();await expect(page.getByRole('button',{name:'Build tracks'})).toBeEnabled();await expect(page.getByRole('button',{name:'Trains & lines'})).toBeEnabled();
+});

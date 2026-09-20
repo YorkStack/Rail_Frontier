@@ -30,6 +30,10 @@ Runtime checkpoint `053f79e` passes 161 active Node tests, the guided service-bu
 | --- |
 | ![Railway Office showing the three-step first-service flow and live consist preview](docs/screenshots/first-service-builder.png) |
 
+| Optional hands-on introduction |
+| --- |
+| ![Rail Frontier showing step one of the persistent first-railway introduction](docs/screenshots/guided-introduction.png) |
+
 ## Run
 
 Node ≥22.12 and npm required. Tested on Apple M2 Pro with Node 25.8.0, npm 11.11.0 and Chrome 153.

@@ -15,7 +15,7 @@ import { snapshotState } from '../src/application/snapshot.js';
 import { emptyOperations,initialTownEconomy } from '../src/domain/operations.js';
 
 const withoutTerrain=<T extends ReturnType<typeof emptyOperations>>(operations:T)=>{const {terrain:_,...legacy}=operations;return legacy;};
-const schemaSixState=(state:ReturnType<typeof createStudyState>)=>({...state,operations:withoutTerrain(state.operations),stations:state.stations.map(({layout:_,constructionCost:__,...station})=>station)});
+const schemaSixState=(state:ReturnType<typeof createStudyState>)=>{const {learning:_,...legacy}=state;return {...legacy,operations:withoutTerrain(state.operations),stations:state.stations.map(({layout:__,constructionCost:___,...station})=>station)};};
 
 test('terrain diagonal interpolation matches triangles rather than bilinear saddle',()=>{
   const terrain=new Heightfield(2,2,10,new Float64Array([0,0,0,10]));assert.equal(terrain.sample(5,5).elevationM,5);assert.equal(terrain.sample(7,3).elevationM,3);assert.equal(terrain.sample(3,7).elevationM,3);
@@ -74,8 +74,12 @@ test('schema 6 adds legacy station layouts without changing rail topology',()=>{
   assert.equal(JSON.stringify(legacy),json);assert.deepEqual(loaded.railway,state.railway);assert.deepEqual(loaded.stations,state.stations);
 });
 test('schema 7 migrates to empty semantic terrain state without changing railway or infrastructure',()=>{
-  const state=createStudyState(),legacy={schemaVersion:7,gameVersion:'0.7.0',state:{...state,operations:withoutTerrain(state.operations)}},json=JSON.stringify(legacy),loaded=deserialize(json);
+  const state=createStudyState(),{learning:_,...historical}=state,legacy={schemaVersion:7,gameVersion:'0.7.0',state:{...historical,operations:withoutTerrain(state.operations)}},json=JSON.stringify(legacy),loaded=deserialize(json);
   assert.equal(JSON.stringify(legacy),json);assert.deepEqual(loaded.railway,state.railway);assert.deepEqual(loaded.operations.infrastructure,state.operations.infrastructure);assert.deepEqual(loaded.operations.terrain,{revision:0,patchGeneratorVersion:1,operations:[]});
+});
+test('schema 8 adds no active tutorial to existing companies',()=>{
+  const state=createStudyState(),{learning:_,...historical}=state,legacy={schemaVersion:8,gameVersion:'0.8.0',state:historical},json=JSON.stringify(legacy),loaded=deserialize(json);
+  assert.equal(JSON.stringify(legacy),json);assert.deepEqual(loaded,{...state,learning:null});
 });
 test('save validation rejects conflicting edge reservations',()=>{
   const state=createStudyState();state.operations.reservations=[{edgeId:'edge:9',trainId:'train:15'},{edgeId:'edge:9',trainId:'train:15'}];assert.throws(()=>serialize(state),/Conflicting/);
