@@ -44,7 +44,7 @@ export function tutorialPrompt(state:Readonly<GameState>,trackDraftReady=false):
   const copy:Record<TutorialStage,Omit<TutorialPrompt,'step'|'total'|'stage'>>={
     'station-one':{title:'Build the first station in Sundvik',instruction:'Open Build station, choose level ground near Sundvik and turn the platform toward Granli.',action:'station'},
     'station-two':{title:'Build the destination station',instruction:'Place a second station near Granli. It may exist before the connecting railway.',action:'station'},
-    'track-planned':{title:'Plan the railway',instruction:'Start at one highlighted station end, shape the route with waypoints and finish at the other station.',action:'track'},
+    'track-planned':{title:'Plan the railway',instruction:'Drag from a highlighted station end to draw your route. Release at the other station. You can reshape the line by dragging its handles.',action:'track'},
     'track-built':{title:'Build the railway',instruction:'Review gradient, structures and cost, then buy the complete alignment once.',action:'track'},
     'train-bought':{title:'Assemble your first train',instruction:'Open Trains & lines and buy the recommended steam locomotive with two passenger coaches.',action:'operations'},
     'service-started':{title:'Start the shuttle service',instruction:'Keep the two ordered stops, create the shuttle and assign the waiting train.',action:'operations'},

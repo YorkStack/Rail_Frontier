@@ -6,7 +6,7 @@ declare global {interface Window {__railProbe:{ready:boolean;assets:AssetReport[
 
 test('runtime asset, camera, alignment, pause and durable save validation',async({page})=>{
   const errors:string[]=[],models:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',event=>{if(event.type()==='error'||event.type()==='warning')errors.push(event.text());});page.on('request',request=>{if(request.url().includes('/models/'))models.push(request.url());});
-  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);
+  await page.goto('/?skip-menu=1&study-corridors=1');await page.waitForFunction(()=>window.__railProbe?.ready);
   const assets=await page.evaluate(()=>window.__railProbe.assets);expect(assets).toHaveLength(72);expect(assets.find(asset=>asset.name==='nord-2-6-0'&&asset.lod===0)?.triangles).toBe(1204);expect(assets.find(asset=>asset.name==='nord-2-6-0'&&asset.lod===1)?.triangles).toBe(236);expect(new Set(assets.map(asset=>asset.name)).size).toBe(36);expect(assets.every(asset=>asset.normalsFinite)).toBe(true);expect(models).toHaveLength(72);expect(models.every(url=>url.includes('/models/norway/'))).toBe(true);
   const production=await page.evaluate(()=>({world:window.__railProbe.snapshot().world,trains:window.__railProbe.snapshot().trains,stats:window.__railProbe.stats()}));expect(production.world.widthM).toBe(16000);expect(production.world.depthM).toBe(16000);expect(production.trains[0]!.vehicleIds).toHaveLength(2);expect(production.stats.trees).toBe(28000);
   expect(await page.evaluate(()=>window.__railProbe.stats().terrainErrorM)).toBeLessThan(.001);
@@ -36,7 +36,7 @@ test('runtime asset, camera, alignment, pause and durable save validation',async
 
 test('scaled scene records honest frame metrics and releases replaced resources',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('/?skip-menu=1');await page.waitForFunction(()=>window.__railProbe?.ready);await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>120);
+  await page.goto('/?skip-menu=1&study-corridors=1');await page.waitForFunction(()=>window.__railProbe?.ready);await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>120);
   const initial=await page.evaluate(()=>window.__railProbe.metrics());
   await page.evaluate(()=>{window.__railProbe.setSpeed(8);window.__railProbe.setStress(true);});
   await page.waitForFunction(()=>window.__railProbe.metrics().frames.length>=300,{},{timeout:45000});

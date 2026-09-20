@@ -18,7 +18,7 @@ try{
   page.on('console',message=>{
     if(message.type()==='error'||message.type()==='warning')errors.push(message.text());
   });
-  await page.goto(`${baseUrl}/?skip-menu=1`,{waitUntil:'networkidle'});
+  await page.goto(`${baseUrl}/?skip-menu=1&study-corridors=1`,{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.__railProbe?.ready===true);
   await page.evaluate(()=>window.__railProbe.setSpeed(0));
   await page.waitForTimeout(4400);
@@ -43,8 +43,8 @@ try{
 
   await page.evaluate(()=>window.__railProbe.cameraPreset('regional'));
   await page.locator('#plan').click();
-  await page.getByLabel('Corridor').selectOption('bridge');
-  await expectVisible(page,'#engineering-review');
+  await page.locator('#alignment').selectOption('bridge',{force:true});
+  await expectVisible(page,'#engineering-review');await page.locator('#engineering-review').evaluate((node:HTMLDetailsElement)=>node.open=true);
   await page.locator('#engineering-profile').scrollIntoViewIfNeeded();
   await settle(page);
   await page.screenshot({path:resolve(outputDirectory,'alignment-engineering.png'),fullPage:true});

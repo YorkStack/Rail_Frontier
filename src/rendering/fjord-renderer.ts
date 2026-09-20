@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type {EngineeringInterval} from '../rail/planner.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
@@ -313,14 +314,24 @@ export class FjordRenderer implements WorldRenderer {
     for(let i=0;i<count;i++){const town=state.towns[i%state.towns.length]!;let x=town.position.x,z=town.position.z;for(let attempt=0;attempt<24;attempt++){const angle=random.next()*Math.PI*2,radius=25+Math.sqrt(random.next())*300;x=Math.max(3,Math.min(this.terrain.widthM-3,town.position.x+Math.cos(angle)*radius));z=Math.max(3,Math.min(this.terrain.depthM-3,town.position.z+Math.sin(angle)*radius));if(Math.abs(x-this.corridorX(z))>70)break;}const y=this.terrain.sample(x,z).elevationM,w=7+random.next()*9,h=3.5+random.next()*4,d=8+random.next()*11,rotation=Math.round(random.next()*3)*Math.PI/2;dummy.position.set(x,y+h/2,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(w,h,d);dummy.updateMatrix();body.setMatrixAt(i,dummy.matrix);body.setColorAt(i,new THREE.Color(palettes[i%palettes.length]!));dummy.position.y=y+h+.28;dummy.scale.set(w+1,.55,d+1);dummy.updateMatrix();roof.setMatrixAt(i,dummy.matrix);}
     body.castShadow=true;roof.castShadow=true;body.computeBoundingSphere();roof.computeBoundingSphere();this.buildings.add(body,roof);this.buildingCount=count;
   }
+  private planningGesture=false;
+  setPlanningGesture(active:boolean):void {if(active&&!this.planningGesture){this.follow=false;this.controls.enableDamping=false;this.controls.update();this.controls.enableDamping=true;}this.planningGesture=active;this.controls.enabled=!active;}
+  frameRoute(points:readonly Vec3[]):void {if(!points.length)return;this.follow=false;const center=new THREE.Vector3();for(const p of points)center.add(new THREE.Vector3(p.x,p.y,p.z));center.multiplyScalar(1/points.length);const radius=Math.max(180,...points.map(p=>Math.hypot(p.x-center.x,p.z-center.z)));center.add(new THREE.Vector3(radius*.5,0,-radius*.12));this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(radius*.45,radius*1.5,radius*1.85));this.controls.update();}
   setPreview(geometry:TrackGeometry|null,color='#edc879'):void {
     this.setAlignmentPreview(geometry?[geometry]:[],color);
   }
-  setAlignmentPreview(geometries:readonly TrackGeometry[],color='#edc879'):void {
+  setAlignmentPreview(geometries:readonly TrackGeometry[],color='#edc879',spans?:readonly (readonly EngineeringInterval[])[]):void {
     if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
     if(geometries.length===0)return;
     const group=new THREE.Group(),material=new THREE.LineBasicMaterial({color,depthTest:false});
-    for(const geometry of geometries){const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material));}
+    geometries.forEach((geometry,index)=>{
+      const sections=spans?.[index];if(!sections){const points=geometry.samples.map(s=>new THREE.Vector3(s.position.x,s.position.y+.6,s.position.z));group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material));return;}
+      for(const span of sections){const count=Math.max(2,Math.min(128,Math.ceil((span.endM-span.startM)/12))),points=Array.from({length:count+1},(_,i)=>{const p=sampleDistance(geometry,span.startM+(span.endM-span.startM)*i/count);return new THREE.Vector3(p.x,p.y+1,p.z);});
+        const lineMaterial=span.kind==='tunnel'?new THREE.LineDashedMaterial({color:'#f3d0b1',dashSize:8,gapSize:6,depthTest:false}):new THREE.LineBasicMaterial({color:span.kind==='bridge'?'#b1e6e0':color,depthTest:false});const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),lineMaterial);line.computeLineDistances();group.add(line);
+        if(span.kind==='tunnel'&&span.endM-span.startM>15){for(const at of [0,points.length-1]){const portal=new THREE.Mesh(new THREE.TorusGeometry(4,.8,6,14),new THREE.MeshBasicMaterial({color:'#f3d0b1',depthTest:false}));portal.position.copy(points[at]!);portal.lookAt(points[at===0?1:points.length-2]!);group.add(portal);}}
+        if(span.kind==='bridge'&&span.endM-span.startM>20){for(let i=1;i<points.length;i+=4){const p=points[i]!,ground=this.terrain.sample(p.x,p.z).elevationM,h=Math.max(0,p.y-ground);if(h>1){const support=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.6,h,5),new THREE.MeshBasicMaterial({color:'#b1e6e0',transparent:true,opacity:.6}));support.position.set(p.x,p.y-h/2,p.z);group.add(support);}}}
+      }
+    });
     group.renderOrder=10;this.preview=group;this.scene.add(group);
   }
   setStationPreview(site:StationSite|null,valid=true):void {
@@ -408,10 +419,10 @@ export class FjordRenderer implements WorldRenderer {
     const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
     const shift=new THREE.Vector3((this.keys.has('KeyD')?1:0)-(this.keys.has('KeyA')?1:0),0,(this.keys.has('KeyS')?1:0)-(this.keys.has('KeyW')?1:0));
-    if(shift.lengthSq()){shift.multiplyScalar(this.camera.position.distanceTo(this.controls.target)*.006);this.camera.position.add(shift);this.controls.target.add(shift);this.follow=false;}
+    if(!this.planningGesture&&shift.lengthSq()){shift.multiplyScalar(this.camera.position.distanceTo(this.controls.target)*.006);this.camera.position.add(shift);this.controls.target.add(shift);this.follow=false;}
     const {x,z}=this.camera.position;
     if(!this.inspectionModel&&x>=0&&z>=0&&x<=this.terrain.widthM&&z<=this.terrain.depthM)this.camera.position.y=Math.max(this.camera.position.y,this.terrain.sample(x,z).elevationM+8);
-    this.controls.update();this.sun.target.position.copy(this.controls.target);this.sun.position.copy(this.controls.target).add(this.sunOffset);this.updateSceneryLod();this.updateSouthwestLod();
+    if(!this.planningGesture)this.controls.update();this.sun.target.position.copy(this.controls.target);this.sun.position.copy(this.controls.target).add(this.sunOffset);this.updateSceneryLod();this.updateSouthwestLod();
     this.water.material.uniforms.time!.value=current.tick*.05;
     this.waterfall.material.uniforms.time!.value=current.tick*.05;
     if(this.stressTrains){const dummy=new THREE.Object3D(),track=[...this.geometry.values()][1]!;for(let i=0;i<99;i++){const s=(i*11+current.tick*.9)%track.lengthM,p=sampleDistance(track,s),q=sampleDistance(track,Math.min(track.lengthM,s+1));dummy.position.set(p.x,p.y+1.6,p.z);dummy.rotation.y=Math.atan2(q.x-p.x,q.z-p.z);dummy.updateMatrix();this.stressTrains.setMatrixAt(i,dummy.matrix);}this.stressTrains.instanceMatrix.needsUpdate=true;}
