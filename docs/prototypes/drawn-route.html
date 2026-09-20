@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rail Frontier · Strecke zeichnen · Bedienungsentwurf</title>
+<style>
+:root{font:16px/1.45 system-ui,sans-serif;color:oklch(94% .014 90);background:oklch(22% .022 155);--ink:oklch(24% .025 155);--paper:oklch(95% .018 90);--gold:oklch(83% .10 86)}
+*{box-sizing:border-box}body{margin:0}button,select{font:inherit;cursor:pointer}button{min-height:44px;padding:9px 15px;border:1px solid oklch(65% .022 150);border-radius:5px;color:inherit;background:transparent}button:hover{background:oklch(38% .034 155)}button:disabled{opacity:.4;cursor:default}button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button[aria-pressed=true],.primary{background:var(--gold);color:var(--ink);border-color:var(--gold)}header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid oklch(42% .022 155)}header b{letter-spacing:.15em}header span{font-size:14px;color:oklch(85% .025 130)}a{color:inherit}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 350px;min-height:0;height:calc(100dvh - 162px)}.land{position:relative;overflow:hidden;background:oklch(54% .065 145)}svg{width:100%;height:100%;display:block;touch-action:none;user-select:none}.instruction{position:absolute;top:18px;left:18px;max-width:520px;padding:12px 18px;background:var(--ink);border-radius:5px;pointer-events:none}.instruction strong{display:block;font-size:20px}.instruction span{font-size:14px;color:oklch(85% .025 130)}aside{padding:24px;overflow:auto;border-left:1px solid oklch(42% .022 155)}.eyebrow{font-size:14px;letter-spacing:.08em;color:var(--gold)}h1{font-size:26px;line-height:1.2;margin:8px 0 12px}h2{font-size:18px;margin:20px 0 12px}p{margin:10px 0;color:oklch(85% .02 130)}.mode-note{font-size:14px;border:1px solid oklch(50% .025 150);padding:12px}.choice{display:block;width:100%;text-align:left;margin:8px 0}.choice span{display:block;font-size:14px;margin-top:3px}.choice[aria-pressed=true] span{color:var(--ink)}.totals{margin:22px 0;padding-top:12px;border-top:1px solid oklch(50% .025 150)}.totals div{display:flex;justify-content:space-between;padding:5px 0;gap:12px}.totals strong{font-size:20px}.muted{font-size:14px}.toolbar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:14px 20px;border-top:1px solid oklch(42% .022 155)}.legend{position:absolute;bottom:16px;left:18px;display:flex;gap:18px;font-size:14px;background:var(--ink);padding:10px 14px;border-radius:5px;pointer-events:none}.legend i{display:inline-block;width:24px;border-top:3px solid var(--gold);vertical-align:middle;margin-right:6px}.legend .wish{border-top-style:dashed}.station-label{font:bold 19px system-ui;fill:oklch(96% .016 90);paint-order:stroke;stroke:oklch(28% .025 150);stroke-width:5px}.map-label{font:italic 19px Georgia;fill:oklch(90% .025 100);opacity:.8}.handle{cursor:grab;fill:oklch(95% .018 90);stroke:oklch(30% .025 155);stroke-width:3}.port{cursor:crosshair;fill:oklch(88% .095 88);stroke:oklch(25% .028 155);stroke-width:4}.marker{cursor:pointer}.marker circle{fill:oklch(26% .024 155);stroke:oklch(90% .06 85);stroke-width:2}.marker text{fill:oklch(95% .02 85);font:bold 20px system-ui;text-anchor:middle;pointer-events:none}[hidden]{display:none!important}footer{font-size:14px;padding:0 24px 14px;color:oklch(78% .018 150)}
+@media(max-width:1050px){.workspace{grid-template-columns:minmax(0,1fr) 310px}aside{padding:18px}header{align-items:start}}@media(max-width:780px){header{display:block}header span{display:block;margin-top:8px}.workspace{display:block;height:auto}.land{height:520px}aside{border-left:0;border-top:1px solid oklch(42% .022 155)}.instruction{right:18px}.legend{gap:8px}.toolbar{justify-content:start}}
+</style>
+<header><b>RAIL FRONTIER</b><span>BEDIENUNGSENTWURF · Illustrationskarte und fiktive Beispielpreise · kein Spielstand</span><a href="../construction/DRAWN_ROUTE_PLANNING.md">Implementierungsplan</a></header>
+<main class="workspace">
+<div class="land">
+<div class="instruction"><strong id="instruction">Deine Linie. Deine Entscheidung.</strong><span id="hint">Wähle am Bergrücken oder an der Bucht eine andere Lösung.</span></div>
+<svg id="map" viewBox="0 0 1100 640" role="group" aria-label="Illustrationskarte: Strecke zwischen Sundvik und Granli zeichnen">
+<defs>
+ <pattern id="forest" width="42" height="48" patternUnits="userSpaceOnUse"><path d="M12 32l9-19 9 19z M28 47l6-13 6 13z" fill="#345a45" opacity=".6"/></pattern>
+ <pattern id="water" width="55" height="25" patternUnits="userSpaceOnUse"><path d="M4 12h26" stroke="#a0c8c1" stroke-width="1" opacity=".22"/></pattern>
+</defs>
+<rect width="1100" height="640" fill="#668263"/>
+<path d="M0 0H1100V105C910 58 890 157 803 248S687 355 736 416C631 435 627 369 697 288S804 150 691 112S421 117 312 39L0 138Z" fill="#426e74"/>
+<path d="M0 0H1100V105C910 58 890 157 803 248S687 355 736 416C631 435 627 369 697 288S804 150 691 112S421 117 312 39L0 138Z" fill="url(#water)"/>
+<path d="M0 175C130 92 275 171 300 332S180 622 0 587Z M810 380C1050 240 1120 390 1100 640H665Z" fill="url(#forest)"/>
+<path d="M270 365C303 227 424 128 533 179S730 315 651 419S518 559 388 491S229 463 270 365" fill="#8b9173"/>
+<g fill="none" stroke="#b9b89a" stroke-width="2" opacity=".55">
+ <path d="M296 365C330 255 421 176 526 205S696 319 626 410S510 523 399 473S270 454 296 365Z"/>
+ <path d="M329 366C356 284 423 213 513 235S657 321 599 397S505 482 420 451S309 427 329 366Z"/>
+ <path d="M367 367C387 308 438 256 511 265S612 325 565 381S495 443 444 418S352 405 367 367Z"/>
+ <path d="M406 362C426 318 455 286 503 298S567 338 537 368S477 405 449 383Z"/>
+</g>
+<path d="M429 359l51-51 38 14 30 37-30 24-25-26-37 23z" fill="#b9baa0" opacity=".75"/>
+<g fill="#c4b899" stroke="#58644e" stroke-width="2"><path d="M57 454h26v19H57zM85 415h31v23H85zM131 488h24v20h-24zM87 500h29v18H87zM930 132h29v19h-29zM976 185h25v22h-25zM1000 145h30v20h-30z"/></g>
+<path d="M0 508Q110 520 159 452M941 197L1100 220" fill="none" stroke="#b7ad82" stroke-width="8"/>
+<text x="465" y="190" class="map-label">Bergrücken</text><text x="791" y="94" class="map-label">Fjordbucht</text><text x="890" y="500" class="map-label">Granli-Wald</text>
+<path id="wish" fill="none" stroke="#eadca9" stroke-width="3" stroke-dasharray="7 7" opacity=".7"/>
+<path id="shadow" fill="none" stroke="#2f4136" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path id="rail" fill="none" stroke="#ebc877" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path id="tunnel" fill="none" stroke="#f6edd1" stroke-width="6" stroke-dasharray="10 9"/>
+<path id="bridge" fill="none" stroke="#cce7dc" stroke-width="11"/>
+<g id="handles"></g>
+<g id="markers"><g class="marker" data-challenge="ridge" role="button" tabindex="0" aria-label="1 Bergrücken vergleichen"><circle cx="530" cy="370" r="23"/><text x="530" y="377">1</text></g><g class="marker" data-challenge="inlet" role="button" tabindex="0" aria-label="2 Bucht vergleichen"><circle cx="794" cy="293" r="23"/><text x="794" y="300">2</text></g></g>
+<circle class="port" data-port="start" cx="120" cy="460" r="17"/><circle class="port" data-port="end" cx="960" cy="170" r="17"/>
+<text class="station-label" x="75" y="415">Sundvik</text><text class="station-label" x="906" y="127">Granli</text>
+</svg>
+<div class="legend"><span><i class="wish"></i>Wunschlinie</span><span><i></i>Trassenvorschlag</span></div>
+</div>
+<aside>
+<span class="eyebrow" id="stage">VARIANTEN AM BEISPIEL</span><h1>Sundvik → Granli</h1>
+<div id="example-panel">
+<div style="display:flex;gap:8px"><button id="show-ridge" aria-pressed="true">1 · Bergrücken</button><button id="show-inlet" aria-pressed="false">2 · Bucht</button></div>
+<div id="ridge-options"><h2 id="ridge-heading">1 · Am Bergrücken</h2>
+<button class="choice" data-ridge="tunnel" aria-pressed="true">Durch den Berg<span>Tunnel · flachere Strecke</span></button>
+<button class="choice" data-ridge="climb" aria-pressed="false">Über den Pass<span>Mehr Steigung · längere Anfahrt</span></button>
+<button class="choice" data-ridge="detour" aria-pressed="false">Um den Bergrücken<span>Keine Tunnel · längerer Weg</span></button>
+</div><div id="inlet-options" hidden><h2 id="inlet-heading">2 · An der Bucht</h2>
+<button class="choice" data-inlet="bridge" aria-pressed="true">Brücke über die Bucht<span>Direkte Verbindung</span></button>
+<button class="choice" data-inlet="detour" aria-pressed="false">Bucht landwärts umfahren<span>Länger · ohne diese Brücke</span></button>
+</div><div class="totals"><div><span>Beispiel-Baupreis</span><strong id="cost"></strong></div><div><span>Beispiel-Länge</span><span id="length"></span></div></div>
+<p class="mode-note">Fiktive Vergleichswerte, keine technische Prüfung. Im Spiel werden Geometrie und vollständiger Baupreis berechnet.</p>
+</div>
+<div id="draw-panel" hidden>
+<p id="draw-status" role="status">Beginne am hellen Anschluss von Sundvik. Halte die Maustaste und zeichne bis Granli. Du kannst unterwegs loslassen und an der Spitze weiterzeichnen.</p>
+<p>Nach dem Zeichnen lassen sich die hellen Punkte ziehen. Alternativ setzt du einzelne Punkte per Klick.</p>
+<div class="totals"><div><span>Technische Prüfung</span><span>Im Spiel vorgesehen</span></div><div><span>Baupreis</span><span>Wird hier nicht berechnet</span></div></div>
+<p class="mode-note">Dieser Entwurf zeigt die Eingabe. Er berechnet keine Steigung, Tunnel oder Kosten aus deinem Strich. „Beispiel vergleichen“ zeigt separat die geplante Darstellung dieser Entscheidungen.</p>
+</div>
+</aside>
+</main>
+<nav class="toolbar" aria-label="Streckenwerkzeuge">
+<button id="draw" class="primary">Selbst zeichnen</button><button id="points" aria-pressed="false">Punkte setzen</button><button id="undo" disabled>Rückgängig</button><button id="redo" disabled>Wiederholen</button><button id="discard">Verwerfen</button><button id="example">Beispiel vergleichen</button>
+</nav>
+<footer>Bedienungsstudie, noch keine Spieländerung. Die Spielumsetzung ergänzt 3D-Kamera, Tastaturbearbeitung, echte Ingenieurprüfung und verbindlichen Bauauftrag.</footer>
+<script type="module">
+const $=s=>document.querySelector(s),map=$('#map'),start={x:120,y:460},end={x:960,y:170};
+let challenge='ridge',mode='example',points=[],complete=false,gesture=null,history=[],future=[],ridge='tunnel',inlet='bridge';
+const line=ps=>ps.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' '),p=(x,y)=>({x,y});
+const clone=value=>structuredClone(value),snapshot=()=>({points:clone(points),complete}),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function record(before){history.push(before);if(history.length>30)history.shift();future=[];}
+function setState(s){points=clone(s.points);complete=s.complete;render();}
+function coordinate(e){const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());return {x:Math.max(20,Math.min(1080,point.x)),y:Math.max(90,Math.min(620,point.y))};}
+function setPath(id,ps){$(id).setAttribute('d',line(ps));}
+function render(){
+ const example=mode==='example';$('#example-panel').hidden=!example;$('#draw-panel').hidden=example;$('#markers').style.display=example?'':'none';$('#handles').replaceChildren();
+ $('#ridge-options').hidden=challenge!=='ridge';$('#inlet-options').hidden=challenge!=='inlet';$('#show-ridge').setAttribute('aria-pressed',String(challenge==='ridge'));$('#show-inlet').setAttribute('aria-pressed',String(challenge==='inlet'));
+ $('#stage').textContent=example?'VARIANTEN AM BEISPIEL':'EIGENE WUNSCHLINIE';$('#points').setAttribute('aria-pressed',String(mode==='points'));$('#undo').disabled=example||!history.length;$('#redo').disabled=example||!future.length;
+ $('#instruction').textContent=example?'Deine Linie. Deine Entscheidung.':complete?'Ziehe die Punkte, bis der Verlauf passt.':mode==='points'?'Setze deinen Wunschpfad mit Klicks.':'Zeichne deine Strecke durch die Landschaft.';
+ $('#hint').textContent=example?'Wähle am Bergrücken oder an der Bucht eine andere Lösung.':complete?'Wunschpfad erfasst. Die echte Trassenberechnung folgt im Spiel.':'Am Anschluss von Sundvik beginnen, am Anschluss von Granli enden.';
+ let route=points;
+ if(example){
+  const a=[start,p(235,430),p(340,420)],b=ridge==='tunnel'?[p(450,388),p(580,355)]:ridge==='climb'?[p(395,360),p(440,315),p(545,275),p(630,292)]:[p(420,515),p(570,520),p(665,430)];
+  const c=inlet==='bridge'?[p(770,265),p(900,200)]:[p(630,395),p(645,450),p(735,470),p(815,420),p(850,310),p(900,200)];route=[...a,...b,p(690,330),...c,end];
+  setPath('#wish',[start,p(340,420),p(690,330),end]);
+  const amount=280000+({tunnel:460000,climb:190000,detour:250000}[ridge])+({bridge:320000,detour:180000}[inlet]);
+  $('#cost').textContent=new Intl.NumberFormat('de-DE').format(amount)+' NOK';$('#length').textContent=(3.2+({tunnel:0,climb:.5,detour:.9}[ridge])+(inlet==='bridge'?0:.8)).toLocaleString('de-DE',{minimumFractionDigits:1})+' km';
+  document.querySelectorAll('[data-ridge]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ridge===ridge)));document.querySelectorAll('[data-inlet]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.inlet===inlet)));
+ }else{
+  setPath('#wish',points);$('#draw-status').textContent=complete?'Wunschpfad erfasst. Ziehe einen hellen Punkt zum Ändern oder beginne eine neue Linie.':points.length?'Zeichne an der letzten Spitze weiter und ende am Anschluss von Granli.':'Beginne am hellen Anschluss von Sundvik. Zeichne frei oder wähle „Punkte setzen“.';
+  if(!gesture)points.forEach((point,index)=>{if(index===0||(complete&&index===points.length-1))return;const handle=document.createElementNS('http://www.w3.org/2000/svg','circle');handle.setAttribute('cx',point.x);handle.setAttribute('cy',point.y);handle.setAttribute('r','10');handle.setAttribute('class','handle');handle.dataset.index=String(index);$('#handles').append(handle);});
+ }
+ setPath('#shadow',route);setPath('#rail',route);setPath('#tunnel',example&&ridge==='tunnel'?[p(450,388),p(580,355)]:[]);setPath('#bridge',example&&inlet==='bridge'?[p(714,310),p(770,265),p(811,244)]:[]);
+}
+function begin(m){if(mode==='example'){points=[];complete=false;history=[];future=[];}mode=m;render();}
+$('#draw').onclick=()=>{if(mode!=='example'&&points.length){record(snapshot());points=[];complete=false;}begin('draw');};$('#points').onclick=()=>begin('points');
+$('#discard').onclick=()=>{if(mode==='example')begin('draw');else if(points.length){record(snapshot());points=[];complete=false;render();}};
+$('#example').onclick=()=>{mode='example';gesture=null;render();};
+$('#undo').onclick=()=>{if(!history.length)return;future.push(snapshot());setState(history.pop());};$('#redo').onclick=()=>{if(!future.length)return;history.push(snapshot());setState(future.pop());};
+document.querySelectorAll('[data-ridge]').forEach(b=>b.onclick=()=>{ridge=b.dataset.ridge;render();});document.querySelectorAll('[data-inlet]').forEach(b=>b.onclick=()=>{inlet=b.dataset.inlet;render();});
+$('#show-ridge').onclick=()=>{challenge='ridge';render();};$('#show-inlet').onclick=()=>{challenge='inlet';render();};
+document.querySelectorAll('[data-challenge]').forEach(b=>{const activate=()=>{challenge=b.dataset.challenge;render();const selector=b.dataset.challenge==='ridge'?'[data-ridge]':'[data-inlet]';$(selector).focus();$(selector).scrollIntoView({block:'nearest'});};b.onclick=activate;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}};});
+map.onpointerdown=e=>{
+ if(mode==='example'||e.button!==0)return;const q=coordinate(e),before=snapshot(),index=e.target.dataset.index;
+ if(index!==undefined){gesture={kind:'handle',index:Number(index),before,id:e.pointerId};map.setPointerCapture(e.pointerId);return;}
+ if(complete)return;
+ if(!points.length){if(distance(q,start)>35){$('#draw-status').textContent='Beginne am hellen Anschluss von Sundvik links unten.';return;}points=[clone(start)];}
+ else if(mode==='points'){record(before);if(distance(q,end)<35){points.push(clone(end));complete=true;}else points.push(q);render();return;}
+ else if(distance(q,points.at(-1))>40){$('#draw-status').textContent='Setze die Linie an ihrer letzten hellen Spitze fort.';return;}
+ if(mode==='points'){record(before);render();return;}
+ gesture={kind:'draw',before,id:e.pointerId};map.setPointerCapture(e.pointerId);render();
+};
+map.onpointermove=e=>{if(!gesture||gesture.id!==e.pointerId)return;const q=coordinate(e);if(gesture.kind==='handle')points[gesture.index]=q;else if(distance(q,points.at(-1))>20&&points.length<96)points.push(q);render();};
+map.onpointerup=e=>{if(!gesture||gesture.id!==e.pointerId)return;const q=coordinate(e),before=gesture.before;if(gesture.kind==='draw'&&distance(q,end)<35){points.push(clone(end));complete=true;}gesture=null;record(before);if(map.hasPointerCapture(e.pointerId))map.releasePointerCapture(e.pointerId);render();};
+function cancelGesture(){if(!gesture)return;const {before,id}=gesture;gesture=null;if(map.hasPointerCapture(id))map.releasePointerCapture(id);setState(before);}
+map.onpointercancel=cancelGesture;window.addEventListener('blur',cancelGesture);window.addEventListener('keydown',e=>{if(e.key==='Escape')cancelGesture();if(mode!=='example'&&(e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();cancelGesture();$(e.shiftKey?'#redo':'#undo').click();}});
+render();
+</script>
+</html>

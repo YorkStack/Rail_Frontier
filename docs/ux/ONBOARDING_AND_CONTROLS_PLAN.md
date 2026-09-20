@@ -1,5 +1,7 @@
 # Readable controls and a playable first railway
 
+> **2026-09-20 priority update:** [DRAWN_ROUTE_PLANNING.md](../construction/DRAWN_ROUTE_PLANNING.md) supersedes the mandatory-waypoint input, player-facing study presets and abstract route-mode workflow below. CON-02/05/06 remain technical foundations, but track-planning UX acceptance is reopened after the user's feedback. DRAW-01–06 come next, after the user switches from Astra to SOL. No new runtime implementation yet. Historical completion statements below do not accept the new drawing experience.
+
 Date: 2026-09-20. Status: **UX-001, UX-003 and UX-004 / CON-07 complete; the first UX-005 slice and automated UX-006 acceptance are implemented; the independent human walkthrough remains pending**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`, with active-step resume and archive/storage checks at `3521de4`, named practice companies plus first-revenue disclosure at `3963024`, and integrated regression at `e70bddd`. The Railway Office keeps advanced tools available but collapsed until first revenue, then presents upgrades, freight, electrification and reporting as the next opportunity.
 
 ## Station-first revision from the user

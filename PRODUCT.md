@@ -39,3 +39,7 @@ All primary actions require keyboard access, visible focus, readable labels, and
 ## First-use priority (2026-09-15)
 
 A new player must be able to create a first railway without reading external instructions or enlarging the browser to read controls. Place and orient a station first, then plan railway from its visible connection points using editable waypoints, automatic engineering and a full-route cost review. Introduce locomotive/wagon composition and service through real actions in the world. Show advanced choices progressively while retaining an explicit full-tools mode and all authoritative campaign/year constraints. Graphics should feel like a situated landscape with natural silhouettes and convincing buildings, rather than a tabletop of isolated primitives. Active detail: docs/ux/ONBOARDING_AND_CONTROLS_PLAN.md and docs/art/GRAPHICS_REWORK_PLAN.md.
+
+## Track-planning priority (2026-09-20)
+
+Players should draw their desired railway through the landscape and reshape it directly. A soft horizontal wish path must not force rail elevation to match every sampled terrain point. Present concrete, locally visible bridge, tunnel, climb and detour alternatives with certified geometry and truthful full-route cost differences. Keep the first route simple; introduce engineering depth through meaningful terrain decisions. The technical planner is not yet accepted as enjoyable or intuitive. Active brief: docs/construction/DRAWN_ROUTE_PLANNING.md.
