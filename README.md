@@ -8,11 +8,15 @@ Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**
 
 ## Try the new track drawing
 
-**2026-09-20 playtest:** choose **Try track drawing / Gleisbau ausprobieren** in the main menu. A separate practice company starts with two real stations in Norway; an active company is archived first. Drag from a highlighted station connection to the destination, then drag the light handles to reshape the wish path. Right-drag pans the camera. Point mode and Undo/Redo are also available.
+**2026-09-20 playtest:** choose **Try track drawing / Gleisbau ausprobieren** in the main menu. A separate practice company starts with two real stations in Norway; an active company is archived first. Click a named **Start here** station sign. Click or drag through the landscape to sketch your path; release anywhere and continue elsewhere. A live cursor line previews the next segment. Finish on the **Finish here** destination sign. Grab anywhere on the dashed sketch to reshape it, or use Undo/Redo. Right-drag pans the camera. No drawing-mode switch is needed.
+
+The panel follows **Start → Draw path → Build**. Track standards sit under settings, and the purchase summary appears after choosing a destination. Named endpoints remain on the map; station selection keeps the camera in place. The first proposal and build button remain visible at 1280×720.
 
 The game compares certified **whole-route** proposals with actual construction prices, gradients and bridge/tunnel lengths. A separate smoothing proposal can stay closer to the valley when a hand-drawn bend would require expensive tunnelling. Nothing is built until you confirm the displayed price. Construction uses the real company ledger, terrain and save system. Local obstacle-by-obstacle decisions remain the next step; this is an initial playtest, not final usability acceptance.
 
 With the development server running: [open the drawing practice in German](http://127.0.0.1:5173/?draw-practice=1&lang=de). The older illustrated prototype is not the game.
+
+![Choose a named station and sketch directly in the landscape](docs/screenshots/drawn-route-start.png)
 
 | Draw and compare actual routes | Inspect the tunnel alternative |
 | --- | --- |
