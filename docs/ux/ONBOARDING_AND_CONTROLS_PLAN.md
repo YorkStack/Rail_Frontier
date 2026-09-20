@@ -1,6 +1,6 @@
 # Readable controls and a playable first railway
 
-Date: 2026-09-20. Status: **UX-001, UX-003 and UX-004 / CON-07 complete; the first UX-005 slice is implemented and UX-006 remains**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`, with active-step resume and archive/storage checks at `3521de4` and named practice companies plus first-revenue disclosure at `3963024`. The Railway Office keeps advanced tools available but collapsed until first revenue, then presents upgrades, freight, electrification and reporting as the next opportunity.
+Date: 2026-09-20. Status: **UX-001, UX-003 and UX-004 / CON-07 complete; the first UX-005 slice and automated UX-006 acceptance are implemented; the independent human walkthrough remains pending**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`, with active-step resume and archive/storage checks at `3521de4`, named practice companies plus first-revenue disclosure at `3963024`, and integrated regression at `e70bddd`. The Railway Office keeps advanced tools available but collapsed until first revenue, then presents upgrades, freight, electrification and reporting as the next opportunity.
 
 ## Station-first revision from the user
 
@@ -127,11 +127,11 @@ Optional follow-on lessons: first timber service; improve a crowded station; und
 | UX-001 | Readable HUD, sizes, settings, vocabulary and DE/EN first-service copy | Native-size and zoom screenshots, keyboard/focus/contrast checks |
 | UX-002 | Station-first construction surface, delivered by CON-01–06 | Two standalone stations, editable alignment, structures, atomic build and reload |
 | UX-003 ✓ | Consist and service sequence | First service plus failure/retry paths with exactly-once purchases |
-| UX-004 | Stateful hands-on lesson and save migration | Whole lesson, interrupt/reload/import/skip/storage failure journeys |
-| UX-005 | Progressive disclosure and follow-on hooks | Beginner and advanced/old-save access with unchanged technology rules |
-| UX-006 | Integrated acceptance | Independent cold-start walkthrough and full application regression |
+| UX-004 ✓ | Stateful hands-on lesson and save migration | Whole lesson, interrupt/reload/import/skip/storage failure journeys |
+| UX-005 ◐ | Progressive disclosure and follow-on hooks | First-revenue tools implemented; optional timber lesson remains |
+| UX-006 ◐ | Integrated acceptance | Automated cold-start and full regression pass; independent human walkthrough pending |
 
-Integration sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 ✓ → CON-01–03 ✓ → GFX-R03–07 ✓ → CON-04–06 ✓ → UX-003 ✓ → UX-004–005 / CON-07 next → GFX-R08–09 + UX-006**. UX-002 is delivered by CON-01–06, not as a second track editor. CON-07 integrates the tutorial with the completed consist/service flow. Refer to the construction design for the exact dependencies. Further campaign economy expansion waits for this pass.
+Integration sequence: **GFX-R01 ✓ → GFX-R02 ✓ → UX-001 ✓ → CON-01–03 ✓ → GFX-R03–07 ✓ → CON-04–06 ✓ → UX-003 ✓ → UX-004 / CON-07 ✓ → UX-005 ◐ → UX-006 automated ✓ → GFX-R08–09**. UX-002 is delivered by CON-01–06, not as a second track editor. Refer to the construction design for the exact dependencies. Further campaign economy expansion waits for this pass.
 
 Tests: focused reducer/command evidence and migration tests; browser journey from menu through both stations, editable track planning/build, consist, line, departure, delivered passengers/fares, save/reload/resume. Cover tutorial skip, replay in a separate company, accidental double click, rejected stale quote, no free rail point, wrong village path, platform mismatch, no demand yet, 1996 save and full-tools opt-out. Assert meaningful outcomes rather than hardcoded tooltip sequences. Retain all existing economy, dispatch and old-save regressions.
 
