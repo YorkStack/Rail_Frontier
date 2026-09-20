@@ -32,6 +32,8 @@ export interface CorridorAlternativeRequest {
   candidateBudget?:number;
 }
 
+export interface CorridorCurveCandidate {id:string;curves:CubicCurve[]}
+
 interface Candidate extends Omit<CorridorAlternative,'recommendedFor'> {scores:Record<CorridorPreference,number>}
 const preferences:CorridorPreference[]=['balanced','low-cost','fast'];
 const weights:Record<CorridorPreference,{cost:number;time:number;grade:number;structure:number;radius:number}>={
@@ -46,18 +48,28 @@ const weights:Record<CorridorPreference,{cost:number;time:number;grade:number;st
  * production pipeline used at construction commit.
  */
 export function findCorridorAlternatives(request:CorridorAlternativeRequest):CorridorAlternative[] {
+  return evaluateCorridorAlternatives(generateCorridorCurveCandidates(request),request.terrain,request.trackClass);
+}
+
+export function generateCorridorCurveCandidates(request:CorridorAlternativeRequest):CorridorCurveCandidate[] {
   const {anchors,terrain,trackClass}=request;if(anchors.length<2)throw new Error('Corridor search needs a start and destination');
   const budget=Math.max(1,Math.min(32,Math.floor(request.candidateBudget??9))),direct=Math.hypot(anchors.at(-1)!.x-anchors[0]!.x,anchors.at(-1)!.z-anchors[0]!.z),maxOffset=Math.max(0,Math.min(request.maxOffsetM??Math.min(650,direct*.22),direct*.35));
-  const patterns:number[][]=[[0],[-.35],[.35],[-.7],[.7],[-1],[1],[-.65,.65],[.65,-.65]].slice(0,budget),candidates:Candidate[]=[];
+  const patterns:number[][]=[[0],[-.35],[.35],[-.7],[.7],[-1],[1],[-.65,.65],[.65,-.65]].slice(0,budget),candidates:CorridorCurveCandidate[]=[];
   for(let index=0;index<patterns.length;index++) {
     const points=offsetAnchors(anchors,patterns[index]!,maxOffset);
     try {
       const horizontal=solveHorizontalAlignment(points,request.tangents),curves=solveVerticalProfile(horizontal,points.map(point=>point.y),trackClass.constraints,{...(request.tangents?.start?{startGrade:0}:{}),...(request.tangents?.end?{endGrade:0}:{})}),geometries=curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));
       if(quotes.some(quote=>!quote.valid))continue;
-      const profile=buildEngineeringProfile(geometries,quotes,terrain),lengthM=geometries.reduce((sum,geometry)=>sum+geometry.lengthM,0),cost=quotes.reduce((sum,quote)=>sum+quote.cost,0),structureM=profile.lengthByKind.bridge+profile.lengthByKind.tunnel,estimatedTimeS=lengthM/trackClass.speedLimitMps*(1+profile.maxGrade*5),minimumRadiusM=profile.minimumRadiusM;
-      candidates.push({id:`corridor:${index}`,curves,geometries,quotes,lengthM,cost,maxGrade:profile.maxGrade,minimumRadiusM,structureM,estimatedTimeS,scores:{balanced:0,'low-cost':0,fast:0}});
+      candidates.push({id:`corridor:${index}`,curves});
     } catch {continue;}
   }
+  return candidates;
+}
+
+/** Revalidates worker-generated curves against the live authoritative terrain before exposing them. */
+export function evaluateCorridorAlternatives(curveCandidates:readonly CorridorCurveCandidate[],terrain:Terrain,trackClass:TrackClassDefinition):CorridorAlternative[] {
+  const candidates:Candidate[]=[];
+  for(const candidate of curveCandidates)try {const geometries=candidate.curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));if(quotes.some(quote=>!quote.valid))continue;const profile=buildEngineeringProfile(geometries,quotes,terrain),lengthM=geometries.reduce((sum,geometry)=>sum+geometry.lengthM,0),cost=quotes.reduce((sum,quote)=>sum+quote.cost,0),structureM=profile.lengthByKind.bridge+profile.lengthByKind.tunnel,estimatedTimeS=lengthM/trackClass.speedLimitMps*(1+profile.maxGrade*5),minimumRadiusM=profile.minimumRadiusM;candidates.push({id:candidate.id,curves:candidate.curves,geometries,quotes,lengthM,cost,maxGrade:profile.maxGrade,minimumRadiusM,structureM,estimatedTimeS,scores:{balanced:0,'low-cost':0,fast:0}});}catch {continue;}
   if(candidates.length===0)return [];
   const normalized={cost:normalizer(candidates.map(item=>item.cost)),time:normalizer(candidates.map(item=>item.estimatedTimeS)),grade:normalizer(candidates.map(item=>item.maxGrade)),structure:normalizer(candidates.map(item=>item.structureM)),radius:normalizer(candidates.map(item=>Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0))};
   for(const item of candidates)for(const preference of preferences){const weight=weights[preference];item.scores[preference]=weight.cost*normalized.cost(item.cost)+weight.time*normalized.time(item.estimatedTimeS)+weight.grade*normalized.grade(item.maxGrade)+weight.structure*normalized.structure(item.structureM)+weight.radius*normalized.radius(Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0);}
