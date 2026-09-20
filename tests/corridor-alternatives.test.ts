@@ -16,3 +16,7 @@ test('cost and speed preferences expose distinct truthful routes where terrain c
   const alternatives=findCorridorAlternatives({anchors:[{x:100,y:0,z:1000},{x:1900,y:0,z:1000}],terrain:ridgeTerrain(),trackClass:trackClasses.local,maxOffsetM:650,candidateBudget:9}),lowCost=alternatives.find(item=>item.recommendedFor.includes('low-cost')),fast=alternatives.find(item=>item.recommendedFor.includes('fast'));
   assert.ok(lowCost);assert.ok(fast);assert.notEqual(lowCost.id,fast.id);assert.ok(lowCost.cost<fast.cost);assert.ok(fast.estimatedTimeS<lowCost.estimatedTimeS);assert.ok(fast.structureM>lowCost.structureM);
 });
+
+test('an impossible elevation change remains a truthful empty result after a wider retry',()=>{
+  const anchors=[{x:100,y:0,z:1000},{x:1900,y:200,z:1000}],terrain=flatTerrain();assert.deepEqual(findCorridorAlternatives({anchors,terrain,trackClass:trackClasses.local,maxOffsetM:650,candidateBudget:9,searchExpansionBudget:6_000}),[]);assert.deepEqual(findCorridorAlternatives({anchors,terrain,trackClass:trackClasses.local,maxOffsetM:1200,candidateBudget:15,searchExpansionBudget:12_000}),[]);
+});
