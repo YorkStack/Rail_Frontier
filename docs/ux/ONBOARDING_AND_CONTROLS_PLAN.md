@@ -1,6 +1,6 @@
 # Readable controls and a playable first railway
 
-Date: 2026-09-20. Status: **UX-001 and UX-003 complete; UX-004–006 remain**. The first-service builder is implemented at runtime checkpoint `053f79e`; the hands-on seven-step tutorial and its persisted learning state are next. This plan and [the graphics rework](../art/GRAPHICS_REWORK_PLAN.md) supersede the previous assumption that only minor release polish remained.
+Date: 2026-09-20. Status: **UX-001 and UX-003 complete; core UX-004 runtime implemented; UX-004 hardening plus UX-005–006 remain**. The first-service builder is implemented at `053f79e`; the persisted seven-step introduction follows at `361640a`. Import interruption, storage-failure recovery, explicit practice-slot naming and the complete progressive-disclosure acceptance remain before UX-004/CON-07 is closed.
 
 ## Station-first revision from the user
 
