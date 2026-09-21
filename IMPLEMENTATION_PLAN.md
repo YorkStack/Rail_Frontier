@@ -1,5 +1,22 @@
 # Implementation plan
 
+## Current checkpoint — language, menu and tunnel round (2026-09-21)
+
+Implemented the approved interface round alongside the new multilingual foundation:
+
+- [x] German/English JSON catalogues, registered language choices, immediate switching, plural/parameter support and localized currency/numbers/dates. Extending the catalogue is documented in [LOCALIZATION.md](docs/LOCALIZATION.md); save/domain identifiers remain stable.
+- [x] Visible Game menu and paused exit confirmation: save and leave, leave without saving, or keep playing. Show last successful save time; keep the company open on write failure. Native dialog focus/Escape and the normal resume button are verified.
+- [x] Landscape-backed main menu with Continue, New game → guided/free, Construction school, archive and settings. No simultaneous bilingual labels.
+- [x] Separate bottom construction areas and camera/time controls, readable task panels, retained price/build action, and a dedicated company-office entry. Fix the invisible header intercepting town clicks.
+- [x] Nine-metre minimum tunnel cover shared by quotation/search; shallower rock remains a priced open cut. Saved-boundary portals face outward, have a bounded terrain aperture and lining, and retaining walls follow local engineered heights.
+- [x] A fourth highland practice near the pronounced mountain relief, with real station costs, certified alternative geometry, actual construction and graph-based completion. It follows the three existing practices and can be opened directly from Construction school.
+- [ ] Turn the independent exercises into a connected campaign with a narrow shore, side gorge and mountain crossing, staged objectives and unlocks. The highland exercise supplies a harder test area; it is not that full campaign.
+- [ ] Complete ordered-corridor search and persist/undo local engineering decisions; run wider device/performance/accessibility acceptance after player feedback.
+
+Validation: 178 core tests, TypeScript/build and 14 distinct focused Chrome journeys, including a complete passenger/mail revenue loop. New image capture: `npx tsx tools/capture-ux-update.ts`. Test links: `/?lang=de`, `/?lang=en`, `/?draw-practice=1&lesson=highland&lang=de`. Existing company cash and save schema 9 are unchanged. Earlier four-metre tunnel classifications are preserved in old built alignments, so use a new construction exercise to evaluate the new cover rule.
+
+The September 20 section below records the previous checkpoint; use this section and CURRENT_STATUS.md for the current handoff.
+
 ## Current continuation — drawn railway and terrain decisions
 
 **2026-09-20: the player accepted the simpler click/drag interaction (“ja das ist jetzt besser”) and asked Astra to continue with budget and terrain progression.** The new checkpoint provides three real Norway construction exercises: **valley → inlet → ridge**. Choose **Try track drawing / Gleisbau ausprobieren** for the valley, or open **More building challenges / Weitere Bauaufgaben** for the inlet or ridge. The next task becomes available after the prepared stations are connected through the real graph. It starts a separate company and archives the current one first. This is a construction practice sequence, not the completed campaign-unlock system.

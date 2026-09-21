@@ -15,7 +15,7 @@ test('current save reloads on one WebGL context and preserves a live session on 
   const saved=await page.evaluate(()=>window.__railProbe.snapshot());
   expect(saved.campaignVersion).toBe(3);expect(saved.world.generatorVersion).toBe(3);
   const contextCount=await page.evaluate(()=>(window as unknown as {__webglContextCount():number}).__webglContextCount());expect(contextCount).toBe(1);
-  await page.getByRole('button',{name:'Open main menu'}).click();await page.getByRole('button',{name:/Start new company/}).click();
+  await page.getByRole('button',{name:'Open main menu'}).click();await page.locator('#menu-settings-button').click();await page.locator('#choose-new-game').click();await page.getByRole('button',{name:/Start new company/}).click();
   await page.waitForFunction(()=>window.__railProbe.snapshot().world.generatorVersion===3);expect((await page.evaluate(()=>window.__railProbe.snapshot())).campaignVersion).toBe(3);
   expect(await page.evaluate(()=>(window as unknown as {__webglContextCount():number}).__webglContextCount())).toBe(1);
   await page.getByRole('button',{name:'Load study',exact:true}).click();await expect(page.getByRole('status')).toContainText('Study resumed');

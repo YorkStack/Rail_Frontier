@@ -50,14 +50,14 @@ try{
   await page.screenshot({path:resolve(outputDirectory,'alignment-engineering.png'),fullPage:true});
   await page.getByRole('button',{name:'Close alignment study'}).click();
 
-  await page.locator('#open-menu').click();
+  await page.locator('#open-menu').click();await page.locator('#menu-settings-button').click();
   await page.locator('[data-menu-view="settings"]').click();
   await settle(page);
   await page.screenshot({path:resolve(outputDirectory,'settings-menu.png'),fullPage:true});
 
   await page.goto(`${baseUrl}/`,{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.__railProbe?.ready===true);
-  await page.getByRole('button',{name:/Start new company/}).click();
+  await page.locator('#choose-new-game').click();await page.getByRole('button',{name:/Start new company/}).click();
   await expectVisible(page,'#tutorial-card');
   await page.evaluate(()=>window.__railProbe.cameraPreset('regional'));
   await settle(page);

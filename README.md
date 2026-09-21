@@ -6,15 +6,35 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 update — languages, menus and mountain construction
+
+The interface now supports **Deutsch and English**, including live language switching in Settings, the introduction, construction tools and the save/exit flow. Numbers, prices and dates follow the selected locale. Additional languages use JSON translation packs and one registry entry; see the [translation guide](docs/LOCALIZATION.md). Technical diagnostics and uncatalogued low-level errors may still fall back to English.
+
+The main menu opens over the actual landscape. Choose **New game → Introduction** for a guided first company, **Free play**, or **Construction school** for four prepared railway challenges. A visible **Game menu** button offers settings and return to the main menu, with **Save & leave / Leave without saving / Keep playing**. Failed saves keep the company open. Stations, tracks, trains/lines and operations have separate bottom actions; camera and time controls sit separately. The station panel keeps its construction price and build button visible.
+
+New tunnels need nine metres of cover; shallower sections become open cuts. Portals face outward and have an actual terrain opening, while retaining walls taper to local shoulder heights. Existing saved tunnel classifications remain intact. The fourth **highland** exercise introduces more pronounced relief and real bridge/tunnel choices; a connected campaign with staged unlocks remains planned.
+
+For a running local server: [play in German](http://127.0.0.1:5173/?lang=de), [play in English](http://127.0.0.1:5173/?lang=en), [highland construction](http://127.0.0.1:5173/?draw-practice=1&lesson=highland&lang=de).
+
+| Main menu over the Norwegian landscape | Safe return to the main menu |
+| --- | --- |
+| ![German main menu with new game and construction school](docs/screenshots/main-menu-de.png) | ![Save, discard current changes or continue playing](docs/screenshots/game-exit-de.png) |
+| Station placement and the guided introduction | Highland route planning |
+| ![German station planner with visible construction price and build action](docs/screenshots/station-interface-de.png) | ![Mountain railway alternatives with real bridge and tunnel lengths and costs](docs/screenshots/highland-planning-de.png) |
+
+![Tunnel mouth connected to the terrain with a visible entrance and tapered approach walls](docs/screenshots/tunnel-entrance.png)
+
+The new images come from the running game. Recreate them with `npx tsx tools/capture-ux-update.ts` while the development server is running.
+
 ## Try the new track drawing
 
-**2026-09-20 playtest:** choose **Try track drawing / Gleisbau ausprobieren** in the main menu. A separate practice company starts with two real stations in Norway; an active company is archived first. Click a named **Start here** station sign. Click or drag through the landscape to sketch your path; release anywhere and continue elsewhere. A live cursor line previews the next segment. Finish on the **Finish here** destination sign. Grab anywhere on the dashed sketch to reshape it, or use Undo/Redo. Right-drag pans the camera. No drawing-mode switch is needed.
+**2026-09-21 playtest:** choose **Construction school / Bauschule → 1 · Along the valley** in the main menu. A separate practice company starts with two real stations in Norway; an active company is archived first. Click a named **Start here** station sign. Click or drag through the landscape to sketch your path; release anywhere and continue elsewhere. A live cursor line previews the next segment. Finish on the **Finish here** destination sign. Grab anywhere on the dashed sketch to reshape it, or use Undo/Redo. Right-drag pans the camera. No drawing-mode switch is needed.
 
 The panel follows **Start → Draw path → Build**. Track standards sit under settings, and the purchase summary appears after choosing a destination. Named endpoints remain on the map; station selection keeps the camera in place. The first proposal and build button remain visible at 1280×720.
 
 New normal companies start with **NOK 5 million**. Drawing practices start with **NOK 10 million before buying the two prepared stations**. Existing companies keep their current cash.
 
-Try three construction exercises in order: **valley → inlet → mountain ridge**. After connecting the stations, continue to the next exercise in a new company; your current railway is saved first. Other exercises are also available under **More building challenges / Weitere Bauaufgaben** in the main menu. These are construction exercises on the real map, not completed campaign progression.
+Try four construction exercises in order: **valley → inlet → mountain ridge → highlands**. After connecting the stations, continue to the next exercise in a new company; your current railway is saved first. Other exercises are also available under **Construction school / Bauschule** in the main menu. These are construction exercises on the real map, not completed campaign progression.
 
 The game offers your drawn course first, then distinct alternatives with actual costs, gradients and structure lengths. Click a **bridge or tunnel marker** to compare solutions for that obstacle and its approaches. Other route sections remain unchanged. If the comparison spans the whole route, the panel says so. A mountain detour may shorten a tunnel without removing it entirely. Confirm the price to buy the exact reviewed geometry. Redrawing or starting a global wider search replaces the current local comparison; drafts are not yet saved.
 
@@ -26,7 +46,7 @@ With the development server running: [valley drawing practice](http://127.0.0.1:
 
 ![Ridge comparison with the current design retained as an option](docs/screenshots/construction-ridge-options.png)
 
-**Validation:** 173 core tests, TypeScript and production build; eight focused browser scenarios cover station placement, drawing/editing/keyboard/compact layouts, the new practice progression and archive, bridge/tunnel persistence and the full passenger-revenue/save loop. Human playability acceptance and broader performance/accessibility work remain. The Norway V3 seabed bug is also fixed: water crossings now use genuinely submerged terrain.
+**Validation:** 178 core tests, TypeScript and production build; 14 distinct focused Chrome scenarios cover drawing/editing/keyboard/compact layouts, practice progression and archive, bridge/tunnel persistence, menu and language switching, tutorial flows, save/exit recovery and the full passenger/mail-revenue/save loop. Human playability acceptance and broader performance/accessibility work remain. The Norway V3 seabed bug is also fixed: water crossings now use genuinely submerged terrain.
 
 ## Current build
 
