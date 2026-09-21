@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 — help where the sketch needs work
+
+Self-crossings, overlapping sections and points outside the map now receive a **labelled map marker and a concrete correction** in German or English. **Edit marked point** takes you to the relevant handle: drag it, use arrow keys, or press Delete. Undo/Redo keeps working. If a route search fails, the game can suggest a tight bend to widen; an advisory hint never overrides the actual engineering checks.
+
+The repair action stays visible at 1280×720. No money is spent while correcting your sketch. Checked with 194 core tests, TypeScript/build and six focused browser journeys, including language switching and correction through the real controls.
+
+![German correction guidance for a self-crossing sketch, with a map marker and directly accessible edit action](docs/screenshots/route-sketch-help.png)
+
 ## September 21 — smarter drawn routes
 
 Route proposals now check the **order of your drawing**, so a nearby return leg cannot silently replace a deliberate loop. A bounded search can switch sides at successive obstacles and choose railway heights independently of the terrain under your cursor. Finished curves still require the normal radius, grade, terrain and cost checks before purchase. Very tight bends may need reshaping or **Wider detours**; the search does not guarantee a solution.

@@ -608,6 +608,24 @@
     "Choose the starting station, draw your path by clicking or dragging, then finish on the destination station sign.": "Choose the starting station, draw your path by clicking or dragging, then finish on the destination station sign.",
     "station.ready": "✓ Ready · {cost} ({earthworks} earthworks)",
     "Gold shows the station preview, not a built station. Place the platform near houses; the rings mark its two rail connections.": "Gold shows the station preview, not a built station. Place the platform near houses; the rings mark its two rail connections.",
-    "Your retained plan is no longer buildable. Reshape it or calculate new alternatives.": "Your retained plan is no longer buildable. Reshape it or calculate new alternatives."
+    "Your retained plan is no longer buildable. Reshape it or calculate new alternatives.": "Your retained plan is no longer buildable. Reshape it or calculate new alternatives.",
+    "Your sketch crosses itself": "Your sketch crosses itself",
+    "Move or remove a point so the two sections no longer cross. A crossing in the sketch does not create a junction.": "Move or remove a point so the two sections no longer cross. A crossing in the sketch does not create a junction.",
+    "Crossing · edit sketch": "Crossing · edit sketch",
+    "Your sketch doubles back": "Your sketch doubles back",
+    "Move or remove a point so the route does not run back over itself. Use a wider loop to change direction.": "Move or remove a point so the route does not run back over itself. Use a wider loop to change direction.",
+    "Overlap · edit sketch": "Overlap · edit sketch",
+    "Part of your sketch is outside the map": "Part of your sketch is outside the map",
+    "Move the marked point back onto the landscape. No track has been built or charged.": "Move the marked point back onto the landscape. No track has been built or charged.",
+    "Map edge · edit sketch": "Map edge · edit sketch",
+    "This bend may need more room": "This bend may need more room",
+    "No buildable route was found. Try widening the marked bend: drag its point outward, use the arrow keys, or press Delete to remove it.": "No buildable route was found. Try widening the marked bend: drag its point outward, use the arrow keys, or press Delete to remove it.",
+    "Tight bend · edit sketch": "Tight bend · edit sketch",
+    "Edit marked point": "Edit marked point",
+    "Reshape the marked part of your sketch to continue.": "Reshape the marked part of your sketch to continue.",
+    "No buildable route found. Reshape your sketch or try a wider detour.": "No buildable route found. Reshape your sketch or try a wider detour.",
+    "You can keep editing while the route is checked.": "You can keep editing while the route is checked.",
+    "Your sketch is kept. Edit it, or use Undo to restore the previous shape.": "Your sketch is kept. Edit it, or use Undo to restore the previous shape.",
+    "Try gentler bends, a wider detour or a different track standard. Your sketch is kept.": "Try gentler bends, a wider detour or a different track standard. Your sketch is kept."
   }
 }
