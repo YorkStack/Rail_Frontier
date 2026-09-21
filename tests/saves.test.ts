@@ -38,7 +38,7 @@ test('portable archive export and import preserve a canonical save and active in
   const {game,store,manager}=setup(true);await manager.save('manual','Sundvik & Fjellhavn');const portable=await manager.exportSlot('manual');
   assert.equal(portable.filename,'Sundvik-Fjellhavn.railfrontier.json');const archive=JSON.parse(portable.json);assert.equal(archive.format,'rail-frontier-save');assert.equal(archive.formatVersion,1);assert.equal(archive.name,'Sundvik & Fjellhavn');
   game.advance(1);const running=JSON.stringify(game.snapshot()),imported=await manager.importArchive(portable.json);assert.equal(imported.name,'Sundvik & Fjellhavn');assert.equal(JSON.stringify(game.snapshot()),running);
-  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,9);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);assert.equal(saved.state.learning.status,'active');
+  const saved=JSON.parse(await store.read(imported.id));assert.equal(saved.schemaVersion,10);assert.deepEqual(deserialize(JSON.stringify(saved)),archive.save.state);assert.equal(saved.state.learning.status,'active');
 });
 
 test('public import rejects malformed, incompatible and over-limit content before writing a slot',async()=>{
@@ -52,4 +52,14 @@ test('public import rejects malformed, incompatible and over-limit content befor
 
 test('a failed storage write does not poison later save operations or tutorial state',async()=>{
   const {game,store,manager}=setup(true);store.failNextWrite=true;await assert.rejects(()=>manager.save('first','First'),/quota/);assert.equal(game.snapshot().learning?.status,'active');await manager.save('second','Second');assert.deepEqual([...store.slots.keys()],['second']);
+});
+
+
+test('planning metadata follows manual/autosaves and portable archives; rejected writes preserve the previous draft',async()=>{
+ const {game,store}=setup();let planning:import('../src/rail/planning-draft.js').PlanningDraft|null={version:1,current:{points:[{x:100,y:1,z:100}],complete:false,trackClassId:'local',design:null},past:[],future:[]};
+ const manager=new GameSaveManager(game,store,undefined,undefined,{snapshot:()=>planning,restore:value=>{planning=value;}});
+ await manager.save('draft','Railway sketch');planning.current.points[0]!.x=200;store.failNextWrite=true;await assert.rejects(()=>manager.save('draft','Railway sketch'));
+ assert.equal((await manager.readDocument('draft')).planning!.current.points[0]!.x,100);assert.equal(planning.current.points[0]!.x,200);
+ const exported=await manager.exportSlot('draft'),imported=await manager.importArchive(exported.json);assert.equal((await manager.readDocument(imported.id)).planning!.current.points[0]!.x,100);
+ await manager.autosave();planning=null;await manager.load('autosave');assert.equal((planning as unknown as import('../src/rail/planning-draft.js').PlanningDraft).current.points[0]!.x,200);
 });

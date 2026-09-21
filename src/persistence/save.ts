@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type {PlanningDraft} from '../rail/planning-draft.js';
+import {trackClasses} from '../content/track-classes.js';
 import type { GameState } from '../domain/model.js';
 import { compileGraph } from '../rail/graph.js';
 import { emptyOperations,initialTownEconomy } from '../domain/operations.js';
@@ -21,6 +23,8 @@ const limitedRecord=(owner:Record<string,unknown>|null,key:string,limit:number,l
   const value=record(owner?.[key]);if(!value)return {};if(Object.keys(value).length>limit)throw new Error(`Save exceeds ${label} limit (${limit.toLocaleString('en')})`);return value;
 };
 function preflightEnvelope(value:unknown):void {
+  const planning=record(record(value)?.planning);
+  if(planning){const drafts=[planning.current,...limitedArray(planning,'past',30,'draft undo'),...limitedArray(planning,'future',30,'draft redo')];for(const draft of drafts){limitedArray(record(draft),'points',64,'draft point');limitedArray(record(draft),'design',128,'draft curve');}}
   const state=record(record(value)?.state);if(!state)return;
   const railway=record(state.railway),operations=record(state.operations),company=record(state.company);
   limitedArray(railway,'nodes',SAVE_LIMITS.nodes,'rail node');limitedArray(railway,'edges',SAVE_LIMITS.edges,'rail edge');
@@ -102,7 +106,24 @@ const stateV3Schema=stateV4Schema.extend({
   company:z.strictObject({id:id('company'),cash:integer,openingCash:integer,ledger:z.array(z.strictObject({id:id('transaction'),tick:nonnegative,category:z.enum(['construction','vehicle','passenger','freight','maintenance']),amount:integer,entityId:z.string(),description:z.string()}))})
 });
 const stateV2Schema=stateV3Schema.extend({operations:operationsV2Schema});
-const envelope=z.strictObject({schemaVersion:z.literal(9),gameVersion:z.literal('0.9.0'),state:stateSchema});
+const draftCurve=z.strictObject({p0:vec,p1:vec,p2:vec,p3:vec});
+const draftSchema=z.strictObject({points:z.array(vec).max(64),complete:z.boolean(),trackClassId:z.string().refine(id=>Object.hasOwn(trackClasses,id)),design:z.array(draftCurve).min(1).max(128).nullable()}).superRefine((draft,ctx)=>{
+  if(draft.complete&&draft.points.length<2)ctx.addIssue({code:'custom',message:'A complete draft needs endpoints'});
+  if(draft.design){
+    const same=(a:{x:number;y:number;z:number}|undefined,b:{x:number;y:number;z:number}|undefined)=>a&&b&&Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)<.001;
+    if(!draft.complete||!same(draft.points[0],draft.design[0]?.p0)||!same(draft.points.at(-1),draft.design.at(-1)?.p3))ctx.addIssue({code:'custom',message:'Draft design endpoints differ from sketch'});
+    for(let i=1;i<draft.design.length;i++)if(!same(draft.design[i-1]!.p3,draft.design[i]!.p0))ctx.addIssue({code:'custom',message:'Draft design is disconnected'});
+  }
+});
+const planningSchema=z.strictObject({version:z.literal(1),current:draftSchema,past:z.array(draftSchema).max(30),future:z.array(draftSchema).max(30)}).nullable();
+const versionNineEnvelope=z.strictObject({schemaVersion:z.literal(9),gameVersion:z.literal('0.9.0'),state:stateSchema});
+const envelope=z.strictObject({schemaVersion:z.literal(10),gameVersion:z.literal('0.10.0'),state:stateSchema,planning:planningSchema});
+export interface SaveDocument {state:GameState;planning:PlanningDraft|null}
+function validatePlanning(value:unknown,state:GameState):PlanningDraft|null {
+ const planning=planningSchema.parse(value);if(!planning)return null;
+ for(const draft of [planning.current,...planning.past,...planning.future])for(const p of draft.points)if(p.x<0||p.z<0||p.x>state.world.widthM||p.z>state.world.depthM)throw new Error('Draft point is outside the world');
+ return planning;
+}
 const versionEightEnvelope=z.strictObject({schemaVersion:z.literal(8),gameVersion:z.literal('0.8.0'),state:stateV8Schema});
 const versionSevenEnvelope=z.strictObject({schemaVersion:z.literal(7),gameVersion:z.literal('0.7.0'),state:stateV7Schema});
 const versionSixEnvelope=z.strictObject({schemaVersion:z.literal(6),gameVersion:z.literal('0.6.0'),state:stateV6Schema});
@@ -192,16 +213,18 @@ export const migrations=new Map<number,(value:unknown)=>unknown>([
   [5,(value)=>{const previous=versionFiveEnvelope.parse(value);return {schemaVersion:6,gameVersion:'0.6.0',state:{...previous.state,operations:{...previous.state.operations,infrastructure:Object.fromEntries(Object.entries(previous.state.operations.infrastructure).map(([edgeId,infrastructure])=>[edgeId,{...infrastructure,electrified:false,electrificationCost:0,electrificationMaintenancePerDay:0}]))}}};}],
   [6,(value)=>{const previous=versionSixEnvelope.parse(value);return {schemaVersion:7,gameVersion:'0.7.0',state:{...previous.state,stations:previous.state.stations.map(station=>({...station,layout:{kind:'legacy-node' as const,version:1 as const},constructionCost:stationDefinition(station.classId)?.purchaseCost??0}))}};}],
   [7,(value)=>{const previous=versionSevenEnvelope.parse(value);return {schemaVersion:8,gameVersion:'0.8.0',state:{...previous.state,operations:{...previous.state.operations,terrain:{revision:0,patchGeneratorVersion:1 as const,operations:[]}}}};}],
-  [8,(value)=>{const previous=versionEightEnvelope.parse(value);return {schemaVersion:9,gameVersion:'0.9.0',state:{...previous.state,learning:null}};}]
+  [8,(value)=>{const previous=versionEightEnvelope.parse(value);return {schemaVersion:9,gameVersion:'0.9.0',state:{...previous.state,learning:null}};}],
+  [9,(value)=>{const previous=versionNineEnvelope.parse(value);return {...previous,schemaVersion:10,gameVersion:'0.10.0',planning:null};}]
 ]);
-export function serialize(state:GameState):string { return JSON.stringify({schemaVersion:9,gameVersion:'0.9.0',state:validateState(state)}); }
-export function deserialize(json:string):GameState {
+export function serialize(state:GameState,planning:PlanningDraft|null=null):string { return JSON.stringify({schemaVersion:10,gameVersion:'0.10.0',state:validateState(state),planning:validatePlanning(planning,state)}); }
+export function deserialize(json:string):GameState {return deserializeDocument(json).state;}
+export function deserializeDocument(json:string):SaveDocument {
   if(json.length>SAVE_LIMITS.bytes||new TextEncoder().encode(json).byteLength>SAVE_LIMITS.bytes) throw new Error('Save exceeds 20 MB limit');
   let value:unknown=JSON.parse(json);
   preflightEnvelope(value);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
-  if(version>9) throw new Error('Save was created by a newer game');
-  while(version<9) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
-  return validateState(envelope.parse(value).state);
+  if(version>10) throw new Error('Save was created by a newer game');
+  while(version<10) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
+  const parsed=envelope.parse(value),state=validateState(parsed.state);return {state,planning:validatePlanning(parsed.planning,state)};
 }

@@ -1,8 +1,10 @@
 import { setAttribute, setText, setHtml } from '../i18n/dom.js';
+import {RouteDraftHistory,emptyRouteDraft,type RouteDraft,type PlanningDraft} from '../rail/planning-draft.js';
+import type {CubicCurve} from '../domain/model.js';
 import type { Vec3 } from '../domain/model.js';
 import { horizontalDistance, simplifyWishPath } from '../rail/wish-path.js';
 
-export interface RouteDraft {points: Vec3[];complete: boolean;}
+export type {RouteDraft} from '../rail/planning-draft.js';
 export interface RouteConnection {point: Vec3;label: string;}
 interface Adapter {
   canvas: HTMLCanvasElement;overlay: HTMLElement;enabled: () => boolean;
@@ -12,8 +14,9 @@ interface Adapter {
 }
 /** One gesture owner: clicking and drawing extend the same sketch, without camera movement. */
 export class RoutePlannerController {
-  draft: RouteDraft = { points: [], complete: false };
-  private history: RouteDraft[] = [];private future: RouteDraft[] = [];
+  private readonly history = new RouteDraftHistory();
+  get draft(){return this.history.current;}
+  set draft(value:RouteDraft){this.history.current=value;}
   private gesture: {id: number;before: RouteDraft;index: number | null;lastX: number;lastY: number;} | null = null;
   private frame = 0;private space = false;
   private cursor: {x: number;y: number;point: Vec3 | null;port: RouteConnection | null;segment: number | null;} | null = null;
@@ -21,13 +24,20 @@ export class RoutePlannerController {
     window.addEventListener('pointerdown', this.down, true);window.addEventListener('pointermove', this.move, true);window.addEventListener('pointerup', this.up, true);window.addEventListener('pointercancel', this.cancelEvent, true);window.addEventListener('blur', this.blur);window.addEventListener('keydown', this.key, true);window.addEventListener('keyup', this.keyUp, true);
     a.canvas.addEventListener('click', this.click, true);a.canvas.addEventListener('wheel', this.wheel, { capture: true, passive: false });this.frame = requestAnimationFrame(this.paint);
   }
-  get canUndo() {return this.history.length > 0;}get canRedo() {return this.future.length > 0;}get busy() {return this.gesture !== null;}
+  get canUndo() {return this.history.past.length > 0;}get canRedo() {return this.history.future.length > 0;}get busy() {return this.gesture !== null;}
   private emit(busy = false) {this.a.changed(structuredClone(this.draft), busy);}
-  private save(before: RouteDraft) {if (JSON.stringify(before) === JSON.stringify(this.draft)) return;this.history.push(before);if (this.history.length > 30) this.history.shift();this.future = [];}
-  clear() {this.cancel();const before = structuredClone(this.draft);this.draft = { points: [], complete: false };this.save(before);this.emit();}
-  reset() {this.cancel();this.history = [];this.future = [];this.draft = { points: [], complete: false };this.cursor = null;}
-  undo() {this.cancel();const previous = this.history.pop();if (previous) {this.future.push(structuredClone(this.draft));this.draft = previous;this.emit();}}
-  redo() {this.cancel();const next = this.future.pop();if (next) {this.history.push(structuredClone(this.draft));this.draft = next;this.emit();}}
+  private save(before:RouteDraft) {
+    if(JSON.stringify(before.points)!==JSON.stringify(this.draft.points)||before.complete!==this.draft.complete)this.draft.design=null;
+    this.history.record(before);
+  }
+  snapshot():PlanningDraft|null {const saved=this.history.snapshot();if(saved&&this.gesture)saved.current=structuredClone(this.gesture.before);return saved;}
+  restore(saved:PlanningDraft|null) {this.cancel();this.history.restore(saved);this.cursor=null;}
+  chooseDesign(curves:CubicCurve[]|null,record=true) {const before=structuredClone(this.draft);this.draft.design=structuredClone(curves);if(record)this.history.record(before);}
+  setStandard(trackClassId:string) {this.cancel();const before=structuredClone(this.draft);this.draft.trackClassId=trackClassId;this.draft.design=null;this.history.record(before);this.emit();}
+  clear() {this.cancel();const before=structuredClone(this.draft);this.draft={...emptyRouteDraft(),trackClassId:before.trackClassId};this.history.record(before);this.emit();}
+  reset() {this.cancel();this.history.restore(null);this.cursor=null;}
+  undo() {this.cancel();if(this.history.undo())this.emit();}
+  redo() {this.cancel();if(this.history.redo())this.emit();}
   private editableMidpoint() {if (this.draft.complete && this.draft.points.length === 2) {const [a, b] = this.draft.points as [Vec3, Vec3],x = (a.x + b.x) / 2,z = (a.z + b.z) / 2;this.draft.points.splice(1, 0, { x, z, y: this.a.surface(x, z) });}}
   connect(point: Vec3) {if (this.draft.complete) return;const before = structuredClone(this.draft);if (!this.draft.points.length) this.draft.points.push({ ...point });else if (horizontalDistance(point, this.draft.points[0]!) > 10) {this.draft.points.push({ ...point });this.draft.complete = true;} else return;this.editableMidpoint();this.save(before);this.emit();}
   private snap(x: number, y: number): RouteConnection | null {
