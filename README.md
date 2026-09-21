@@ -6,6 +6,18 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 follow-up — keep your plans; clearer streets
+
+Selected railway designs now survive switching tools and save/reload. **Undo/Redo** includes route alternatives and track-standard changes as well as drawing edits. Manual saves, autosaves and portable exports retain up to 30 history steps. The game rechecks and reprices the exact retained curves before purchase; planning alone never spends company cash. Old saves migrate with no active draft.
+
+Village streets now curve along houses and farm courts and follow the ground. Norwegian town streets use procedural cobbles, side lanes and Arizona use earth/gravel, and later town roads switch to asphalt. The gold **station preview** now shows two rails, sleepers, a platform and a shelter outline, distinct from the road surface. These are visual scenery improvements; road traffic and managed railway crossings remain future work.
+
+**Checked:** 183 core tests, TypeScript/build and nine focused browser journeys, including saved route choices and the complete first-revenue loop.
+
+| Village lanes beside the houses | Station preview with actual railway shapes |
+| --- | --- |
+| ![Curved village roads with paving and dirt surfaces beside Norwegian houses](docs/screenshots/village-roads.png) | ![Unbuilt station preview showing rails, sleepers and platform](docs/screenshots/station-interface-de.png) |
+
 ## September 21 update — languages, menus and mountain construction
 
 The interface now supports **Deutsch and English**, including live language switching in Settings, the introduction, construction tools and the save/exit flow. Numbers, prices and dates follow the selected locale. Additional languages use JSON translation packs and one registry entry; see the [translation guide](docs/LOCALIZATION.md). Technical diagnostics and uncatalogued low-level errors may still fall back to English.
@@ -36,7 +48,7 @@ New normal companies start with **NOK 5 million**. Drawing practices start with 
 
 Try four construction exercises in order: **valley → inlet → mountain ridge → highlands**. After connecting the stations, continue to the next exercise in a new company; your current railway is saved first. Other exercises are also available under **Construction school / Bauschule** in the main menu. These are construction exercises on the real map, not completed campaign progression.
 
-The game offers your drawn course first, then distinct alternatives with actual costs, gradients and structure lengths. Click a **bridge or tunnel marker** to compare solutions for that obstacle and its approaches. Other route sections remain unchanged. If the comparison spans the whole route, the panel says so. A mountain detour may shorten a tunnel without removing it entirely. Confirm the price to buy the exact reviewed geometry. Redrawing or starting a global wider search replaces the current local comparison; drafts are not yet saved.
+The game offers your drawn course first, then distinct alternatives with actual costs, gradients and structure lengths. Click a **bridge or tunnel marker** to compare solutions for that obstacle and its approaches. Other route sections remain unchanged. If the comparison spans the whole route, the panel says so. A mountain detour may shorten a tunnel without removing it entirely. Confirm the price to buy the exact reviewed geometry. Redrawing or starting a global wider search replaces the comparison list; Undo restores the previous design. The chosen design and draft history are included in company saves.
 
 With the development server running: [valley drawing practice](http://127.0.0.1:5173/?draw-practice=1&lang=de), [inlet: bridge or land route](http://127.0.0.1:5173/?draw-practice=1&lesson=inlet&lang=de), [ridge: compare tunnels and detours](http://127.0.0.1:5173/?draw-practice=1&lesson=ridge&lang=de). The older illustrated prototype is not the game.
 

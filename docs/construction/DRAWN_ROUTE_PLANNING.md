@@ -1,5 +1,18 @@
 # Draw the railway: player intent, engineering choices, construction
 
+## Retained route plans and village roads — 2026-09-21
+
+- Route sketches retain the chosen exact railway curves and track standard when switching tools, opening menus or saving. Undo/redo includes proposal selections, standard changes and sketch edits. Up to 30 past/future draft states travel with manual saves, autosaves and portable archives.
+- Save schema 10 adds a separate, bounded `planning` envelope field. The simulation state is unchanged; schema 9 migrates with no draft. Worker jobs, quotes, prices and rendering objects are never saved. Restored geometry is re-evaluated on live terrain, and the usual atomic construction command remains authoritative. Unbuildable retained designs stay editable and require revision or an explicit new search.
+- A successful construction clears the draft. Failed storage writes keep the live draft; session replacement adopts a different draft only after the new company was successfully prepared. Comparisons retain exact chosen geometry, not the transient list of all rejected alternatives.
+- Village streets replace the long featureless boxes with terrain-conforming curved ribbons along house rows/courts. The circa-1900 art direction uses cobbles on Norwegian town streets and earth/gravel on side lanes and Arizona streets; from 1950 town roads use asphalt while farm-court paths remain dirt. These are visual era rules, not a reconstruction of a historical paving timetable. No world fingerprint or transport simulation changes.
+- The gold station preview shows two rails, sleepers, a side platform and a shelter outline. Localized copy identifies it as an unbuilt preview and explains the connection rings.
+
+Validation: 183 core tests, TypeScript and production build; nine distinct focused Chrome journeys cover station-first construction, retained/global/local route choices, undo/redo during search, save/reload, drawing and keyboard/compact layouts, DE/EN and exit recovery, and the complete passenger/mail-revenue loop. The three construction/draft journeys were repeated after final history bounds and road-material polish. Screenshots were captured against a fixed test build, not during Vite hot reload.
+
+Still open: full ordered-corridor search, connected campaign progression, railway/road crossing gameplay, broader performance/accessibility review and player acceptance. The new road system supplies settlement scenery rather than a simulated road transport network.
+
+
 Date: 2026-09-20. **First integrated drawing slice implemented for playtesting. The user requested continued Astra implementation; the earlier SOL pause is superseded.** Runtime baseline: `e70bddd`; repository checkpoint before this design: `dcd777e`. This brief takes priority over the waypoint and route-mode UX in STATION_TRACK_DESIGN.md and ONBOARDING_AND_CONTROLS_PLAN.md. Their geometry, economy, terrain and transaction contracts still apply.
 
 The user rejects the current construction experience as abstract. A passing automated build test does not resolve that feedback. CON-02/05/06 remain technical foundations; their player-facing acceptance and UX-002 are reopened. Finish this work before further graphics or campaign expansion.

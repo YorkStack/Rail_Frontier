@@ -1,3 +1,5 @@
+import {createVillageRoads,villageRoads,streetEra} from './settlement-roads.js';
+import {currentYear} from '../simulation/calendar.js';
 import {setTerrainPortalOpenings} from './terrain-material.js';
 import * as THREE from 'three';
 import type {EngineeringInterval} from '../rail/planner.js';
@@ -181,16 +183,20 @@ export class FjordRenderer implements WorldRenderer {
     const records=generateNorwaySettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
     for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
     for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
-    const pathMaterial=new THREE.MeshStandardMaterial({color:'#81765d',roughness:1}),pathGeometry=new THREE.BoxGeometry(1,1,1);
-    for(let index=0;index<state.towns.length;index++){const town=state.towns[index]!,path=new THREE.Mesh(pathGeometry.clone(),pathMaterial.clone()),length=index===1?310:360;path.position.set(town.position.x,town.position.y+.22,town.position.z);path.rotation.y=index===0?Math.PI/2:(index===1 ? .62 : 0);path.scale.set(3.2,.1,length);path.receiveShadow=true;group.add(path);}
+    group.userData.roadPlots=records;this.addVillageRoads(group,state);
     this.buildingCount=records.length;return group;
+  }
+  private addVillageRoads(group:THREE.Group,state:Readonly<GameState>):void {
+    const plots=group.userData.roadPlots;if(!plots)return;
+    const old=group.getObjectByName('village-roads');if(old){group.remove(old);disposeObject(old);}
+    group.add(createVillageRoads(this.terrain,villageRoads(state,plots,this.content.presentation.proceduralScenery==='southwest-study',currentYear(state)),plots));
+    group.userData.roadEra=streetEra(currentYear(state));group.userData.roadTerrainRevision=state.operations.terrain.revision;
   }
   private authoredArizonaSettlements(state:Readonly<GameState>):THREE.Group {
     const records=generateArizonaSettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
     for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
     for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
-    const roadMaterial=new THREE.MeshStandardMaterial({color:'#8b6748',roughness:1}),roadGeometry=new THREE.BoxGeometry(1,1,1);
-    for(const town of state.towns){for(const xOffset of [0,-142,142]){const road=new THREE.Mesh(roadGeometry.clone(),roadMaterial.clone());road.position.set(town.position.x+xOffset,town.position.y+.12,town.position.z);road.scale.set(xOffset===0?16:7,.12,620);road.receiveShadow=true;group.add(road);}for(const zOffset of [-188,0,188]){const road=new THREE.Mesh(roadGeometry.clone(),roadMaterial.clone());road.position.set(town.position.x,town.position.y+.14,town.position.z+zOffset);road.scale.set(370,.12,7);road.receiveShadow=true;group.add(road);}}
+    group.userData.roadPlots=records;this.addVillageRoads(group,state);
     this.buildingCount=records.length;return group;
   }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
@@ -365,8 +371,16 @@ export class FjordRenderer implements WorldRenderer {
   setStationPreview(site:StationSite|null,valid=true):void {
     if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
     if(!site)return;
-    const color=valid?'#edc879':'#d7795f',group=new THREE.Group(),material=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.28,depthTest:false}),pad=new THREE.Mesh(new THREE.BoxGeometry(site.widthM,.35,site.lengthM),material),rail=new THREE.Line(new THREE.BufferGeometry().setFromPoints([site.portA,site.portB].map(point=>new THREE.Vector3(point.x,point.y+1,point.z))),new THREE.LineBasicMaterial({color,depthTest:false,linewidth:2}));
-    pad.position.set(site.center.x,site.center.y+.35,site.center.z);pad.rotation.y=site.orientationRad;group.add(pad,rail);
+    const color=valid?'#edc879':'#d7795f',group=new THREE.Group(),local=new THREE.Group();local.position.set(site.center.x,site.center.y+.2,site.center.z);local.rotation.y=site.orientationRad;group.add(local);
+    const solid=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,depthTest:false}),ghost=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.10,depthTest:false});
+    const box=(x:number,y:number,z:number,w:number,h:number,d:number,material:THREE.Material)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);mesh.position.set(x,y,z);local.add(mesh);};
+    box(0,0,0,site.widthM,.15,site.lengthM,ghost);
+    const rails=new THREE.MeshBasicMaterial({color:valid?'#e8eee4':'#f5b49b',depthTest:false});
+    for(const x of [-.7175,.7175])box(x,.7,0,.18,.22,site.lengthM,rails);
+    const sleeper=new THREE.InstancedMesh(new THREE.BoxGeometry(2.7,.16,.28),solid,Math.ceil(site.lengthM/1.9)),matrix=new THREE.Matrix4();for(let i=0;i<sleeper.count;i++){matrix.makeTranslation(0,.48,-site.lengthM/2+i*1.9);sleeper.setMatrixAt(i,matrix);}local.add(sleeper);
+    box(3.6,.65,0,3.8,1,Math.max(12,site.lengthM-12),solid);
+    // A small transparent shelter makes the platform side legible before purchase.
+    box(4,2.8,0,3.2,3.4,7,ghost);box(4,4.65,0,4,.25,8,solid);
     for(const point of [site.portA,site.portB]){const ring=new THREE.Mesh(new THREE.TorusGeometry(5,.8,8,32),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;ring.position.set(point.x,point.y+1.2,point.z);group.add(ring);}
     group.renderOrder=10;this.preview=group;this.scene.add(group);
   }
@@ -442,7 +456,7 @@ export class FjordRenderer implements WorldRenderer {
   regional():void {this.showWorld();if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    this.modelState=current;this.syncLabels(current);if(current.operations.terrain.revision!==this.terrainRevision)this.rebuildTerrain(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
+    this.modelState=current;this.syncLabels(current);if(this.buildings.userData.roadEra!==streetEra(currentYear(current))||this.buildings.userData.roadTerrainRevision!==current.operations.terrain.revision)this.addVillageRoads(this.buildings,current);if(current.operations.terrain.revision!==this.terrainRevision)this.rebuildTerrain(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
     this.syncOverlay(current);this.syncSelectionMarker(current);
     const old=this.trainPosition.clone(),lead=current.trains[0];if(lead){const b=motionPosition(lead.motion,this.geometry);this.trainPosition.set(b.x,b.y,b.z);}
     if(this.follow){const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}
