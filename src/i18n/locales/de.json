@@ -626,6 +626,20 @@
     "No buildable route found. Reshape your sketch or try a wider detour.": "Keine baubare Strecke gefunden. Ändere deine Zeichnung oder prüfe einen größeren Umweg.",
     "You can keep editing while the route is checked.": "Du kannst während der Prüfung weiterzeichnen.",
     "Your sketch is kept. Edit it, or use Undo to restore the previous shape.": "Deine Zeichnung bleibt erhalten. Bearbeite sie oder stelle mit „Rückgängig“ den vorherigen Verlauf wieder her.",
-    "Try gentler bends, a wider detour or a different track standard. Your sketch is kept.": "Versuche weitere Bögen, einen größeren Umweg oder einen anderen Gleisstandard. Deine Zeichnung bleibt erhalten."
+    "Try gentler bends, a wider detour or a different track standard. Your sketch is kept.": "Versuche weitere Bögen, einen größeren Umweg oder einen anderen Gleisstandard. Deine Zeichnung bleibt erhalten.",
+    "Show compared section": "Verglichenen Abschnitt zeigen",
+    "Compare bridge options": "Brückenvarianten vergleichen",
+    "Compare tunnel options": "Tunnelvarianten vergleichen",
+    "Comparison price": "Vergleichspreis",
+    "Save {amount}": "{amount} günstiger",
+    "{amount} more": "{amount} teurer",
+    "Same price": "Gleicher Preis",
+    "✓ Selected": "✓ Ausgewählt",
+    "Savings and extra costs are compared with the plan you opened. Select an option to preview it; only Build places the track.": "Ersparnis und Mehrkosten beziehen sich auf den geöffneten Entwurf. Die Auswahl zeigt eine Vorschau. Erst „Bauen“ verlegt die Gleise.",
+    "Savings and extra costs are compared with option 1. Select an option to preview it; only Build places the track.": "Ersparnis und Mehrkosten beziehen sich auf Variante 1. Die Auswahl zeigt eine Vorschau. Erst „Bauen“ verlegt die Gleise.",
+    "Only the obstacle and approaches change. Full-route prices.": "Nur Hindernis und Zufahrten ändern sich. Gesamtpreise.",
+    "Whole-route comparison. Full-route prices.": "Vergleich der ganzen Strecke. Gesamtpreise.",
+    "Bright: comparison · muted: unchanged": "Hell: Vergleich · dezent: unverändert",
+    "Selection previews; Build buys the route.": "Auswahl zeigt die Vorschau. „Bauen“ kauft die Strecke."
   }
 }

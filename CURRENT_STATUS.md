@@ -15,9 +15,21 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — sketch correction guidance, 2026-09-21
+# Current status — clearer engineering comparisons, 2026-09-21
 
-## Sketch correction guidance — 2026-09-21
+## Clearer engineering comparisons — 2026-09-21
+
+- Route choices separate the full construction price from their savings or extra cost. The reference stays fixed while selecting alternatives: option 1 for a general search, the opening `engineering:current` plan for a local obstacle comparison. Prices still come from the exact complete-route quote, never a cosmetic estimate.
+- Local comparison headings name bridge or tunnel options and distinguish a bounded obstacle/approach change from a whole-route comparison. The focus action frames the compared curves without changing the draft, choice or quote.
+- Outside curves are muted only after their control points match the baseline prefix/suffix exactly. The compared interval accounts for replacements with a different number of curve sections; inconsistent scope falls back to displaying the whole route. The text legend complements colour and stroke weight.
+- The chosen option is identified above the build button even while the alternatives list is scrolled. Unselected options keep their title, price and price difference; full engineering metrics expand on the selected option. This keeps the 1280×720 view readable while the purchase action remains visible. DE/EN catalogues cover all new copy.
+
+Validation: 197 core tests plus TypeScript/production build; nine focused Chrome journeys cover compact comparison, fixed monetary deltas, map focus, local/global undo and redo, retained designs, saved construction, the practice transition and the passenger/mail revenue loop. The new comparison test verifies that selecting/focusing spends no money; it was repeated after adding retained keyboard focus to the selected option. Screenshot: `docs/screenshots/route-comparison.png`.
+
+Next: player review of drawing and obstacle choices; adaptive vertical search and broader performance/accessibility coverage remain open. Connected campaign progression and managed road/rail crossings are not delivered by this interface pass. DRAW acceptance remains open.
+
+
+## Previous checkpoint: sketch correction guidance — 2026-09-21
 
 - Crossing, collinear overlap and out-of-map sketches receive a specific DE/EN explanation and a labelled marker on the landscape. Unsupported self-crossings are rejected before starting the worker, and the proposal generator independently enforces the same check. A crossing within a sketch never implicitly creates a junction.
 - The correction action focuses an editable interior point; an off-screen point is brought into view. Dragging, arrow keys and Delete modify the retained draft, and Undo/Redo restore both the drawing and its recalculated guidance. Diagnosis does not rewrite the sketch, spend cash or change the railway graph.

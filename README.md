@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 — compare the actual trade-off
+
+Bridge, tunnel and land-route alternatives now show their **full price and the saving or extra cost against a fixed reference**. Local comparisons say whether they change an obstacle and its approaches or the whole route. **Show compared section** frames that area; unchanged outside curves are muted only after their geometry is verified.
+
+The selected option remains named above **Build**, including while scrolling through alternatives. Selection previews the route without spending money; Undo/Redo still restores the exact chosen design. Checked with 197 core tests, TypeScript/build and nine focused browser journeys.
+
+![Local engineering comparison with the selected route, price difference and complete purchase price](docs/screenshots/route-comparison.png)
+
 ## September 21 — help where the sketch needs work
 
 Self-crossings, overlapping sections and points outside the map now receive a **labelled map marker and a concrete correction** in German or English. **Edit marked point** takes you to the relevant handle: drag it, use arrow keys, or press Delete. Undo/Redo keeps working. If a route search fails, the game can suggest a tight bend to widen; an advisory hint never overrides the actual engineering checks.
