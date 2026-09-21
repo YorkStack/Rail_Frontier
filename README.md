@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 — better climbs and descents
+
+The route search now looks ahead over the terrain and refines railway heights around promising routes. It can combine separate climbs, descents and cuts across successive hills, while retaining the exact station connections. Every offered option still passes the real grade, curve and price checks. These choices are labelled **Terrain variant / Geländevariante**.
+
+Checked with **201 core tests and seven browser journeys**, including retained designs, local comparisons, undo/redo and real construction. The bounded search can still miss a solution; further drawing, performance and campaign work remains open.
+
+Try [the mountain construction exercise in German](http://127.0.0.1:5173/?draw-practice=1&lesson=highland&lang=de) with the local server running. Compare the complete prices before building.
+
 ## September 21 — compare the actual trade-off
 
 Bridge, tunnel and land-route alternatives now show their **full price and the saving or extra cost against a fixed reference**. Local comparisons say whether they change an obstacle and its approaches or the whole route. **Show compared section** frames that area; unchanged outside curves are muted only after their geometry is verified.

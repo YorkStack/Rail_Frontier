@@ -3,6 +3,7 @@ import type {CorridorAlternativeRequest} from './corridor-alternatives.js';
 import {MIN_TUNNEL_COVER_M} from '../content/engineering-rules.js';
 import {pointAt} from './geometry.js';
 import {horizontalDistance,simplifyWishPath} from './wish-path.js';
+import {elevationEnvelopes} from './elevation-envelope.js';
 
 /** Equal-distance stations make the search independent of pointer event density. */
 export function corridorStations(points:readonly Vec3[],spacingM:number):Vec3[] {
@@ -81,45 +82,76 @@ export function searchOrderedCorridor(request:CorridorAlternativeRequest):Ordere
   const width=Math.max(0,Math.min(300,request.maxOffsetM??60)),limits=request.trackClass.constraints,budget=Math.max(0,Math.min(20_000,Math.floor(request.searchExpansionBudget??6000))),beam=48,start=request.anchors[0]!,end=request.anchors.at(-1)!,terrain=request.terrain;
   if(!Number.isFinite(budget)||!Number.isFinite(width))return empty;
   const offsets=width>0?[-width*.9,-width*.45,0,width*.45,width*.9]:[0];
-  let frontier:SearchState[]=[{point:{...start},offset:0,heading:request.tangents?.start?Math.atan2(request.tangents.start.z,request.tangents.start.x):Math.atan2(stations[1]!.z-start.z,stations[1]!.x-start.x),grade:request.endpointGrades?.start??0,regime:0,cost:0,parent:null}],expansions=0;
-  for(let layer=1;layer<=last;layer++){
-    const center=stations[layer]!,before=stations[layer-1]!,after=stations[Math.min(last,layer+1)]!,dx=after.x-before.x,dz=after.z-before.z,norm=Math.hypot(dx,dz)||1,fraction=layer/last,linearY=start.y+(end.y-start.y)*fraction,step=length/last;
-    const nodes:{point:Vec3;offset:number}[]=[];
-    for(const offset of layer===last?[0]:offsets){
-      const x=layer===last?end.x:center.x-dz/norm*offset,z=layer===last?end.z:center.z+dx/norm*offset;
-      if(x<0||z<0||x>terrain.widthM||z>terrain.depthM)continue;
-      let ground:number;try{ground=terrain.sample(x,z).elevationM;}catch{continue;}
-      // Independent elevations around the endpoint grade line plus local ground;
-      // intermediate pointer Y is never a required rail elevation.
-      const band=step*limits.maxGrade*.45,levels=layer===last?[end.y]:[linearY-2*band,linearY-band,linearY,linearY+band,linearY+2*band,ground];
-      for(const y of new Set(levels))if(Number.isFinite(y))nodes.push({point:{x,y,z},offset});
-    }
-    const next=new Map<string,SearchState>();
-    for(const current of frontier){
-      if(expansions>=budget)return {paths:[],expansions,exhausted:true};
-      expansions++;
-      for(const node of nodes){
-        const p=node.point,distance=horizontalDistance(current.point,p);
-        if(distance<10||Math.abs(node.offset-current.offset)>step*.95)continue;
-        const grade=(p.y-current.point.y)/distance,heading=Math.atan2(p.z-current.point.z,p.x-current.point.x),turn=Math.abs(Math.atan2(Math.sin(heading-current.heading),Math.cos(heading-current.heading)));
-        if(Math.abs(grade)>limits.maxGrade*.92||turn>Math.min(1.25,distance/limits.minRadiusM))continue;
-        if(layer===last&&request.tangents?.end){const endHeading=Math.atan2(request.tangents.end.z,request.tangents.end.x);if(Math.abs(Math.atan2(Math.sin(heading-endHeading),Math.cos(heading-endHeading)))>.65)continue;}
-        let capital=0,regime=0,valid=true;
-        // Classify throughout each primitive, not only at its destination.
-        const samples=Math.max(2,Math.ceil(distance/40));
-        for(let s=1;s<=samples;s++){
-          const t=s/samples,x=current.point.x+(p.x-current.point.x)*t,z=current.point.z+(p.z-current.point.z)*t,y=current.point.y+(p.y-current.point.y)*t;
-          try{const sample=terrain.sample(x,z),clearance=y-sample.elevationM;regime=(sample.waterLevelM!==null&&sample.elevationM<=sample.waterLevelM+.001)||clearance>6?1:clearance< -MIN_TUNNEL_COVER_M?2:0;capital+=(regime===1?5.2:regime===2?6.4:1+Math.abs(clearance)*.08)/samples;}catch{valid=false;break;}
-        }
-        if(!valid)continue;
-        const deviation=width?node.offset/width:0,cost=current.cost+distance*(capital+.3+.35*deviation*deviation+2*turn*turn+Math.abs(grade)*8+Math.abs(grade-current.grade)*15)+(regime===current.regime?0:step*.2);
-        const key=`${node.offset}:${p.y.toFixed(3)}:${Math.round(heading*16/Math.PI)}:${Math.round(grade/limits.maxGrade*8)}:${regime}`,known=next.get(key);
-        if(!known||cost<known.cost)next.set(key,{...node,heading,grade,regime,cost,parent:current});
-      }
-    }
-    frontier=[...next.values()].sort((a,b)=>a.cost-b.cost||Math.abs(a.offset)-Math.abs(b.offset)||a.point.y-b.point.y).slice(0,beam);
-    if(!frontier.length)return {paths:[],expansions,exhausted:false};
+  // Sample each lateral corridor once. Water asks for clearance, not a descent
+  // to the riverbed. Out-of-map offsets have no speculative height profile.
+  const corridors=new Map<number,number[][]>();
+  for(const offset of offsets){
+    const points=stations.map((center,i)=>{
+      if(i===0)return {...start};if(i===last)return {...end};
+      const before=stations[i-1]!,after=stations[i+1]!,dx=after.x-before.x,dz=after.z-before.z,norm=Math.hypot(dx,dz)||1;
+      return {x:center.x-dz/norm*offset,y:0,z:center.z+dx/norm*offset};
+    });
+    try{
+      const ground=points.map(p=>{if(p.x<0||p.z<0||p.x>terrain.widthM||p.z>terrain.depthM)throw new Error('Outside terrain');const sample=terrain.sample(p.x,p.z);return Math.max(sample.elevationM,sample.waterLevelM===null?-Infinity:sample.waterLevelM+2.5);});
+      const distances=[0];for(let i=1;i<points.length;i++)distances.push(distances[i-1]!+horizontalDistance(points[i-1]!,points[i]!));
+      corridors.set(offset,elevationEnvelopes(ground,distances,start.y,end.y,limits.maxGrade));
+    }catch{/* An incomplete lateral corridor contributes no look-ahead heights. */}
   }
-  const paths=frontier.slice(0,6).map(state=>{const points:Vec3[]=[];for(let current:SearchState|null=state;current;current=current.parent)points.push({...current.point});return points.reverse();});
-  return {paths,expansions,exhausted:false};
+  let expansions=0,exhausted=false;
+  const unwind=(state:SearchState)=>{const points:Vec3[]=[];for(let current:SearchState|null=state;current;current=current.parent)points.push({...current.point});return points.reverse();};
+  const stage=(refine:readonly Vec3[][]):Vec3[][]=>{
+    let frontier:SearchState[]=[{point:{...start},offset:0,heading:request.tangents?.start?Math.atan2(request.tangents.start.z,request.tangents.start.x):Math.atan2(stations[1]!.z-start.z,stations[1]!.x-start.x),grade:request.endpointGrades?.start??0,regime:0,cost:0,parent:null}];
+    for(let layer=1;layer<=last;layer++){
+      const center=stations[layer]!,before=stations[layer-1]!,after=stations[Math.min(last,layer+1)]!,dx=after.x-before.x,dz=after.z-before.z,norm=Math.hypot(dx,dz)||1,fraction=layer/last,linearY=start.y+(end.y-start.y)*fraction,step=length/last;
+      const nodes:{point:Vec3;offset:number}[]=[];
+      for(const offset of layer===last?[0]:offsets){
+        const x=layer===last?end.x:center.x-dz/norm*offset,z=layer===last?end.z:center.z+dx/norm*offset;
+        if(x<0||z<0||x>terrain.widthM||z>terrain.depthM)continue;
+        let ground:number;try{ground=terrain.sample(x,z).elevationM;}catch{continue;}
+        // Endpoint bands remain a fallback. Terrain envelopes add independent
+        // local climbs/descents beyond that narrow band; pointer Y is ignored.
+        const band=step*limits.maxGrade*.45,levels=layer===last?[end.y]:[linearY-2*band,linearY-band,linearY,linearY+band,linearY+2*band,ground,...(corridors.get(offset)?.map(profile=>profile[layer]!)??[]),...refine.flatMap(path=>[path[layer]!.y-band/2,path[layer]!.y,path[layer]!.y+band/2])];
+        for(const y of new Set(levels))if(Number.isFinite(y))nodes.push({point:{x,y,z},offset});
+      }
+      const next=new Map<string,SearchState>();
+      for(const current of frontier){
+        if(expansions>=budget){exhausted=true;return [];}
+        expansions++;
+        for(const node of nodes){
+          const p=node.point,distance=horizontalDistance(current.point,p);
+          if(distance<10||Math.abs(node.offset-current.offset)>step*.95)continue;
+          const grade=(p.y-current.point.y)/distance,heading=Math.atan2(p.z-current.point.z,p.x-current.point.x),turn=Math.abs(Math.atan2(Math.sin(heading-current.heading),Math.cos(heading-current.heading)));
+          if(Math.abs(grade)>limits.maxGrade*.92||turn>Math.min(1.25,distance/limits.minRadiusM))continue;
+          if(layer===last&&request.tangents?.end){const endHeading=Math.atan2(request.tangents.end.z,request.tangents.end.x);if(Math.abs(Math.atan2(Math.sin(heading-endHeading),Math.cos(heading-endHeading)))>.65)continue;}
+          let capital=0,regime=0,valid=true;
+          // Classify throughout each primitive, not only at its destination.
+          const samples=Math.max(2,Math.ceil(distance/40));
+          for(let s=1;s<=samples;s++){
+            const t=s/samples,x=current.point.x+(p.x-current.point.x)*t,z=current.point.z+(p.z-current.point.z)*t,y=current.point.y+(p.y-current.point.y)*t;
+            try{const sample=terrain.sample(x,z),clearance=y-sample.elevationM;regime=(sample.waterLevelM!==null&&sample.elevationM<=sample.waterLevelM+.001)||clearance>6?1:clearance< -MIN_TUNNEL_COVER_M?2:0;capital+=(regime===1?5.2:regime===2?6.4:1+Math.abs(clearance)*.08)/samples;}catch{valid=false;break;}
+          }
+          if(!valid)continue;
+          const deviation=width?node.offset/width:0,cost=current.cost+distance*(capital+.3+.35*deviation*deviation+2*turn*turn+Math.abs(grade)*8+Math.abs(grade-current.grade)*15)+(regime===current.regime?0:step*.2);
+          const key=`${node.offset}:${p.y.toFixed(3)}:${Math.round(heading*16/Math.PI)}:${Math.round(grade/limits.maxGrade*8)}:${regime}`,known=next.get(key);
+          if(!known||cost<known.cost)next.set(key,{...node,heading,grade,regime,cost,parent:current});
+        }
+      }
+      frontier=[...next.values()].sort((a,b)=>a.cost-b.cost||Math.abs(a.offset)-Math.abs(b.offset)||a.point.y-b.point.y).slice(0,beam);
+      if(!frontier.length)return [];
+    }
+    return frontier.slice(0,6).map(unwind);
+  };
+  const coarse=stage([]);
+  if(!coarse.length)return {paths:[],expansions,exhausted};
+  // Refine around complete paths, not around a partial frontier. Both passes
+  // share one expansion counter. A truncated second pass never displaces a
+  // completed first-pass proposal. Flat terrain needs no elevation refinement.
+  const relief=[...corridors.values()].some(profiles=>profiles.some(profile=>profile.some((y,i)=>Math.abs(y-(start.y+(end.y-start.y)*i/last))>.5)));
+  const refined=relief?stage(coarse.slice(0,3)):[];
+  const paths:Vec3[][]=[],seen=new Set<string>();
+  for(const path of [...coarse.slice(0,3),...refined,...coarse.slice(3)]){
+    const key=path.map(p=>`${p.x.toFixed(3)},${p.y.toFixed(3)},${p.z.toFixed(3)}`).join(';');
+    if(!seen.has(key)){seen.add(key);paths.push(path);}if(paths.length===6)break;
+  }
+  return {paths,expansions,exhausted};
 }
