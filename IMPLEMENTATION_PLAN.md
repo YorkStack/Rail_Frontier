@@ -1,6 +1,19 @@
 # Implementation plan
 
-## Retained route plans and village roads — 2026-09-21
+## Ordered route search — 2026-09-21
+
+- The worker now supplements the original fitted proposals with a search across successive cross-sections of the drawn path. Progress is an explicit layer, so nearby return legs cannot replace the remaining journey. Heading, elevation, grade and structure regime accompany each state; lateral and vertical choices can change at successive obstacles.
+- Every fitted proposal, including the explicitly labelled relaxed chord and local obstacle alternatives, must visit the sketch in order. Two-way, 15 m sampled gate checks replace the old nearest-segment-only test. This is an intent check; the existing exact curve certificate, authoritative terrain quote and atomic construction command still govern buildability.
+- Search uses at most 48 retained states per layer, roughly 50 cross-sections, six terminal paths and one optional rounding pass. The request's expansion budget is shared across this search (hard ceiling 20,000); exhaustion returns no partial path. There is no endpoint-chord heuristic. Intermediate pointer heights do not pin railway elevation. Existing fitted candidates remain available when the search cannot supply a certified improvement.
+- An alternating-water-obstacle fixture now produces a certified land route that changes sides and costs less than the bridge alternative. Regression cases cover ordered return bends, shortcut rejection, pointer sample density, impossible grades and exhausted budgets. All four real-map practices still build at their quoted prices.
+- Scope: this is a bounded beam search, not an optimal or complete routing algorithm. Elevation samples remain a small discrete set rather than the full adaptive vertical refinement in the target design. Search curves stay within the requested 60/300 m corridor; existing offset proposals retain their original 60 m curve-fitting allowance. Narrow sharp bends may still require reshaping or the explicit wider search. Self-crossing guidance, broader performance/accessibility measurements and unassisted player acceptance remain open; DRAW is not marked complete.
+
+Validation: 189 core tests, TypeScript and production build; six focused Chrome journeys against a fixed test build cover drawing/reshaping/cancellation, compact and keyboard controls, retained choices and undo/redo, save/reload, inlet land/bridge construction and transition to the ridge exercise.
+
+Next: improve actionable feedback for sketches that cannot be fitted, including self-crossings; then review obstacle-choice usability with the player before connected campaign progression. Railway/road crossing gameplay remains pending.
+
+
+## Previous checkpoint: retained route plans and village roads — 2026-09-21
 
 - Route sketches retain the chosen exact railway curves and track standard when switching tools, opening menus or saving. Undo/redo includes proposal selections, standard changes and sketch edits. Up to 30 past/future draft states travel with manual saves, autosaves and portable archives.
 - Save schema 10 adds a separate, bounded `planning` envelope field. The simulation state is unchanged; schema 9 migrates with no draft. Worker jobs, quotes, prices and rendering objects are never saved. Restored geometry is re-evaluated on live terrain, and the usual atomic construction command remains authoritative. Unbuildable retained designs stay editable and require revision or an explicit new search.

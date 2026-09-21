@@ -1,10 +1,11 @@
 import type {Vec3} from '../domain/model.js';
 import {solveHorizontalAlignment} from './alignment-solver.js';
 import {solveVerticalProfile} from './vertical-profile.js';
-import {compileCurve,pointAt} from './geometry.js';
+import {compileCurve} from './geometry.js';
 import {derivative} from './constraints.js';
 import {quoteTrack} from './planner.js';
 import {fitWishPoints,horizontalDistance,distanceToSegment} from './wish-path.js';
+import {followsOrderedCorridor,searchOrderedCorridor} from './ordered-corridor.js';
 import type {CorridorAlternativeRequest,CorridorCurveCandidate} from './corridor-alternatives.js';
 
 /** Bounded first-pass proposals. Intermediate pointer Y never determines rail height.
@@ -16,6 +17,16 @@ export function generateWishCandidates(request:CorridorAlternativeRequest,allowR
   if(anchors.length<2)return [];
   const result:CorridorCurveCandidate[]=[],signatures=new Set<string>(),baseSignatures=new Set<string>();
   const width=request.maxOffsetM??60;
+  const addCandidate=(points:Vec3[],heights:number[],id:string,corridorWidth:number)=>{
+    points=points.map((p,i)=>({...p,y:heights[i]!}));
+    const horizontal=solveHorizontalAlignment(points,tangents),curves=solveVerticalProfile(horizontal,heights,trackClass.constraints,{...(tangents?.start?{startGrade:request.endpointGrades?.start??0}:{}),...(tangents?.end?{endGrade:request.endpointGrades?.end??0}:{})});
+    if(request.endpointGrades){const first=derivative(curves[0]!,0),last=derivative(curves.at(-1)!,1);if(Math.abs(first.y/Math.hypot(first.x,first.z)-request.endpointGrades.start)>1e-7||Math.abs(last.y/Math.hypot(last.x,last.z)-request.endpointGrades.end)>1e-7)return;}
+    if(!followsOrderedCorridor(curves,anchors,corridorWidth))return;
+    if(curves.some(c=>!quoteTrack(compileCurve(c),terrain,trackClass.constraints,trackClass.costMultiplier).valid))return;
+    const signature=curves.map(c=>[c.p0,c.p1,c.p2,c.p3].map(p=>[p.x,p.y,p.z].map(v=>v.toFixed(1)).join(',')).join(';')).join('|');
+    if(signatures.has(signature))return;
+    signatures.add(signature);result.push({id,curves});
+  };
   for(const tolerance of [8,22,45]){
     let base:Vec3[];try{base=fitWishPoints(anchors,tolerance);}catch{continue;}
     // Add interior freedom even for a single long stroke. Endpoints stay exact.
@@ -35,20 +46,25 @@ export function generateWishCandidates(request:CorridorAlternativeRequest,allowR
           for(let i=heights.length-2;i>0;i--){const delta=horizontalDistance(points[i+1]!,points[i]!)*trackClass.constraints.maxGrade*.55;heights[i]=Math.max(heights[i+1]!-delta,Math.min(heights[i+1]!+delta,heights[i]!));}
           heights=heights.map((h,i)=>i===0||i===heights.length-1?h:(heights[i-1]!+2*h+heights[i+1]!)/4);
         }
-        points.forEach((p,i)=>p.y=heights[i]!);
-        const horizontal=solveHorizontalAlignment(points,tangents),curves=solveVerticalProfile(horizontal,heights,trackClass.constraints,{...(tangents?.start?{startGrade:request.endpointGrades?.start??0}:{}),...(tangents?.end?{endGrade:request.endpointGrades?.end??0}:{})});
-        if(request.endpointGrades){const first=derivative(curves[0]!,0),last=derivative(curves.at(-1)!,1);if(Math.abs(first.y/Math.hypot(first.x,first.z)-request.endpointGrades.start)>1e-7||Math.abs(last.y/Math.hypot(last.x,last.z)-request.endpointGrades.end)>1e-7)continue;}
-        // A candidate cannot short-cut to a different side of the user's landscape.
-        if(curves.some(curve=>Array.from({length:17},(_,i)=>pointAt(curve,i/16)).some(p=>Math.min(...anchors.slice(1).map((b,i)=>distanceToSegment(p,anchors[i]!,b)))>Math.abs(offset)+60)))continue;
-        const geometries=curves.map(c=>compileCurve(c)),quotes=geometries.map(g=>quoteTrack(g,terrain,trackClass.constraints,trackClass.costMultiplier));if(quotes.some(q=>!q.valid))continue;
-        const signature=curves.map(c=>[c.p0,c.p1,c.p2,c.p3].map(p=>[p.x,p.y,p.z].map(v=>v.toFixed(1)).join(',')).join(';')).join('|');if(signatures.has(signature))continue;signatures.add(signature);
-        result.push({id:`wish:${offset===0?'near':offset<0?'left':'right'}:${Math.abs(offset)}:${follow}:${tolerance}:${smoothing}`,curves});
+        addCandidate(points,heights,`wish:${offset===0?'near':offset<0?'left':'right'}:${Math.abs(offset)}:${follow}:${tolerance}:${smoothing}`,Math.abs(offset)+60);
       }catch{/* Infeasible candidates are omitted; never relax engineering checks. */}
 
     }
   }
+  // Search follows ordered cross-sections, allowing different lateral/vertical
+  // decisions at successive obstacles instead of one whole-route offset.
+  if(request.searchExpansionBudget!==0)for(const [index,points] of searchOrderedCorridor(request).paths.entries()){
+    for(const smoothing of [0,1])try{
+      // One bounded rounding pass can remove lattice corners. Intent and the
+      // real curve certificate are checked again after rounding, with no wider
+      // corridor or weaker engineering limits.
+      const rounded=points.map((p,i)=>smoothing===0||i===0||i===points.length-1?p:{x:(points[i-1]!.x+2*p.x+points[i+1]!.x)/4,y:p.y,z:(points[i-1]!.z+2*p.z+points[i+1]!.z)/4});
+      addCandidate(rounded,rounded.map(p=>p.y),`wish:search:${index}:${smoothing}`,Math.max(60,width));
+    }catch{/* Search output is only a proposal, never permission to build. */}
+  }
+
   if(allowRelaxation&&anchors.length>2&&anchors.every(p=>distanceToSegment(p,anchors[0]!,anchors.at(-1)!)<=150)){
-    for(const candidate of generateWishCandidates({...request,anchors:[anchors[0]!,anchors.at(-1)!],maxOffsetM:0},false))result.push({...candidate,id:candidate.id.replace('wish:near','wish:relaxed')});
+    for(const candidate of generateWishCandidates({...request,anchors:[anchors[0]!,anchors.at(-1)!],maxOffsetM:0,searchExpansionBudget:0},false))if(followsOrderedCorridor(candidate.curves,anchors,150))result.push({...candidate,id:candidate.id.replace('wish:near','wish:relaxed')});
   }
   return result;
 }
