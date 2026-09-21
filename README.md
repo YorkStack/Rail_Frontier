@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 21 — smarter drawn routes
+
+Route proposals now check the **order of your drawing**, so a nearby return leg cannot silently replace a deliberate loop. A bounded search can switch sides at successive obstacles and choose railway heights independently of the terrain under your cursor. Finished curves still require the normal radius, grade, terrain and cost checks before purchase. Very tight bends may need reshaping or **Wider detours**; the search does not guarantee a solution.
+
+**Checked:** 189 core tests, TypeScript/production build and six focused browser journeys for drawing, retained designs and the construction exercises.
+
+Try [the inlet exercise in German](http://127.0.0.1:5173/?draw-practice=1&lesson=inlet&lang=de) with the local server running. Draw your route, finish on the destination and compare the priced alternatives.
+
 ## September 21 follow-up — keep your plans; clearer streets
 
 Selected railway designs now survive switching tools and save/reload. **Undo/Redo** includes route alternatives and track-standard changes as well as drawing edits. Manual saves, autosaves and portable exports retain up to 30 history steps. The game rechecks and reprices the exact retained curves before purchase; planning alone never spends company cash. Old saves migrate with no active draft.
