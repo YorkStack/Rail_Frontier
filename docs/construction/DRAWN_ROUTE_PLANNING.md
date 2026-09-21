@@ -1,6 +1,18 @@
 # Draw the railway: player intent, engineering choices, construction
 
-## Adaptive railway elevations — 2026-09-21
+## Responsive cost validation — 2026-09-21
+
+- Live-terrain revalidation now yields between candidates after roughly 8 ms of work, preserving input opportunities while the worker results are checked. All choices remain private until the complete current set is ready. A DE/EN cost-check message and busy state explain the final stage; Build remains disabled.
+- Every resumed slice checks the job identity, railway/terrain revisions and track class. Cancelled, replaced and timed-out work cannot publish stale results or clear a newer job. Restarting during validation is covered through the actual browser controls, followed by successful replanning.
+- Engineering profiles are reused during ranking, and the selected preview/obstacle markers reuse the same revision-bound live quote. The authoritative certificate and construction-time quote are unchanged. Synchronous and cooperative evaluations return identical geometry, prices and preference choices.
+- In a fixed-build Chrome experiment with fourfold CPU throttling, the worst observed frame gap fell from 300 ms to 67 ms and no main-thread task ≥50 ms was observed after the change. Complete results took longer (valley median 472→697 ms; highland 300→375 ms), because rendering/input receive time during validation. This is six runs per revision, not general p95/device acceptance. Method and recorded samples: `docs/performance/ROUTE_PLANNING.md`.
+
+Validation: 203 core tests, TypeScript/production build and eight Chrome journeys, including cancellation during cost validation, drawn-route input, compact keyboard controls, local comparison, undo/redo, saved plans and inlet/ridge construction.
+
+Next: measure long freehand strokes and held-key editing, then broader device/accessibility coverage and connected campaign progression. Adaptive longitudinal subdivision, managed road/rail crossings and unassisted player acceptance remain open. DRAW is not marked complete.
+
+
+## Previous checkpoint: adaptive railway elevations — 2026-09-21
 
 - Ordered route search now looks ahead along the terrain in both directions. Lower/upper height envelopes at two grade budgets supplement the former endpoint bands and local ground samples. This allows separate climbs and descents at successive ridges; underwater ground does not become the target railway elevation. Exact station/splice endpoints stay fixed.
 - A second pass adds finer height choices around three complete first-pass paths. Both passes share the same expansion counter and hard 20,000-state ceiling. At most six complete search paths go to fitting; three first-pass paths retain places when refinement succeeds. If refinement exhausts its budget, completed first-pass paths survive and the partial frontier is discarded. Flat corridors skip refinement. Original fitted proposals remain available.

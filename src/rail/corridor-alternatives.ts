@@ -5,7 +5,7 @@ import {solveHorizontalAlignment,type AlignmentTangents} from './alignment-solve
 import {solveVerticalProfile} from './vertical-profile.js';
 import {compileCurve,type TrackGeometry} from './geometry.js';
 import {quoteTrack,type EngineeringQuote} from './planner.js';
-import {buildEngineeringProfile} from '../ui/engineering-profile.js';
+import {buildEngineeringProfile,type EngineeringProfile} from '../ui/engineering-profile.js';
 import {searchCorridorLattice} from './corridor-lattice.js';
 
 export type CorridorPreference='balanced'|'low-cost'|'fast';
@@ -72,13 +72,35 @@ export function generateCorridorCurveCandidates(request:CorridorAlternativeReque
 
 /** Revalidates worker-generated curves against the live authoritative terrain before exposing them. */
 export function evaluateCorridorAlternatives(curveCandidates:readonly CorridorCurveCandidate[],terrain:Terrain,trackClass:TrackClassDefinition,keepGeometryChoices=false):CorridorAlternative[] {
-  const candidates:Candidate[]=[];
-  for(const candidate of curveCandidates)try {const geometries=candidate.curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));if(quotes.some(quote=>!quote.valid))continue;const profile=buildEngineeringProfile(geometries,quotes,terrain),lengthM=geometries.reduce((sum,geometry)=>sum+geometry.lengthM,0),cost=quotes.reduce((sum,quote)=>sum+quote.cost,0),structureM=profile.lengthByKind.bridge+profile.lengthByKind.tunnel,estimatedTimeS=lengthM/trackClass.speedLimitMps*(1+profile.maxGrade*5),minimumRadiusM=profile.minimumRadiusM;candidates.push({id:candidate.id,curves:candidate.curves,geometries,quotes,lengthM,cost,maxGrade:profile.maxGrade,minimumRadiusM,structureM,estimatedTimeS,scores:{balanced:0,'low-cost':0,fast:0}});}catch {continue;}
+  const profiles=new Map<string,EngineeringProfile>(),candidates=curveCandidates.flatMap(candidate=>{const evaluated=evaluateCandidate(candidate,terrain,trackClass,profiles);return evaluated?[evaluated]:[];});
+  return selectAlternatives(candidates,profiles,keepGeometryChoices);
+}
+
+/** Identical live-terrain certification, cooperatively scheduled between candidates.
+ * null means superseded; no partial list may be published or purchased. */
+export async function evaluateCorridorAlternativesInSlices(curveCandidates:readonly CorridorCurveCandidate[],terrain:Terrain,trackClass:TrackClassDefinition,options:{isCurrent:()=>boolean;yieldToInput?:()=>Promise<void>;keepAll?:boolean}):Promise<CorridorAlternative[]|null> {
+  const profiles=new Map<string,EngineeringProfile>(),candidates:Candidate[]=[],yieldToInput=options.yieldToInput??(()=>new Promise<void>(resolve=>setTimeout(resolve,0)));
+  if(!options.isCurrent())return null;
+  await yieldToInput();let sliceStart=performance.now();
+  for(const candidate of curveCandidates){
+    if(!options.isCurrent())return null;
+    const evaluated=evaluateCandidate(candidate,terrain,trackClass,profiles);if(evaluated)candidates.push(evaluated);
+    if(performance.now()-sliceStart>=8){await yieldToInput();sliceStart=performance.now();}
+  }
+  if(!options.isCurrent())return null;
+  return options.keepAll?candidates.map(candidate=>({...candidate,recommendedFor:['balanced']})):selectAlternatives(candidates,profiles,true);
+}
+
+function evaluateCandidate(candidate:CorridorCurveCandidate,terrain:Terrain,trackClass:TrackClassDefinition,profiles:Map<string,EngineeringProfile>):Candidate|null {
+  try {const geometries=candidate.curves.map(curve=>compileCurve(curve)),quotes=geometries.map(geometry=>quoteTrack(geometry,terrain,trackClass.constraints,trackClass.costMultiplier));if(quotes.some(quote=>!quote.valid))return null;const profile=buildEngineeringProfile(geometries,quotes,terrain),lengthM=geometries.reduce((sum,geometry)=>sum+geometry.lengthM,0),cost=quotes.reduce((sum,quote)=>sum+quote.cost,0),structureM=profile.lengthByKind.bridge+profile.lengthByKind.tunnel,estimatedTimeS=lengthM/trackClass.speedLimitMps*(1+profile.maxGrade*5),minimumRadiusM=profile.minimumRadiusM;profiles.set(candidate.id,profile);return {id:candidate.id,curves:candidate.curves,geometries,quotes,lengthM,cost,maxGrade:profile.maxGrade,minimumRadiusM,structureM,estimatedTimeS,scores:{balanced:0,'low-cost':0,fast:0}};}catch{return null;}
+}
+
+function selectAlternatives(candidates:Candidate[],profiles:Map<string,EngineeringProfile>,keepGeometryChoices:boolean):CorridorAlternative[] {
   if(candidates.length===0)return [];
   const normalized={cost:normalizer(candidates.map(item=>item.cost)),time:normalizer(candidates.map(item=>item.estimatedTimeS)),grade:normalizer(candidates.map(item=>item.maxGrade)),structure:normalizer(candidates.map(item=>item.structureM)),radius:normalizer(candidates.map(item=>Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0))};
   for(const item of candidates)for(const preference of preferences){const weight=weights[preference];item.scores[preference]=weight.cost*normalized.cost(item.cost)+weight.time*normalized.time(item.estimatedTimeS)+weight.grade*normalized.grade(item.maxGrade)+weight.structure*normalized.structure(item.structureM)+weight.radius*normalized.radius(Number.isFinite(item.minimumRadiusM)?1/item.minimumRadiusM:0);}
   if(keepGeometryChoices){
-    const ordered=[...candidates].sort((a,b)=>a.cost-b.cost),chosen:CorridorAlternative[]=[],profiles=new Map(ordered.map(item=>[item.id,buildEngineeringProfile(item.geometries,item.quotes,terrain)]));
+    const ordered=[...candidates].sort((a,b)=>a.cost-b.cost),chosen:CorridorAlternative[]=[];
     const family=(item:Candidate)=>{const {bridge,tunnel}=profiles.get(item.id)!.lengthByKind;return bridge<1&&tunnel<1?'land':tunnel<1?'bridge':bridge<1?'tunnel':'mixed';};
     // Reserve space for different engineering solutions before small variations of one solution.
     const families=new Set<string>(),near=ordered.find(item=>item.id.startsWith('wish:near:'));
