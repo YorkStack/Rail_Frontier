@@ -1,11 +1,12 @@
+import {resolveLanguage,type Language} from '../i18n/index.js';
 export const uiScales=[1,1.25,1.5] as const;
 export type UiScale=typeof uiScales[number];
-export type UiLanguage='de'|'en';
+export type UiLanguage=Language;
 export interface PresentationPreferences {uiScale:UiScale;language:UiLanguage}
 export interface PreferenceStorage {getItem(key:string):string|null;setItem(key:string,value:string):void}
 
 const key='rail-frontier:presentation:v1';
-const languageFrom=(value:string):UiLanguage=>value.toLowerCase().startsWith('de')?'de':'en';
+const languageFrom=resolveLanguage;
 const scaleFrom=(value:unknown):UiScale=>uiScales.includes(value as UiScale)?value as UiScale:1;
 
 export function readPresentationPreferences(storage:PreferenceStorage|null,browserLanguage:string):PresentationPreferences {
@@ -13,7 +14,7 @@ export function readPresentationPreferences(storage:PreferenceStorage|null,brows
   if(!storage)return defaults;
   try {
     const raw=storage.getItem(key);if(!raw)return defaults;const parsed=JSON.parse(raw) as {uiScale?:unknown;language?:unknown};
-    return {uiScale:scaleFrom(parsed.uiScale),language:parsed.language==='de'||parsed.language==='en'?parsed.language:defaults.language};
+    return {uiScale:scaleFrom(parsed.uiScale),language:typeof parsed.language==='string'?resolveLanguage(parsed.language):defaults.language};
   } catch{return defaults;}
 }
 

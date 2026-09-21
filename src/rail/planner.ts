@@ -1,3 +1,4 @@
+import {MIN_TUNNEL_COVER_M} from '../content/engineering-rules.js';
 import { type Terrain,type TriangleTerrain } from '../world/terrain.js';
 import { pointAt,type TrackGeometry } from './geometry.js';
 import { certifyCurve,type RailConstraints,standardRail } from './constraints.js';
@@ -18,7 +19,7 @@ export function quoteTrack(geometry:TrackGeometry,terrain:Terrain,limits:RailCon
     const plane=triangleTerrain.planeAt!(mid.x,mid.z),part=curveInterval(geometry.curve,start,end),controls=[part.p0,part.p1,part.p2,part.p3];
     const ground=controls.map(p=>plane.dx*p.x+plane.dz*p.z+plane.constant),clearance=controls.map((p,j)=>p.y-ground[j]!);
     const add=(values:number[],level:number)=>parameters.push(...cubicRoots(values,level).map(t=>start+t*(end-start)));
-    add(clearance,-4);add(clearance,6);
+    add(clearance,-MIN_TUNNEL_COVER_M);add(clearance,6);
     if(terrain.waterLevelM!==null){add(ground,terrain.waterLevelM);add(controls.map(p=>p.y),terrain.waterLevelM+2);}
   }
   const sorted=parameters.sort((a,b)=>a-b).filter((t,i,all)=>i===0||t-all[i-1]!>1e-9);
@@ -35,7 +36,7 @@ export function quoteTrack(geometry:TrackGeometry,terrain:Terrain,limits:RailCon
     const horizontal=Math.hypot(b.x-a.x,b.z-a.z),grade=horizontal>1e-10?Math.abs(b.y-a.y)/horizontal:0;maxGrade=Math.max(maxGrade,grade);
     const wet=sample.waterLevelM!==null&&sample.elevationM<sample.waterLevelM;
     if(wet&&p.y<sample.waterLevelM!+2-1e-8)reasons.add('Rail lacks 2 m water clearance');
-    const kind=clearance < -4?'tunnel':wet||clearance>6?'bridge':'ground',rate=kind==='tunnel'?180000:kind==='bridge'?120000:12000;
+    const kind=clearance < -MIN_TUNNEL_COVER_M?'tunnel':wet||clearance>6?'bridge':'ground',rate=kind==='tunnel'?180000:kind==='bridge'?120000:12000;
     const startM=distanceAt(t0),endM=distanceAt(t1),amount=Math.round((endM-startM)*(rate+Math.abs(clearance)*1500+sample.forest*4000+sample.rock*8000+sample.urban*20000)*costMultiplier);
     intervals.push({startM,endM,kind,grade,cost:amount});cost+=amount;
   }

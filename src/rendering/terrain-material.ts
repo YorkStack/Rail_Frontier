@@ -92,3 +92,18 @@ export function createTerrainMaterial(profile:BiomeDefinition):THREE.MeshStandar
   };
   return material;
 }
+
+const portalHooks=new WeakMap<THREE.Material,{compile:THREE.Material['onBeforeCompile'];key:THREE.Material['customProgramCacheKey']}>();
+/** A heightfield supplies the roof elevation, but cannot represent a tunnel mouth.
+ * Cut only the air inside each saved portal; the surveyed roof and terrain stay unchanged. */
+export function setTerrainPortalOpenings(material:THREE.Material,portals:readonly {position:{x:number;y:number;z:number};rotationY:number}[]):void {
+  let original=portalHooks.get(material);if(!original){original={compile:material.onBeforeCompile,key:material.customProgramCacheKey};portalHooks.set(material,original);}
+  const {compile,key}=original,count=portals.length,values=portals.map(p=>new THREE.Vector4(p.position.x,p.position.y,p.position.z,p.rotationY));
+  material.customProgramCacheKey=()=>`${key.call(material)}-portal-openings-${count}`;
+  material.onBeforeCompile=(shader,renderer)=>{
+    compile.call(material,shader,renderer);if(!count)return;
+    shader.uniforms.rfPortals={value:values};
+    shader.fragmentShader=shader.fragmentShader.replace('void main() {',`uniform vec4 rfPortals[${count}];\nvoid main() {\nfor(int i=0;i<${count};i++){\nvec3 delta=vTerrainWorld-rfPortals[i].xyz;\nfloat c=cos(rfPortals[i].w),s=sin(rfPortals[i].w);\nfloat across=c*delta.x-s*delta.z;\nfloat along=s*delta.x+c*delta.z;\nif(abs(across)<2.4 && delta.y>-.5 && delta.y<6.0 && along>-4.0 && along<6.0)discard;\n}`);
+  };
+  material.needsUpdate=true;
+}

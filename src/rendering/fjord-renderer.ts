@@ -1,3 +1,4 @@
+import {setTerrainPortalOpenings} from './terrain-material.js';
 import * as THREE from 'three';
 import type {EngineeringInterval} from '../rail/planner.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -83,7 +84,7 @@ export class FjordRenderer implements WorldRenderer {
   private stressCount=1;
   private readonly onResize=()=>this.resize();
   private readonly keys=new Set<string>();
-  private readonly keyDown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement)return;this.keys.add(event.code);};
+  private readonly keyDown=(event:KeyboardEvent)=>{if(event.target instanceof HTMLInputElement||document.querySelector('dialog[open]'))return;this.keys.add(event.code);};
   private readonly keyUp=(event:KeyboardEvent)=>this.keys.delete(event.code);
   private readonly clearKeys=()=>this.keys.clear();
   private readonly controlStart=()=>{this.follow=false;};
@@ -203,17 +204,32 @@ export class FjordRenderer implements WorldRenderer {
   }
   private rebuildAuthoredInfrastructure(state:Readonly<GameState>):void {
     this.scene.remove(this.infrastructureModels);disposeObject(this.infrastructureModels);this.infrastructureModels=new THREE.Group();
-    const layout=deriveInfrastructurePlacements(this.geometry,state.operations.infrastructure,state.operations.terrain),bridgeAsset=this.content.presentation.assetRoles.bridgeSpan,tunnelAsset=this.content.presentation.assetRoles.tunnelPortal,dummy=new THREE.Object3D();
+    const layout=deriveInfrastructurePlacements(this.geometry,state.operations.infrastructure,state.operations.terrain,this.terrain),bridgeAsset=this.content.presentation.assetRoles.bridgeSpan,tunnelAsset=this.content.presentation.assetRoles.tunnelPortal,dummy=new THREE.Object3D();
     this.structureCounts={bridgeModules:layout.bridgeModules.length,bridgeAbutments:layout.transitions.filter(item=>item.kind==='bridge-abutment').length,tunnelPortals:layout.transitions.filter(item=>item.kind==='tunnel-portal').length,retainingWalls:layout.retainingWalls.length};
     const bridgeMatrices=layout.bridgeModules.map(item=>{dummy.position.set(item.position.x,item.position.y-.9,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(1,1,item.lengthM/BRIDGE_MODULE_LENGTH_M);dummy.updateMatrix();return dummy.matrix.clone();});
     if(bridgeMatrices.length>0){if(bridgeAsset&&this.assetLevels.has(bridgeAsset))this.infrastructureModels.add(this.instancedAsset(bridgeAsset,0,bridgeMatrices));else{const deckMatrices=layout.bridgeModules.map(item=>{dummy.position.set(item.position.x,item.position.y-.72,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(7,.8,item.lengthM);dummy.updateMatrix();return dummy.matrix.clone();}),deck=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:'#40514e',roughness:.68,metalness:.3}),deckMatrices.length);deckMatrices.forEach((matrix,index)=>deck.setMatrixAt(index,matrix));deck.castShadow=true;deck.receiveShadow=true;deck.computeBoundingSphere();this.infrastructureModels.add(deck);}}
     const tunnelPortals=layout.transitions.filter(item=>item.kind==='tunnel-portal');
+    setTerrainPortalOpenings(this.terrainSurfaceMaterial,tunnelPortals);
+    for(const item of tunnelPortals){
+      const recess=new THREE.Group();recess.position.set(item.position.x,item.position.y,item.position.z);recess.rotation.y=item.rotationY;
+      const darkness=new THREE.Mesh(new THREE.PlaneGeometry(4.8,6.4),new THREE.MeshBasicMaterial({color:'#080c0a'}));darkness.position.set(0,2.8,-3.9);recess.add(darkness);
+      const stone=new THREE.MeshStandardMaterial({color:'#55584f',roughness:1});
+      for(const side of [-1,1]){const wall=new THREE.Mesh(new THREE.BoxGeometry(.3,6.4,5.2),stone);wall.position.set(side*2.5,2.8,-1.4);recess.add(wall);}
+      const roof=new THREE.Mesh(new THREE.BoxGeometry(5.3,.3,5.2),stone);roof.position.set(0,6.1,-1.4);recess.add(roof);
+      const floor=new THREE.Mesh(new THREE.BoxGeometry(4.8,.2,10),stone);floor.position.set(0,-.55,1);recess.add(floor);this.infrastructureModels.add(recess);
+    }
     if(tunnelAsset&&this.assetLevels.has(tunnelAsset))for(const item of tunnelPortals){const model=this.cloneLod(tunnelAsset,280);model.position.set(item.position.x,item.position.y,item.position.z);model.rotation.y=item.rotationY;this.infrastructureModels.add(model);}else if(tunnelPortals.length>0){const material=new THREE.MeshStandardMaterial({color:'#8b887c',roughness:.98});for(const item of tunnelPortals){const portal=new THREE.Group();for(const x of [-3.3,3.3]){const pillar=new THREE.Mesh(new THREE.BoxGeometry(1.5,5,3),material);pillar.position.set(x,2.1,0);portal.add(pillar);}const arch=new THREE.Mesh(new THREE.TorusGeometry(3.3,.8,7,18,Math.PI),material);arch.position.y=4.6;portal.add(arch);portal.position.set(item.position.x,item.position.y,item.position.z);portal.rotation.y=item.rotationY;this.infrastructureModels.add(portal);}}
-    const abutmentMatrices:THREE.Matrix4[]=[],cutMatrices:THREE.Matrix4[]=[],fillMatrices:THREE.Matrix4[]=[];
+    const abutmentMatrices:THREE.Matrix4[]=[];
     for(const item of layout.transitions.filter(item=>item.kind==='bridge-abutment')){const ground=this.terrain.sample(item.position.x,item.position.z).elevationM,top=item.position.y-.7,height=Math.max(1.5,Math.min(12,Math.abs(top-ground)));dummy.position.set(item.position.x,Math.min(top,ground)+height/2,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(9,height,3.2);dummy.updateMatrix();abutmentMatrices.push(dummy.matrix.clone());}
-    for(const item of layout.retainingWalls){const formationY=item.position.y-.55,centerY=item.earthwork==='cut'?formationY+item.heightM/2:formationY-item.heightM/2;dummy.position.set(item.position.x,centerY,item.position.z);dummy.rotation.set(0,item.rotationY,0);dummy.scale.set(.7,item.heightM,item.lengthM);dummy.updateMatrix();(item.earthwork==='cut'?cutMatrices:fillMatrices).push(dummy.matrix.clone());}
+    const wallParts:THREE.BufferGeometry[]=[];
+    for(const item of layout.retainingWalls){
+      const geometry=new THREE.BoxGeometry(.7,1,item.lengthM),positions=geometry.getAttribute('position');
+      for(let i=0;i<positions.count;i++){const start=positions.getZ(i)>0,height=start?item.startHeightM:item.endHeightM,railY=start?item.startRailY:item.endRailY,base=railY-.55,upper=item.earthwork==='cut'?base+height:base,lower=item.earthwork==='cut'?base:base-height;positions.setY(i,positions.getY(i)>0?upper:lower);}
+      geometry.rotateY(item.rotationY);geometry.translate(item.position.x,0,item.position.z);geometry.computeVertexNormals();wallParts.push(geometry);
+    }
+    if(wallParts.length){const combined=mergeGeometries(wallParts),walls=new THREE.Mesh(combined,new THREE.MeshStandardMaterial({color:'#777b6d',roughness:.97}));walls.castShadow=true;walls.receiveShadow=true;this.infrastructureModels.add(walls);for(const part of wallParts)part.dispose();}
     const addMasonry=(matrices:THREE.Matrix4[],color:string)=>{if(matrices.length===0)return;const mesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color,roughness:.96}),matrices.length);matrices.forEach((matrix,index)=>mesh.setMatrixAt(index,matrix));mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();this.infrastructureModels.add(mesh);};
-    addMasonry(abutmentMatrices,'#81796a');addMasonry(cutMatrices,'#76766d');addMasonry(fillMatrices,'#696d67');
+    addMasonry(abutmentMatrices,'#81796a');
     this.scene.add(this.infrastructureModels);
   }
   private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {

@@ -3,7 +3,7 @@ import {mkdirSync} from 'node:fs';
 
 test('draw, reshape, compare, cancel and build a real railway without camera or cash side effects',async({page})=>{
   test.setTimeout(180000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.locator('#try-drawing').click();await expect(page.locator('#main-menu')).toBeHidden();await expect(page.locator('#planner')).toBeVisible();
+  await page.goto('/');await page.waitForFunction(()=>window.__railProbe?.ready);await page.locator('#choose-practice').click();await page.locator('#try-drawing').click();await expect(page.locator('#main-menu')).toBeHidden();await expect(page.locator('#planner')).toBeVisible();
   const before=await page.evaluate(()=>window.__railProbe.snapshot());expect(before.stations).toHaveLength(2);expect(before.railway.edges).toHaveLength(4);
   const ports=await page.evaluate(()=>{const state=window.__railProbe.snapshot();return state.stations.map((station,i)=>{if(station.layout.kind!=='single-platform')throw new Error('Missing station ports');const nodeId=station.layout.ports[i===0?1:0]!.nodeId;return state.railway.nodes.find(n=>n.id===nodeId)!.position;});});
   const screens=await page.evaluate(ports=>ports.map(p=>window.__railProbe.project(p)),ports),a=screens[0]!,b=screens[1]!;

@@ -8,9 +8,10 @@ import {RailFrontierGame} from './game.js';
 
 export const PRACTICE_CAPITAL=1_000_000_000;
 export const constructionLessons=[
-  {id:'valley',de:'1 · Durch das Tal',en:'1 · Through the valley',hintDe:'Verbinde Sundvik und Granli. Zeichne deinen Weg und ziehe die Linie, bis sie dir gefällt.',hintEn:'Connect Sundvik and Granli. Sketch your path and drag the line until it feels right.',names:['Sundvik','Granli'],angle:55,sites:null},
-  {id:'inlet',de:'2 · Um die Bucht',en:'2 · Around the inlet',hintDe:'Direkt über das Wasser oder am westlichen Ufer entlang? Vergleiche Brückenlänge und Baupreis. Größere Umwege eröffnen weitere Lösungen.',hintEn:'Straight across the water or along the west bank? Compare bridge length and cost. Wider detours reveal more options.',names:['Südufer','Nordufer'],angle:0,sites:[{x:400,z:2000},{x:500,z:4500}]},
-  {id:'ridge',de:'3 · Durch den Bergrücken',en:'3 · Through the ridge',hintDe:'Ein Bergrücken versperrt den Weg. Vergleiche Tunnel und seitliche Umwege: Ein Umweg kann den Tunnel verkürzen, aber auch Brücken benötigen.',hintEn:'A ridge blocks the way. Compare tunnels and side detours: going around can shorten the tunnel, but may also need bridges.',names:['Berglager West','Berglager Ost'],angle:90,sites:[{x:9500,z:5250},{x:11000,z:5250}]},
+  {id:'valley',en:'1 · Through the valley',hintEn:'Connect Sundvik and Granli. Sketch your path and drag the line until it feels right.',names:['Sundvik','Granli'],angle:55,sites:null},
+  {id:'inlet',en:'2 · Around the inlet',hintEn:'Straight across the water or along the west bank? Compare bridge length and cost. Wider detours reveal more options.',names:['South shore','North shore'],angle:0,sites:[{x:400,z:2000},{x:500,z:4500}]},
+  {id:'ridge',en:'3 · Through the ridge',hintEn:'A ridge blocks the way. Compare tunnels and side detours: going around can shorten the tunnel, but may also need bridges.',names:['West ridge camp','East ridge camp'],angle:90,sites:[{x:9500,z:5250},{x:11000,z:5250}]},
+  {id:'highland',en:'4 · Across the highlands',hintEn:'Between rock shoulders and deep gullies: compare a direct tunnel with a high route. Large changes can require extra bridges.',names:['West highland camp','East highland camp'],angle:50,sites:[{x:10650,z:7600},{x:11950,z:8650}]},
 ] as const;
 export type ConstructionLessonId=typeof constructionLessons[number]['id'];
 export function createConstructionPractice(id:ConstructionLessonId):GameState{

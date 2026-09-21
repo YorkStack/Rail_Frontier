@@ -10,7 +10,7 @@ import {ENGINEERING_RULES_VERSION} from '../src/content/engineering-rules.js';
 import {serialize,deserialize} from '../src/persistence/save.js';
 import type {GameState} from '../src/domain/model.js';
 
-for(const id of ['valley','inlet','ridge'] as const)test(`${id}: prepared stations are charged and certified choices build at the quoted price`,()=>{
+for(const id of ['valley','inlet','ridge','highland'] as const)test(`${id}: prepared stations are charged and certified choices build at the quoted price`,()=>{
   const state=createConstructionPractice(id),base=campaignContentRegistry.resolve(state).worldGenerator.generate(state.world),game=new RailFrontierGame(state,base),progress=constructionPracticeProgress(state)!;
   assert.equal(progress.lesson.id,id);assert.equal(progress.complete,false);assert.equal(state.company.openingCash,PRACTICE_CAPITAL);assert.equal(state.company.ledger.length,2);assert.ok(state.company.cash<PRACTICE_CAPITAL);assert.ok(state.company.cash>700_000_000);
   const ports=state.stations.map((s,i)=>{assert.equal(s.layout.kind,'single-platform');if(s.layout.kind!=='single-platform')throw new Error('No platform');const port=s.layout.ports[i===0?1:0]!;return {point:state.railway.nodes.find(n=>n.id===port.nodeId)!.position,outward:port.outward};});
