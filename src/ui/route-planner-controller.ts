@@ -40,6 +40,9 @@ export class RoutePlannerController {
   redo() {this.cancel();if(this.history.redo())this.emit();}
   private editableMidpoint() {if (this.draft.complete && this.draft.points.length === 2) {const [a, b] = this.draft.points as [Vec3, Vec3],x = (a.x + b.x) / 2,z = (a.z + b.z) / 2;this.draft.points.splice(1, 0, { x, z, y: this.a.surface(x, z) });}}
   connect(point: Vec3) {if (this.draft.complete) return;const before = structuredClone(this.draft);if (!this.draft.points.length) this.draft.points.push({ ...point });else if (horizontalDistance(point, this.draft.points[0]!) > 10) {this.draft.points.push({ ...point });this.draft.complete = true;} else return;this.editableMidpoint();this.save(before);this.emit();}
+  focusPoint(index:number) {
+    this.a.overlay.querySelector<HTMLButtonElement>(`[data-route-handle="${index}"]`)?.focus({preventScroll:true});
+  }
   private snap(x: number, y: number): RouteConnection | null {
     let best: RouteConnection | null = null,distance = 42;
     for (const port of this.a.ports()) {const screen = this.a.project(port.point),d = Math.hypot(screen.x - x, screen.y - y);if (screen.visible && d < distance) {best = port;distance = d;}}

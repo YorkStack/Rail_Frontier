@@ -608,6 +608,24 @@
     "Choose the starting station, draw your path by clicking or dragging, then finish on the destination station sign.": "Wähle den Startbahnhof, zeichne deinen Weg durch Klicken oder Ziehen und beende ihn am Schild des Zielbahnhofs.",
     "station.ready": "✓ Baubereit · {cost} (davon {earthworks} Erdarbeiten)",
     "Gold shows the station preview, not a built station. Place the platform near houses; the rings mark its two rail connections.": "Gold zeigt die Bahnhofsvorschau. Platziere den Bahnsteig nahe den Häusern; die Ringe markieren seine beiden Gleisanschlüsse. Gebaut wird erst nach Bestätigung.",
-    "Your retained plan is no longer buildable. Reshape it or calculate new alternatives.": "Dein gespeicherter Entwurf ist nicht mehr baubar. Ändere ihn oder berechne neue Alternativen."
+    "Your retained plan is no longer buildable. Reshape it or calculate new alternatives.": "Dein gespeicherter Entwurf ist nicht mehr baubar. Ändere ihn oder berechne neue Alternativen.",
+    "Your sketch crosses itself": "Deine Zeichnung kreuzt sich selbst",
+    "Move or remove a point so the two sections no longer cross. A crossing in the sketch does not create a junction.": "Verschiebe oder entferne einen Punkt, damit sich die Abschnitte nicht mehr kreuzen. Eine Kreuzung in der Zeichnung erzeugt keine Weiche.",
+    "Crossing · edit sketch": "Kreuzung · Zeichnung ändern",
+    "Your sketch doubles back": "Deine Zeichnung läuft über sich selbst zurück",
+    "Move or remove a point so the route does not run back over itself. Use a wider loop to change direction.": "Verschiebe oder entferne einen Punkt, damit die Strecke nicht über sich selbst zurückläuft. Zeichne zum Wenden einen größeren Bogen.",
+    "Overlap · edit sketch": "Überlagerung · Zeichnung ändern",
+    "Part of your sketch is outside the map": "Ein Teil deiner Zeichnung liegt außerhalb der Karte",
+    "Move the marked point back onto the landscape. No track has been built or charged.": "Verschiebe den markierten Punkt zurück auf die Landschaft. Es wurden keine Gleise gebaut oder berechnet.",
+    "Map edge · edit sketch": "Kartenrand · Zeichnung ändern",
+    "This bend may need more room": "Dieser Knick braucht möglicherweise mehr Platz",
+    "No buildable route was found. Try widening the marked bend: drag its point outward, use the arrow keys, or press Delete to remove it.": "Es wurde keine baubare Strecke gefunden. Ziehe den markierten Punkt für einen weiteren Bogen nach außen, nutze die Pfeiltasten oder entferne ihn mit der Löschtaste.",
+    "Tight bend · edit sketch": "Enger Knick · Zeichnung ändern",
+    "Edit marked point": "Markierten Punkt bearbeiten",
+    "Reshape the marked part of your sketch to continue.": "Ändere den markierten Teil deiner Zeichnung, um fortzufahren.",
+    "No buildable route found. Reshape your sketch or try a wider detour.": "Keine baubare Strecke gefunden. Ändere deine Zeichnung oder prüfe einen größeren Umweg.",
+    "You can keep editing while the route is checked.": "Du kannst während der Prüfung weiterzeichnen.",
+    "Your sketch is kept. Edit it, or use Undo to restore the previous shape.": "Deine Zeichnung bleibt erhalten. Bearbeite sie oder stelle mit „Rückgängig“ den vorherigen Verlauf wieder her.",
+    "Try gentler bends, a wider detour or a different track standard. Your sketch is kept.": "Versuche weitere Bögen, einen größeren Umweg oder einen anderen Gleisstandard. Deine Zeichnung bleibt erhalten."
   }
 }

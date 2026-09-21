@@ -1,3 +1,4 @@
+import {diagnoseSketch} from './sketch-diagnostics.js';
 import type {Vec3} from '../domain/model.js';
 import {solveHorizontalAlignment} from './alignment-solver.js';
 import {solveVerticalProfile} from './vertical-profile.js';
@@ -14,7 +15,7 @@ import type {CorridorAlternativeRequest,CorridorCurveCandidate} from './corridor
  */
 export function generateWishCandidates(request:CorridorAlternativeRequest,allowRelaxation=true):CorridorCurveCandidate[] {
   const {anchors,terrain,trackClass,tangents}=request;
-  if(anchors.length<2)return [];
+  if(anchors.length<2||diagnoseSketch(anchors,terrain,trackClass.constraints.minRadiusM)?.blocking)return [];
   const result:CorridorCurveCandidate[]=[],signatures=new Set<string>(),baseSignatures=new Set<string>();
   const width=request.maxOffsetM??60;
   const addCandidate=(points:Vec3[],heights:number[],id:string,corridorWidth:number)=>{

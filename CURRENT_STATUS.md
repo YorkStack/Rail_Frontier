@@ -15,9 +15,21 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — ordered route search, 2026-09-21
+# Current status — sketch correction guidance, 2026-09-21
 
-## Ordered route search — 2026-09-21
+## Sketch correction guidance — 2026-09-21
+
+- Crossing, collinear overlap and out-of-map sketches receive a specific DE/EN explanation and a labelled marker on the landscape. Unsupported self-crossings are rejected before starting the worker, and the proposal generator independently enforces the same check. A crossing within a sketch never implicitly creates a junction.
+- The correction action focuses an editable interior point; an off-screen point is brought into view. Dragging, arrow keys and Delete modify the retained draft, and Undo/Redo restore both the drawing and its recalculated guidance. Diagnosis does not rewrite the sketch, spend cash or change the railway graph.
+- When search finds no buildable result, a tight-corner heuristic can suggest which point to widen. This is advisory, shown only after a failed search; it is not presented as a curve certificate or used to reject an otherwise valid proposal. Timeouts and worker errors do not invent a terrain diagnosis. The general failure message now explains the next actions in plain language.
+- Repair guidance appears before ordinary instructions. While it is visible, the unavailable purchase section is hidden; sketch editing remains the next step. The correction button is visible at 1280×720. Supporting alternative text now uses a readable 13 px minimum rather than the old 9 px override.
+
+Validation: 194 core tests, TypeScript and production build; six focused Chrome journeys cover drawn-route editing/building, retained/global/local choices, save/reload and undo/redo. The new crossing journey checks visible compact guidance, no worker dispatch or spending for an unsupported sketch, DE→EN switching, keyboard correction and recovery to a buildable proposal. Screenshot: `docs/screenshots/route-sketch-help.png`.
+
+Next: review obstacle comparisons and the first-route experience with the player. Adaptive vertical search, wider performance/accessibility coverage, connected campaign progression and managed road/rail crossings remain open. DRAW acceptance stays open.
+
+
+## Previous checkpoint: ordered route search — 2026-09-21
 
 - The worker now supplements the original fitted proposals with a search across successive cross-sections of the drawn path. Progress is an explicit layer, so nearby return legs cannot replace the remaining journey. Heading, elevation, grade and structure regime accompany each state; lateral and vertical choices can change at successive obstacles.
 - Every fitted proposal, including the explicitly labelled relaxed chord and local obstacle alternatives, must visit the sketch in order. Two-way, 15 m sampled gate checks replace the old nearest-segment-only test. This is an intent check; the existing exact curve certificate, authoritative terrain quote and atomic construction command still govern buildability.
