@@ -1,0 +1,258 @@
+{
+  "baselineCommit": "15db4a5",
+  "scope": "headless Chrome, 1440x900, fourfold CDP CPU throttle after world loading; three fresh contexts per lesson; no concurrent benchmark browser",
+  "before": {
+    "runtime": "v25.8.0",
+    "cpuRate": 4,
+    "viewport": [
+      1440,
+      900
+    ],
+    "results": [
+      {
+        "lesson": "valley",
+        "run": 0,
+        "durationMs": 500.5,
+        "paintMs": 529.2000000059606,
+        "frameP95Ms": 299.90000000000055,
+        "maxFrameMs": 299.90000000000055,
+        "longTasks": [
+          {
+            "start": 6244.29999999702,
+            "duration": 273
+          }
+        ],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "valley",
+        "run": 1,
+        "durationMs": 471.8999999910593,
+        "paintMs": 501.10000000000036,
+        "frameP95Ms": 283.40000000000055,
+        "maxFrameMs": 283.40000000000055,
+        "longTasks": [
+          {
+            "start": 6065,
+            "duration": 259
+          }
+        ],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "valley",
+        "run": 2,
+        "durationMs": 470,
+        "paintMs": 499.09999999701995,
+        "frameP95Ms": 283.3000000000002,
+        "maxFrameMs": 283.3000000000002,
+        "longTasks": [
+          {
+            "start": 6065,
+            "duration": 260
+          }
+        ],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 0,
+        "durationMs": 300.20000000298023,
+        "paintMs": 349.90000000298005,
+        "frameP95Ms": 200,
+        "maxFrameMs": 200,
+        "longTasks": [
+          {
+            "start": 6004.79999999702,
+            "duration": 153
+          }
+        ],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 1,
+        "durationMs": 294,
+        "paintMs": 334.10000000000036,
+        "frameP95Ms": 183.20000000000073,
+        "maxFrameMs": 183.20000000000073,
+        "longTasks": [
+          {
+            "start": 5984.199999988079,
+            "duration": 148
+          }
+        ],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 2,
+        "durationMs": 387,
+        "paintMs": 432.6000000089407,
+        "frameP95Ms": 200,
+        "maxFrameMs": 200,
+        "longTasks": [
+          {
+            "start": 6119.5999999940395,
+            "duration": 159
+          }
+        ],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      }
+    ]
+  },
+  "after": {
+    "runtime": "v25.8.0",
+    "cpuRate": 4,
+    "viewport": [
+      1440,
+      900
+    ],
+    "results": [
+      {
+        "lesson": "valley",
+        "run": 0,
+        "durationMs": 746.5,
+        "paintMs": 784.3000000119209,
+        "frameP95Ms": 50,
+        "maxFrameMs": 66.69999999999982,
+        "longTasks": [],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "valley",
+        "run": 1,
+        "durationMs": 697.1999999880791,
+        "paintMs": 717.8999999880789,
+        "frameP95Ms": 33.400000000000546,
+        "maxFrameMs": 66.59999999999945,
+        "longTasks": [],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "valley",
+        "run": 2,
+        "durationMs": 681,
+        "paintMs": 700.6999999940399,
+        "frameP95Ms": 33.400000000000546,
+        "maxFrameMs": 66.69999999999982,
+        "longTasks": [],
+        "choices": 2,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 0,
+        "durationMs": 382,
+        "paintMs": 420.0000000029804,
+        "frameP95Ms": 50,
+        "maxFrameMs": 50,
+        "longTasks": [],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 1,
+        "durationMs": 374.6000000089407,
+        "paintMs": 418.70000000596065,
+        "frameP95Ms": 66.69999999999982,
+        "maxFrameMs": 66.69999999999982,
+        "longTasks": [],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      },
+      {
+        "lesson": "highland",
+        "run": 2,
+        "durationMs": 371.59999999403954,
+        "paintMs": 417.3000000059601,
+        "frameP95Ms": 66.69999999999982,
+        "maxFrameMs": 66.69999999999982,
+        "longTasks": [],
+        "choices": 3,
+        "planning": {
+          "requests": 1,
+          "accepted": 1,
+          "discarded": 0,
+          "cancelled": 0,
+          "pending": false
+        }
+      }
+    ]
+  }
+}

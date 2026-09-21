@@ -6,16 +6,16 @@ import {derivative,tangentCompatible} from './constraints.js';
 import {quoteTrack} from './planner.js';
 import {buildEngineeringProfile} from '../ui/engineering-profile.js';
 import {generateWishCandidates} from './wish-corridor.js';
-import {evaluateCorridorAlternatives,type CorridorCurveCandidate} from './corridor-alternatives.js';
+import {evaluateCorridorAlternatives,type CorridorCurveCandidate,type CorridorAlternative} from './corridor-alternatives.js';
 
 export interface EngineeringChallenge {
   id:string;kind:'bridge'|'tunnel';position:Vec3;lengthM:number;cost:number;
   fromCurve:number;toCurve:number;start:Vec3;end:Vec3;wholeRoute:boolean;
 }
 /** Structure intervals come from the same exact terrain intersections as the construction quote. */
-export function engineeringChallenges(curves:readonly CubicCurve[],terrain:Terrain,standard:TrackClassDefinition):EngineeringChallenge[]{
+export function engineeringChallenges(curves:readonly CubicCurve[],terrain:Terrain,standard:TrackClassDefinition,prepared?:Pick<CorridorAlternative,'geometries'|'quotes'>):EngineeringChallenge[]{
   if(!curves.length)return [];
-  const geometries=curves.map(c=>compileCurve(c)),quotes=geometries.map(g=>quoteTrack(g,terrain,standard.constraints,standard.costMultiplier)),profile=buildEngineeringProfile(geometries,quotes,terrain),ends:number[]=[];
+  const geometries=prepared?.geometries??curves.map(c=>compileCurve(c)),quotes=prepared?.quotes??geometries.map(g=>quoteTrack(g,terrain,standard.constraints,standard.costMultiplier)),profile=buildEngineeringProfile(geometries,quotes,terrain),ends:number[]=[];
   for(const g of geometries)ends.push((ends.at(-1)??0)+g.lengthM);
   const at=(m:number)=>{const index=ends.findIndex(end=>end>=m);return Math.max(0,index<0?ends.length-1:index);};
   return profile.spans.filter(s=>s.kind!=='ground'&&s.endM-s.startM>=50).sort((a,b)=>b.cost-a.cost).slice(0,4).map((s,index)=>{
