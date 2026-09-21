@@ -118,3 +118,18 @@ body.construction-practice :is(.field-notes,.chapter,.objective-card){display:no
 .route-handle:focus:before{inset:9px;background:var(--gold)}
 
 #planner:has(#route-help:not([hidden])) :is(#planner-copy,.route-purchase-bar){display:none}
+
+#planner #route-comparison{margin:2px 0 8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+#planner #route-comparison strong{font:600 1rem/1.35 'DM Sans',sans-serif;color:var(--gold)}
+#planner #route-comparison p{font-size:.8125rem;line-height:1.35;margin:4px 0}
+#planner #route-comparison small{display:block;font-size:.8125rem;line-height:1.35;color:var(--muted);margin-top:4px}
+#planner #route-comparison button{min-height:44px;width:100%;padding:8px;font-size:.875rem;border:1px solid var(--line);border-radius:3px}
+#planner .route-choice .route-choice-price{font-size:1rem;font-weight:600}
+#planner .route-choice .route-choice-difference{font-weight:600;margin-top:2px}
+#planner .route-choice[aria-pressed=true] strong:after{content:" ✓"}
+#planner .route-choice:focus-visible,#planner #route-comparison button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#route-draft-overlay .route-proposal [class^=retained-]{stroke:oklch(83% .018 145);stroke-width:3;opacity:.55}
+#route-draft-overlay .route-proposal .retained-tunnel{stroke-dasharray:9 6}
+#planner:has(#route-comparison:not([hidden])) #planner-copy{display:none}
+
+#planner:has(#route-comparison:not([hidden])) #alignment-steps{display:none}
