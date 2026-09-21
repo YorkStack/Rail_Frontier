@@ -15,9 +15,21 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — clearer engineering comparisons, 2026-09-21
+# Current status — adaptive railway elevations, 2026-09-21
 
-## Clearer engineering comparisons — 2026-09-21
+## Adaptive railway elevations — 2026-09-21
+
+- Ordered route search now looks ahead along the terrain in both directions. Lower/upper height envelopes at two grade budgets supplement the former endpoint bands and local ground samples. This allows separate climbs and descents at successive ridges; underwater ground does not become the target railway elevation. Exact station/splice endpoints stay fixed.
+- A second pass adds finer height choices around three complete first-pass paths. Both passes share the same expansion counter and hard 20,000-state ceiling. At most six complete search paths go to fitting; three first-pass paths retain places when refinement succeeds. If refinement exhausts its budget, completed first-pass paths survive and the partial frontier is discarded. Flat corridors skip refinement. Original fitted proposals remain available.
+- Grade cones and search scores guide proposals only. The unchanged cubic certificate, endpoint-grade check, ordered-drawing check, live terrain quote and atomic build command still decide what can be bought. Search options are named **Terrain variant / Geländevariante**, since an improvement can change elevation without making a lateral detour.
+- Regression coverage includes two successive hills, an affordable land alternative, exact level endpoints, stricter track classes, shared-budget exhaustion and a finer pass that improves an actual certified quote. All four real-map exercises still construct at the quoted cost; fixed local splices retain their nonzero boundary grades.
+
+Validation: 201 core tests, TypeScript/production build and seven Chrome journeys for drawing/reshaping, compact keyboard controls, saved/retained choices, local comparisons, undo/redo and the inlet-to-ridge transition. A local Node smoke measurement of three full-terrain searches plus quote evaluation for each practice at 60/300 m returned 2–3 choices in 157–788 ms, without exhausting the search budget. Reproduce with `npx tsx tools/benchmark-route-planning.ts`; these timings exclude world creation, rendering and worker transport and do not establish browser p95 acceptance.
+
+Next: measure released-draft latency and drawing responsiveness in the browser, then address observed bottlenecks and remaining interaction/accessibility issues. The search still uses fixed horizontal cross-sections and approximate search costs; adaptive longitudinal subdivision and more exhaustive certified-fit retries remain open. No optimality or completeness guarantee is made. Connected campaign progression, managed road/rail crossings and unassisted player acceptance are still pending; DRAW remains open.
+
+
+## Previous checkpoint: clearer engineering comparisons — 2026-09-21
 
 - Route choices separate the full construction price from their savings or extra cost. The reference stays fixed while selecting alternatives: option 1 for a general search, the opening `engineering:current` plan for a local obstacle comparison. Prices still come from the exact complete-route quote, never a cosmetic estimate.
 - Local comparison headings name bridge or tunnel options and distinguish a bounded obstacle/approach change from a whole-route comparison. The focus action frames the compared curves without changing the draft, choice or quote.
