@@ -37,3 +37,12 @@ Omit `CPU_RATE` for normal-speed measurements. A normal production build intenti
 Every resumed slice checks the request identity, railway revision, terrain revision and track class. Editing, restarting, closing the tool, switching company or timing out invalidates unfinished work. No partial choice list is published. The status remains busy and Build stays disabled until a complete current result is ready. A Chrome regression test queues Restart during live cost validation, checks that no stale result or money change survives, then successfully plans again.
 
 Next: longer and denser freehand strokes, held-key edits, complete pointer-to-paint measurements, and broader device/accessibility coverage. The eight-second worker timeout and incomplete adaptive longitudinal subdivision remain known limits; DRAW acceptance is still open.
+
+
+## Held keys and long strokes, September 22
+
+A held arrow gesture now updates the drawing immediately but commits history and dispatches planning only when the last held arrow is released or focus moves to another control. Escape/window blur cancels it. Save captures the preceding committed draft. Pointer movement keeps accepted samples while coalescing adapter/DOM updates to animation frames; terrain picking is reused within the event. A stroke that exceeds the sample cap is cancelled rather than silently truncated. Keyboard edits beyond the world boundary use a clamped height query while preserving the actual out-of-map coordinates for diagnosis.
+
+Fixed-build Chrome 153, 1440×900, one before/after run on the same machine, without CPU throttling. Twenty repeated ArrowRight keydowns caused **20 planning requests before, zero while held and one after release now**. One Undo restores the complete gesture. A real 160-event mouse stroke measured **75.1 → 40.0 ms p95** and **76.4 → 41.3 ms maximum** from a pointer event to a nested second animation-frame callback. This is an approximate following-frame delay, not measured presentation latency, INP or statistical device acceptance. The input comparison precedes this checkpoint's scenery changes. [Raw measurements](route-input.json).
+
+Reproduce against a fixed test build with `RAIL_FRONTIER_URL=http://127.0.0.1:5174 npx tsx tools/measure-route-input.ts`. Browser regressions cover held/released keys, simultaneous keys, Escape, focus changes, map-boundary cancellation, pointer drawing, real construction and saved draft history. Remaining work includes physical-device testing, complete presentation latency and unassisted player acceptance.

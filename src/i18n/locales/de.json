@@ -55,6 +55,7 @@
     "Insufficient funds · {p0} more required": "Es fehlen {p0}. Wähle eine günstigere Variante.",
     "✓ Feasible route. Not built yet.": "✓ Geprüfte Strecke. Noch nicht gebaut.",
     "Build for {p0}": "Für {p0} bauen",
+    "Release to check the route. Escape cancels this edit.": "Loslassen prüft die Strecke. Escape verwirft diese Änderung.",
     "Editing sketch. No construction order.": "Entwurf wird geändert. Noch kein Bauauftrag.",
     "Company before drawing practice": "Gesellschaft vor Gleisbauübung",
     "Practice ready: NOK 10 million opening capital, prepared stations already paid.": "Übungsfirma bereit: 10 Mio. NOK Startkapital, vorbereitete Bahnhöfe bereits bezahlt.",
@@ -642,6 +643,7 @@
     "Only the obstacle and approaches change. Full-route prices.": "Nur Hindernis und Zufahrten ändern sich. Gesamtpreise.",
     "Whole-route comparison. Full-route prices.": "Vergleich der ganzen Strecke. Gesamtpreise.",
     "Bright: comparison · muted: unchanged": "Hell: Vergleich · dezent: unverändert",
-    "Selection previews; Build buys the route.": "Auswahl zeigt die Vorschau. „Bauen“ kauft die Strecke."
+    "Selection previews; Build buys the route.": "Auswahl zeigt die Vorschau. „Bauen“ kauft die Strecke.",
+    "Following the selected train.": "Die Kamera folgt dem ausgewählten Zug."
   }
 }

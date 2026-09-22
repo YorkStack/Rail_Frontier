@@ -21,3 +21,9 @@ test('new track removes only intersecting deterministic scenery',()=>{
   state.railway={nodes:[from,to],edges:[edge],revision:1};const after=generateNorwayScenery(terrain,state,targets),afterIds=new Set(after.map(item=>item.id));assert.equal(afterIds.has(chosen.id),false);
   const removed=before.filter(item=>!afterIds.has(item.id));assert.ok(removed.length>=1);for(const item of removed)assert.ok(Math.abs(item.z-chosen.z)<30||Math.abs(item.x-chosen.x)<60);
 });
+
+test('full Norway vegetation includes a bounded shrub layer and respects world edges',()=>{
+ const {terrain,state}=input(),items=generateNorwayScenery(terrain,state),shrubs=items.filter(item=>item.category==='understorey');
+ assert.equal(items.filter(item=>item.category==='tree').length,28000);assert.equal(shrubs.length,12000);assert.ok(shrubs.filter(item=>item.assetId==='norway-shrub').length>9000);
+ for(const item of items){assert.ok(item.x>0&&item.x<terrain.widthM&&item.z>0&&item.z<terrain.depthM);assert.ok(state.towns.every(town=>Math.hypot(item.x-town.position.x,item.z-town.position.z)>=330));}
+});

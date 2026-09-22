@@ -1,0 +1,39 @@
+{
+  "one": {
+    "samples": 1800,
+    "frameP50Ms": 16.69999999999891,
+    "frameP95Ms": 16.700000000004366,
+    "renderP95Ms": 4.4000000059604645,
+    "tickP95Ms": 0.6000000089406967
+  },
+  "eight": {
+    "samples": 1799,
+    "frameP50Ms": 16.69999999999709,
+    "frameP95Ms": 16.700000000004366,
+    "renderP95Ms": 4,
+    "tickP95Ms": 9.400000005960464
+  },
+  "sweepMax": {
+    "calls": 243,
+    "triangles": 3823698
+  },
+  "stress": {
+    "samples": 301,
+    "frameP50Ms": 16.69999999999709,
+    "frameP95Ms": 16.79999999998836,
+    "renderP95Ms": 0.8999999910593033,
+    "tickP95Ms": 12.400000005960464,
+    "calls": 82,
+    "triangles": 5534726,
+    "geometries": 87,
+    "textures": 15
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1
+  }
+}
