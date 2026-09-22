@@ -6,6 +6,12 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — paths that can be navigated
+
+Town paths now have explicit junctions, house doors and station entrances. A route query verifies that connected entrances really reach their town. New railway construction rebuilds the network: a checked detour is allowed, while an inaccessible entrance stays blocked without an invisible rail crossing.
+
+**238 core tests and seven focused Chrome journeys pass**, including construction in both directions and exact path reconstruction after save/reload. [Navigation contract and crossing policy](docs/world/SETTLEMENT_NAVIGATION_CHECKPOINT.md). This prepares the routes for future residents; moving people and managed level crossings are still forthcoming. The graphics below remain current.
+
 ## September 22 — regional station architecture and period surfaces
 
 Stations now have pitched roofs, detailed windows and doors, canopies and textured timber, brick or plaster facades. New buildings reflect their construction period and region; older stations keep their original architecture. Cobbled streets, dusty paths and later asphalt are distinct. Platforms gain gravel, timber or paving, textured stone edges, benches and lamps instead of a single grey slab.

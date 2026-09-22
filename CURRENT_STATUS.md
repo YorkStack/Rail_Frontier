@@ -15,7 +15,15 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — regional station architecture and period surfaces, 2026-09-22
+# Current status — navigable settlement junctions and entrances, 2026-09-22
+
+## LIV-01c: navigable junctions and explicit entrances — 2026-09-22
+
+- Derived roads now have a deterministic graph of real intersections, T joins, overlapping segments, town hubs and authored entrances. Shortest-route queries connect doors to each other or their town hub; nearby disconnected lanes do not acquire invisible links. The access status verifies an actual route.
+- Railway/terrain changes and load rebuild geometry and topology together. A checked detour is allowed; an unbridgeable rail cut remains blocked. No implicit level crossing or unverified bridge/tunnel clearance. Managed crossings remain a later component. Cash, demand, station eligibility and schema 11 are unchanged.
+- Verification: 238 core tests, TypeScript/production build and seven focused Chrome journeys, including real rail construction in both directions, all initial Norway/Arizona accessible entrances, preview/build agreement and exact reconstruction after reload. [Implementation, crossing policy, results and limits](docs/world/SETTLEMENT_NAVIGATION_CHECKPOINT.md).
+- Cleanup: browsers and isolated server stopped; generated acceptance site removed from workspace, logs retained. No graphics changes or new residents in this checkpoint.
+- Next: **LIV-02a**, verified doorway/forecourt/platform walking heights and waiting locations, followed by a small period-appropriate resident set linked to actual demand. STX physical station expansion and managed crossings remain open.
 
 ## Requested art refinement: regional stations, roads and platforms — 2026-09-22
 

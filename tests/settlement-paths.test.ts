@@ -1,3 +1,4 @@
+import {buildSettlementNavigation,SettlementNavigator} from '../src/world/settlement-navigation.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -36,5 +37,6 @@ test('authored Norway thresholds connect all residential plots on the actual fjo
   for(const plot of plots.filter(p=>p.assetId===assetId)){if(access){const placed=placedBuildingAccess(plot,access);obstacles.push(placed.obstacle);if(placed.entrance)entrances.push(placed.entrance);}else obstacles.push({id:plot.id,x:plot.x,z:plot.z,halfX:plot.footprintRadiusM,halfZ:plot.footprintRadiusM,rotationY:plot.rotationY});}
  }
  const rails=[...compileGraph(state.railway).values()].map(g=>g.samples.map(s=>s.position)),seeds=villageRoadSeeds(state,plots,false,1900).map(r=>({townId:r.townId!,points:r.points})),before=JSON.stringify(state),result=connectSettlementPaths(terrain,obstacles,rails,entrances,seeds);
+ const navigation=buildSettlementNavigation(result.paths,entrances,result.hubs,result.access),navigator=new SettlementNavigator(navigation);for(const entrance of entrances)assert.ok(navigator.routeToTown(entrance.id),entrance.id+' must reach its town hub');
  assert.equal(entrances.length,45);assert.deepEqual(Object.entries(result.access).filter(([,value])=>value!=='connected'),[]);assert.equal(JSON.stringify(state),before);assert.deepEqual(result,connectSettlementPaths(terrain,obstacles,rails,entrances,seeds));
 });

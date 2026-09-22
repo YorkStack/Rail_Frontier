@@ -55,9 +55,9 @@ The existing authored door meshes provide entrance metadata now. Preview-time ac
 
 The spatially indexed obstruction checks replaced an initially slow full-network scan during development. No frame-rate or cross-device performance guarantee is claimed. Test servers and headless browsers are closed after validation; diagnostic logs remain under ignored `artifacts/`.
 
-## Next
+## Follow-up
 
-LIV-01c: introduce explicit navigable junction/entrance contracts and decide how a newly built railway cuts a public path. Supported forecourt geometry does not yet include separately priced grading or stair solutions. Only then attach LIV-02 representative people or change passenger eligibility. STX-01 station expansions must use the same public-side access contract.
+LIV-01c is now implemented: [navigable junctions, entrances and the explicit no-unmanaged-crossing policy](SETTLEMENT_NAVIGATION_CHECKPOINT.md). Next is LIV-02a with verified surface heights and boarding/waiting links before adding residents. Supported forecourt geometry does not yet include separately priced grading or stair solutions. Only then attach LIV-02 representative people or change passenger eligibility. STX-01 station expansions must use the same public-side access contract.
 
 
 ## Verified views
