@@ -15,7 +15,16 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — Middle Rhine, Tyne/Wear and Arizona regional expansion, 2026-09-22
+# Current status — exact missing service links, 2026-09-22
+
+## UX: readable, actionable disconnected-route feedback
+
+- A rejected line now lists every missing consecutive railway connection as **origin → destination**. Pendulum routes check adjacent stops; loop routes also check the return leg. The calculation uses the same live rail graph as route creation.
+- The Railway Office keeps the selected stops, moves focus to the explanation and scrolls its complete lower edge into view. The status, route rows and small actions now use readable scaled type and larger targets.
+- Verification: **245/245 core tests**, TypeScript, production build and the focused German Chrome journey pass. The browser case checks real station names, focus, a 16 px minimum message size, full panel visibility and unchanged company state. Screenshot: `docs/screenshots/missing-track-connections.png`.
+- The player-facing development server remains available at `http://127.0.0.1:5173/` for review. Next remains regional player review and balancing; physical yards/platform expansion and living settlement agents are later systems.
+
+## Previous status — Middle Rhine, Tyne/Wear and Arizona regional expansion, 2026-09-22
 
 ## REG-01: two playable European regions and expanded Arizona scenery — 2026-09-22
 

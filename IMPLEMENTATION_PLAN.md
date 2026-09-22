@@ -1,6 +1,12 @@
 # Implementation plan
 
-## Current checkpoint: Middle Rhine, Tyne/Wear and Arizona regional expansion — 2026-09-22
+## Current UX correction: exact missing service links — 2026-09-22
+
+The Railway Office now derives disconnected consecutive legs from the live rail graph and lists each pair as **origin → destination**. Shuttle services check adjacent stops; loop services also check the return to the first stop. The larger status treatment and end-aligned focus keep the complete correction visible. The route draft remains intact after rejection.
+
+Unit coverage checks all missing pairs and the loop closing leg. A focused German Chrome journey checks the actual names, focus, 16 px minimum text and complete visibility inside the office. Continue next with player review of the new Rhine and Tyne/Wear regions; physical platforms/yards and living settlement agents remain later systems.
+
+## Previous checkpoint: Middle Rhine, Tyne/Wear and Arizona regional expansion — 2026-09-22
 
 REG-01 adds two selectable playable 32 × 32 km regions based on reproducibly imported Mapzen/Skadi elevation grids: the Middle Rhine around Boppard/St. Goar/Bacharach and Tyne/Wear around Newcastle/North Shields/Sunderland. Each receives an original locally generated two-LOD Blender catalogue for architecture, station eras, industry, vegetation, infrastructure, props and regional rolling stock. Arizona adds its windpump/ranch-fence group and eight desert vegetation assets. [Scope, sources, catalogue and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
 
