@@ -188,7 +188,8 @@ bindings=[
     {'materialPrefix':'RF_AZ_Roof_','map':'weathered-roof-base','normalMap':'weathered-roof-normal','roughnessMap':'weathered-roof-roughness','repeat':[3,4]}
 ]
 previous=json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
-assets += [a for a in previous.get('assets',[]) if a['id'].startswith('arizona-station')]
+authored_ids={a['id'] for a in assets}
+assets += [a for a in previous.get('assets',[]) if a['id'] not in authored_ids]
 manifest={'version':1,'campaignId':'arizona-terrain-study','generator':{'blender':bpy.app.version_string,'script':'tools/blender/generate_arizona_architecture.py','referenceEra':'Arizona circa 1900 interpretation'},'textures':textures,'materialBindings':bindings,'assets':assets}
 if 'stationScript' in previous.get('generator',{}):manifest['generator']['stationScript']=previous['generator']['stationScript']
 MANIFEST.write_text(json.dumps(manifest,indent=2)+'\n')
@@ -204,3 +205,9 @@ bpy.ops.object.light_add(type='AREA',location=(100,65,35));bpy.context.object.da
 bpy.ops.object.camera_add(location=(46,-130,62));camera=bpy.context.object;camera.rotation_euler=(Vector((46,15,6))-camera.location).to_track_quat('-Z','Y').to_euler();camera.data.lens=38;bpy.context.scene.camera=camera
 scene=bpy.context.scene;scene.render.engine='BLENDER_EEVEE';scene.render.resolution_x=2000;scene.render.resolution_y=950;scene.render.resolution_percentage=100;scene.render.image_settings.file_format='PNG';scene.render.filepath=str(CONTACT);scene.world.color=(.65,.58,.48);scene.view_settings.look='AgX - Medium High Contrast';scene.view_settings.exposure=1.8;bpy.ops.render.render(write_still=True)
 print('RF_ARIZONA_ARCHITECTURE_EXPORT',json.dumps({'blender':bpy.app.version_string,'assets':len(assets),'textures':len(textures),'contact':str(CONTACT)}))
+
+# Retain independently authored regional scenery and its shared material tiles.
+manifest['textures'] += [t for t in previous.get('textures',[]) if t['id'].startswith('regional-')]
+manifest['materialBindings'] += [b for b in previous.get('materialBindings',[]) if b['materialPrefix'].startswith('RF_REG_')]
+if 'regionalScript' in previous.get('generator',{}):manifest['generator']['regionalScript']=previous['generator']['regionalScript']
+MANIFEST.write_text(json.dumps(manifest,indent=2)+'\n')

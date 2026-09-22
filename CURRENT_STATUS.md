@@ -15,7 +15,16 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — navigable settlement junctions and entrances, 2026-09-22
+# Current status — Middle Rhine, Tyne/Wear and Arizona regional expansion, 2026-09-22
+
+## REG-01: two playable European regions and expanded Arizona scenery — 2026-09-22
+
+- Added selectable, playable 32 × 32 km Middle Rhine and Tyne/Wear companies over reproducibly imported real elevation grids. The regional compositions include Boppard/St. Goar/Bacharach and Newcastle/North Shields/Sunderland, terrain-aware settlement placement, roads, vegetation, ports and five industry sites.
+- Local Blender generated 46 assets per European region in two LODs: regional buildings, three station eras, industries, vegetation, infrastructure, props, four locomotive eras and eight coach/wagon types. Arizona gains a windpump, ranch fence and eight desert vegetation assets. Original external PBR tiles and pack validation are included.
+- Coal, ore, steel and oil inventories, wagon-specific freight capacity, region/year purchase filtering, regional currency display and schema-12 migration are integrated. New European station previews automatically select a low-relief orientation while preserving manual rotation.
+- Terrain source URLs, hashes, bounds, licence and attribution are bundled. Real height data is the geographic base; water stages, settlements, roads and industry sites are selective game compositions.
+- Verification: **242/242** core tests, **4/4** focused Chrome journeys, TypeScript, production build, asset validation and diff hygiene pass. New actual-renderer README images show Boppard, Newcastle and the Arizona windpump. [Full scope, provenance and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
+- Next: improve the strategic water silhouettes and begin authored region-specific objectives/balance after player review. Moving residents/traffic/animals and physical multi-platform yards remain separate planned work.
 
 ## LIV-01c: navigable junctions and explicit entrances — 2026-09-22
 
@@ -278,9 +287,9 @@ Still open: full ordered-corridor search, connected campaign progression, railwa
 
 ## Currently working
 
-The current user priority is living settlements: connected textured paths and station entrances before pedestrians, era traffic and animals. Station-direction controls and persistent day/year are complete; follow `docs/world/LIVING_SETTLEMENTS.md`, starting with LIV-01. The drawn-route player review and human acceptance remain open. Do not resume the earlier SOL-pause instruction.
+The current user priority is regional expansion. The Middle Rhine and Tyne/Wear foundations plus the Arizona windpump/vegetation pass are implemented and ready for player review. The next regional pass should refine far-view water silhouettes and add authored objectives/balance. The earlier living-settlement roadmap remains valid after that review; the drawn-route human acceptance also remains open. Do not resume the earlier SOL-pause instruction.
 
-Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campaign expansion and further graphics work wait behind the track-planning review. Current saves use schema 11; schema 10 retained route sketches migrate with the company.
+Norway V3, Arizona V2, Middle Rhine V1 and Tyne/Wear V1 are current. Arizona remains a terrain study; the two European additions are playable free-company foundations. Current saves use schema 12; schema 11 companies migrate without regional assets being invented.
 
 ## Stable contracts
 
@@ -289,7 +298,7 @@ Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campai
 - src/world/terrain.ts + domain/curve-math.ts: triangle surface and exact crossing rules.
 - src/rail/geometry.ts, constraints.ts, planner.ts, graph.ts: cubic/arc/traversal/quote/cache rules.
 - src/simulation/clock.ts: 20 Hz fixed steps, preserved time debt and compressed calendar contract.
-- src/persistence/save.ts: schema 11 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
+- src/persistence/save.ts: schema 12 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
 
 Do not casually change units/axes, graph identity/connectivity, tick cadence/order, typed IDs, command atomicity or saved operational semantics. A genuine redesign follows ASTRA_ESCALATIONS.md; there is no open escalation now.
 

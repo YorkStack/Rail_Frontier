@@ -39,6 +39,22 @@ export function surveyStationSite(terrain:Terrain,position:{x:number;z:number},o
   return {center:{...position,y},portA:{x:planar[1]!.x,y,z:planar[1]!.z},portB:{x:planar[2]!.x,y,z:planar[2]!.z},direction,orientationRad:angle,lengthM,widthM:STATION_PAD_WIDTH_M,maxReliefM,cutVolumeM3,fillVolumeM3,earthworkCost};
 }
 
+/** Find the lowest-relief platform direction at one location. Players can
+ * still rotate the preview; this gives steep settlements a useful default. */
+export function bestStationOrientation(terrain:Terrain,position:{x:number;z:number},lengthM:number,steps=16):number|null {
+  let best:{orientationRad:number;reliefM:number}|null=null;
+  for(let index=0;index<steps;index++) {
+    const orientationRad=index*Math.PI/steps;
+    try {
+      const site=surveyStationSite(terrain,position,orientationRad,lengthM);
+      if(best===null||site.maxReliefM<best.reliefM)best={orientationRad,reliefM:site.maxReliefM};
+    } catch {
+      // Other angles at the same location may still be buildable.
+    }
+  }
+  return best?.orientationRad??null;
+}
+
 export function straightCurve(from:Vec3,to:Vec3):CubicCurve {
   return {p0:from,p1:{x:(2*from.x+to.x)/3,y:(2*from.y+to.y)/3,z:(2*from.z+to.z)/3},p2:{x:(from.x+2*to.x)/3,y:(from.y+2*to.y)/3,z:(from.z+2*to.z)/3},p3:to};
 }

@@ -2,7 +2,7 @@ import type {IndustryRecipe} from '../domain/operations.js';
 import { industryDefinition } from '../content/industries.js';
 import type { CargoKind, GameState, Industry } from '../domain/model.js';
 
-const kinds:CargoKind[]=['passengers','mail','timber','lumber'];
+const kinds:CargoKind[]=['passengers','mail','timber','lumber','coal','ore','steel','oil'];
 const totalInventory=(industry:Industry)=>kinds.reduce((sum,kind)=>sum+(industry.inventory[kind]??0),0);
 
 export function industryBlocker(industry:Industry,recipe:IndustryRecipe):'inputs'|'storage'|null {

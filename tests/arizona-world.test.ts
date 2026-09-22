@@ -43,7 +43,7 @@ test('two long Arizona V2 corridors remain feasible and the northern one crosses
 test('Arizona exposes only the current study and rejects removed V1 content',()=>{
   const resolved=campaignContentRegistry.resolve({campaignId:arizonaTerrainStudy.id,campaignVersion:arizonaTerrainStudy.version,world:arizonaTerrainStudy.world});
   assert.throws(()=>campaignContentRegistry.resolve({campaignId:'arizona-terrain-study',campaignVersion:1,world:{...arizonaV2.world,generatorVersion:1}}),/Unsupported campaign content/);
-  assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,'/packs/arizona.json');assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['entry','regional','canyon','escarpment','wash','settlement','street','house-close','vegetation','industry','train']);
+  assert.equal(resolved.worldGenerator.id,'arizona-basin-v2');assert.equal(resolved.presentation.rendererId,'terrain-study');assert.equal(resolved.presentation.assetManifestUrl,'/packs/arizona.json');assert.equal(resolved.presentation.entryCameraId,'entry');assert.deepEqual(Object.keys(resolved.presentation.cameraPresets),['ranch','entry','regional','canyon','escarpment','wash','settlement','street','house-close','vegetation','industry','train']);
 });
 
 test('Arizona architecture occupies deterministic street plots with the complete building kit',()=>{

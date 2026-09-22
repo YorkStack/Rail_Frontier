@@ -20,3 +20,7 @@ Installed package metadata and license files were checked before checkpointing. 
 Production builds include project/runtime dependency/font notices through tools/copy-notices.ts. Development-only licenses remain in the repository; Vite/TypeScript/Playwright are not shipped as browser executable code. Included Three.js addons are part of its MIT distribution. No unrelated example models are copied.
 
 Blender 4.0.2 is an external authoring tool, not bundled. Runtime GLBs contain original generated geometry/materials, not Blender source or application code. Revisit tooling distribution terms if Blender itself or other exporters are later bundled.
+
+## European terrain
+
+Middle Rhine and Tyne/Wear use Mapzen Skadi elevation data with Copernicus, Environment Agency and USGS attribution. See [terrain source notice](licenses/terrain-data.txt) for licences, source files and modifications.

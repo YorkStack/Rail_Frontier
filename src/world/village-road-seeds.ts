@@ -5,12 +5,17 @@ interface Point {x:number;z:number}
 export interface VillageRoad {points:Point[];width:number;surface:RoadSurface;townId?:string}
 /** Art-direction eras: paving reaches town streets first; farm access remains unpaved. */
 export {settlementEra as streetEra} from './settlement-era.js';
-export function villageRoadSeeds(state:Pick<GameState,'towns'>,plots:readonly Plot[],southwest:boolean,year:number):VillageRoad[]{
+export function villageRoadSeeds(state:Pick<GameState,'towns'>&Partial<Pick<GameState,'world'>>,plots:readonly Plot[],southwest:boolean,year:number):VillageRoad[]{
  const roads:VillageRoad[]=[],modern=year>=1960;
  for(const [index,town] of state.towns.entries()){
   const houses=plots.filter(p=>p.townId===town.id);if(!houses.length)continue;
   const add=(points:Point[],width:number,central=false)=>roads.push({points,width,townId:town.id,surface:modern?'asphalt':central&&!southwest?'cobbles':'dirt'});
-  if(southwest){
+  if(state.world?.biomeId==='rhine'||state.world?.biomeId==='tyne'){
+   const half=state.world.biomeId==='rhine'?118:155;
+   for(const side of [-1,1])for(let row=0;row<3;row++){const z=town.position.z+side*(28+row*28);add(Array.from({length:7},(_,i)=>({x:town.position.x-half+i*half/3,z:z+Math.sin(i*.45)*7})),row===0?6:4.5,row===0);}
+   for(const side of [-1,1])add([-96,-55,-28,28,55,96].map(z=>({x:town.position.x+side*(half+10),z:town.position.z+z})),5,true);
+   add([{x:town.position.x-48,z:town.position.z+22},{x:town.position.x-70,z:town.position.z+26},{x:town.position.x-half-10,z:town.position.z+28}],4,true);
+  }else if(southwest){
    for(const offset of [0,-142,142])add([-330,-180,0,180,330].map((z,i)=>({x:town.position.x+offset+Math.sin(i*1.5)*3,z:town.position.z+z})),offset===0?11:6,true);
    for(const offset of [-188,0,188])add([-200,-100,0,100,200].map((x,i)=>({x:town.position.x+x,z:town.position.z+offset+Math.sin(i*1.8)*2})),6);
   }else if(index!==1){

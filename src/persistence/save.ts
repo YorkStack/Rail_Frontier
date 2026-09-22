@@ -6,7 +6,7 @@ import { compileGraph } from '../rail/graph.js';
 import { emptyOperations,initialTownEconomy } from '../domain/operations.js';
 import { industryDefinition } from '../content/industries.js';
 import { stationDefinition } from '../content/stations.js';
-import { vehicleDefinition } from '../content/vehicles.js';
+import { vehicleDefinition,vehicleInCampaign } from '../content/vehicles.js';
 import { currentYear } from '../simulation/calendar.js';
 import {compileCurve} from '../rail/geometry.js';
 import {RAIL_TO_FORMATION_M,STATION_MAX_RELIEF_M} from '../rail/station-layout.js';
@@ -95,7 +95,15 @@ const stateV6Schema=z.strictObject({
 });
 const stateV7Schema=stateV6Schema.extend({operations:operationsV7Schema,stations:z.array(stationSchema)});
 const stateV8Schema=stateV7Schema.extend({operations:operationsSchema});
-const stateSchema=stateV8Schema.extend({learning:learningSchema}) satisfies z.ZodType<GameState>;
+const stateV11Schema=stateV8Schema.extend({learning:learningSchema});
+const cargoKinds=z.enum(['passengers','mail','timber','lumber','coal','ore','steel','oil']);
+const regionalCargo=cargo.extend({kind:cargoKinds});
+const stateSchema=stateV11Schema.extend({
+ stations:z.array(stationSchema.extend({storage:z.array(regionalCargo)})),
+ trains:z.array(stateV6Schema.shape.trains.element.extend({cargo:z.array(regionalCargo)})),
+ industries:z.array(stateV6Schema.shape.industries.element.extend({inventory:z.partialRecord(cargoKinds,nonnegative)})),
+ operations:operationsSchema.extend({delivered:operationsV5Schema.shape.delivered.extend({coal:nonnegative.optional(),ore:nonnegative.optional(),steel:nonnegative.optional(),oil:nonnegative.optional()})})
+}) satisfies z.ZodType<GameState>;
 const stateV5Schema=stateV6Schema.extend({operations:operationsV5Schema});
 const stateV4Schema=stateV5Schema.omit({startingYear:true});
 const stateV3Schema=stateV4Schema.extend({
@@ -116,9 +124,10 @@ const draftSchema=z.strictObject({points:z.array(vec).max(64),complete:z.boolean
   }
 });
 const planningSchema=z.strictObject({version:z.literal(1),current:draftSchema,past:z.array(draftSchema).max(30),future:z.array(draftSchema).max(30)}).nullable();
-const versionNineEnvelope=z.strictObject({schemaVersion:z.literal(9),gameVersion:z.literal('0.9.0'),state:stateSchema});
-const versionTenEnvelope=z.strictObject({schemaVersion:z.literal(10),gameVersion:z.literal('0.10.0'),state:stateSchema,planning:planningSchema});
-const envelope=versionTenEnvelope.extend({schemaVersion:z.literal(11),gameVersion:z.literal('0.11.0')});
+const versionNineEnvelope=z.strictObject({schemaVersion:z.literal(9),gameVersion:z.literal('0.9.0'),state:stateV11Schema});
+const versionTenEnvelope=z.strictObject({schemaVersion:z.literal(10),gameVersion:z.literal('0.10.0'),state:stateV11Schema,planning:planningSchema});
+const versionElevenEnvelope=versionTenEnvelope.extend({schemaVersion:z.literal(11),gameVersion:z.literal('0.11.0')});
+const envelope=versionElevenEnvelope.extend({schemaVersion:z.literal(12),gameVersion:z.literal('0.12.0'),state:stateSchema});
 export interface SaveDocument {state:GameState;planning:PlanningDraft|null}
 function validatePlanning(value:unknown,state:GameState):PlanningDraft|null {
  const planning=planningSchema.parse(value);if(!planning)return null;
@@ -163,7 +172,7 @@ export function validateState(value: unknown): GameState {
   for(const route of state.routes) route.stops.forEach(requireRef);
   for(const train of state.trains) {
     requireRef(train.routeId);
-    if(state.campaignId==='norwegian-fjords'){const definitions=[vehicleDefinition(train.locomotiveId),...train.vehicleIds.map(vehicleDefinition)];if(!definitions[0]||definitions[0].kind!=='locomotive'||definitions.slice(1).some(definition=>!definition||definition.kind!=='wagon'))throw new Error('Train contains unknown vehicle content');if(definitions.some(definition=>definition!.availableYear>currentYear(state)))throw new Error('Train contains vehicle content from a future year');}
+    if(['norwegian-fjords','middle-rhine','tyne-wear-coast'].includes(state.campaignId)){if([train.locomotiveId,...train.vehicleIds].some(id=>!vehicleInCampaign(id,state.campaignId)))throw new Error('Train contains vehicle content from another region');const definitions=[vehicleDefinition(train.locomotiveId),...train.vehicleIds.map(vehicleDefinition)];if(!definitions[0]||definitions[0].kind!=='locomotive'||definitions.slice(1).some(definition=>!definition||definition.kind!=='wagon'))throw new Error('Train contains unknown vehicle content');if(definitions.some(definition=>definition!.availableYear>currentYear(state)))throw new Error('Train contains vehicle content from a future year');}
     const {motion}=train;
     if(motion.path.length===0) {
       if(train.phase!=='idle'||motion.leg!==0||motion.distanceM!==0) throw new Error('Invalid idle motion');
@@ -216,9 +225,10 @@ export const migrations=new Map<number,(value:unknown)=>unknown>([
   [7,(value)=>{const previous=versionSevenEnvelope.parse(value);return {schemaVersion:8,gameVersion:'0.8.0',state:{...previous.state,operations:{...previous.state.operations,terrain:{revision:0,patchGeneratorVersion:1 as const,operations:[]}}}};}],
   [8,(value)=>{const previous=versionEightEnvelope.parse(value);return {schemaVersion:9,gameVersion:'0.9.0',state:{...previous.state,learning:null}};}],
   [9,(value)=>{const previous=versionNineEnvelope.parse(value);return {...previous,schemaVersion:10,gameVersion:'0.10.0',planning:null};}],
-  [10,(value)=>{const previous=versionTenEnvelope.parse(value);for(const operation of previous.state.operations.terrain.operations)if(operation.kind==='station-pad'){if(Math.abs(operation.targetElevationM-operation.center.y)>.001)throw new Error('Invalid legacy station terrain operation');operation.targetElevationM-=RAIL_TO_FORMATION_M;}return {...previous,schemaVersion:11,gameVersion:'0.11.0'};}]
+  [10,(value)=>{const previous=versionTenEnvelope.parse(value);for(const operation of previous.state.operations.terrain.operations)if(operation.kind==='station-pad'){if(Math.abs(operation.targetElevationM-operation.center.y)>.001)throw new Error('Invalid legacy station terrain operation');operation.targetElevationM-=RAIL_TO_FORMATION_M;}return {...previous,schemaVersion:11,gameVersion:'0.11.0'};}],
+  [11,(value)=>({...versionElevenEnvelope.parse(value),schemaVersion:12,gameVersion:'0.12.0'})]
 ]);
-export function serialize(state:GameState,planning:PlanningDraft|null=null):string { return JSON.stringify({schemaVersion:11,gameVersion:'0.11.0',state:validateState(state),planning:validatePlanning(planning,state)}); }
+export function serialize(state:GameState,planning:PlanningDraft|null=null):string { return JSON.stringify({schemaVersion:12,gameVersion:'0.12.0',state:validateState(state),planning:validatePlanning(planning,state)}); }
 export function deserialize(json:string):GameState {return deserializeDocument(json).state;}
 export function deserializeDocument(json:string):SaveDocument {
   if(json.length>SAVE_LIMITS.bytes||new TextEncoder().encode(json).byteLength>SAVE_LIMITS.bytes) throw new Error('Save exceeds 20 MB limit');
@@ -226,7 +236,7 @@ export function deserializeDocument(json:string):SaveDocument {
   preflightEnvelope(value);
   const header=z.object({schemaVersion:integer.positive()});
   let version=header.parse(value).schemaVersion;
-  if(version>11) throw new Error('Save was created by a newer game');
-  while(version<11) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
+  if(version>12) throw new Error('Save was created by a newer game');
+  while(version<12) {const migrate=migrations.get(version);if(!migrate)throw new Error('Missing migration');value=migrate(value);const next=header.parse(value).schemaVersion;if(next!==version+1)throw new Error('Migration must advance exactly one schema version');version=next;}
   const parsed=envelope.parse(value),state=validateState(parsed.state);return {state,planning:validatePlanning(parsed.planning,state)};
 }

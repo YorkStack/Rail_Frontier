@@ -1,3 +1,5 @@
+import {europeCampaigns,europePresentation} from './europe.js';
+import {europeGenerator} from '../world/europe.js';
 import type {CampaignDefinition,GameState,WorldDefinition} from '../domain/model.js';
 import type {WorldGenerator} from '../world/generator.js';
 import {norwayV2,norwayV3} from './norway.js';
@@ -36,9 +38,11 @@ const arizonaV2Content:CampaignContent=Object.freeze({
   validateWorld(world:WorldDefinition):void {try{arizonaV2WorldGenerator.validate(world);}catch{throw new Error('Save world definition is not compatible with Arizona terrain study V2');}if(world.seed!==arizonaV2.world.seed)throw new Error('Save world definition is not compatible with Arizona terrain study V2');}
 });
 
+const europeContent:CampaignContent[]=(['rhine','tyne'] as const).map(region=>{const worldGenerator=europeGenerator(region);return{campaign:europeCampaigns[region],presentation:europePresentation(region),worldGenerator,validateWorld:w=>worldGenerator.validate(w)};});
+
 export class ContentRegistry {
   private readonly content=new Map<string,CampaignContent>();
-  constructor(entries:readonly CampaignContent[]=[norwayV2Content,norwayV3Content,arizonaV2Content]) {for(const entry of entries){const key=this.key(entry.campaign.id,entry.campaign.version,entry.campaign.world.generatorVersion);if(entry.presentation.biome.id!==entry.campaign.world.biomeId||entry.worldGenerator.biomeId!==entry.campaign.world.biomeId||entry.worldGenerator.version!==entry.campaign.world.generatorVersion)throw new Error(`Campaign content does not match world definition: ${key}`);if(this.content.has(key))throw new Error(`Duplicate campaign content: ${key}`);this.content.set(key,entry);}}
+  constructor(entries:readonly CampaignContent[]=[norwayV2Content,norwayV3Content,arizonaV2Content,...europeContent]) {for(const entry of entries){const key=this.key(entry.campaign.id,entry.campaign.version,entry.campaign.world.generatorVersion);if(entry.presentation.biome.id!==entry.campaign.world.biomeId||entry.worldGenerator.biomeId!==entry.campaign.world.biomeId||entry.worldGenerator.version!==entry.campaign.world.generatorVersion)throw new Error(`Campaign content does not match world definition: ${key}`);if(this.content.has(key))throw new Error(`Duplicate campaign content: ${key}`);this.content.set(key,entry);}}
   resolve(state:Pick<GameState,'campaignId'|'campaignVersion'|'world'>):CampaignContent {
     const key=this.key(state.campaignId,state.campaignVersion,state.world.generatorVersion),entry=this.content.get(key);
     if(!entry)throw new Error(`Unsupported campaign content: ${key}`);

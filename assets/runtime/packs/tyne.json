@@ -1,0 +1,1339 @@
+{
+  "version": 1,
+  "campaignId": "tyne-wear-coast",
+  "generator": {
+    "blender": "4.0.2",
+    "regionalScript": "tools/blender/generate_regional_catalogues.py",
+    "script": "tools/blender/generate_regional_catalogues.py"
+  },
+  "assets": [
+    {
+      "id": "tyne-half-timber",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-half-timber_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-half-timber_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-stone-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-stone-house_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-stone-house_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-brick-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-brick-house_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-brick-house_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-terrace",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-terrace_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-terrace_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-villa",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-villa_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-villa_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-barn",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-barn_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-barn_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-shop",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-shop_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-shop_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-station",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-station_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-station_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-station-interwar",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-station-interwar_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-station-interwar_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-station-modern",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-station-modern_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-station-modern_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-mine",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-mine_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-mine_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-factory",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-factory_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-factory_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-warehouse",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-warehouse_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-warehouse_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-crane",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-crane_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-crane_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-oak",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-oak_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-oak_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-beech",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-beech_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-beech_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-birch",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-birch_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-birch_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-willow",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-willow_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-willow_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-pine",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-pine_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-pine_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-hedge",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-hedge_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-hedge_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-grass",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-grass_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-grass_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-gorse",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-gorse_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-gorse_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-bridge-span",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "span_start",
+        "span_end"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-bridge-span_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-bridge-span_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-tunnel-portal",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "track_center"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-tunnel-portal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-tunnel-portal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-water-tower",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-water-tower_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-water-tower_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-signal",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-signal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-signal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-fence",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-fence_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-fence_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-cart",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-cart_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-cart_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-truck",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-truck_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-truck_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-barge",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-barge_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-barge_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-church",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-church_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-church_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-lighthouse",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-lighthouse_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-lighthouse_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-crates",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-crates_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-crates_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-rock",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-rock_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-rock_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-j21",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-j21_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-j21_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-a3",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-a3_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-a3_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-class37",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-class37_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-class37_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-class91",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-class91_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-class91_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-coach",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-coach_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-coach_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-modern-coach",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-modern-coach_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-modern-coach_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-mail",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-mail_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-mail_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-coal",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-coal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-coal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-hopper",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-hopper_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-hopper_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-goods",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-goods_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-goods_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-flat",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-flat_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-flat_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "tyne-tank",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/tyne/tyne-tank_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/tyne/tyne-tank_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "id": "regional-wood-base",
+      "path": "/textures/tyne/wood-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-wood-normal",
+      "path": "/textures/tyne/wood-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-wood-roughness",
+      "path": "/textures/tyne/wood-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-base",
+      "path": "/textures/tyne/brick-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-brick-normal",
+      "path": "/textures/tyne/brick-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-roughness",
+      "path": "/textures/tyne/brick-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-base",
+      "path": "/textures/tyne/stone-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-stone-normal",
+      "path": "/textures/tyne/stone-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-roughness",
+      "path": "/textures/tyne/stone-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-base",
+      "path": "/textures/tyne/roof-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-roof-normal",
+      "path": "/textures/tyne/roof-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-roughness",
+      "path": "/textures/tyne/roof-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-base",
+      "path": "/textures/tyne/plaster-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-plaster-normal",
+      "path": "/textures/tyne/plaster-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-roughness",
+      "path": "/textures/tyne/plaster-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    }
+  ],
+  "materialBindings": [
+    {
+      "materialPrefix": "RF_REG_tyne_wood",
+      "map": "regional-wood-base",
+      "normalMap": "regional-wood-normal",
+      "roughnessMap": "regional-wood-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_tyne_brick",
+      "map": "regional-brick-base",
+      "normalMap": "regional-brick-normal",
+      "roughnessMap": "regional-brick-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_tyne_stone",
+      "map": "regional-stone-base",
+      "normalMap": "regional-stone-normal",
+      "roughnessMap": "regional-stone-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_tyne_roof",
+      "map": "regional-roof-base",
+      "normalMap": "regional-roof-normal",
+      "roughnessMap": "regional-roof-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_tyne_plaster",
+      "map": "regional-plaster-base",
+      "normalMap": "regional-plaster-normal",
+      "roughnessMap": "regional-plaster-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    }
+  ]
+}

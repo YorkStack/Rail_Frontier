@@ -1,3 +1,4 @@
+import {generateRegionalPlots,generateRegionalScenery} from './regional-placement.js';
 import {emptySettlementNavigation} from '../world/settlement-navigation.js';
 import {streetSurface,settlementEra,stationAssetFor,stationConstructionYear} from '../world/settlement-era.js';
 import {readBuildingAccess,type BuildingAccess} from './building-access.js';
@@ -64,7 +65,7 @@ export class FjordRenderer implements WorldRenderer {
   private stationModels=new Map<string,THREE.LOD>();
   private infrastructureModels=new THREE.Group();
   private modelState:Readonly<GameState>;
-  private water:THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial>;
+  private water:THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial>;
   private shoreContact:THREE.Mesh<THREE.BufferGeometry,THREE.MeshBasicMaterial>;
   private waterfall:THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial>;
   private trees:THREE.Group;
@@ -123,8 +124,8 @@ export class FjordRenderer implements WorldRenderer {
     this.shoreContact=this.createShoreContact();this.scene.add(this.shoreContact);
     this.waterfall=this.createWaterfall();this.waterfall.visible=content.worldGenerator.landforms.waterfall!==null;this.scene.add(this.waterfall);
     this.rebuildTracks(state);
-    this.trees=content.presentation.proceduralScenery==='southwest-study'?this.createSouthwestVegetation(this.profile.vegetation.density):this.createForest(this.profile.vegetation.density);this.scene.add(this.trees);
-    if(content.presentation.proceduralScenery==='southwest-study')this.createSouthwestBuildings(state,180);else this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
+    this.trees=content.presentation.proceduralScenery==='norway-fallback'?this.createForest(this.profile.vegetation.density):new THREE.Group();this.scene.add(this.trees);
+    if(content.presentation.proceduralScenery==='southwest-study')this.createSouthwestBuildings(state,180);else if(content.presentation.proceduralScenery==='norway-fallback')this.createBuildings(state,terrain.widthM>4000?360:90);this.scene.add(this.buildings);this.assetLibrary.visible=false;this.scene.add(this.assetLibrary);
     this.rebuildAuthoredInfrastructure(state);
     this.labels=[
       ...state.towns.map(town=>({name:town.name,position:town.position,selection:{kind:'town' as const,id:town.id}})),
@@ -178,7 +179,7 @@ export class FjordRenderer implements WorldRenderer {
     this.treeCount=placements.length;return this.instancedAsset('norway-spruce',1,placements);
   }
   private authoredScenery(state:Readonly<GameState>):THREE.Group {
-    const source=generateNorwayScenery(this.terrain,state),dummy=new THREE.Object3D(),records=source.map(record=>{dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();return {...record,matrix:dummy.matrix.clone(),detail:1 as 0|1};});
+    const source=this.content.presentation.proceduralScenery==='norway-fallback'?generateNorwayScenery(this.terrain,state):generateRegionalScenery(this.terrain,state),dummy=new THREE.Object3D(),records=source.map(record=>{dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();return {...record,matrix:dummy.matrix.clone(),detail:1 as 0|1};});
     const group=new THREE.Group(),capacities=new Map<string,number>();for(const record of records)capacities.set(record.assetId,(capacities.get(record.assetId)??0)+1);
     const levels=new Map<string,THREE.Group>();for(const [id,count] of capacities)for(const lod of [0,1] as const){const level=this.instancedAsset(id,lod,Array.from({length:count},()=>new THREE.Matrix4()),lod===0);level.name=`${id}:lod${lod}`;levels.set(`${id}:${lod}`,level);group.add(level);}
     group.userData.scenery={records,levels,lastCamera:new THREE.Vector3(Number.POSITIVE_INFINITY,0,0),lastRotation:new THREE.Quaternion(),lastAspect:0};this.treeCount=records.filter(record=>record.category==='tree').length;this.updateSceneryLod(group,true);return group;
@@ -198,7 +199,7 @@ export class FjordRenderer implements WorldRenderer {
     this.buildingCount=count;return this.instancedAsset('norway-house',0,placements);
   }
   private authoredSettlements(state:Readonly<GameState>):THREE.Group {
-    const records=generateNorwaySettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
+    const records=this.content.presentation.proceduralScenery==='norway-fallback'?generateNorwaySettlements(this.terrain,state):generateRegionalPlots(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
     for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
     for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
     group.userData.roadPlots=records;this.addVillageRoads(group,state);
@@ -214,16 +215,16 @@ export class FjordRenderer implements WorldRenderer {
     group.userData.roadEra=streetEra(currentYear(state));group.userData.roadTerrainRevision=state.operations.terrain.revision;
   }
   private authoredArizonaSettlements(state:Readonly<GameState>):THREE.Group {
-    const records=generateArizonaSettlements(this.terrain,state),batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
+    const records=[...generateArizonaSettlements(this.terrain,state),...generateRegionalPlots(this.terrain,state)],batches=new Map<string,THREE.Matrix4[]>(),dummy=new THREE.Object3D(),group=new THREE.Group();
     for(const record of records){const matrices=batches.get(record.assetId)??[];dummy.position.set(record.x,record.y,record.z);dummy.rotation.set(0,record.rotationY,0);dummy.scale.setScalar(record.scale);dummy.updateMatrix();matrices.push(dummy.matrix.clone());batches.set(record.assetId,matrices);}
     for(const [id,matrices] of batches)group.add(this.instancedAsset(id,0,matrices));
     group.userData.roadPlots=records;this.addVillageRoads(group,state);
     this.buildingCount=records.length;return group;
   }
   private replaceAuthoredScenery(state:Readonly<GameState>):void {
-    if(this.content.presentation.proceduralScenery==='norway-fallback'){this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.assetLevels.has('norway-pine')?this.authoredScenery(state):this.authoredForest(this.profile.vegetation.density);this.scene.add(this.trees);}
+    this.scene.remove(this.trees);disposeObject(this.trees);this.trees=this.authoredScenery(state);this.scene.add(this.trees);
     this.scene.remove(this.buildings);disposeObject(this.buildings);
-    this.buildings=this.content.presentation.proceduralScenery==='southwest-study'?this.authoredArizonaSettlements(state):this.assetLevels.has('norway-house-red-white')?this.authoredSettlements(state):this.legacyAuthoredBuildings(state,360);this.scene.add(this.buildings);
+    this.buildings=this.content.presentation.proceduralScenery==='southwest-study'?this.authoredArizonaSettlements(state):this.authoredSettlements(state);this.scene.add(this.buildings);
   }
   private syncStationModels(state:Readonly<GameState>):void {
     const assetId=this.content.presentation.assetRoles.station;if(!assetId||!this.assetLevels.has(assetId))return;for(const model of this.stationModels.values())model.visible=false;
@@ -259,7 +260,7 @@ export class FjordRenderer implements WorldRenderer {
     addMasonry(abutmentMatrices,'#81796a');
     this.scene.add(this.infrastructureModels);
   }
-  private createWater():THREE.Mesh<THREE.PlaneGeometry,THREE.ShaderMaterial> {
+  private createWater():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {
     const material=new THREE.ShaderMaterial({
       uniforms:{time:{value:0},deep:{value:new THREE.Color('#173f4a')},light:{value:new THREE.Color('#73999b')},sky:{value:new THREE.Color('#b7c9c7')}},
       vertexShader:'varying vec3 world; void main(){ vec4 p=modelMatrix*vec4(position,1.0); world=p.xyz; gl_Position=projectionMatrix*viewMatrix*p; }',
@@ -272,6 +273,12 @@ export class FjordRenderer implements WorldRenderer {
         #include <colorspace_fragment>
         }`
     });
+    if(this.content.presentation.proceduralScenery==='rhine'||this.content.presentation.proceduralScenery==='tyne'){
+      const positions:number[]=[],step=this.terrain.cellM;
+      for(let z=0;z<this.terrain.depthM;z+=step)for(let x=0;x<this.terrain.widthM;x+=step){const corners=[[x,z],[x+step,z],[x+step,z+step],[x,z+step]] as const,samples=corners.map(([a,b])=>this.terrain.sample(a,b));if(samples.every(s=>s.elevationM>(s.waterLevelM??0)+.5))continue;
+        for(const i of [0,2,1,0,3,2])positions.push(corners[i]![0],samples[i]!.waterLevelM!+.12,corners[i]![1]);}
+      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();return new THREE.Mesh(geometry,material);
+    }
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(terrainSize(this.terrain),terrainSize(this.terrain)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(this.terrain.widthM/2,.15,this.terrain.depthM/2);return mesh;
   }
   private createWaterfall():THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial> {

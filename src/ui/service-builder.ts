@@ -1,5 +1,5 @@
 import type {GameState,Id} from '../domain/model.js';
-import {vehicleDefinition} from '../content/vehicles.js';
+import {vehicleDefinition,freightCapacityOf} from '../content/vehicles.js';
 import {stationDefinition} from '../content/stations.js';
 import {stationHasExternalConnection,stationInternalEdges} from '../rail/station-layout.js';
 
@@ -38,7 +38,7 @@ export function previewConsist(state:Readonly<GameState>,draft:ConsistDraft):Con
   if(!locomotive||locomotive.kind!=='locomotive'||!wagon||wagon.kind!=='wagon'||!Number.isInteger(draft.wagonCount)||draft.wagonCount<1)return empty('Choose a locomotive and at least one car.');
   const definitions=[locomotive,...Array(draft.wagonCount).fill(wagon)] as const;
   const purchaseCost=definitions.reduce((sum,item)=>sum+item.purchaseCost,0),lengthM=definitions.reduce((sum,item)=>sum+item.lengthM,0),runningCostPerKm=definitions.reduce((sum,item)=>sum+item.runningCostPerKm,0),maintenancePerDay=definitions.reduce((sum,item)=>sum+item.maintenancePerDay,0);
-  const preview:ConsistPreview={valid:true,reason:'Ready to purchase.',purchaseCost,lengthM,platformLengthM:platform.platformLengthM,passengers:draft.wagonCount*(wagon.capacity.passengers??0),mail:draft.wagonCount*(wagon.capacity.mail??0),freight:draft.wagonCount*Math.max(wagon.capacity.timber??0,wagon.capacity.lumber??0),runningCostPerKm,maintenancePerDay,maxSpeedKmh:Math.round(Math.min(...definitions.map(item=>item.maxSpeedMps))*3.6)};
+  const preview:ConsistPreview={valid:true,reason:'Ready to purchase.',purchaseCost,lengthM,platformLengthM:platform.platformLengthM,passengers:draft.wagonCount*(wagon.capacity.passengers??0),mail:draft.wagonCount*(wagon.capacity.mail??0),freight:draft.wagonCount*freightCapacityOf(wagon),runningCostPerKm,maintenancePerDay,maxSpeedKmh:Math.round(Math.min(...definitions.map(item=>item.maxSpeedMps))*3.6)};
   if(definitions.some(item=>item.availableYear>draft.year))return {...preview,valid:false,reason:'A selected vehicle is not available yet.'};
   if(!stationHasExternalConnection(state,station))return {...preview,valid:false,reason:'Connect this station to the railway before buying a train.'};
   if(lengthM>platform.platformLengthM)return {...preview,valid:false,reason:`The ${Math.round(lengthM)} m train is too long for this ${platform.platformLengthM} m platform.`};

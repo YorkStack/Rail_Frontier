@@ -78,10 +78,10 @@ for(const asset of pack.assets) {
 }
 
 const arizonaPack=packSchema.parse(JSON.parse(readFileSync('assets/runtime/packs/arizona.json','utf8'))),arizonaResults=[];
-assert.equal(arizonaPack.campaignId,'arizona-terrain-study');assert.equal(arizonaPack.assets.length,13);assert.equal(arizonaPack.assets.filter(asset=>asset.kind==='building').length,10);assert.equal(arizonaPack.assets.filter(asset=>asset.kind==='station').length,3);assert.equal(new Set(arizonaPack.assets.map(asset=>asset.id)).size,13);
+assert.equal(arizonaPack.campaignId,'arizona-terrain-study');assert.equal(arizonaPack.assets.length,23);assert.equal(arizonaPack.assets.filter(asset=>asset.kind==='building').length,10);assert.equal(arizonaPack.assets.filter(asset=>asset.kind==='station').length,3);assert.equal(new Set(arizonaPack.assets.map(asset=>asset.id)).size,23);
 const arizonaTextureIds=new Set<string>();let arizonaDecodedTextureBytes=0;
 for(const texture of arizonaPack.textures??[]){assert.equal(arizonaTextureIds.has(texture.id),false);arizonaTextureIds.add(texture.id);assert.equal(texture.role==='baseColor'?texture.colorSpace:'linear',texture.colorSpace);const bytes=readFileSync(`assets/runtime${texture.path}`);assert.deepEqual([...bytes.subarray(0,8)],[137,80,78,71,13,10,26,10]);arizonaDecodedTextureBytes+=Math.ceil(bytes.readUInt32BE(16)*bytes.readUInt32BE(20)*4*4/3);}
-assert.equal(arizonaTextureIds.size,9);assert.ok(arizonaDecodedTextureBytes<=32*1024*1024);
+assert.equal(arizonaTextureIds.size,24);assert.ok(arizonaDecodedTextureBytes<=32*1024*1024);
 for(const binding of arizonaPack.materialBindings??[])for(const id of [binding.map,binding.normalMap,binding.roughnessMap])assert.ok(arizonaTextureIds.has(id),`Unknown Arizona texture binding ${id}`);
 const arizonaDetails:Readonly<Record<string,readonly string[]>>={
   'arizona-timber-house-gable':['RF_AZ_Gable_RoofLeft','RF_AZ_Gable_Window','RF_AZ_Gable_Door'],
@@ -104,4 +104,17 @@ for(const asset of arizonaPack.assets){
 }
 assert.ok(decodedTextureBytes<=128*1024*1024,'Norway external + embedded textures exceed 128 MiB');
 assert.ok(arizonaDecodedTextureBytes<=32*1024*1024,'Arizona external + embedded textures exceed 32 MiB');
-console.log(JSON.stringify({formatValidated:true,engineImportValidated:false,probe:probeResults,packs:[{campaignId:pack.campaignId,generator:pack.generator,decodedTextureBytes,assets:packResults},{campaignId:arizonaPack.campaignId,generator:arizonaPack.generator,decodedTextureBytes:arizonaDecodedTextureBytes,assets:arizonaResults}]},null,2));
+const europeResults=[];
+for(const region of ['rhine','tyne']){
+ const regional=packSchema.parse(JSON.parse(readFileSync(`assets/runtime/packs/${region}.json`,'utf8'))),ids=new Set(regional.assets.map(a=>a.id));assert.equal(ids.size,46);assert.equal(regional.assets.filter(a=>a.kind==='vehicle').length,12);
+ const textures=new Set<string>();let textureBytes=0;
+ for(const t of regional.textures??[]){assert.ok(!textures.has(t.id));textures.add(t.id);const png=readFileSync(`assets/runtime${t.path}`);assert.deepEqual([...png.subarray(0,8)],[137,80,78,71,13,10,26,10]);textureBytes+=Math.ceil(png.readUInt32BE(16)*png.readUInt32BE(20)*4*4/3);}
+ assert.ok(textureBytes<16*1024*1024);for(const binding of regional.materialBindings??[])for(const id of [binding.map,binding.normalMap,binding.roughnessMap])assert.ok(textures.has(id));
+ for(const asset of regional.assets){const results=asset.lods.map(l=>{const r=inspect(`assets/runtime${l.path}`);assert.ok(r.bytes<=l.maxBytes,asset.id+' bytes');assert.ok(r.triangles<=l.maxTriangles,asset.id+' triangles');assert.ok(r.materials<=12,asset.id+' materials');assert.ok(r.hasUvs,asset.id+' UV');assert.ok(r.bounds.min[1]!>=-.08,asset.id+' ground pivot '+r.bounds.min[1]);for(let i=0;i<3;i++)assert.ok(r.dimensions[i]!<=asset.maxDimensionsM[i]!,asset.id+' size');for(const name of asset.requiredNodes)assert.ok(r.nodes.has(name),asset.id+' '+name);return r;});
+ assert.ok(results[1]!.triangles<results[0]!.triangles,asset.id+' LOD');for(const name of asset.requiredNodes)assert.deepEqual(results[0]!.nodes.get(name),results[1]!.nodes.get(name),asset.id+' attachment');
+ if(asset.kind==='vehicle'){assert.ok(results[0]!.nodes.get('coupler_front')![2]!<0);assert.ok(results[0]!.nodes.get('coupler_rear')![2]!>0);}
+ if(asset.kind==='station'){const n=results[0]!.nodes;assert.ok(n.get('roof_ridge')![1]!>n.get('roof_eave_left')![1]!+.5);}
+ }
+ europeResults.push({campaignId:regional.campaignId,assets:regional.assets.length,decodedTextureBytes:textureBytes});
+}
+console.log(JSON.stringify({formatValidated:true,engineImportValidated:false,regionalPacks:europeResults,probe:probeResults,packs:[{campaignId:pack.campaignId,generator:pack.generator,decodedTextureBytes,assets:packResults},{campaignId:arizonaPack.campaignId,generator:arizonaPack.generator,decodedTextureBytes:arizonaDecodedTextureBytes,assets:arizonaResults}]},null,2));
