@@ -27,6 +27,19 @@ export class GameSaveManager {
     await this.queueWrite(()=>this.store.write(id,normalizedName,json));
   }
   autosave(){return this.save('autosave','Autosave');}
+  /** Preserve the stored document, not unsaved memory: leaving without saving must stay meaningful. */
+  async preserveQuickSaves():Promise<void> {
+    await this.queueWrite(async()=>{
+      const slots=await this.store.list(),existing=new Set(slots.map(slot=>slot.id));
+      for(const slot of slots.filter(slot=>slot.id==='study'||slot.id==='autosave').reverse()){
+        const json=await this.store.read(slot.id);
+        const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json));
+        const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+        const id=`preserved-${slot.id}-${hash}`;
+        if(!existing.has(id)){await this.store.write(id,slot.name,json);existing.add(id);}
+      }
+    });
+  }
   async load(id:string):Promise<Readonly<GameState>> {
     const document=await this.readDocument(id),candidate=document.state;
     this.assertCompatible(candidate);

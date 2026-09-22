@@ -1,3 +1,4 @@
+import {stationUpgradeReason} from '../rail/station-upgrade.js';
 import type { CommandHandler, CommandHandlers } from './commands.js';
 import type { GameCommand } from './ports.js';
 import { stationDefinition } from '../content/stations.js';
@@ -63,10 +64,8 @@ export const buildStationHandler:CommandHandler<BuildStation>=(state,command,con
 
 export const upgradeStationHandler:CommandHandler<UpgradeStation>=(state,command)=>{
   const station=state.stations.find(candidate=>candidate.id===command.stationId)!,current=stationDefinition(station.classId),next=stationDefinition(command.classId);
-  if(!current)throw new Error(`Unknown current station class: ${station.classId}`);
-  if(!next)throw new Error(`Unknown station class: ${command.classId}`);
-  if(next.id===current.id)throw new Error('Station already has this class');
-  if(next.purchaseCost<=current.purchaseCost||next.coverageRadiusM<current.coverageRadiusM||next.storageCapacity<current.storageCapacity||next.platformLengthM<current.platformLengthM)throw new Error('Station upgrades cannot reduce capability');
+  const reason=stationUpgradeReason(station,command.classId);if(reason)throw new Error(reason);
+  if(!current||!next)throw new Error('Station class is unavailable');
   const cost=next.purchaseCost-current.purchaseCost;
   if(!Number.isSafeInteger(cost)||cost<=0)throw new Error('Invalid station upgrade cost');
   if(state.company.cash<cost)throw new Error('Insufficient funds');

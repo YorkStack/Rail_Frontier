@@ -15,7 +15,16 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — continuous station track and platforms, 2026-09-22
+# Current status — expanded player review and recovery fixes, 2026-09-22
+
+## Expanded play, adversarial and UX review — 2026-09-22
+
+- Completed 18 review roles: 10 player perspectives, 4 adversarial roles, 4 critical UX roles. Eleven distinct new agent workers; remaining 7 roles reused workers after a tool thread limit, with fresh contexts and explicit disclosures. This is not real demographic research. [Results and limits](docs/qa/swarm-2026-09-22/RESULTS.md).
+- Fixed 13 consolidated issues, including original quick-save loss after leaving for practice, unsupported physical station upgrades, cramped150% station controls, objective/clock overlap, hidden purchase cash, freight status, existing-service management, first-route framing, invisible rejection feedback, office/train navigation and stalled-industry explanations. Ten P3 items remain documented; one 8× concurrent-browser symptom did not reproduce with a single browser and three trains.
+- Validation: 224 core tests, production build,49 distinct browser cases. Broad sweep 48/49; the only failure used an incorrect test locator for an existing proper name. Corrected selector passed 1/1 with unchanged application code. Earlier focused runs and the JSON−0/0 assertion correction are recorded in the report; no automatic retries. The bundle-size advisory remains.
+- Station expansion is planned in [STATION_EXPANSION_AND_YARDS.md](docs/construction/STATION_EXPANSION_AND_YARDS.md): real platforms/turnouts, sidings, freight modules, individual wagon stock and consist changes. These features are not yet implemented; current physical platform limits remain enforced.
+- Cleanup complete: no listeners 5173/5180/5190, no test drivers or headless Chrome left; generated test sites removed, reports retained. Development preview intentionally stopped as requested. Restart with `npm run dev -- --host 127.0.0.1` to play.
+- Next: LIV-01 connected settlement/station access, followed by STX-01 physical station expansion contracts. Human first-play, Safari/Firefox, assistive technology and century-scale balance remain separate gates.
 
 ## Continuous station track and platform — 2026-09-22
 

@@ -28,7 +28,7 @@ Inspect a trace with `npx playwright show-trace <trace.zip>` or the report with 
 | Place real stations and connect their platforms | `construction`, `station-approaches` |
 | Keep the complete station track above terrain and preserve it on reload | `ux-station-track`; core `station-rendering` covers mesh clearance and old-save migration |
 | Rotate a station preview, align toward a town, preserve built orientation on reload and see time with tools open in DE/EN | `ux-station-time` |
-| Draw, drag, repair, undo and price a real railway | `drawn-route`, `draft-persistence` |
+| Draw, drag, repair, undo and price a real railway; discard stale validation | `drawn-route`, `draft-persistence`, `planning-responsiveness` |
 | Compare water/ridge alternatives and keep the previous company | `construction-lessons` |
 | Reopen a built railway without confusing internal-node markers | `route-connections` |
 | Buy a consist, create stops, assign, resume and follow | `practice-service`, `follow-train`, `operations`, `ux-service-state` |
@@ -36,6 +36,7 @@ Inspect a trace with `npx playwright show-trace <trace.zip>` or the report with 
 | Deliver timber and processed lumber through real simulation | `freight` |
 | Preserve route comparisons across panel switching | `ux-route-review` |
 | Native keyboard activation, localized accessible names, narrow 100/125/150% layouts | `ux-accessibility` |
+| Preserve a built company across Save & leave → practice → save; reject unsupported station expansion; manage existing services; enlarged controls and single-charge rapid confirmations | `ux-swarm-regressions`; core `saves`, `stations`, `operations` |
 
 The gameplay tests use ordinary controls for purchases, construction and service assignment. Read-only probes inspect state to verify cash, graph, cargo and persistence; a few setup/observation helpers control time or camera. Storage-failure tests deliberately inject a failing write, separately from ordinary journeys.
 
@@ -46,3 +47,5 @@ The September 22 review has two rounds: three separate agents attempt first-play
 Agent simulations and automated Chromium journeys do not establish human first-use comprehension or Safari, touch-device and screen-reader acceptance. Those require separate manual checks. A test passing means its specific assertions passed, not that the whole game is finished. New confirmed failures should become focused reproducible tests rather than broad screenshot snapshots or tests that only repeat implementation details.
 
 The consolidated findings, dispositions and retained screenshots are in [PLAYER_REVIEW_2026-09-22.md](PLAYER_REVIEW_2026-09-22.md).
+
+The expanded second round uses 18 review roles (11 workers, seven disclosed reuses after the tool thread limit). Its [matrix](swarm-2026-09-22/MATRIX.md), [findings](swarm-2026-09-22/FINDINGS.md) and [results](swarm-2026-09-22/RESULTS.md) retain actual coverage and unsuccessful harness stages. Persistent-save replacement, repeated purchases, failed-route focus, existing-service management, large/narrow controls and truthful industry blockers now have dedicated regressions.
