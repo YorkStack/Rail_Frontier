@@ -3,7 +3,7 @@ import {defineConfig} from '@playwright/test';
 // A fresh, isolated build: never attach acceptance tests to the player's dev server.
 const journeys=['menu','tutorial','construction','drawn-route','construction-lessons',
   'station-approaches','route-connections','practice-service','follow-train',
-  'draft-persistence','localization-exit','passenger','freight','operations'];
+  'draft-persistence','planning-responsiveness','localization-exit','passenger','freight','operations'];
 export default defineConfig({
   testDir:'tests/browser',
   testMatch:[...journeys.map(name=>`**/${name}.spec.ts`),'**/novice-*.spec.ts','**/ux-*.spec.ts'],

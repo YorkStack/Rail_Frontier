@@ -720,6 +720,22 @@
     "Face a settlement": "Richtung eines Ortes",
     "Align toward settlement": "Zum Ort ausrichten",
     "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.": "Drehe den Bahnhof vor dem Bau. Die Richtung zum Ort dient als Ausgangspunkt, sie garantiert keine günstigste Strecke. Gebaute Bahnhöfe behalten ihre Ausrichtung.",
-    "The game calendar has 360 days per year. Vehicle availability follows the year.": "Der Spielkalender hat 360 Tage pro Jahr. Das Jahr bestimmt, welche Fahrzeuge verfügbar sind."
+    "The game calendar has 360 days per year. Vehicle availability follows the year.": "Der Spielkalender hat 360 Tage pro Jahr. Das Jahr bestimmt, welche Fahrzeuge verfügbar sind.",
+    "A longer platform requires rebuilding the station. Expansion is not available yet; build a larger station at another site.": "Ein längerer Bahnsteig erfordert einen Umbau. Dieser Ausbau ist noch nicht verfügbar. Baue einen größeren Bahnhof an einem anderen Standort.",
+    "office.freightAboard": "An Bord: {cargo}",
+    "Cash: {amount}": "Guthaben: {amount}",
+    "Manage services": "Linien verwalten",
+    "Choose a train and a different route. Changes are possible only when the train is stopped at a station served by the new route. Pausing time alone does not stop a moving train.": "Wähle einen Zug und eine andere Linie. Änderungen sind nur möglich, wenn der Zug an einem Bahnhof der neuen Linie hält. Die Zeit anzuhalten bringt einen fahrenden Zug nicht zum Stillstand.",
+    "Practice: {lesson}": "Übung: {lesson}",
+    "Route contains disconnected stops": "Diese Halte sind noch nicht durch Gleise verbunden. Verbinde die Bahnhöfe zuerst und erstelle die Linie danach erneut.",
+    "Train must be stopped before route assignment": "Der Zug muss an einem Bahnhof halten, bevor du seine Linie ändern kannst.",
+    "Train is not stopped at a station node": "Der Zug hält noch nicht an einem Bahnhof. Warte auf den nächsten Halt.",
+    "Train is not at a stop on this route": "Der aktuelle Bahnhof des Zugs ist kein Halt dieser Linie.",
+    "Waiting for {cargo}": "Wartet auf {cargo}",
+    "Storage full · collect outgoing goods": "Lager voll · Fertigwaren abholen",
+    "Cycle: {progress}%": "Arbeitsgang: {progress}%",
+    "Produces {cargo} per cycle": "Erzeugt {cargo} je Arbeitsgang",
+    "Recipe": "Verarbeitung",
+    "stored": "gelagert"
   }
 }

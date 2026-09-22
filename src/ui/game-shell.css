@@ -84,3 +84,30 @@ body:has(.floating-panel:not([hidden])) .company-strip,body:has(.floating-panel:
 .station-turn-controls button{flex:1;min-width:110px}.station-bearing-action{width:100%;margin:6px 0}
 .station-bearing-action:disabled{opacity:.5;cursor:not-allowed}
 #station-planner .station-direction-help{font-size:calc(.8125rem * var(--ui-scale));line-height:1.5;color:var(--muted)}
+
+/* Review fixes: enlarged text must keep objectives and controls reachable. */
+@media(min-width:801px){
+ .objective-card,html[data-ui-scale] .objective-card{top:calc(100px + var(--company-strip-height,76px));width:calc(200px * var(--ui-scale));max-height:calc(100dvh - 150px - var(--company-strip-height,76px) - var(--clock-deck-height,84px));overflow:auto;scrollbar-gutter:stable}
+}
+@media(max-height:800px),(max-width:800px){
+ #station-planner{padding:16px}
+ #station-planner>h2{display:none}
+ #station-planner .panel-title{margin-bottom:8px}
+ .station-purchase-bar{margin-top:8px;padding-top:8px}
+ #station-valid{margin:4px 0 8px;font-size:calc(.8125rem * var(--ui-scale));line-height:1.35}
+}
+.station-planner-body{scrollbar-gutter:stable;overscroll-behavior:contain}
+.session-tools button,.view-controls button{font-size:calc(.875rem * var(--ui-scale))}
+.new-save-slot label,.new-save-slot button,.archive-tools,.save-slot button,.save-slot form button{font-size:calc(.875rem * var(--ui-scale));min-height:44px;letter-spacing:0;text-transform:none}
+.new-save-slot input,.save-slot input{font-size:calc(1rem * var(--ui-scale));min-width:0;max-width:100%}
+.save-slot small,.empty-slots span{font-size:calc(.8125rem * var(--ui-scale));line-height:1.45;letter-spacing:0}
+.save-slot{flex-wrap:wrap}.save-slot>div,.save-slot form{flex-wrap:wrap}
+.service-workflow li,.service-stage small,#consist-valid{font-size:calc(.875rem * var(--ui-scale));line-height:1.45}
+.tool-balance{font-size:calc(.8125rem * var(--ui-scale));line-height:1.35;color:var(--ink);margin-left:auto;text-align:right;max-width:55%;overflow-wrap:anywhere}
+.floating-panel .panel-title,#planner .panel-title{gap:8px}
+
+#manage-service{margin-top:8px;background:transparent;color:var(--ink);font-weight:400}
+#assignment-guidance{font-size:calc(.875rem * var(--ui-scale));line-height:1.5}
+.service-workflow #service-guidance,#service-running-detail,.consist-summary span,.consist-summary strong{font-size:calc(.875rem * var(--ui-scale));line-height:1.45}
+.consist-unit b{font-size:calc(.75rem * var(--ui-scale))}
+.operations-panel form #operations-valid{grid-column:1/-1;margin:8px 0;padding:12px;border:1px solid currentColor;border-radius:4px}

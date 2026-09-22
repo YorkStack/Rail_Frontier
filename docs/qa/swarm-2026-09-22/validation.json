@@ -1,0 +1,28 @@
+{
+  "baseline": "fb5f666",
+  "core": {
+    "passed": 224,
+    "failed": 0
+  },
+  "productionBuild": "passed (existing bundle-size advisory)",
+  "browserBroadSweep": {
+    "cases": 49,
+    "passed": 48,
+    "failed": 1,
+    "failure": "test locator assumed translated proper name; application status was correct"
+  },
+  "browserFollowup": {
+    "cases": 1,
+    "passed": 1,
+    "applicationChanged": false
+  },
+  "distinctBrowserCasesPassed": 49,
+  "automaticRetries": 0,
+  "focusedHistory": [
+    "5/6: JSON -0/0 comparison corrected",
+    "9/9: expanded focused run passed"
+  ],
+  "reviewRoles": 18,
+  "distinctWorkers": 11,
+  "workerReuses": 7
+}

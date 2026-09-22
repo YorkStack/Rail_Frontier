@@ -106,3 +106,12 @@ test('save validation enforces station class and cargo storage capacity',()=>{
   const state=structuredClone(game.snapshot()) as GameState,station=state.stations[0]!;station.storage=[{kind:'mail',quantity:501,originId:station.id,destinationId:station.id,loadedTick:0,distanceM:0}];
   assert.throws(()=>serialize(state),/Station storage exceeds capacity/);station.storage=[];station.classId='unknown';assert.throws(()=>serialize(state),/Unknown station class/);
 });
+
+test('a built platform cannot buy an impossible class expansion or lose money on rejection',()=>{
+ const game=new RailFrontierGame(createInitialState(),terrain()),site=surveyStationSite(game.terrain,{x:250,z:250},0,90);
+ assert.equal(game.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position:site.center,orientationRad:0,expectedRevision:0,quotedCost:stationDefinitions['rural-halt'].purchaseCost+site.earthworkCost}}).ok,true);
+ const before=JSON.stringify(game.snapshot()),station=game.snapshot().stations[0]!;
+ const result=game.dispatch({sequence:2,command:{type:'upgradeStation',stationId:station.id,classId:'major-terminal'}});
+ assert.equal(result.ok,false);if(!result.ok)assert.match(result.reason,/requires rebuilding/);
+ assert.equal(JSON.stringify(game.snapshot()),before);
+});

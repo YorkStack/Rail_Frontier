@@ -63,3 +63,18 @@ test('planning metadata follows manual/autosaves and portable archives; rejected
  const exported=await manager.exportSlot('draft'),imported=await manager.importArchive(exported.json);assert.equal((await manager.readDocument(imported.id)).planning!.current.points[0]!.x,100);
  await manager.autosave();planning=null;await manager.load('autosave');assert.equal((planning as unknown as import('../src/rail/planning-draft.js').PlanningDraft).current.points[0]!.x,200);
 });
+
+test('session replacement preserves stored quick saves and drafts once without capturing discarded edits',async()=>{
+ const {game,store,manager}=setup();await manager.save('study','Original railway');await manager.autosave();
+ const original=await store.read('study');game.advance(2);await manager.preserveQuickSaves();
+ const preserved=(await manager.list()).filter(slot=>slot.id.startsWith('preserved-'));assert.equal(preserved.length,2);
+ for(const slot of preserved)assert.equal(await store.read(slot.id),original);
+ await manager.preserveQuickSaves();assert.equal((await manager.list()).filter(slot=>slot.id.startsWith('preserved-')).length,2);
+ await manager.save('study','Practice');await manager.autosave();for(const slot of preserved)assert.equal(await store.read(slot.id),original);
+});
+
+test('failed pre-switch preservation leaves the original quick save intact and can be retried',async()=>{
+ const {store,manager}=setup();await manager.save('study','Original railway');const original=await store.read('study');store.failNextWrite=true;
+ await assert.rejects(()=>manager.preserveQuickSaves(),/quota/);assert.equal(await store.read('study'),original);assert.equal(store.slots.size,1);
+ await manager.preserveQuickSaves();assert.equal(store.slots.size,2);
+});

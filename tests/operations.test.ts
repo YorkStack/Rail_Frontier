@@ -100,3 +100,13 @@ test('station platforms reject overlong purchases and route assignments until up
   assert.equal(instance.dispatch({sequence:4,command:{type:'upgradeStation',stationId:'station:9',classId:'small-station'}}).ok,true);
   assert.equal(instance.dispatch({sequence:5,command:{type:'assignRoute',trainId:'train:11',routeId:'route:13'}}).ok,true);
 });
+
+test('a moving train cannot be reassigned even while the simulation clock is paused',()=>{
+ const instance=game();
+ assert.equal(instance.dispatch({sequence:1,command:{type:'purchaseTrain',locomotiveId:'nord-2-6-0',vehicleIds:['fjord-passenger-coach'],stationId:'station:8'}}).ok,true);
+ assert.equal(instance.dispatch({sequence:2,command:{type:'createRoute',stops:['station:8','station:9'],mode:'shuttle'}}).ok,true);
+ assert.equal(instance.dispatch({sequence:3,command:{type:'assignRoute',trainId:'train:10',routeId:'route:12'}}).ok,true);
+ instance.pauseForVisibility();const before=JSON.stringify(instance.snapshot());
+ assert.deepEqual(instance.dispatch({sequence:4,command:{type:'assignRoute',trainId:'train:10',routeId:'route:12'}}),{ok:false,reason:'Train must be stopped before route assignment'});
+ assert.equal(JSON.stringify(instance.snapshot()),before);
+});

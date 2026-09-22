@@ -720,6 +720,22 @@
     "Face a settlement": "Face a settlement",
     "Align toward settlement": "Align toward settlement",
     "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.": "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.",
-    "The game calendar has 360 days per year. Vehicle availability follows the year.": "The game calendar has 360 days per year. Vehicle availability follows the year."
+    "The game calendar has 360 days per year. Vehicle availability follows the year.": "The game calendar has 360 days per year. Vehicle availability follows the year.",
+    "A longer platform requires rebuilding the station. Expansion is not available yet; build a larger station at another site.": "A longer platform requires rebuilding the station. Expansion is not available yet; build a larger station at another site.",
+    "office.freightAboard": "On board: {cargo}",
+    "Cash: {amount}": "Cash: {amount}",
+    "Manage services": "Manage services",
+    "Choose a train and a different route. Changes are possible only when the train is stopped at a station served by the new route. Pausing time alone does not stop a moving train.": "Choose a train and a different route. Changes are possible only when the train is stopped at a station served by the new route. Pausing time alone does not stop a moving train.",
+    "Practice: {lesson}": "Practice: {lesson}",
+    "Route contains disconnected stops": "Route contains disconnected stops",
+    "Train must be stopped before route assignment": "Train must be stopped before route assignment",
+    "Train is not stopped at a station node": "Train is not stopped at a station node",
+    "Train is not at a stop on this route": "Train is not at a stop on this route",
+    "Waiting for {cargo}": "Waiting for {cargo}",
+    "Storage full · collect outgoing goods": "Storage full · collect outgoing goods",
+    "Cycle: {progress}%": "Cycle: {progress}%",
+    "Produces {cargo} per cycle": "Produces {cargo} per cycle",
+    "Recipe": "Recipe",
+    "stored": "stored"
   }
 }
