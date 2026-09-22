@@ -1,4 +1,5 @@
 ASTRA_PHASE_COMPLETE=false
+PROJECT_PAUSED=true
 RECOMMENDED_MODEL=ASTRA
 ASTRA_REVIEW_REQUIRED=false
 GRAPHICS_PLANNING_COMPLETE=true
@@ -15,7 +16,9 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — automatic regional route recovery, 2026-09-22
+# Current status — paused after automatic regional route recovery, 2026-09-22
+
+The user requested a clean pause after the Tyne/Wear route-planning correction. Source, tests and documentation are committed and synchronized to `main` and `implementation/passenger-slice`. Project development servers, preview servers and test browsers are stopped. Resume from the automatic regional route-recovery checkpoint below.
 
 ## DRAW: show a buildable railway after the first narrow search fails
 
