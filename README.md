@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — continuous rails beside the station platform
+
+Station ballast and sleepers no longer disappear into grass. The prepared ground now stays below the rails, and the platform follows the entire saved station length with a clear boarding edge. The building stays its original size and has a grounded foundation.
+
+![A connected track continues alongside the complete Sundvik platform and waiting train](docs/screenshots/station-connected-train.png)
+
+Existing saves migrate automatically without moving track, changing trains or charging construction costs again. Verified with **219 core tests and seven browser journeys**, including real construction, passenger/mail delivery and save/reload; two final focused cases also passed after the foundation detail. Reload the game and continue your saved company to see the correction.
+
 ## September 22 — orient your station and keep track of the year
 
 Before building, use the **left/right 15° buttons** or **Align toward settlement** to turn the station preview. The latter points toward your selected town; terrain, curves and construction cost still need checking. Built stations keep their orientation. The current **day and year now remain beside the time controls**, including while planning track or managing trains.

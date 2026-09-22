@@ -389,3 +389,10 @@ Validation: 217 core tests, TypeScript/production build and 17 distinct focused 
 ### LIV-01–05 — Living settlements, access and era progression
 
 Planned, with LIV-01 as the next implementation priority requested by the player. Detailed contracts, file map, visual budgets, archival references and acceptance gates are in [LIVING_SETTLEMENTS.md](docs/world/LIVING_SETTLEMENTS.md). Sequence: connected building paths and station forecourts → residents driven by real demand → gradual period-appropriate road traffic → habitat-based proportional animals → balanced playable era progression. Current textured roads do not guarantee access; residents and animals are not implemented. Reuse the existing road system, preserve aggregate economic accounting, and benchmark close/far views before claiming performance acceptance. Earlier first-freight guidance and cross-browser/human acceptance remain pending.
+
+
+### FIX-STATION-BED — Visible track along the complete platform, 2026-09-22
+
+Complete: station-pad terrain is prepared 0.55 m below railhead rather than covering ballast and sleepers. The platform uses the saved footprint length, retains a 1.75 m edge clearance from track centre and gives the unchanged authored building a foundation. The short authored slab is replaced at runtime in both LODs. New construction keeps the existing purchase/site-grading price contract; standard bed preparation is included.
+
+Schema 10→11 corrects only explicit station-pad target heights, with old-contract validation and preserved rail graph, motion, ledger, stations and planning history. Core regressions ray-check visible rails and ballast clearance along rotated platforms and verify migration is pure and not repeated. The browser checks rendered terrain throughout the platform before/after reload; existing construction, bidirectional default approaches, DE/EN station controls and real passenger/mail revenue remain covered. 219 core tests, production build and seven distinct Chrome journeys pass. Continue with LIV-01 afterwards.

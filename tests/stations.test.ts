@@ -73,7 +73,7 @@ test('station survey quotes and publishes balanced cut and fill on a moderate sl
   assert.ok(site.maxReliefM>2.5&&site.maxReliefM<12);assert.ok(site.cutVolumeM3>0);assert.ok(site.fillVolumeM3>0);assert.ok(site.earthworkCost>0);
   assert.deepEqual(game.dispatch({sequence:1,command:{type:'placeStation',classId:'rural-halt',position,orientationRad,expectedRevision:0,quotedCost}}),{ok:true,createdIds:['station:5','node:6','node:7','node:8','edge:9','edge:10']});
   const built=game.snapshot(),station=built.stations[0]!;assert.equal(station.constructionCost,quotedCost);assert.equal(built.company.cash,beforeCash-quotedCost);assert.equal(built.operations.terrain.operations[0]?.kind,'station-pad');
-  for(const point of [site.center,site.portA,site.portB])assert.ok(Math.abs(game.terrain.sample(point.x,point.z).elevationM-site.center.y)<.001);
+  for(const point of [site.center,site.portA,site.portB])assert.ok(Math.abs(game.terrain.sample(point.x,point.z).elevationM-(site.center.y-.55))<.001);
 });
 
 test('town coverage chooses one closest station with stable ID tie-breaking',()=>{

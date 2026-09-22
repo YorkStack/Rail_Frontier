@@ -11,4 +11,10 @@ for(const reverse of [false,true])test(`untouched default station orientation bu
  if(reverse){await page.mouse.move(50,80);mkdirSync('artifacts/evidence/station-approaches',{recursive:true});await page.screenshot({path:'artifacts/evidence/station-approaches/granli-sundvik.png'});}
  await page.locator('#commit-track').click();await expect(page.locator('#planner')).toBeHidden();const after=await page.evaluate(()=>window.__railProbe.snapshot());expect(after.railway.revision).toBe(before.railway.revision+1);expect(after.company.cash).toBe(before.company.cash-cost);expect(after.stations.map(s=>s.layout)).toEqual(before.stations.map(s=>s.layout));
  await page.evaluate(()=>window.__railProbe.save());await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.locator('#continue-game').click();await expect(page.locator('#main-menu')).toBeHidden();expect((await page.evaluate(()=>window.__railProbe.snapshot())).railway).toEqual(after.railway);expect(errors).toEqual([]);
+ if(reverse){
+  await page.locator('#operations').click();await page.locator('#purchase-station').selectOption(after.stations[0]!.id);await page.locator('#purchase-train .office-action').click();await page.locator('#close-operations').click();
+  const station=after.stations[0]!;if(station.layout.kind!=='single-platform')throw new Error('Expected platform');
+  await page.evaluate(p=>window.__railProbe.focus(p),station.layout.pad.center);await page.mouse.move(720,430);await page.mouse.wheel(0,-700);await page.waitForTimeout(1000);
+  mkdirSync('artifacts/evidence',{recursive:true});await page.screenshot({path:'artifacts/evidence/station-connected-train.png'});
+ }
 });

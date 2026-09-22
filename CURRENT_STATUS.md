@@ -15,7 +15,16 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — station direction, visible calendar and living settlements, 2026-09-22
+# Current status — continuous station track and platforms, 2026-09-22
+
+## Continuous station track and platform — 2026-09-22
+
+- Fixed the grass gap at stations: station-pad terrain formerly coincided with the railhead and occluded sleepers and ballast. Explicit station formation now sits 0.55 m below the unchanged rail geometry, matching the connecting track bed. Standard bed preparation remains included in the station price; site-grading quotes are unchanged.
+- Derive a continuous platform from the saved station footprint instead of displaying only the 28 m authored slab. The building remains its original size; the platform edge clears the rolling-stock envelope, with a contrasting edge and foundations down to the prepared ground. The original slab is omitted from both runtime asset LODs to avoid overlapping surfaces.
+- Save schema 11 migrates existing explicit station-pad heights once. Rail nodes, curves, stations, trains, routes, paid costs, cash and retained planning drafts are preserved. New saves validate the corrected height contract. Patch generator version 1 is unchanged because it already evaluates the explicit target correctly.
+- Validation: 219 core tests and production build pass; seven focused Chrome journeys pass for station construction, forward/reverse connections, passenger/mail revenue, orientation persistence in DE/EN and the full station ground height before/after reload. Both final focused rerun cases pass with the added building foundation and connected-train screenshot (`docs/screenshots/station-connected-train.png`). Known build chunk advisory remains.
+
+Next: resume LIV-01 connected settlement paths and station access. The station visual correction does not implement road access or residents.
 
 ## Station direction and living-settlement foundation — 2026-09-22
 
@@ -227,7 +236,7 @@ Still open: full ordered-corridor search, connected campaign progression, railwa
 
 The current user priority is living settlements: connected textured paths and station entrances before pedestrians, era traffic and animals. Station-direction controls and persistent day/year are complete; follow `docs/world/LIVING_SETTLEMENTS.md`, starting with LIV-01. The drawn-route player review and human acceptance remain open. Do not resume the earlier SOL-pause instruction.
 
-Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campaign expansion and further graphics work wait behind the track-planning review. Existing built saves remain schema 9; unbuilt route sketches are transient and not persisted.
+Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campaign expansion and further graphics work wait behind the track-planning review. Current saves use schema 11; schema 10 retained route sketches migrate with the company.
 
 ## Stable contracts
 
@@ -236,7 +245,7 @@ Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campai
 - src/world/terrain.ts + domain/curve-math.ts: triangle surface and exact crossing rules.
 - src/rail/geometry.ts, constraints.ts, planner.ts, graph.ts: cubic/arc/traversal/quote/cache rules.
 - src/simulation/clock.ts: 20 Hz fixed steps, preserved time debt and compressed calendar contract.
-- src/persistence/save.ts: schema 9 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
+- src/persistence/save.ts: schema 11 and sequential versioned migrations; indexeddb.ts: atomic slot backend.
 
 Do not casually change units/axes, graph identity/connectivity, tick cadence/order, typed IDs, command atomicity or saved operational semantics. A genuine redesign follows ASTRA_ESCALATIONS.md; there is no open escalation now.
 
