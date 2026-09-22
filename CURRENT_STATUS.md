@@ -15,7 +15,13 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — exact missing service links, 2026-09-22
+# Current status — automatic regional route recovery, 2026-09-22
+
+## DRAW: show a buildable railway after the first narrow search fails
+
+- Reproduced the reported Tyne/Wear plan between two automatically oriented coastal stations. The initial 60 m corridor could not fit the required station approaches, while the existing 300 m retry immediately produced three certified bridge/terrain alternatives.
+- That wider search now starts automatically after an empty first pass. During it the German/English status explains that a larger detour is being checked; the player's drawing remains unchanged. A failed or unfinished draft clears any stale quoted price from the disabled build button.
+- A real Chrome regression builds the first two Tyne stations, selects both rail connections, waits for the automatic fallback, frames the coloured proposal, buys it and verifies a new railway revision plus additional track edges. **245/245 core tests**, localization, TypeScript and the production build pass.
 
 ## UX: readable, actionable disconnected-route feedback
 

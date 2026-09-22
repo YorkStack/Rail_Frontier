@@ -6,6 +6,8 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+The route planner first checks a tight corridor around the player's drawing. If station approaches do not fit there, it now automatically checks a wider 300 m detour and displays the resulting coloured, buildable railway. A disabled build button never retains the price of an obsolete proposal.
+
 ## September 22 — exact missing railway links
 
 Creating a service now names every disconnected leg in travel order, for example **Sundvik → Granli**, instead of showing a generic rejection. The notice uses normal interface text size, stays fully visible in the Railway Office and preserves the chosen stops so the missing track can be built without entering the line again.
