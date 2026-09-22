@@ -305,13 +305,6 @@ def house(lod):
         cylinder('RF_House_Chimney',(2.4,1.8,8.0),.32,2.4,'stone',8)
     empty('ground_origin',(0,0,0))
 
-def spruce(lod):
-    cylinder('RF_Tree_Trunk',(0,0,4.2),.38,8.4,'wood',6 if lod else 8)
-    cone('RF_Tree_Crown_Low',(0,0,7.2),3.4,.25,7.8,'leaf',7 if lod else 10)
-    if not lod:
-        cone('RF_Tree_Crown_High',(0,0,11.0),2.6,.08,7.5,'green',10)
-    empty('ground_origin',(0,0,0))
-
 def bridge(lod):
     box('RF_Bridge_Deck',(0,0,.45),(7.2,24,.9),'iron')
     for x in (-3.35,3.35):
@@ -329,10 +322,10 @@ def portal(lod):
         for x in (-4.7,-2.3,2.3,4.7): box('RF_Portal_Block',(x,-1.3,7.8),(1.9,.35,.8),'cream')
     empty('track_center',(0,0,0))
 
-BUILDERS={'nord-2-6-0':locomotive,'nord-el-1':electric_el1,'nord-di-3b':diesel_di3b,'nord-di-4':diesel_di4,'nord-el-18':electric_el18,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-station':station,'norway-house':house,'norway-spruce':spruce,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
-KINDS={'nord-2-6-0':'vehicle','nord-el-1':'vehicle','nord-di-3b':'vehicle','nord-di-4':'vehicle','nord-el-18':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-station':'station','norway-house':'building','norway-spruce':'vegetation','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
-NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-1':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-4':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-18':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-station':['platform_origin','track_side'],'norway-house':['ground_origin'],'norway-spruce':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
-MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-el-1':[4,7.5,14.5],'nord-di-3b':[4,5.5,20.5],'nord-di-4':[4,5.5,22.5],'nord-el-18':[4,7.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-station':[16,10,31],'norway-house':[12,11,13],'norway-spruce':[9,16,9],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
+BUILDERS={'nord-2-6-0':locomotive,'nord-el-1':electric_el1,'nord-di-3b':diesel_di3b,'nord-di-4':diesel_di4,'nord-el-18':electric_el18,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-station':station,'norway-house':house,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
+KINDS={'nord-2-6-0':'vehicle','nord-el-1':'vehicle','nord-di-3b':'vehicle','nord-di-4':'vehicle','nord-el-18':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-station':'station','norway-house':'building','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
+NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-1':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-4':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-18':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-station':['platform_origin','track_side'],'norway-house':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
+MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-el-1':[4,7.5,14.5],'nord-di-3b':[4,5.5,20.5],'nord-di-4':[4,5.5,22.5],'nord-el-18':[4,7.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-station':[16,10,31],'norway-house':[12,11,13],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
 
 assets=[]
 for asset_id,builder in BUILDERS.items():

@@ -55,6 +55,7 @@
     "Insufficient funds · {p0} more required": "Insufficient funds · {p0} more required",
     "✓ Feasible route. Not built yet.": "✓ Feasible route. Not built yet.",
     "Build for {p0}": "Build for {p0}",
+    "Release to check the route. Escape cancels this edit.": "Release to check the route. Escape cancels this edit.",
     "Editing sketch. No construction order.": "Editing sketch. No construction order.",
     "Company before drawing practice": "Company before drawing practice",
     "Practice ready: NOK 10 million opening capital, prepared stations already paid.": "Practice ready: NOK 10 million opening capital, prepared stations already paid.",
@@ -642,6 +643,7 @@
     "Only the obstacle and approaches change. Full-route prices.": "Only the obstacle and approaches change. Full-route prices.",
     "Whole-route comparison. Full-route prices.": "Whole-route comparison. Full-route prices.",
     "Bright: comparison · muted: unchanged": "Bright: comparison · muted: unchanged",
-    "Selection previews; Build buys the route.": "Selection previews; Build buys the route."
+    "Selection previews; Build buys the route.": "Selection previews; Build buys the route.",
+    "Following the selected train.": "Following the selected train."
   }
 }

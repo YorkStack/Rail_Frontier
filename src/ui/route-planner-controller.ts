@@ -18,25 +18,26 @@ export class RoutePlannerController {
   get draft(){return this.history.current;}
   set draft(value:RouteDraft){this.history.current=value;}
   private gesture: {id: number;before: RouteDraft;index: number | null;lastX: number;lastY: number;} | null = null;
-  private frame = 0;private space = false;
+  private frame = 0;private space = false;private pendingBusy=false;
+  private keyboardGesture:{before:RouteDraft;index:number;keys:Set<string>}|null=null;
   private cursor: {x: number;y: number;point: Vec3 | null;port: RouteConnection | null;segment: number | null;} | null = null;
   constructor(private readonly a: Adapter) {
-    window.addEventListener('pointerdown', this.down, true);window.addEventListener('pointermove', this.move, true);window.addEventListener('pointerup', this.up, true);window.addEventListener('pointercancel', this.cancelEvent, true);window.addEventListener('blur', this.blur);window.addEventListener('keydown', this.key, true);window.addEventListener('keyup', this.keyUp, true);
+    window.addEventListener('pointerdown', this.down, true);window.addEventListener('pointermove', this.move, true);window.addEventListener('pointerup', this.up, true);window.addEventListener('pointercancel', this.cancelEvent, true);window.addEventListener('blur', this.blur);window.addEventListener('keydown', this.key, true);window.addEventListener('keyup', this.keyUp, true);window.addEventListener('focusout',this.focusOut,true);
     a.canvas.addEventListener('click', this.click, true);a.canvas.addEventListener('wheel', this.wheel, { capture: true, passive: false });this.frame = requestAnimationFrame(this.paint);
   }
-  get canUndo() {return this.history.past.length > 0;}get canRedo() {return this.history.future.length > 0;}get busy() {return this.gesture !== null;}
-  private emit(busy = false) {this.a.changed(structuredClone(this.draft), busy);}
+  get canUndo() {return this.history.past.length > 0;}get canRedo() {return this.history.future.length > 0;}get busy() {return this.gesture !== null||this.keyboardGesture!==null;}
+  private emit(busy = false) {this.pendingBusy=false;this.a.changed(structuredClone(this.draft), busy);}
   private save(before:RouteDraft) {
     if(JSON.stringify(before.points)!==JSON.stringify(this.draft.points)||before.complete!==this.draft.complete)this.draft.design=null;
     this.history.record(before);
   }
-  snapshot():PlanningDraft|null {const saved=this.history.snapshot();if(saved&&this.gesture)saved.current=structuredClone(this.gesture.before);return saved;}
+  snapshot():PlanningDraft|null {const saved=this.history.snapshot();const before=this.gesture?.before??this.keyboardGesture?.before;if(saved&&before)saved.current=structuredClone(before);return saved;}
   restore(saved:PlanningDraft|null) {this.cancel();this.history.restore(saved);this.cursor=null;}
   chooseDesign(curves:CubicCurve[]|null,record=true) {const before=structuredClone(this.draft);this.draft.design=structuredClone(curves);if(record)this.history.record(before);}
   setStandard(trackClassId:string) {this.cancel();const before=structuredClone(this.draft);this.draft.trackClassId=trackClassId;this.draft.design=null;this.history.record(before);this.emit();}
   clear() {this.cancel();const before=structuredClone(this.draft);this.draft={...emptyRouteDraft(),trackClassId:before.trackClassId};this.history.record(before);this.emit();}
   reset() {this.cancel();this.history.restore(null);this.cursor=null;}
-  undo() {this.cancel();if(this.history.undo())this.emit();}
+  undo() {if(this.keyboardGesture){this.cancel();return;}this.cancel();if(this.history.undo())this.emit();}
   redo() {this.cancel();if(this.history.redo())this.emit();}
   private editableMidpoint() {if (this.draft.complete && this.draft.points.length === 2) {const [a, b] = this.draft.points as [Vec3, Vec3],x = (a.x + b.x) / 2,z = (a.z + b.z) / 2;this.draft.points.splice(1, 0, { x, z, y: this.a.surface(x, z) });}}
   connect(point: Vec3) {if (this.draft.complete) return;const before = structuredClone(this.draft);if (!this.draft.points.length) this.draft.points.push({ ...point });else if (horizontalDistance(point, this.draft.points[0]!) > 10) {this.draft.points.push({ ...point });this.draft.complete = true;} else return;this.editableMidpoint();this.save(before);this.emit();}
@@ -68,7 +69,7 @@ export class RoutePlannerController {
   private down = (e: PointerEvent) => {
     if (!this.a.enabled() || e.button !== 0 || !this.onMap(e.target)) return;
     if (e.altKey || this.space) {this.a.pan(this.space);return;}
-    this.stop(e);if (this.gesture) {this.cancel();return;}
+    this.stop(e);if(this.keyboardGesture)this.finishKeyboard();if (this.gesture) {this.cancel();return;}
     const target = e.target as Element,handle = target.closest<HTMLElement>('[data-route-handle]')?.dataset.routeHandle;
     const point = this.a.pick(e.clientX, e.clientY),port = this.portTarget(e),before = structuredClone(this.draft);
     // The unfinished tip remains a drawing affordance. Interior handles reshape the sketch.
@@ -90,16 +91,21 @@ export class RoutePlannerController {
     this.a.canvas.setPointerCapture(e.pointerId);this.emit(true);
   };
   private move = (e: PointerEvent) => {
+    let picked:Vec3|null|undefined;
     if (this.a.enabled() && this.onMap(e.target) && !e.altKey && !this.space && (e.buttons === 0 || e.buttons === 1)) {
-      this.cursor = { x: e.clientX, y: e.clientY, point: this.a.pick(e.clientX, e.clientY), port: this.portTarget(e), segment: this.draft.complete ? this.segmentAt(e.clientX, e.clientY) : null };
+      this.cursor = { x: e.clientX, y: e.clientY, point: picked=this.a.pick(e.clientX, e.clientY), port: this.portTarget(e), segment: this.draft.complete ? this.segmentAt(e.clientX, e.clientY) : null };
     } else this.cursor = null;
     const g = this.gesture;if (!g || e.pointerId !== g.id) return;this.stop(e);
     if (Math.hypot(e.clientX - g.lastX, e.clientY - g.lastY) < 4) return;
-    const p = this.a.pick(e.clientX, e.clientY);if (!p) {this.cancel();this.a.notice('Stroke cancelled: outside the terrain.');return;}
+    const p = picked===undefined?this.a.pick(e.clientX,e.clientY):picked;if (!p) {this.cancel();this.a.notice('Stroke cancelled: outside the terrain.');return;}
     g.lastX = e.clientX;g.lastY = e.clientY;
     if (g.index !== null) this.draft.points[g.index] = p;else
-    if (this.draft.points.length < 2048 && horizontalDistance(p, this.draft.points.at(-1)!) > 3) this.draft.points.push(p);
-    this.emit(true);
+    if (horizontalDistance(p, this.draft.points.at(-1)!) > 3) {
+      if(this.draft.points.length>=2048){this.cancel();this.a.notice('Too many bends. Draw a simpler route.');return;}
+      this.draft.points.push(p);
+    }
+    // Keep all accepted stroke samples; only coalesce the adapter/DOM work.
+    this.pendingBusy=true;
   };
   private up = (e: PointerEvent) => {const g = this.gesture;if (!g || e.pointerId !== g.id) return;this.stop(e);const port = this.snap(e.clientX, e.clientY);
     if (g.index === null && port && horizontalDistance(port.point, this.draft.points[0]!) > 10) {if (this.draft.points.length > 1 && horizontalDistance(this.draft.points.at(-1)!, port.point) < 35) this.draft.points.pop();this.draft.points.push({ ...port.point });this.draft.complete = true;}
@@ -107,25 +113,37 @@ export class RoutePlannerController {
     if (this.draft.points.length > 64) {this.draft = g.before;this.a.notice('Too many bends. Draw a simpler route.');} else this.save(g.before);
     this.release();this.emit();
   };
-  private release() {if (this.gesture && this.a.canvas.hasPointerCapture(this.gesture.id)) this.a.canvas.releasePointerCapture(this.gesture.id);this.gesture = null;this.a.lock(false);}
-  cancel() {if (!this.gesture) return;this.draft = this.gesture.before;this.release();this.emit();}
+  private release() {if (this.gesture && this.a.canvas.hasPointerCapture(this.gesture.id)) this.a.canvas.releasePointerCapture(this.gesture.id);this.gesture = null;this.pendingBusy=false;this.a.lock(false);}
+  cancel() {const before=this.gesture?.before??this.keyboardGesture?.before;if(!before)return;this.draft=before;this.keyboardGesture=null;this.release();this.emit();}
+  private finishKeyboard() {const edit=this.keyboardGesture;if(!edit)return;this.keyboardGesture=null;this.save(edit.before);this.emit();}
+  private focusOut=(event:FocusEvent)=>{if(!this.keyboardGesture)return;const target=event.target instanceof Element?event.target.closest('[data-route-handle]'):null;if(!target)return;if(event.relatedTarget)this.finishKeyboard();else this.cancel();};
   private cancelEvent = () => this.cancel();private blur = () => {this.space = false;this.cursor = null;this.a.pan(false);this.cancel();};
   private click = (e: MouseEvent) => {if (this.a.enabled()) this.stop(e);};
   private wheel = (e: WheelEvent) => {this.cursor = null;if (this.gesture) this.stop(e);};
   private key = (e: KeyboardEvent) => {if (!this.a.enabled() || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
     if (e.code === 'Space' && e.target === this.a.canvas) {this.space = true;this.stop(e);return;}
-    if (e.code === 'Escape' && this.gesture) {this.stop(e);this.cancel();return;}
+    if (e.code === 'Escape' && this.busy) {this.stop(e);this.cancel();return;}
     if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ') {this.stop(e);e.shiftKey ? this.redo() : this.undo();return;}
     const target = e.target instanceof HTMLElement ? e.target.closest<HTMLElement>('[data-route-handle]') : null;if (!target) return;const index = Number(target.dataset.routeHandle),point = this.draft.points[index];if (!point) return;
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete', 'Backspace'].includes(e.key)) {
-      this.stop(e);const before = structuredClone(this.draft);
-      if (e.key === 'Delete' || e.key === 'Backspace') this.draft.points.splice(index, 1);else
-      {const step = e.shiftKey ? 25 : 5;point.x += e.key === 'ArrowRight' ? step : e.key === 'ArrowLeft' ? -step : 0;point.z += e.key === 'ArrowDown' ? step : e.key === 'ArrowUp' ? -step : 0;point.y = this.a.surface(point.x, point.z);}
-      this.save(before);this.emit();
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+      this.stop(e);if(this.gesture)return;
+      if(this.keyboardGesture&&this.keyboardGesture.index!==index)this.finishKeyboard();
+      if(!this.keyboardGesture)this.keyboardGesture={before:structuredClone(this.draft),index,keys:new Set()};
+      this.keyboardGesture.keys.add(e.code);
+      const step=e.shiftKey?25:5;point.x+=e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0;point.z+=e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0;point.y=this.a.surface(point.x,point.z);
+      this.emit(true);return;
+    }
+    if(e.key==='Delete'||e.key==='Backspace') {
+      this.stop(e);if(this.gesture)return;this.finishKeyboard();const before=structuredClone(this.draft);this.draft.points.splice(index,1);this.save(before);this.emit();
     }
   };
-  private keyUp = (e: KeyboardEvent) => {if (e.code === 'Space') {this.space = false;this.a.pan(false);}};
+  private keyUp = (e: KeyboardEvent) => {
+    if(e.code==='Space'){this.space=false;this.a.pan(false);}
+    if(this.keyboardGesture?.keys.delete(e.code)&&!this.keyboardGesture.keys.size)this.finishKeyboard();
+  };
+
   private paint = () => {
+    if(this.pendingBusy&&this.gesture)this.emit(true);
     const root = this.a.overlay;root.hidden = !this.a.enabled();
     if (!root.hidden) {
       const screens = this.draft.points.map((p) => this.a.project(p));let svg = root.querySelector<SVGSVGElement>('svg');
@@ -152,5 +170,5 @@ export class RoutePlannerController {
     } else {this.a.canvas.style.cursor = '';this.cursor = null;}
     this.frame = requestAnimationFrame(this.paint);
   };
-  dispose() {this.release();cancelAnimationFrame(this.frame);window.removeEventListener('pointerdown', this.down, true);window.removeEventListener('pointermove', this.move, true);window.removeEventListener('pointerup', this.up, true);window.removeEventListener('pointercancel', this.cancelEvent, true);window.removeEventListener('blur', this.blur);window.removeEventListener('keydown', this.key, true);window.removeEventListener('keyup', this.keyUp, true);this.a.canvas.removeEventListener('click', this.click, true);this.a.canvas.removeEventListener('wheel', this.wheel, true);this.a.overlay.replaceChildren();this.a.canvas.style.cursor = '';}
+  dispose() {this.keyboardGesture=null;this.release();cancelAnimationFrame(this.frame);window.removeEventListener('pointerdown', this.down, true);window.removeEventListener('pointermove', this.move, true);window.removeEventListener('pointerup', this.up, true);window.removeEventListener('pointercancel', this.cancelEvent, true);window.removeEventListener('blur', this.blur);window.removeEventListener('keydown', this.key, true);window.removeEventListener('keyup', this.keyUp, true);window.removeEventListener('focusout',this.focusOut,true);this.a.canvas.removeEventListener('click', this.click, true);this.a.canvas.removeEventListener('wheel', this.wheel, true);this.a.overlay.replaceChildren();this.a.canvas.style.cursor = '';}
 }

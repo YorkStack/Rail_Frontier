@@ -6,6 +6,20 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — follow a real train, explore a fuller woodland
+
+**Follow train** now appears only when a service has a valid route. Without a commissioned train, neither the button nor the F shortcut can send the camera into an unrelated mountain. Paused trains and trains boarding at a station remain followable; the camera stays with the chosen train.
+
+The local Blender pipeline now gives the Norwegian trees irregular crowns and layered branches at both detail levels. Mixed stands, gaps, smaller trees higher up and a larger shrub/fern layer replace the sparse scatter. The look remains stylised. Conservative instance culling keeps the four checked views below the existing two-million-triangle budget; [recorded scene counts](docs/performance/woodland-runtime.json).
+
+Held arrow keys now reshape a route as **one undoable edit**, with cost calculation on release. Freehand movement avoids repeated terrain picks and redundant panel updates. [Input measurements and limits](docs/performance/ROUTE_PLANNING.md#held-keys-and-long-strokes-september-22).
+
+![Norwegian mixed woodland and low shrub groups, captured in the running game with German controls](docs/screenshots/norway-woodland.png)
+
+**Validation:** 206 core tests, asset checks and 16 focused browser journeys, including the camera sweep and 100-train scale fixture.
+
+Try [the German mountain exercise](http://127.0.0.1:5173/?draw-practice=1&lesson=highland&lang=de) with the local server running. Follow remains absent until a train service exists.
+
 ## September 21 — keep editing while prices are checked
 
 The final cost check now gives the interface time to respond between route candidates. You can restart or edit the sketch while that check runs; superseded results cannot replace the new plan. Build unlocks only after the complete current proposal has passed live-terrain checks.

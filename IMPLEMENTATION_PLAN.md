@@ -1,5 +1,16 @@
 # Implementation plan
 
+## Train follow, woodland and drawing input — 2026-09-22
+
+- Follow train is hidden until a commissioned service has a valid route and current rail path. F and direct camera calls also refuse invalid targets without moving. The renderer computes the chosen train's actual position immediately, remembers its ID and stops following if that service disappears. Paused, boarding and waiting services remain followable. Camera height is kept above the terrain; tutorial actions target their bound train.
+- The locally installed Blender 4.0.2 regenerated both spruce forms, pine, birch, alder and shrubs at two LODs. Strategic LODs now retain irregular, overlapping crowns and branch tiers instead of a single cone or ball. Smooth foliage normals and deterministic edge variation soften the old faceted appearance. The scenery generator owns both spruces, so rerunning the base pack cannot overwrite them.
+- Woodland uses shared deterministic stand centres with gaps and mixed species; elevation reduces tree size and density. A bounded 12,000-instance layer of mostly shrubs plus ferns extends around woodland edges, alongside 28,000 trees. Existing water, slope, settlement and live railway clearance checks remain authoritative. Rendering culls individual instance bounds against the camera, including rotation and aspect changes, while retaining a generous edge margin.
+- Held-arrow editing is one history gesture and one released planning request. Pointer input avoids duplicate terrain picks and redundant interface updates while retaining accepted samples. Escape, focus/blur, undo, save and out-of-map editing are covered. A small fixed-build experiment improved approximate following-frame delay from 75.1 to 40.0 ms p95; see `docs/performance/ROUTE_PLANNING.md` for its limits.
+
+Validation: 206 core tests, TypeScript and production build, asset validation and 16 distinct focused Chrome journeys. These include no-train follow rejection, the actual paused train position, held-key/cancel/focus/boundary input, saved drafts, drawing/building, service purchase/assignment, DE/EN switching and exit/save behaviour. The 60-second camera sweep and 100-train scale fixture pass the existing frame/draw-call budgets; all four fixed views remain below two million submitted triangles.
+
+Next: player review of the woodland and construction controls; broader physical-device/accessibility coverage, connected campaign progression and managed road/rail crossings. Adaptive longitudinal subdivision and unassisted DRAW acceptance remain open. The woodland is stylised geometry, not photorealistic foliage.
+
 ## Responsive cost validation — 2026-09-21
 
 - Live-terrain revalidation now yields between candidates after roughly 8 ms of work, preserving input opportunities while the worker results are checked. All choices remain private until the complete current set is ready. A DE/EN cost-check message and busy state explain the final stage; Build remains disabled.

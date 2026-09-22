@@ -518,20 +518,20 @@
         "ground_origin"
       ],
       "maxDimensionsM": [
-        9,
-        16,
-        9
+        12,
+        22,
+        12
       ],
       "lods": [
         {
           "path": "/models/norway/norway-spruce_lod0.glb",
-          "maxTriangles": 12000,
-          "maxBytes": 350000
+          "maxTriangles": 5000,
+          "maxBytes": 220000
         },
         {
           "path": "/models/norway/norway-spruce_lod1.glb",
-          "maxTriangles": 3000,
-          "maxBytes": 140000
+          "maxTriangles": 1600,
+          "maxBytes": 100000
         }
       ]
     },

@@ -1,0 +1,32 @@
+{
+  "baseline": "a1ef4d1",
+  "date": "2026-09-22",
+  "before": {
+    "browser": "153.0.8010.48",
+    "viewport": [
+      1440,
+      900
+    ],
+    "repeatCount": 20,
+    "requestsWhileHeld": 20,
+    "requestsAfterRelease": 20,
+    "oneUndoRestores": false,
+    "strokeEvents": 160,
+    "inputToFollowingFrameP95Ms": 75.09999999403954,
+    "maxMs": 76.3999999910593
+  },
+  "after": {
+    "browser": "153.0.8010.48",
+    "viewport": [
+      1440,
+      900
+    ],
+    "repeatCount": 20,
+    "requestsWhileHeld": 0,
+    "requestsAfterRelease": 1,
+    "oneUndoRestores": true,
+    "strokeEvents": 160,
+    "inputToFollowingFrameP95Ms": 40,
+    "maxMs": 41.29999999701977
+  }
+}
