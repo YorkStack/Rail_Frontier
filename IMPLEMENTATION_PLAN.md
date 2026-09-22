@@ -1,5 +1,11 @@
 # Implementation plan
 
+## Construction connection markers — 2026-09-22
+
+- Fixed the stack of “Finish here · Rail connection” signs reported after track construction. Degree-two nodes between alignment segments are implementation details and no longer become independent construction targets. Available platform ends, open rail ends and existing junctions remain selectable; the railway itself and saves are unchanged.
+- Connection names are laid out in screen space with collision suppression, preferring station names and the focused/hovered target. Compact 44px targets remain available when a name is suppressed, with accessible labels and keyboard selection. Names stay within the viewport, and nested generic connection names are translated.
+- Validation: 211 core tests and eight Chrome journeys passed, covering a built highland alignment reopened for construction, real pointer drawing, clickable station signs, compact layout, undo and held-arrow editing. Screenshot: `docs/screenshots/construction-targets.png`.
+
 ## From construction practice to a working service — 2026-09-22
 
 - A completed practice railway now offers the next real action: assemble a train, choose stops, assign the service, then resume and follow it. Buying still uses the normal catalogue, platform and cash checks; guidance never purchases or starts time implicitly.

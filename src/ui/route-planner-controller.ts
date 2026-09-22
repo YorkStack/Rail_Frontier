@@ -1,3 +1,5 @@
+import {translateSource} from '../i18n/index.js';
+import {visibleConnectionLabels,type LabelBox} from './rail-connections.js';
 import { setAttribute, setText, setHtml } from '../i18n/dom.js';
 import {RouteDraftHistory,emptyRouteDraft,type RouteDraft,type PlanningDraft} from '../rail/planning-draft.js';
 import type {CubicCurve} from '../domain/model.js';
@@ -5,7 +7,7 @@ import type { Vec3 } from '../domain/model.js';
 import { horizontalDistance, simplifyWishPath } from '../rail/wish-path.js';
 
 export type {RouteDraft} from '../rail/planning-draft.js';
-export interface RouteConnection {point: Vec3;label: string;}
+export interface RouteConnection {point: Vec3;label: string;station?:boolean;}
 interface Adapter {
   canvas: HTMLCanvasElement;overlay: HTMLElement;enabled: () => boolean;
   pick: (x: number, y: number) => Vec3 | null;surface: (x: number, z: number) => number;project: (p: Vec3) => {x: number;y: number;visible: boolean;};
@@ -154,13 +156,16 @@ export class RoutePlannerController {
       const ports = this.a.ports(),connections = root.querySelector<HTMLElement>('.route-connections')!;
       while (connections.children.length > ports.length) connections.lastElementChild!.remove();
       while (connections.children.length < ports.length) {const button = document.createElement('button');button.type = 'button';button.className = 'route-port';setHtml(button, '<span></span>');connections.append(button);}
-      [...connections.children].forEach((node, i) => {const button = node as HTMLButtonElement,port = ports[i]!,screen = this.a.project(port.point),label = `${this.draft.points.length ? 'Finish here' : 'Start here'} · ${port.label}`;
+      const labelBoxes:LabelBox[]=[],labelButtons:HTMLButtonElement[]=[];
+      [...connections.children].forEach((node, i) => {const button = node as HTMLButtonElement,port = ports[i]!,screen = this.a.project(port.point),label = `${this.draft.points.length ? 'Finish here' : 'Start here'} · ${translateSource(port.label)}`;
         button.dataset.routePort = String(i);setAttribute(button, 'aria-label', label);setText(button.querySelector('span')!, label);button.hidden = !screen.visible || this.draft.complete;button.classList.toggle('snap-ready', Boolean(this.cursor?.port && horizontalDistance(this.cursor.port.point, port.point) < 1));button.style.transform = `translate(${screen.x - 22}px,${screen.y - 22}px)`;button.onclick = (e) => {if (e.detail === 0) this.connect(port.point);};
+        if(!button.hidden){const span=button.querySelector('span')!,width=span.offsetWidth,height=span.offsetHeight,left=Math.max(8,Math.min(screen.x+15,innerWidth-width-8)),top=Math.max(8,Math.min(screen.y-22,innerHeight-height-8));span.style.left=`${left-screen.x+22}px`;span.style.top=`${top-screen.y+22}px`;labelButtons.push(button);labelBoxes.push({x:left,y:top,width,height,priority:button===document.activeElement?3:button.classList.contains('snap-ready')?2:port.station?1:0});}
       });
+      const visibleLabels=visibleConnectionLabels(labelBoxes);labelButtons.forEach((button,index)=>button.classList.toggle('label-collapsed',!visibleLabels.has(index)));
       const grips = root.querySelector<HTMLElement>('.route-grips')!,count = Math.max(0, screens.length - 1 - (this.draft.complete ? 1 : 0));while (grips.children.length > count) grips.lastElementChild!.remove();while (grips.children.length < count) {const button = document.createElement('button');button.type = 'button';button.className = 'route-handle';grips.append(button);}
       [...grips.children].forEach((el, i) => {const button = el as HTMLButtonElement,p = screens[i + 1]!;button.dataset.routeHandle = String(i + 1);setAttribute(button, 'aria-label', `Route point ${i + 1}, drag or use arrow keys`);button.hidden = !p.visible;button.style.transform = `translate(${p.x - 22}px,${p.y - 22}px)`;});
-      const start = root.querySelector<HTMLElement>('.route-start-badge')!;start.hidden = !screens[0]?.visible;setText(start, screens[0] ? `${'Start'} · ${this.a.connectionName(this.draft.points[0]!)}` : '');if (screens[0]) start.style.transform = `translate(${screens[0].x}px,${screens[0].y}px)`;
-      const end = root.querySelector<HTMLElement>('.route-end-badge')!,last = screens.at(-1);end.hidden = !this.draft.complete || !last?.visible;if (last && this.draft.complete) {setText(end, `${'To'} · ${this.a.connectionName(this.draft.points.at(-1)!)}`);end.style.transform = `translate(${last.x}px,${last.y}px)`;}
+      const start = root.querySelector<HTMLElement>('.route-start-badge')!;start.hidden = !screens[0]?.visible;setText(start, screens[0] ? `${'Start'} · ${translateSource(this.a.connectionName(this.draft.points[0]!))}` : '');if (screens[0]) start.style.transform = `translate(${screens[0].x}px,${screens[0].y}px)`;
+      const end = root.querySelector<HTMLElement>('.route-end-badge')!,last = screens.at(-1);end.hidden = !this.draft.complete || !last?.visible;if (last && this.draft.complete) {setText(end, `${'To'} · ${translateSource(this.a.connectionName(this.draft.points.at(-1)!))}`);end.style.transform = `translate(${last.x}px,${last.y}px)`;}
       const c = this.cursor,tip = screens.at(-1),ghost = svg.querySelector('.route-cursor path')!,hint = root.querySelector<HTMLElement>('.route-cursor-hint')!;
       ghost.setAttribute('d', c?.point && tip?.visible && !this.draft.complete && !this.gesture ? pathData([tip, this.a.project(c.port?.point ?? c.point)]) : '');
       const text = c?.port && !this.draft.complete ? this.draft.points.length ? 'Release or click to connect' : 'Click or start drawing' : c?.segment !== null && this.draft.complete ? 'Drag here to reshape' : this.draft.points.length && !this.draft.complete ? 'Click or drag to continue' : '';
