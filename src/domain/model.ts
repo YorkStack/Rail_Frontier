@@ -37,7 +37,7 @@ export interface WorldDefinition { seed: number; widthM: number; depthM: number;
 export interface CampaignDefinition {
   id: string; version: number; title: string; startingYear: number; startingCash: Money;
   world: WorldDefinition; towns: Town[];
-  objectives: { id: string; type: 'connectTowns' | 'deliverPassengers' | 'operatingProfit'; target: number }[];
+  objectives: { id: string; type: 'connectTowns' | 'deliverPassengers' | 'deliverFreight' | 'operatingProfit'; target: number }[];
 }
 export type TutorialStage='station-one'|'station-two'|'track-planned'|'track-built'|'train-bought'|'service-started'|'first-revenue';
 export interface LearningState {

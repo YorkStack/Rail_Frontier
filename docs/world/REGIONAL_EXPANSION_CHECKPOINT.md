@@ -41,6 +41,7 @@ Architecture and surface colour derive from broad regional references: stucco/sl
 - Coal, ore, steel and oil join the existing passenger, mail and timber cargo model.
 - Mines, terminals, steelworks, oil terminals and freight ports use explicit input/output inventories.
 - Freight capacity comes from the selected wagon rather than a generic train value.
+- The Rhine Charter requires a connected river railway, 60 units of industrial freight and a profitable operation. The Tyne/Wear Industrial Charter raises the freight target to 100 units and explicitly counts coal, ore and steel deliveries. Both are evaluated by the simulation and displayed in German and English.
 - The main menu filters locomotives and wagons by region and date.
 - German companies use Mark/DEM/EUR display periods; British companies use pounds.
 - New companies start with automatically terrain-aligned station orientation, while the player can still rotate the preview.
@@ -48,11 +49,11 @@ Architecture and surface colour derive from broad regional references: stucco/sl
 
 ## Validation
 
-- **242/242** Node tests pass, including real DEM anchors, catalogue integrity, mixed coal/ore-to-steel transfer, regional vehicle filtering, save migration and station orientation.
+- **244/244** Node tests pass, including real DEM anchors, continuous Rhine water, interpolated shore clipping, catalogue integrity, mixed coal/ore-to-steel transfer, regional objective progress, vehicle filtering, save migration and station orientation.
 - **4/4** focused Chrome journeys pass: campaign selection, station placement, regional stock, Middle Rhine rendering, Tyne/Wear rendering and Arizona windpump/vegetation.
 - TypeScript, production build, external texture checks, marker checks and close/far asset budgets pass.
 - Actual-renderer evidence is stored in `docs/screenshots/middle-rhine-settlement.png`, `docs/screenshots/tyne-wear-settlement.png` and `docs/screenshots/arizona-windpump.png`.
 
 ## Known limits
 
-These are playable regional foundations, not finished historical campaigns. They reuse the current objectives and economy balance. The strategic water mask is intentionally low resolution at the far camera; harbours and river/coast silhouettes need later art passes. Road traffic, moving residents/animals, physical freight yards, multiple platforms, turnouts and train reformation remain separate planned systems.
+These are playable regional foundations, not finished historical campaigns. Their opening charters are regional, while prices, demand generation and long-term economy balance still reuse the shared systems. The Rhine bed is a selective reconstruction from the valley floor and settlement corridor, not surveyed bathymetry. Harbours can receive later authored detail. Road traffic, moving residents/animals, physical freight yards, multiple platforms, turnouts and train reformation remain separate planned systems.

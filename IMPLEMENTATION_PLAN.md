@@ -4,9 +4,9 @@
 
 REG-01 adds two selectable playable 32 × 32 km regions based on reproducibly imported Mapzen/Skadi elevation grids: the Middle Rhine around Boppard/St. Goar/Bacharach and Tyne/Wear around Newcastle/North Shields/Sunderland. Each receives an original locally generated two-LOD Blender catalogue for architecture, station eras, industry, vegetation, infrastructure, props and regional rolling stock. Arizona adds its windpump/ranch-fence group and eight desert vegetation assets. [Scope, sources, catalogue and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
 
-Coal, ore, steel and oil now use wagon-specific freight capacity and industry inventories. Purchase menus and save validation enforce region and year. New European stations choose a low-relief initial orientation but retain manual controls. Schema 12 migrates schema 11. **242 core tests, four focused Chrome journeys, TypeScript, production build and asset validation pass.** README contains new actual-renderer captures.
+Coal, ore, steel and oil now use wagon-specific freight capacity and industry inventories. Purchase menus and save validation enforce region and year. New European stations choose a low-relief initial orientation but retain manual controls. Interpolated triangle clipping provides smooth water edges, and the Rhine obtains a continuous shallow channel along the real valley floor. Regional charters count real industrial deliveries. Schema 12 migrates schema 11. **244 core tests, four focused Chrome journeys, TypeScript, production build and asset validation pass.** README contains new actual-renderer captures.
 
-**Next:** player review of both regions, then refine far-view water silhouettes and write region-specific objectives/economy balance. Living residents/traffic/animals and physical multiple-platform/yard construction remain later systems. Continue regular pushes to both remote branches and clean up test processes afterwards.
+**Next:** player review of both regions, then tune region-specific demand/prices and add authored harbour detail. Living residents/traffic/animals and physical multiple-platform/yard construction remain later systems. Continue regular pushes to both remote branches; keep the requested local test server available during review.
 
 ## Previous checkpoint: navigable settlement paths — 2026-09-22
 

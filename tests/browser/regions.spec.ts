@@ -27,6 +27,8 @@ for(const region of ['rhine','tyne'] as const)test(`${region} catalogue renders 
   await page.goto(`/?skip-menu=1&world=${region}&lang=de`);await page.waitForFunction(()=>window.__railProbe?.ready,{timeout:90000});
   await page.evaluate(()=>window.__railProbe.setSpeed(0));
   await expect(page.locator('#cash')).toContainText(region==='rhine'?'Mark':'£');
+  await expect(page.locator('#objective-title')).toContainText(region==='rhine'?'RHEIN-CHARTA':'INDUSTRIE-CHARTA');
+  await expect(page.locator('#objective-label-1')).toContainText(region==='rhine'?'Flussindustrie':'Kohle, Erz und Stahl');
   const probe=await page.evaluate(()=>({state:window.__railProbe.snapshot(),stats:window.__railProbe.stats(),assets:window.__railProbe.assets}));
   expect(probe.state.world.widthM).toBe(32000);expect(probe.state.industries).toHaveLength(5);expect(probe.stats.buildings).toBeGreaterThan(160);expect(probe.stats.trees).toBeGreaterThan(3000);
   expect(probe.assets.filter((asset:{name:string})=>asset.name.startsWith(region+'-'))).toHaveLength(92);

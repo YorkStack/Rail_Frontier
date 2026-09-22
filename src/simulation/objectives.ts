@@ -1,9 +1,10 @@
 import { norway } from '../content/norway.js';
+import {europeCampaigns} from '../content/europe.js';
 import type { CampaignDefinition, GameState, Id } from '../domain/model.js';
 import { townCoverage } from './coverage.js';
 
 const fjordStudy:CampaignDefinition={...norway,id:'fjord-study',title:'The Northern Line'};
-const registry=new Map<string,CampaignDefinition>([[`${norway.id}@${norway.version}`,norway],[`${fjordStudy.id}@${fjordStudy.version}`,fjordStudy]]);
+const registry=new Map<string,CampaignDefinition>([norway,fjordStudy,europeCampaigns.rhine,europeCampaigns.tyne].map(campaign=>[`${campaign.id}@${campaign.version}`,campaign]));
 
 function connectedCoveredTowns(state:GameState):number {
   const coverage=townCoverage(state),stationById=new Map(state.stations.map(station=>[station.id,station])),adjacency=new Map<Id<'node'>,Id<'node'>[]>();
@@ -21,7 +22,7 @@ export function evaluateObjectives(state:GameState):void {
   const campaign=registry.get(`${state.campaignId}@${state.campaignVersion}`);if(!campaign)return;
   const revenue=state.operations.monthlyAccounts.reduce((sum,account)=>sum+account.revenue,0),operating=state.operations.monthlyAccounts.reduce((sum,account)=>sum+account.operatingCost,0);
   for(const objective of campaign.objectives) {
-    const progress=objective.type==='connectTowns'?connectedCoveredTowns(state):objective.type==='deliverPassengers'?state.operations.delivered.passengers:Math.max(0,revenue-operating);
+    const progress=objective.type==='connectTowns'?connectedCoveredTowns(state):objective.type==='deliverPassengers'?state.operations.delivered.passengers:objective.type==='deliverFreight'?(['timber','lumber','coal','ore','steel','oil'] as const).reduce((sum,kind)=>sum+(state.operations.delivered[kind]??0),0):Math.max(0,revenue-operating);
     state.objectiveProgress[objective.id]=progress;
     if(progress>=objective.target&&!state.operations.completedObjectives.includes(objective.id))state.operations.completedObjectives.push(objective.id);
   }
