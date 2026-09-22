@@ -18,7 +18,8 @@
     "preview": "vite preview",
     "screenshots:readme": "tsx tools/capture-readme-screenshots.ts",
     "test:browser": "playwright test",
-    "spike:network": "tsx spikes/network-scale.ts"
+    "spike:network": "tsx spikes/network-scale.ts",
+    "test:acceptance": "playwright test --config playwright.acceptance.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

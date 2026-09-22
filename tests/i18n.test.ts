@@ -15,5 +15,8 @@ test('locale resolution, interpolation, source messages and formatting support l
  assert.equal(translateSource('  Day 12 · 1900  '),'  Tag 12 · 1900  ');assert.equal(translateSource('Build station'),'Bahnhof bauen');
  assert.equal(translate('common.stops',{count:1}),'1 Halt');assert.equal(translate('common.stops',{count:1200}),'1.200 Halte');assert.equal(number(1234.5),'1.234,5');assert.match(currency(123450000),/1\.234\.500/);assert.match(date(new Date('2026-09-21T10:00:00Z')),/21\.09\.2026/);
  assert.equal(translate('Unknown future message'),'Unknown future message');assert.equal(translateSource('Sundvik'),'Sundvik');
+ assert.equal(translateSource('44 m platform · Serves Sundvik').split(' · ').at(-1),'Bedient Sundvik');
+ assert.equal(translate('To: {station}',{station:'Granli'}),'Nach: Granli');
+ assert.equal(translateSource('2 · Terrain variant · Over land').split(' · ')[1],'Geländevariante');
  setLanguage('en');assert.equal(translateSource('Build station'),'Build station');assert.equal(number(1234.5),'1,234.5');
 });

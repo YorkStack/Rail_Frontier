@@ -62,3 +62,11 @@ body:has(.floating-panel:not([hidden])) .company-strip,body:has(.floating-panel:
 @media(max-width:800px){#practice-progress{left:12px;bottom:202px;width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 292px)}}
 
 #practice-progress #next-practice small{display:block;font-size:12px;line-height:1.45;margin-top:4px;color:var(--muted)}
+
+/* On narrow windows the scaled build labels may wrap to several lines. */
+@media(max-width:800px){
+  .view-controls,.clock-deck{bottom:calc(var(--control-deck-height,84px) + 24px)}
+  .floating-panel,#planner{bottom:calc(var(--control-deck-height,84px) + 80px);max-height:calc(100dvh - var(--control-deck-height,84px) - 160px)}
+  .tutorial-card,#practice-progress{bottom:calc(var(--control-deck-height,84px) + 80px);max-height:calc(100dvh - var(--control-deck-height,84px) - 170px)}
+  #toast{bottom:calc(var(--control-deck-height,84px) + 80px)}
+}

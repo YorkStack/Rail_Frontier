@@ -6,6 +6,16 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — independent player and UX checks
+
+Three first-play agents tested onboarding, track construction and train operations; two subsequent agents audited navigation, keyboard behavior and small/scaled layouts. The review resulted in fixes for misleading paused-service messages, loaded-service guidance, lost route comparisons, Space activating the wrong action, missing icon names and overlapping enlarged controls. Cargo totals and the reviewed German operational text are clearer, and reopening the office reveals the relevant next action.
+
+![The loaded service offers an explicit resume action in German](docs/qa/evidence/resumed-office-after.png)
+
+**215 core tests and 34 distinct browser cases verified**, including real passenger/mail and timber/lumber deliveries, persistence, DE/EN and 100–150% interface layouts. [Findings, before/after evidence and exact run results](docs/qa/PLAYER_REVIEW_2026-09-22.md). Agent testing supplements human playtesting; it does not establish Safari, screen-reader or touch-gameplay acceptance.
+
+Run `npm run test:acceptance` for the isolated player-journey suite and its HTML/JUnit reports.
+
 ## September 22 — station approaches that fit
 
 A normal valley route now finds certified departure curves even when both stations keep their default orientation. This works from Sundvik to Granli and in reverse, with the same construction rules and quoted-price checks.
@@ -189,7 +199,7 @@ Open http://127.0.0.1:5173. Drag to orbit, right-drag to pan, scroll to zoom; WA
 2. Build a second station near Granli and point it along the same corridor.
 3. Choose **Build tracks**, click the named starting station and sketch by clicking or dragging through the landscape. Finish on the destination station sign. Drag the dashed line to reshape it, compare bridge/tunnel solutions and confirm the construction price. **Undo/Redo** revises the sketch; right-drag pans the camera. Track standards are under the optional settings disclosure.
 4. Open **Trains & lines**, buy a locomotive with one or more cars, add both stations as ordered stops, create the route and assign the train.
-5. Run at 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
+5. Choose **Resume and follow train** to start the assigned service, then optionally switch to 4× or 8× and watch passengers, mail, freight and company results. Save from the header or create a named archive slot in the main menu.
 
 The commissioned preview already contains a legacy three-station railway and a passenger train. **Start new company** opens the new station-first construction flow.
 
@@ -201,6 +211,7 @@ The diagnostics button exposes tree visibility and a clearly identified renderin
 npm run check
 npm test
 npm run validate:assets
+npm run test:acceptance
 npm run test:browser
 npm run spike
 npm run spike:network
@@ -208,7 +219,7 @@ npm run build
 npm run preview
 ```
 
-Browser tests require installed Google Chrome (Playwright channel chrome). They build and serve a static test-mode bundle on port 5173; the normal preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The Three.js chunk produces Vite's normal size advisory and remains within the current compressed download budget.
+Browser tests require installed Google Chrome (Playwright channel chrome). **`test:acceptance` is the recommended player-journey gate:** it builds a separate site, uses port 5180, runs fresh contexts without automatic retries, and writes HTML/JUnit reports plus failure traces. [Coverage and instructions](docs/qa/ACCEPTANCE_TESTS.md). The older `test:browser` command uses port 5173 and may reuse an existing server; the normal preview serves on port 4173. No deployment configured or performed. Font assets are bundled locally. The Three.js chunk produces Vite's normal size advisory and remains within the current compressed download budget.
 
 General README screenshots are captured from the running application with `npm run screenshots:readme`; the new terrain-choice images use `npx tsx tools/capture-construction-lessons.ts`. Set `RAIL_FRONTIER_URL` to capture a server other than `http://127.0.0.1:5173`.
 

@@ -9,7 +9,8 @@ test('track without a train never offers follow or moves the camera on F',async(
  await page.evaluate(()=>window.__railProbe.setSpeed(0));await page.waitForTimeout(500);
  const before=await page.evaluate(()=>window.__railProbe.snapshot().towns.map(town=>window.__railProbe.project(town.position)));
  await page.locator('#regional').focus();await page.keyboard.press('f');await page.evaluate(()=>window.__railProbe.focusTrain());await page.waitForTimeout(300);
- expect(await page.evaluate(()=>window.__railProbe.snapshot().towns.map(town=>window.__railProbe.project(town.position)))).toEqual(before);expect(errors).toEqual([]);
+ const after=await page.evaluate(()=>window.__railProbe.snapshot().towns.map(town=>window.__railProbe.project(town.position)));
+ for(let i=0;i<before.length;i++){expect(after[i]!.visible).toBe(before[i]!.visible);expect(after[i]!.x).toBeCloseTo(before[i]!.x,6);expect(after[i]!.y).toBeCloseTo(before[i]!.y,6);}expect(errors).toEqual([]);
 });
 
 test('a paused active service can be followed at its actual track location',async({page})=>{

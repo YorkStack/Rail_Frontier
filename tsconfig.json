@@ -20,6 +20,7 @@
     "tools/*.ts",
     "spikes",
     "vite.config.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "playwright.acceptance.config.ts"
   ]
 }
