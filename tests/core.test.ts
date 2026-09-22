@@ -89,7 +89,7 @@ test('built-state fixture survives mid-run save/reload and deterministic continu
   for(let i=0;i<350;i++){step(state);step(loaded);}assert.deepEqual(loaded,state);assert.equal(loaded.trains[0]!.motion.arrived,true);
 });
 test('save loader rejects future schemas, malformed data and dangling references',()=>{
-  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":11','"schemaVersion":109')));
+  const json=serialize(fixture());assert.throws(()=>deserialize(json.replace('"schemaVersion":12','"schemaVersion":109')));
   assert.throws(()=>deserialize('{'));assert.throws(()=>deserialize(json.replace('station:11','station:999')));
 });
 test('save loader rejects unreconciled finance and stale entity counters',()=>{

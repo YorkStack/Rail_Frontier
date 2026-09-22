@@ -6,7 +6,18 @@ import { postIncome } from './finance.js';
 
 const passengerCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>sum+(vehicleDefinition(id)?.capacity.passengers??0),0);
 const mailCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>sum+(vehicleDefinition(id)?.capacity.mail??0),0);
-const freightCapacity=(train:Train)=>train.vehicleIds.reduce((sum,id)=>{const capacity=vehicleDefinition(id)?.capacity;return sum+Math.max(capacity?.timber??0,capacity?.lumber??0);},0);
+const freightKinds=['timber','lumber','coal','ore','steel','oil'] as const;
+type FreightKind=typeof freightKinds[number];
+const isFreight=(kind:CargoKind):kind is FreightKind=>freightKinds.includes(kind as FreightKind);
+/** Reserve occupied wagon space before finding room for a compatible new shipment. */
+export function freightRoom(train:Train,kind:FreightKind):number {
+ const wagons=train.vehicleIds.map(id=>({capacity:vehicleDefinition(id)?.capacity??{},used:0}));
+ for(const lot of train.cargo.filter(l=>isFreight(l.kind))){let remaining=lot.quantity;
+  const compatible=wagons.filter(w=>(w.capacity[lot.kind]??0)>0).sort((a,b)=>Object.keys(a.capacity).length-Object.keys(b.capacity).length);
+  for(const w of compatible){const amount=Math.min(remaining,Math.max(0,(w.capacity[lot.kind]??0)-w.used));w.used+=amount;remaining-=amount;}if(remaining>0)return 0;
+ }
+ return wagons.reduce((sum,w)=>sum+Math.max(0,(w.capacity[kind]??0)-w.used),0);
+}
 const inventoryTotal=(industry:Industry)=>Object.values(industry.inventory).reduce((sum,quantity)=>sum+(quantity??0),0);
 
 /** Unload payable destinations once, then board oldest valid OD queues. */
@@ -72,7 +83,7 @@ export function serviceMail(state:GameState,train:Train,stationId:Id<'station'>)
     const existing=train.cargo.find(lot=>lot.kind==='mail'&&lot.destinationId===destination&&lot.originId===stationId&&lot.distanceM===0);
     if(existing)existing.quantity+=loaded;
     else train.cargo.push({kind:'mail',quantity:loaded,destinationId:destination,originId:stationId,loadedTick:state.tick,distanceM:0});
-    free-=loaded;if(free===0)break;
+
   }
 }
 
@@ -81,22 +92,22 @@ function industriesAtStation(state:GameState,stationId:Id<'station'>):Industry[]
   return state.industries.filter(industry=>coverage.get(industry.id)===stationId).sort((a,b)=>a.id.localeCompare(b.id));
 }
 
-function freightDestination(state:GameState,routeStops:Id<'station'>[],current:Id<'station'>,kind:'timber'|'lumber'):Id<'station'>|undefined {
+function freightDestination(state:GameState,routeStops:Id<'station'>[],current:Id<'station'>,kind:FreightKind):Id<'station'>|undefined {
   const coverage=industryCoverage(state);
   for(const stationId of routeStops) {
     if(stationId===current)continue;
-    if(kind==='timber'&&state.industries.some(industry=>industry.definitionId==='sawmill'&&coverage.get(industry.id)===stationId))return stationId;
+    if(state.industries.some(industry=>(industryDefinition(industry.definitionId)?.inputs[kind]??0)>0&&coverage.get(industry.id)===stationId))return stationId;
     const station=state.stations.find(candidate=>candidate.id===stationId);if(kind==='lumber'&&station?.townId!=null&&(state.operations.townEconomy[station.townId]?.lumberDemand??0)>0)return stationId;
   }
   return undefined;
 }
 
-function postFreightDelivery(state:GameState,train:Train,stationId:Id<'station'>,kind:'timber'|'lumber',quantity:number,distanceM:number):void {
+function postFreightDelivery(state:GameState,train:Train,stationId:Id<'station'>,kind:FreightKind,quantity:number,distanceM:number):void {
   if(quantity<=0)return;
   const unitFare=Math.max(1,Math.round(distanceM/1000*25)),fare=quantity*unitFare,service=state.operations.trainServices[train.id];
-  if(!Number.isSafeInteger(fare)||!service||!Number.isSafeInteger(service.revenue+fare)||!Number.isSafeInteger(state.operations.delivered[kind]+quantity))throw new Error('Freight totals exceed range');
-  postIncome(state,'freight',fare,train.id,`${kind==='timber'?'Timber':'Lumber'} freight at ${stationId}`);
-  service.revenue+=fare;state.operations.delivered[kind]+=quantity;
+  if(!Number.isSafeInteger(fare)||!service||!Number.isSafeInteger(service.revenue+fare)||!Number.isSafeInteger((state.operations.delivered[kind]??0)+quantity))throw new Error('Freight totals exceed range');
+  postIncome(state,'freight',fare,train.id,`${kind} freight at ${stationId}`);
+  service.revenue+=fare;state.operations.delivered[kind]=(state.operations.delivered[kind]??0)+quantity;
 }
 
 /** Deliver industrial inputs and town lumber, then load the next valid route shipment. */
@@ -106,12 +117,13 @@ export function serviceFreight(state:GameState,train:Train,stationId:Id<'station
   const local=industriesAtStation(state,stationId),sawmill=local.find(industry=>industry.definitionId==='sawmill');
   const retained=[] as Train['cargo'];
   for(const lot of train.cargo) {
-    if(lot.destinationId!==stationId||(lot.kind!=='timber'&&lot.kind!=='lumber')){retained.push(lot);continue;}
+    if(lot.destinationId!==stationId||!isFreight(lot.kind)){retained.push(lot);continue;}
     let delivered=0;
-    if(lot.kind==='timber'&&sawmill) {
-      const recipe=industryDefinition(sawmill.definitionId)!;
-      delivered=Math.min(lot.quantity,Math.max(0,recipe.storageCapacity-inventoryTotal(sawmill)));
-      if(delivered>0)sawmill.inventory.timber=(sawmill.inventory.timber??0)+delivered;
+    const receiver=local.find(i=>(industryDefinition(i.definitionId)?.inputs[lot.kind]??0)>0);
+    if(receiver) {
+      const recipe=industryDefinition(receiver.definitionId)!;
+      delivered=Math.min(lot.quantity,Math.max(0,recipe.storageCapacity-inventoryTotal(receiver)));
+      if(delivered>0)receiver.inventory[lot.kind]=(receiver.inventory[lot.kind]??0)+delivered;
     } else if(lot.kind==='lumber'&&station.townId!==null) {
       const economy=state.operations.townEconomy[station.townId];if(!economy)throw new Error('Town economy is missing');
       delivered=Math.min(lot.quantity,economy.lumberDemand);if(!Number.isSafeInteger(economy.lumberDelivered+delivered)||!Number.isSafeInteger(economy.lumberReceivedToday+delivered))throw new Error('Town delivery exceeds range');economy.lumberDemand-=delivered;economy.lumberDelivered+=delivered;economy.lumberReceivedToday+=delivered;
@@ -121,10 +133,9 @@ export function serviceFreight(state:GameState,train:Train,stationId:Id<'station
   }
   train.cargo=retained;
 
-  let free=freightCapacity(train)-train.cargo.filter(lot=>lot.kind==='timber'||lot.kind==='lumber').reduce((sum,lot)=>sum+lot.quantity,0);
-  if(free<=0)return;
-  for(const kind of ['timber','lumber'] as const) {
-    const source=local.find(industry=>industry.definitionId===(kind==='timber'?'forest':'sawmill'));
+  for(const kind of freightKinds) {
+    const free=freightRoom(train,kind);if(free<=0)continue;
+    const source=local.find(industry=>(industryDefinition(industry.definitionId)?.outputs[kind]??0)>0);
     const destination=freightDestination(state,route.stops,stationId,kind),available=source?.inventory[kind]??0;
     if(!source||!destination||available<=0)continue;
     const loaded=Math.min(free,available);source.inventory[kind]=available-loaded;
@@ -132,7 +143,7 @@ export function serviceFreight(state:GameState,train:Train,stationId:Id<'station
     const existing=train.cargo.find(lot=>lot.kind===kind&&lot.destinationId===destination&&lot.originId===stationId&&lot.distanceM===0);
     if(existing)existing.quantity+=loaded;
     else train.cargo.push({kind,quantity:loaded,destinationId:destination,originId:stationId,loadedTick:state.tick,distanceM:0});
-    free-=loaded;if(free===0)break;
+
   }
 }
 

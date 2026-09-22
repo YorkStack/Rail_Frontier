@@ -1,6 +1,14 @@
 # Implementation plan
 
-## Current checkpoint: navigable settlement paths — 2026-09-22
+## Current checkpoint: Middle Rhine, Tyne/Wear and Arizona regional expansion — 2026-09-22
+
+REG-01 adds two selectable playable 32 × 32 km regions based on reproducibly imported Mapzen/Skadi elevation grids: the Middle Rhine around Boppard/St. Goar/Bacharach and Tyne/Wear around Newcastle/North Shields/Sunderland. Each receives an original locally generated two-LOD Blender catalogue for architecture, station eras, industry, vegetation, infrastructure, props and regional rolling stock. Arizona adds its windpump/ranch-fence group and eight desert vegetation assets. [Scope, sources, catalogue and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
+
+Coal, ore, steel and oil now use wagon-specific freight capacity and industry inventories. Purchase menus and save validation enforce region and year. New European stations choose a low-relief initial orientation but retain manual controls. Schema 12 migrates schema 11. **242 core tests, four focused Chrome journeys, TypeScript, production build and asset validation pass.** README contains new actual-renderer captures.
+
+**Next:** player review of both regions, then refine far-view water silhouettes and write region-specific objectives/economy balance. Living residents/traffic/animals and physical multiple-platform/yard construction remain later systems. Continue regular pushes to both remote branches and clean up test processes afterwards.
+
+## Previous checkpoint: navigable settlement paths — 2026-09-22
 
 LIV-01c adds explicit junctions, entrance nodes, town hubs and route queries on the checked road geometry. Collinear overlaps and T junctions connect correctly; nearby disconnected paths do not. Real rail builds recalculate the graph, retaining safe detours and blocked access rather than adding invisible crossings. Preview and built state agree, and reload reconstructs the same network. [Contract, crossing decision and validation](docs/world/SETTLEMENT_NAVIGATION_CHECKPOINT.md).
 

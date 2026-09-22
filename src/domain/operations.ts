@@ -27,7 +27,7 @@ export interface OperationsState {
   terrain:TerrainEngineeringState;
   industryCycleTicks:Record<Id<'industry'>,number>;
   townEconomy:Record<Id<'town'>,TownEconomyState>;
-  delivered:Record<CargoKind,number>;
+  delivered:Record<'passengers'|'mail'|'timber'|'lumber',number>&Partial<Record<CargoKind,number|undefined>>;
   completedObjectives:string[];
   monthlyAccounts:{month:number;revenue:Money;operatingCost:Money;capitalCost:Money}[];
   lastCommandSequence:number;

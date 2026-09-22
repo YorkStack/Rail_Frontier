@@ -16,5 +16,5 @@ export interface CampaignPresentation {
   readonly cameraPresets:Readonly<Record<string,CameraPreset>>;
   readonly entryCameraId:string;
   readonly cameraSweep:readonly string[];
-  readonly proceduralScenery:'norway-fallback'|'southwest-study';
+  readonly proceduralScenery:'norway-fallback'|'southwest-study'|'rhine'|'tyne';
 }

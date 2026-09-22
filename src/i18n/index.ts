@@ -20,7 +20,9 @@ export function translate(key:string,parameters:Record<string,string|number>={},
   return template.replace(/\{([a-zA-Z0-9_]+)\}/g,(whole,name:string)=>parameters[name]===undefined?whole:typeof parameters[name]==='number'?new Intl.NumberFormat(pack.locale).format(parameters[name] as number):String(parameters[name]));
 }
 export const number=(value:number,options:Intl.NumberFormatOptions={})=>new Intl.NumberFormat(languages[active].locale,options).format(value);
-export const currency=(minor:number)=>number(minor/100,{style:'currency',currency:'NOK',maximumFractionDigits:0});
+let moneyUnit='NOK';
+export const setMoneyRegion=(campaignId:string,year:number)=>{moneyUnit=campaignId==='middle-rhine'?(year<1948?'Mark':year<2002?'DEM':'EUR'):campaignId==='tyne-wear-coast'?'GBP':'NOK';};
+export const currency=(minor:number)=>moneyUnit==='Mark'?number(minor/100,{maximumFractionDigits:0})+' Mark':number(minor/100,{style:'currency',currency:moneyUnit,maximumFractionDigits:0});
 export const date=(value:Date|number,options:Intl.DateTimeFormatOptions={dateStyle:'medium',timeStyle:'short'})=>new Intl.DateTimeFormat(languages[active].locale,options).format(value);
 
 // Source-message adapter for the existing vanilla DOM shell. New messages can use

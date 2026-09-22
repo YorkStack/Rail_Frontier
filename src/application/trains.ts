@@ -1,6 +1,6 @@
 import type { CommandHandler, CommandHandlers } from './commands.js';
 import type { GameCommand } from './ports.js';
-import { vehicleDefinition } from '../content/vehicles.js';
+import { vehicleDefinition,vehicleInCampaign } from '../content/vehicles.js';
 import { stationDefinition } from '../content/stations.js';
 import { allocateId, type Money } from '../domain/model.js';
 import { currentYear } from '../simulation/calendar.js';
@@ -12,6 +12,7 @@ type PurchaseTrain=Extract<GameCommand,{type:'purchaseTrain'}>;
 export const purchaseTrainHandler:CommandHandler<PurchaseTrain>=(state,command)=>{
   const station=state.stations.find(candidate=>candidate.id===command.stationId)!;
   if(!stationHasExternalConnection(state,station))throw new Error('Purchase station needs an external track connection');
+  if([command.locomotiveId,...command.vehicleIds].some(id=>!vehicleInCampaign(id,state.campaignId)))throw new Error('Vehicle is not available in this region');
   const locomotive=vehicleDefinition(command.locomotiveId);
   if(!locomotive||locomotive.kind!=='locomotive')throw new Error(`Unknown locomotive: ${command.locomotiveId}`);
   const vehicles=command.vehicleIds.map(id=>vehicleDefinition(id));

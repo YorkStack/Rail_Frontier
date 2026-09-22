@@ -20,7 +20,7 @@ export interface Train {
   phase: 'idle' | 'running' | 'dwelling' | 'blocked'; dwellTicks: number;
   cargo: CargoLot[];
 }
-export type CargoKind = 'passengers' | 'mail' | 'timber' | 'lumber';
+export type CargoKind = 'passengers' | 'mail' | 'timber' | 'lumber' | 'coal' | 'ore' | 'steel' | 'oil';
 export interface CargoLot { kind: CargoKind; quantity: number; destinationId: Id<'station'>; originId: Id<'station'>; loadedTick: number; distanceM: number }
 export interface StationPort {
   key:'a'|'b';nodeId:Id<'node'>;outward:{x:number;z:number};trackClassId:'local';gaugeM:1.435;attachmentCapacity:1;

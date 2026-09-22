@@ -1,0 +1,1339 @@
+{
+  "version": 1,
+  "campaignId": "middle-rhine",
+  "generator": {
+    "blender": "4.0.2",
+    "regionalScript": "tools/blender/generate_regional_catalogues.py",
+    "script": "tools/blender/generate_regional_catalogues.py"
+  },
+  "assets": [
+    {
+      "id": "rhine-half-timber",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-half-timber_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-half-timber_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-stone-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-stone-house_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-stone-house_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-brick-house",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-brick-house_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-brick-house_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-terrace",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-terrace_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-terrace_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-villa",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-villa_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-villa_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-barn",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-barn_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-barn_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-shop",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin",
+        "footprint_nw",
+        "footprint_se",
+        "entrance",
+        "entrance_outward"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-shop_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-shop_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-station",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-station_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-station_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-station-interwar",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-station-interwar_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-station-interwar_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-station-modern",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-station-modern_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-station-modern_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-mine",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-mine_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-mine_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-factory",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-factory_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-factory_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-warehouse",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-warehouse_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-warehouse_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-crane",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-crane_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-crane_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-oak",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-oak_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-oak_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-beech",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-beech_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-beech_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-birch",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-birch_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-birch_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-willow",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-willow_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-willow_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-pine",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-pine_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-pine_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-hedge",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-hedge_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-hedge_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-grass",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-grass_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-grass_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-vine",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-vine_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-vine_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-bridge-span",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "span_start",
+        "span_end"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-bridge-span_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-bridge-span_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-tunnel-portal",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "track_center"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-tunnel-portal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-tunnel-portal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-water-tower",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-water-tower_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-water-tower_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-signal",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-signal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-signal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-fence",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-fence_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-fence_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-cart",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-cart_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-cart_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-truck",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-truck_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-truck_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-barge",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-barge_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-barge_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-church",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-church_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-church_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-castle",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-castle_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-castle_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-crates",
+      "kind": "building",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-crates_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-crates_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-rock",
+      "kind": "rock",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-rock_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-rock_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-g3",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-g3_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-g3_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-p8",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-p8_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-p8_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-v100",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-v100_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-v100_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-e10",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-e10_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-e10_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-coach",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-coach_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-coach_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-modern-coach",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-modern-coach_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-modern-coach_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-mail",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-mail_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-mail_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-coal",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-coal_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-coal_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-hopper",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-hopper_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-hopper_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-goods",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-goods_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-goods_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-flat",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-flat_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-flat_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "rhine-tank",
+      "kind": "vehicle",
+      "requiredNodes": [
+        "coupler_front",
+        "coupler_rear",
+        "forward_probe",
+        "up_probe"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/rhine/rhine-tank_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/rhine/rhine-tank_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "id": "regional-wood-base",
+      "path": "/textures/rhine/wood-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-wood-normal",
+      "path": "/textures/rhine/wood-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-wood-roughness",
+      "path": "/textures/rhine/wood-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-base",
+      "path": "/textures/rhine/brick-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-brick-normal",
+      "path": "/textures/rhine/brick-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-roughness",
+      "path": "/textures/rhine/brick-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-base",
+      "path": "/textures/rhine/stone-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-stone-normal",
+      "path": "/textures/rhine/stone-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-roughness",
+      "path": "/textures/rhine/stone-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-base",
+      "path": "/textures/rhine/roof-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-roof-normal",
+      "path": "/textures/rhine/roof-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-roughness",
+      "path": "/textures/rhine/roof-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-base",
+      "path": "/textures/rhine/plaster-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-plaster-normal",
+      "path": "/textures/rhine/plaster-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-roughness",
+      "path": "/textures/rhine/plaster-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    }
+  ],
+  "materialBindings": [
+    {
+      "materialPrefix": "RF_REG_rhine_wood",
+      "map": "regional-wood-base",
+      "normalMap": "regional-wood-normal",
+      "roughnessMap": "regional-wood-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_rhine_brick",
+      "map": "regional-brick-base",
+      "normalMap": "regional-brick-normal",
+      "roughnessMap": "regional-brick-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_rhine_stone",
+      "map": "regional-stone-base",
+      "normalMap": "regional-stone-normal",
+      "roughnessMap": "regional-stone-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_rhine_roof",
+      "map": "regional-roof-base",
+      "normalMap": "regional-roof-normal",
+      "roughnessMap": "regional-roof-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_rhine_plaster",
+      "map": "regional-plaster-base",
+      "normalMap": "regional-plaster-normal",
+      "roughnessMap": "regional-plaster-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    }
+  ]
+}

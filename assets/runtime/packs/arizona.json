@@ -5,7 +5,8 @@
     "blender": "4.0.2",
     "script": "tools/blender/generate_arizona_architecture.py",
     "referenceEra": "Arizona circa 1900 interpretation",
-    "stationScript": "tools/blender/generate_station_architecture.py"
+    "stationScript": "tools/blender/generate_station_architecture.py",
+    "regionalScript": "tools/blender/generate_regional_catalogues.py"
   },
   "textures": [
     {
@@ -61,6 +62,96 @@
       "path": "/textures/arizona/weathered-roof-roughness.png",
       "role": "roughness",
       "colorSpace": "linear"
+    },
+    {
+      "id": "regional-wood-base",
+      "path": "/textures/arizona/wood-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-wood-normal",
+      "path": "/textures/arizona/wood-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-wood-roughness",
+      "path": "/textures/arizona/wood-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-base",
+      "path": "/textures/arizona/brick-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-brick-normal",
+      "path": "/textures/arizona/brick-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-brick-roughness",
+      "path": "/textures/arizona/brick-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-base",
+      "path": "/textures/arizona/stone-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-stone-normal",
+      "path": "/textures/arizona/stone-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-stone-roughness",
+      "path": "/textures/arizona/stone-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-base",
+      "path": "/textures/arizona/roof-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-roof-normal",
+      "path": "/textures/arizona/roof-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-roof-roughness",
+      "path": "/textures/arizona/roof-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-base",
+      "path": "/textures/arizona/plaster-base.png",
+      "role": "baseColor",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "regional-plaster-normal",
+      "path": "/textures/arizona/plaster-normal.png",
+      "role": "normal",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "regional-plaster-roughness",
+      "path": "/textures/arizona/plaster-roughness.png",
+      "role": "roughness",
+      "colorSpace": "linear"
     }
   ],
   "materialBindings": [
@@ -92,6 +183,56 @@
       "repeat": [
         3,
         4
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_arizona_wood",
+      "map": "regional-wood-base",
+      "normalMap": "regional-wood-normal",
+      "roughnessMap": "regional-wood-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_arizona_brick",
+      "map": "regional-brick-base",
+      "normalMap": "regional-brick-normal",
+      "roughnessMap": "regional-brick-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_arizona_stone",
+      "map": "regional-stone-base",
+      "normalMap": "regional-stone-normal",
+      "roughnessMap": "regional-stone-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_arizona_roof",
+      "map": "regional-roof-base",
+      "normalMap": "regional-roof-normal",
+      "roughnessMap": "regional-roof-roughness",
+      "repeat": [
+        1,
+        1
+      ]
+    },
+    {
+      "materialPrefix": "RF_REG_arizona_plaster",
+      "map": "regional-plaster-base",
+      "normalMap": "regional-plaster-normal",
+      "roughnessMap": "regional-plaster-roughness",
+      "repeat": [
+        1,
+        1
       ]
     }
   ],
@@ -455,6 +596,247 @@
           "path": "/models/arizona/arizona-station-modern_lod1.glb",
           "maxTriangles": 1600,
           "maxBytes": 800000
+        }
+      ]
+    },
+    {
+      "id": "arizona-windpump",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin",
+        "rotor_center"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-windpump_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-windpump_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-creosote",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-creosote_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-creosote_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-sage",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-sage_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-sage_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-grass",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-grass_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-grass_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-saguaro",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-saguaro_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-saguaro_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-prickly-pear",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-prickly-pear_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-prickly-pear_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-yucca",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-yucca_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-yucca_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-juniper",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-juniper_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-juniper_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-mesquite",
+      "kind": "vegetation",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-mesquite_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-mesquite_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
+        }
+      ]
+    },
+    {
+      "id": "arizona-ranch-fence",
+      "kind": "infrastructure",
+      "requiredNodes": [
+        "ground_origin"
+      ],
+      "maxDimensionsM": [
+        40,
+        45,
+        45
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-ranch-fence_lod0.glb",
+          "maxTriangles": 18000,
+          "maxBytes": 1500000
+        },
+        {
+          "path": "/models/arizona/arizona-ranch-fence_lod1.glb",
+          "maxTriangles": 8500,
+          "maxBytes": 1500000
         }
       ]
     }

@@ -1,0 +1,21 @@
+EUROPEAN TERRAIN DATA — RAIL FRONTIER
+
+Mapzen / Tilezen Terrain Tiles (Skadi HGT, WGS84 / EGM96), downloaded 2026-09-22.
+Catalogue: https://registry.opendata.aws/terrain-tiles/
+Format: https://github.com/tilezen/joerd/blob/master/docs/formats.md
+Data sources and attribution: https://github.com/tilezen/joerd/blob/master/docs/attribution.md
+
+Europe terrain data produced using Copernicus data and information funded by the European Union - EU-DEM layers.
+United Kingdom terrain data © Environment Agency copyright and/or database right 2015. All rights reserved.
+Global GMTED2010 and SRTM terrain data courtesy of the U.S. Geological Survey.
+
+Tiles: N50E007, N54W002, N55W002. Source URLs and SHA-256 hashes are recorded in src/content/geodata/*-dem.json.
+The upstream composite does not label the originating provider per sample; relevant regional and global attributions are retained.
+
+Modifications: cropped to two 32 km square regions, locally projected with latitude-dependent metres per longitude degree, bilinearly resampled to 80 m and rounded to whole metres. Heights are not vertically exaggerated. River and tidal water stages are approximated for the game; they are not hydrographic surveys. Terrain is modern elevation data, not an archival reconstruction of 1900. Buildings, roads, industries, populations and vehicle performance are authored gameplay content.
+
+EU-DEM: Copernicus free, full and open access terms, https://land.copernicus.eu/en/data-policy
+Environment Agency: Open Government Licence v3, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+USGS data are public domain; no endorsement or accuracy warranty is implied.
+
+Photographs and museum images were consulted as references only. No third-party photographs are bundled as textures. All new 3D meshes and material tiles are original Blender/script-generated work under this repository's MIT licence.
