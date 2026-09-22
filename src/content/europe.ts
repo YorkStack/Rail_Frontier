@@ -4,7 +4,10 @@ import type {CampaignPresentation} from './presentation.js';
 import {europeGenerator,europeSites,europeDem,geoPoint,type EuropeRegion} from '../world/europe.js';
 export const europeCampaigns=Object.fromEntries((['rhine','tyne'] as const).map(region=>{
  const generator=europeGenerator(region),d=europeDem[region],seed=region==='rhine'?500722:550922;
- const campaign:CampaignDefinition={id:region==='rhine'?'middle-rhine':'tyne-wear-coast',version:1,title:region==='rhine'?'Middle Rhine':'Tyne & Wear Coast',startingYear:1900,startingCash:1_000_000_000,world:{seed,widthM:32000,depthM:32000,cellM:d.cellM,generatorVersion:1,biomeId:region},towns:europeSites[region].map((s,i)=>{const p=geoPoint(region,s.latitude,s.longitude);return{id:`town:${i+2}` as const,name:s.name,position:{...p,y:generator.elevation(p.x,p.z,seed)},population:s.population};}),objectives:[{id:'first-connection',type:'connectTowns',target:2},{id:'first-passengers',type:'deliverPassengers',target:200},{id:'profitable-railway',type:'operatingProfit',target:1_000_000}]};
+ const objectives:CampaignDefinition['objectives']=region==='rhine'?
+  [{id:'rhine-connection',type:'connectTowns',target:2},{id:'rhine-freight',type:'deliverFreight',target:60},{id:'rhine-profit',type:'operatingProfit',target:1_500_000}]:
+  [{id:'tyne-connection',type:'connectTowns',target:2},{id:'tyne-freight',type:'deliverFreight',target:100},{id:'tyne-profit',type:'operatingProfit',target:2_000_000}];
+ const campaign:CampaignDefinition={id:region==='rhine'?'middle-rhine':'tyne-wear-coast',version:1,title:region==='rhine'?'Middle Rhine':'Tyne & Wear Coast',startingYear:1900,startingCash:1_000_000_000,world:{seed,widthM:32000,depthM:32000,cellM:d.cellM,generatorVersion:1,biomeId:region},towns:europeSites[region].map((s,i)=>{const p=geoPoint(region,s.latitude,s.longitude);return{id:`town:${i+2}` as const,name:s.name,position:{...p,y:generator.elevation(p.x,p.z,seed)},population:s.population};}),objectives};
  return [region,campaign];
 })) as Record<EuropeRegion,CampaignDefinition>;
 export function europePresentation(region:EuropeRegion):CampaignPresentation {

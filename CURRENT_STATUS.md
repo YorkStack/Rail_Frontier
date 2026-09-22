@@ -22,9 +22,11 @@ AWAITING_USER_PLAYTEST=true
 - Added selectable, playable 32 × 32 km Middle Rhine and Tyne/Wear companies over reproducibly imported real elevation grids. The regional compositions include Boppard/St. Goar/Bacharach and Newcastle/North Shields/Sunderland, terrain-aware settlement placement, roads, vegetation, ports and five industry sites.
 - Local Blender generated 46 assets per European region in two LODs: regional buildings, three station eras, industries, vegetation, infrastructure, props, four locomotive eras and eight coach/wagon types. Arizona gains a windpump, ranch fence and eight desert vegetation assets. Original external PBR tiles and pack validation are included.
 - Coal, ore, steel and oil inventories, wagon-specific freight capacity, region/year purchase filtering, regional currency display and schema-12 migration are integrated. New European station previews automatically select a low-relief orientation while preserving manual rotation.
+- Regional water now clips each authoritative terrain triangle at the interpolated shoreline. The Rhine additionally reconstructs a narrow continuous channel along the local valley minimum where Skadi records the water surface instead of bathymetry. Tyne/Wear retains its real-height estuary and coast without square water-cell steps.
+- Rhein-Charta and Tyne/Wear Industrie-Charta replace the copied Norway targets. Their freight objectives count delivered industrial cargo in the simulation; titles, labels, targets and regional currency render dynamically in German and English.
 - Terrain source URLs, hashes, bounds, licence and attribution are bundled. Real height data is the geographic base; water stages, settlements, roads and industry sites are selective game compositions.
-- Verification: **242/242** core tests, **4/4** focused Chrome journeys, TypeScript, production build, asset validation and diff hygiene pass. New actual-renderer README images show Boppard, Newcastle and the Arizona windpump. [Full scope, provenance and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
-- Next: improve the strategic water silhouettes and begin authored region-specific objectives/balance after player review. Moving residents/traffic/animals and physical multi-platform yards remain separate planned work.
+- Verification: **244/244** core tests, **4/4** focused Chrome journeys, TypeScript, production build, asset validation and diff hygiene pass. New actual-renderer README images show Boppard, Newcastle and the Arizona windpump. [Full scope, provenance and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
+- Next: player review, then region-specific demand/pricing balance and authored harbour detail. Moving residents/traffic/animals and physical multi-platform yards remain separate planned work.
 
 ## LIV-01c: navigable junctions and explicit entrances — 2026-09-22
 
@@ -287,7 +289,7 @@ Still open: full ordered-corridor search, connected campaign progression, railwa
 
 ## Currently working
 
-The current user priority is regional expansion. The Middle Rhine and Tyne/Wear foundations plus the Arizona windpump/vegetation pass are implemented and ready for player review. The next regional pass should refine far-view water silhouettes and add authored objectives/balance. The earlier living-settlement roadmap remains valid after that review; the drawn-route human acceptance also remains open. Do not resume the earlier SOL-pause instruction.
+The current user priority is regional expansion. The Middle Rhine and Tyne/Wear foundations, interpolated water silhouettes, regional charters and the Arizona windpump/vegetation pass are implemented and ready for player review. The next regional pass should tune demand/prices and add harbour detail. The earlier living-settlement roadmap remains valid after that review; the drawn-route human acceptance also remains open. Do not resume the earlier SOL-pause instruction.
 
 Norway V3, Arizona V2, Middle Rhine V1 and Tyne/Wear V1 are current. Arizona remains a terrain study; the two European additions are playable free-company foundations. Current saves use schema 12; schema 11 companies migrate without regional assets being invented.
 

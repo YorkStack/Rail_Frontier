@@ -8,7 +8,7 @@ Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**
 
 ## September 22 — Middle Rhine, Tyne/Wear and the Arizona ranch
 
-Two new 32 km playable regions can now be selected when starting a company. **Middle Rhine** follows a real elevation corridor around Boppard, St. Goar and Bacharach; **Tyne & Wear** covers Newcastle, North Shields and Sunderland. Each has its own locally generated Blender catalogue for regional houses, period stations, mines, steelworks, ports, vegetation, props, four locomotive eras and eight coach/wagon types. Coal, ore, steel and oil work through the existing inventory and train-service simulation. The year and region limit which vehicles may be bought.
+Two new 32 km playable regions can now be selected when starting a company. **Middle Rhine** follows a real elevation corridor around Boppard, St. Goar and Bacharach; **Tyne & Wear** covers Newcastle, North Shields and Sunderland. Each has its own locally generated Blender catalogue for regional houses, period stations, mines, steelworks, ports, vegetation, props, four locomotive eras and eight coach/wagon types. Coal, ore, steel and oil work through the existing inventory and train-service simulation. The year and region limit which vehicles may be bought. Interpolated shore geometry removes the former square water steps; a reconstructed shallow Rhine channel bridges gaps where the elevation source measures the water surface instead of the river bed.
 
 | Middle Rhine settlement and river | Tyne/Wear industrial settlement |
 | --- | --- |
@@ -18,7 +18,7 @@ Arizona gains a ranch windpump, stock fencing and eight additional desert plant 
 
 ![Arizona ranch windpump, water tank, stock fence and desert vegetation](docs/screenshots/arizona-windpump.png)
 
-The European terrain is reproducibly resampled from real Mapzen/Skadi elevation tiles with source URLs, hashes and attribution bundled in the project. Water stages, roads, towns and industries are game compositions rather than exact historical reconstruction. **242 core tests and four new focused Chrome journeys pass**, together with TypeScript, production build and all regional asset checks. [Sources, asset inventory, integration details and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
+The European terrain is reproducibly resampled from real Mapzen/Skadi elevation tiles with source URLs, hashes and attribution bundled in the project. Water stages, roads, towns and industries are game compositions rather than exact historical reconstruction. The Rhein-Charta asks for connected river towns and industrial freight; the Tyne/Wear Industrie-Charta tracks coal, ore and steel deliveries. **244 core tests and four focused Chrome journeys pass**, together with TypeScript, production build and all regional asset checks. [Sources, asset inventory, integration details and limits](docs/world/REGIONAL_EXPANSION_CHECKPOINT.md).
 
 ## September 22 — paths that can be navigated
 

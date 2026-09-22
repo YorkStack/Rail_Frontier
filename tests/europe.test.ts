@@ -7,14 +7,24 @@ import {createInitialState} from '../src/content/norway.js';
 import {addRegionalIndustries,industryDefinition} from '../src/content/industries.js';
 import {availableVehicles,vehicleDefinition} from '../src/content/vehicles.js';
 import {generateRegionalPlots,generateRegionalScenery} from '../src/rendering/regional-placement.js';
+import {waterSurfacePositions} from '../src/rendering/water-surface.js';
+import {Heightfield} from '../src/world/terrain.js';
 import {RailFrontierGame} from '../src/application/game.js';
 import {bestStationOrientation,surveyStationSite,straightCurve} from '../src/rail/station-layout.js';
 import {stationDefinitions} from '../src/content/stations.js';
 import {deserialize,serialize} from '../src/persistence/save.js';
 import {freightRoom,serviceFreight} from '../src/simulation/transfer.js';
 import {advanceIndustries} from '../src/simulation/industry.js';
+import {evaluateObjectives} from '../src/simulation/objectives.js';
 import type {GameState,Train} from '../src/domain/model.js';
 import {readFileSync} from 'node:fs';
+
+test('regional water clips at the interpolated shoreline instead of filling dry grid squares',()=>{
+ const terrain=new Heightfield(2,2,80,new Float64Array([-2,4,4,4]),0),positions=waterSurfacePositions(terrain);
+ assert.ok(positions.length>=9);assert.equal(positions.length%9,0);
+ const shoreline=[...positions].filter((_,index)=>index%3!==1);assert.ok(shoreline.some(value=>value>0&&value<80));
+ for(let i=0;i<positions.length;i+=3)assert.ok(positions[i]!>=0&&positions[i]!<=80&&positions[i+2]!>=0&&positions[i+2]!<=80);
+});
 
 for(const region of ['rhine','tyne'] as const)test(`${region}: real DEM, playable towns, region catalogue and save round trip`,()=>{
  const campaign=europeCampaigns[region],state=createInitialState(campaign),content=campaignContentRegistry.resolve(state),terrain=content.worldGenerator.generate(state.world),dem=europeDem[region];addRegionalIndustries(state,terrain);
@@ -26,6 +36,7 @@ for(const region of ['rhine','tyne'] as const)test(`${region}: real DEM, playabl
  const pack=JSON.parse(readFileSync(`assets/runtime/packs/${region}.json`,'utf8')),ids=new Set(pack.assets.map((a:{id:string})=>a.id));const available=availableVehicles(1900,undefined,campaign.id);assert.ok(available.length>=6);for(const v of available)assert.ok(ids.has(v.id),v.id);assert.equal(available.filter(d=>d.kind==='locomotive').length,1);assert.equal(availableVehicles(2000,'locomotive',campaign.id).length,4);assert.equal(available.some(v=>v.id.startsWith('nord')),false);
  const plots=generateRegionalPlots(terrain,state);assert.ok(plots.filter(p=>p.townId).length>60);assert.deepEqual(plots,generateRegionalPlots(terrain,state));for(const p of plots)assert.ok(ids.has(p.assetId),p.assetId);
  const plants=generateRegionalScenery(terrain,state,2500);assert.equal(plants.length,2500);assert.ok(plants.some(p=>p.category==='understorey'));for(const p of plants){assert.ok(ids.has(p.assetId),p.assetId);assert.ok(p.y>terrain.sample(p.x,p.z).waterLevelM!);}
+ if(region==='rhine')for(let z=0;z<=terrain.depthM;z+=terrain.cellM)assert.ok(Array.from({length:401},(_,ix)=>terrain.sample(ix*terrain.cellM,z)).some(sample=>sample.elevationM<sample.waterLevelM!),`Rhine channel interrupted at ${z} m`);
 });
 
 function industrialFixture():GameState {
@@ -44,6 +55,10 @@ test('regional mixed freight respects compatible wagon space, converts coal and 
  const restored=deserialize(serialize(s)),train=restored.trains[0]!;train.cargo[0]!.distanceM=3000;serviceFreight(restored,train,'station:8');assert.equal(restored.operations.delivered.steel,12);const cash=restored.company.cash;serviceFreight(restored,train,'station:8');assert.equal(restored.company.cash,cash);
  for(let i=0;i<600;i++)advanceIndustries(restored);assert.equal(restored.industries[2]!.inventory.steel,4);assert.equal(restored.industries[2]!.inventory.oil,8);
  const bad=structuredClone(restored);bad.trains[0]!.locomotiveId='nord-2-6-0';assert.throws(()=>serialize(bad),/another region/);bad.trains[0]!.locomotiveId='tyne-class91';assert.throws(()=>serialize(bad),/future year/);
+});
+test('Tyne freight charter progresses from delivered industrial cargo',()=>{
+ const state=industrialFixture();state.operations.delivered.coal=55;state.operations.delivered.ore=25;state.operations.delivered.steel=20;evaluateObjectives(state);
+ assert.equal(state.objectiveProgress['tyne-freight'],100);assert.ok(state.operations.completedObjectives.includes('tyne-freight'));assert.equal(state.objectiveProgress['first-passengers'],undefined);
 });
 test('v11 companies migrate without inventing freight or changing their balances',()=>{
  const s=createInitialState(),doc=JSON.parse(serialize(s));doc.schemaVersion=11;doc.gameVersion='0.11.0';assert.deepEqual(deserialize(JSON.stringify(doc)),s);

@@ -36,6 +36,7 @@ import {generateArizonaSettlements} from './arizona-settlement-placement.js';
 import type {CampaignContent} from '../content/registry.js';
 import type {StationSite} from '../rail/station-layout.js';
 import {BRIDGE_MODULE_LENGTH_M,deriveInfrastructurePlacements} from './infrastructure-placement.js';
+import {waterSurfacePositions} from './water-surface.js';
 
 export interface RenderStats { calls:number;triangles:number;terrainTriangles:number;terrainPatchTriangles:number;geometries:number;textures:number;trees:number;detailedTrees:number;simplifiedTrees:number;buildings:number;trains:number;lod:number;terrainErrorM:number;terrainPatchCells:number;bridgeModules:number;bridgeAbutments:number;tunnelPortals:number;retainingWalls:number;contextLost:boolean }
 export interface AssetReport { name:string;lod:number;sizeM:number[];normalsFinite:boolean;materials:number;triangles:number }
@@ -274,10 +275,7 @@ export class FjordRenderer implements WorldRenderer {
         }`
     });
     if(this.content.presentation.proceduralScenery==='rhine'||this.content.presentation.proceduralScenery==='tyne'){
-      const positions:number[]=[],step=this.terrain.cellM;
-      for(let z=0;z<this.terrain.depthM;z+=step)for(let x=0;x<this.terrain.widthM;x+=step){const corners=[[x,z],[x+step,z],[x+step,z+step],[x,z+step]] as const,samples=corners.map(([a,b])=>this.terrain.sample(a,b));if(samples.every(s=>s.elevationM>(s.waterLevelM??0)+.5))continue;
-        for(const i of [0,2,1,0,3,2])positions.push(corners[i]![0],samples[i]!.waterLevelM!+.12,corners[i]![1]);}
-      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();return new THREE.Mesh(geometry,material);
+      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(waterSurfacePositions(this.terrain),3));geometry.computeVertexNormals();return new THREE.Mesh(geometry,material);
     }
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(terrainSize(this.terrain),terrainSize(this.terrain)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(this.terrain.widthM/2,.15,this.terrain.depthM/2);return mesh;
   }

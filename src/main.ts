@@ -136,10 +136,10 @@ setHtml(app, `
     <div class="study-note"><span>FIRST SERVICE</span><p id="service-summary">Preparing passenger operations.</p></div>
   </aside>
   <aside class="objective-card" aria-label="Campaign objectives">
-    <p class="eyebrow">FIRST CHARTER <span id="objective-count">0 / 3</span></p>
-    <div class="objective-row" data-objective="first-connection"><i></i><span>Connect settlements<small id="objective-connection">0 / 2</small></span></div>
-    <div class="objective-row" data-objective="first-passengers"><i></i><span>Carry passengers<small id="objective-passengers">0 / 200</small></span></div>
-    <div class="objective-row" data-objective="profitable-railway"><i></i><span>Operating profit<small id="objective-profit">NOK 0 / 10,000</small></span></div>
+    <p class="eyebrow"><span id="objective-title">FIRST CHARTER</span> <span id="objective-count">0 / 3</span></p>
+    <div class="objective-row" data-objective="first-connection"><i></i><span><b id="objective-label-0">Connect settlements</b><small id="objective-progress-0">0 / 2</small></span></div>
+    <div class="objective-row" data-objective="first-passengers"><i></i><span><b id="objective-label-1">Carry passengers</b><small id="objective-progress-1">0 / 200</small></span></div>
+    <div class="objective-row" data-objective="profitable-railway"><i></i><span><b id="objective-label-2">Operating profit</b><small id="objective-progress-2">NOK 0 / 10,000</small></span></div>
   </aside>
   <aside id="tutorial-card" class="tutorial-card" aria-label="Your first railway introduction" hidden>
     <div class="tutorial-progress"><span id="tutorial-step">STEP 1 OF 7</span><button id="dismiss-tutorial" type="button">End introduction</button></div>
@@ -714,16 +714,15 @@ const formatDate = (value: string) => {const date = new Date(value);return Numbe
 const formatBytes = (value: number) => value < 1_000_000 ? `${Math.round(value / 1000)} KB` : `${(value / 1_000_000).toFixed(1)} MB`;
 function updateObjectives(state: Readonly<GameState>): void {
   setMoneyRegion(state.campaignId,currentYear(state));
-  const values: {id: string;value: number;target: number;}[] = [
-  { id: 'first-connection', value: state.objectiveProgress['first-connection'] ?? 0, target: 2 },
-  { id: 'first-passengers', value: state.objectiveProgress['first-passengers'] ?? 0, target: 200 },
-  { id: 'profitable-railway', value: state.objectiveProgress['profitable-railway'] ?? 0, target: 1_000_000 }];
-
-  setText(element('#objective-connection'), `${Math.min(values[0]!.value, 2)} / 2`);
-  setText(element('#objective-passengers'), `${Math.min(values[1]!.value, 200).toLocaleString(locale())} / 200`);
-  setText(element('#objective-profit'), `${money(Math.min(values[2]!.value, 1_000_000))} / ${money(1_000_000)}`);
-  const completed = new Set(state.operations.completedObjectives);for (const objective of values) element(`[data-objective="${objective.id}"]`).classList.toggle('complete', completed.has(objective.id));
-  setText(element('#objective-count'), `${values.filter((objective) => completed.has(objective.id)).length} / ${values.length}`);
+  const campaign=campaignContentRegistry.resolve(state).campaign,completed=new Set(state.operations.completedObjectives),title=state.campaignId==='middle-rhine'?'RHINE CHARTER':state.campaignId==='tyne-wear-coast'?'INDUSTRIAL CHARTER':'FIRST CHARTER';
+  setText(element('#objective-title'),translate(title));
+  const labels=state.campaignId==='middle-rhine'?['Connect Rhine towns','Supply river industries','Rhine operating profit']:state.campaignId==='tyne-wear-coast'?['Link coalfield and coast','Move coal, ore and steel','Industrial operating profit']:['Connect settlements','Carry passengers','Operating profit'];
+  campaign.objectives.forEach((objective,index)=>{
+    const row=element<HTMLElement>(`.objective-row:nth-of-type(${index+1})`),value=state.objectiveProgress[objective.id]??0;
+    row.dataset.objective=objective.id;row.classList.toggle('complete',completed.has(objective.id));setText(element(`#objective-label-${index}`),translate(labels[index]!));
+    setText(element(`#objective-progress-${index}`),objective.type==='operatingProfit'?`${money(Math.min(value,objective.target))} / ${money(objective.target)}`:`${Math.min(value,objective.target).toLocaleString(locale())} / ${objective.target.toLocaleString(locale())}`);
+  });
+  setText(element('#objective-count'), `${campaign.objectives.filter((objective) => completed.has(objective.id)).length} / ${campaign.objectives.length}`);
 }
 function message(error: unknown): string {return error instanceof Error ? error.message : String(error);}
 void start().catch((error) => {console.error(error);element('#toast').classList.add('visible', 'error');setText(element('#toast'), `The study could not start: ${message(error)}`);setText(element('#fps'), 'STARTUP FAILED');});

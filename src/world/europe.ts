@@ -19,6 +19,11 @@ class RegionalHeightfield extends Heightfield {
  override sample(x:number,z:number){return {...super.sample(x,z),waterLevelM:regionalWaterLevel(this.region,z)};}
 }
 const cache=new Map<EuropeRegion,Heightfield>();
+function rhineCentreline(d:typeof rhineDem,heights:Float64Array,sites:{x:number;z:number}[]):number[] {
+ const ordered=[...sites].sort((a,b)=>a.z-b.z),expected=(z:number)=>{let a=ordered[0]!,b=ordered[1]!;if(z>=ordered.at(-1)!.z){a=ordered.at(-2)!;b=ordered.at(-1)!;}else for(let i=1;i<ordered.length;i++)if(z<=ordered[i]!.z){a=ordered[i-1]!;b=ordered[i]!;break;}const t=(z-a.z)/(b.z-a.z);return a.x+(b.x-a.x)*t;},raw:number[]=[];
+ for(let iz=0;iz<d.rows;iz++){const target=Math.round(expected(iz*d.cellM)/d.cellM),start=Math.max(0,target-18),end=Math.min(d.columns-1,target+18);let best=start;for(let ix=start+1;ix<=end;ix++)if(heights[iz*d.columns+ix]!<heights[iz*d.columns+best]!)best=ix;raw.push(best*d.cellM);}
+ return raw.map((_,index)=>{let sum=0,weight=0;for(let offset=-4;offset<=4;offset++){const sample=raw[Math.max(0,Math.min(raw.length-1,index+offset))]!,w=5-Math.abs(offset);sum+=sample*w;weight+=w;}return sum/weight;});
+}
 export function europeHeightfield(region:EuropeRegion):Heightfield {
  const existing=cache.get(region);if(existing)return existing;
  const d=europeDem[region],size=d.heights.length,heights=Float64Array.from(d.heights),forest=new Float32Array(size),rock=new Float32Array(size),urban=new Float32Array(size),sites=europeSites[region].map(s=>geoPoint(region,s.latitude,s.longitude));
@@ -27,8 +32,12 @@ export function europeHeightfield(region:EuropeRegion):Heightfield {
   forest[i]=y>regionalWaterLevel(region,z)+2?(1-urban[i]!)*(region==='rhine'?.25+patch*.7:patch*.52):0;rock[i]=Math.min(1,slope*1.8);
  }
  // Skadi measures the river surface, not its bed. Reconstruct shallow bathymetry
- // in the DEM's low valley band so noisy water returns do not become grass islands.
- if(region==='rhine')for(let i=0;i<size;i++){const z=Math.floor(i/d.columns)*d.cellM,water=regionalWaterLevel(region,z),delta=heights[i]!-water;if(delta<7){const edge=Math.max(0,Math.min(1,delta/7));heights[i]=water-4+Math.pow(edge,3)*11;}}
+ // in the DEM's low valley band and a narrow continuous thalweg following the
+ // locally lowest samples near the real settlement corridor.
+ if(region==='rhine'){
+  for(let i=0;i<size;i++){const z=Math.floor(i/d.columns)*d.cellM,water=regionalWaterLevel(region,z),delta=heights[i]!-water;if(delta<7){const edge=Math.max(0,Math.min(1,delta/7));heights[i]=water-4+Math.pow(edge,3)*11;}}
+  const centres=rhineCentreline(d,heights,sites);for(let iz=0;iz<d.rows;iz++)for(let ix=0;ix<d.columns;ix++){const distance=Math.abs(ix*d.cellM-centres[iz]!),edge=Math.min(1,distance/230),target=regionalWaterLevel(region,iz*d.cellM)-4+edge*edge*7;if(distance<230)heights[iz*d.columns+ix]=Math.min(heights[iz*d.columns+ix]!,target);}
+ }
  const result=new RegionalHeightfield(region,heights,{forest,rock,urban});cache.set(region,result);return result;
 }
 export function europeGenerator(region:EuropeRegion):WorldGenerator {
