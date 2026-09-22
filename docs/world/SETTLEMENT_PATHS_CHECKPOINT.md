@@ -2,6 +2,17 @@
 
 22 September 2026. First implemented part of LIV-01; this does not complete the living-settlement or station-expansion plans.
 
+## LIV-01b: access review and supported forecourt — 2026-09-22
+
+Before buying a station, the planner now draws its actual building side, public entrance, paved landing and feasible connection to the town paths. German/English copy distinguishes connected, blocked, remote and unsuitable forecourt terrain. A missing visual connection does not forbid a rural station or silently change passenger eligibility.
+
+The preview executes the authoritative station command against a private state copy, derives the same engineered terrain, regional building placements and access network as the renderer, and returns the checked geometry. Nothing is bought or saved. Rotation/position/class changes debounce for 160 ms before a dedicated worker starts. Replaced jobs are terminated; revision checks reject outdated results. Purchase waits for the current result. A failed or 20-second timed-out worker leaves purchase disabled and offers Retry. Closing placement, switching tools/companies and disposal terminate the job.
+
+A valid forecourt has a 3.4 m wide paved landing at the street-side doorway, a short sloping apron and solid supporting edges down to the terrain. Whole-width and centre samples reject buried surfaces, water, excessive rise or slope; building/rail checks reject obstruction. This is derived supported geometry, **not a new paid grading operation**. It uses the existing station formation and preserves schema 11, saved prices, cash, demand and rail geometry. An unsuitable court is omitted and explained rather than left floating or buried.
+
+The private preview and actual build were compared for Norway and Arizona at three orientations. The browser verifies the final rotation after rapid changes, exact network equality after purchase and reload, cancellation, tool switching and retry after an intentionally failed worker. Current validation totals and verified images are recorded below.
+
+
 ## Implemented contract
 
 - A single deterministic path generator now connects the existing harbour rows, farm courts and Arizona street blocks. The previous renderer no longer clips out road pieces when a house overlaps them.
@@ -16,9 +27,24 @@
 
 New Norway companies connect all 45 residential entrances in the tested starting world. Arizona connects the buildings with authored doors; water towers and mine headframes are not residential entrances. Existing railways can divide settlements into disconnected areas. The generator reports that state rather than silently painting a crossing. The search is local (nearest connection at most 650 m, 18,000 expanded cells); “blocked” means no safe connection was found within those limits, not a mathematical proof that none exists anywhere.
 
-The existing authored door meshes provide entrance metadata now. Dedicated Blender navigation sockets, graded forecourts/steps, explicit graph junction IDs, safe crossing structures, preview-time access review and priced road construction remain LIV-01b. There are no moving residents or animals yet. The conservative rail obstacle also excludes routes beneath elevated tracks or above tunnels until explicit crossing clearance exists. Existing decorative settlement placement can change with railway geometry; this is not a saved parcel-ownership system.
+The existing authored door meshes provide entrance metadata now. Preview-time access review and a supported paved forecourt are implemented. Dedicated Blender navigation sockets, explicit graph junction IDs, safe crossing structures, terrain-cut steps and priced road construction remain open. There are no moving residents or animals yet. The conservative rail obstacle also excludes routes beneath elevated tracks or above tunnels until explicit crossing clearance exists. Existing decorative settlement placement can change with railway geometry; this is not a saved parcel-ownership system.
 
-## Validation
+## LIV-01b validation
+
+- **230 core tests passed** (227 existing plus three new cases). New cases cover supported/invalid forecourt geometry and exact actual-build comparison in Norway and Arizona at 0°, 55° and 180°, including unchanged preview cash/IDs/terrain and the actual charged price.
+- Production TypeScript/Vite build passed after the final UI change. The existing bundle-size advisory remains.
+- **15 distinct Chrome journeys verified**: construction, four tutorial journeys, two settlement journeys, three preview/cancellation journeys, two orientation/calendar journeys, continuous platform terrain, and narrow/desktop 150% layouts.
+- First browser sweep: 11/13 passed. The two new preview tests expected “Ortswegenetz” / “town paths”; the implemented connected message correctly said “Ortsanschluss möglich” / “town connection are possible”. Corrected test expectations then passed in DE/EN, together with cancellation/retry and the narrow 150% case (4/4). The always-visible short access summary was added after screenshot review. The desktop 150% case passed separately, and the German preview/build/reload case was repeated to capture a closer forecourt view. No automatic retries, no claim that the entire browser suite was rerun.
+- Failed-worker recovery deliberately aborts the worker script, verifies disabled purchase, removes the fault and retries through the UI. Tool changes and Escape retain cash and rail geometry and clear the pending/ready preview. Save/reload compares the entire derived access network.
+- Evidence/logs: ignored `artifacts/liv-01b/`; screenshots below and in README. No cross-browser, real-player, accessibility-device or performance-budget acceptance is inferred from these checks. Workers terminate on completion/cancel; test servers and browsers are stopped after verification.
+
+![Pre-purchase access review](../screenshots/station-access-preview.png)
+
+![Supported entrance landing and approach](../screenshots/station-forecourt-close.png)
+
+![Station connected to the settlement](../screenshots/station-forecourt.png)
+
+## Earlier LIV-01a validation
 
 - 227 core checks passed after the path integration (224 existing plus three new path tests).
 - Six targeted geometry/path/migration checks passed after batching the road geometry.
@@ -31,7 +57,7 @@ The spatially indexed obstruction checks replaced an initially slow full-network
 
 ## Next
 
-LIV-01b: preview the access before buying, grade an explicit station forecourt, retain navigable junction/entrance contracts and decide how a newly built railway cuts a public path. Only then attach LIV-02 representative people or change passenger eligibility. STX-01 station expansions must use the same public-side access contract.
+LIV-01c: introduce explicit navigable junction/entrance contracts and decide how a newly built railway cuts a public path. Supported forecourt geometry does not yet include separately priced grading or stair solutions. Only then attach LIV-02 representative people or change passenger eligibility. STX-01 station expansions must use the same public-side access contract.
 
 
 ## Verified views

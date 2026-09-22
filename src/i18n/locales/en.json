@@ -741,6 +741,20 @@
     "access.connected": "Connected to the town paths",
     "access.blocked": "No continuous path to the town found",
     "access.remote": "No town path within connection range",
-    "access.note": "Paths are currently visual. Passenger demand still uses the station catchment."
+    "access.note": "Paths are currently visual. Passenger demand still uses the station catchment.",
+    "access.preview.short.pending": "Checking access …",
+    "access.preview.short.connected": "Access: connected to the town",
+    "access.preview.short.blocked": "Access: no continuous path",
+    "access.preview.short.remote": "Access: no nearby town",
+    "access.preview.short.terrain": "Access: no forecourt at this site",
+    "access.preview.short.failed": "Access check failed; see details above",
+    "access.preview.title": "Entrance and town path",
+    "access.preview.pending": "Checking the forecourt and town path…",
+    "access.preview.connected": "Forecourt and town connection are possible. The pale dashed line shows the footpath; gold shows the planned station.",
+    "access.preview.blocked": "No continuous town path found. Try another site or rotate the station. You can also build it without a town path.",
+    "access.preview.remote": "No town path network nearby. A rural station can still be built here.",
+    "access.preview.terrain": "The entrance faces awkward terrain or an obstacle. Move or rotate the station for a safe forecourt. Building without a forecourt remains possible.",
+    "access.preview.failed": "The access check failed. Check this site again. Nothing has been built.",
+    "access.preview.retry": "Check access again"
   }
 }

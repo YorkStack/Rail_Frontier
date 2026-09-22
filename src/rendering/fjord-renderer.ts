@@ -1,8 +1,10 @@
-import {readBuildingAccess,placedBuildingAccess,placedStationAccess,type BuildingAccess} from './building-access.js';
-import {connectSettlementPaths,type PathObstacle,type PathEntrance,type SettlementPaths} from '../world/settlement-paths.js';
+import {readBuildingAccess,type BuildingAccess} from './building-access.js';
+import {generateSettlementAccess,type SettlementAccess} from '../world/settlement-access.js';
+import {createStationForecourt} from './station-forecourt.js';
+import type {StationAccessPreview} from '../application/station-access-preview.js';
 import {createStationPlatform,STATION_MODEL_OFFSET_M} from './station-platform.js';
 import {followTarget} from './follow-target.js';
-import {createVillageRoads,villageRoadSeeds,streetEra} from './settlement-roads.js';
+import {createVillageRoads,streetEra} from './settlement-roads.js';
 import {currentYear} from '../simulation/calendar.js';
 import {setTerrainPortalOpenings} from './terrain-material.js';
 import * as THREE from 'three';
@@ -66,8 +68,9 @@ export class FjordRenderer implements WorldRenderer {
   private trees:THREE.Group;
   private buildings=new THREE.Group();
   private buildingAccess=new Map<string,BuildingAccess>();
-  private settlementPaths:SettlementPaths={paths:[],access:{}};
-  settlementAccess():SettlementPaths {return structuredClone(this.settlementPaths);}
+  private settlementPaths:SettlementAccess={paths:[],access:{},forecourts:[]};
+  settlementAccess():SettlementAccess {return structuredClone(this.settlementPaths);}
+  buildingAccessCatalogue():[string,BuildingAccess][] {return structuredClone([...this.buildingAccess]);}
   stationAccess(id:string):string {return this.settlementPaths.access[id]??'remote';}
   private preview:THREE.Object3D|null=null;
   private marker:THREE.Object3D|null=null;
@@ -199,13 +202,10 @@ export class FjordRenderer implements WorldRenderer {
   private addVillageRoads(group:THREE.Group,state:Readonly<GameState>):void {
     const plots=group.userData.roadPlots;if(!plots)return;
     const old=group.getObjectByName('village-roads');if(old){group.remove(old);disposeObject(old);}
-    const southwest=this.content.presentation.proceduralScenery==='southwest-study',year=currentYear(state),obstacles:PathObstacle[]=[],entrances:PathEntrance[]=[];
-    for(const plot of plots){const asset=this.buildingAccess.get(plot.assetId);if(asset){const placed=placedBuildingAccess(plot,asset);obstacles.push(placed.obstacle);if(placed.entrance)entrances.push(placed.entrance);}else obstacles.push({id:plot.id,x:plot.x,z:plot.z,halfX:plot.footprintRadiusM,halfZ:plot.footprintRadiusM,rotationY:plot.rotationY});}
-    for(const station of state.stations){const node=state.railway.nodes.find(n=>n.id===station.nodeId);if(!node)continue;const edge=state.railway.edges.find(e=>e.from===node.id||e.to===node.id),other=edge?state.railway.nodes.find(n=>n.id===(edge.from===node.id?edge.to:edge.from)):undefined,yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:other?Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z)):0;
-      const placed=placedStationAccess(station.id,station.townId??'',node.position,yaw);obstacles.push(placed.obstacle);entrances.push(placed.entrance);}
-    const rails=[...compileGraph(structuredClone(state.railway)).values()].map(track=>track.samples.map(s=>({x:s.position.x,z:s.position.z}))),seeds=villageRoadSeeds(state,plots,southwest,year).map(r=>({townId:r.townId!,points:r.points}));
-    this.settlementPaths=connectSettlementPaths(this.terrain,obstacles,rails,entrances,seeds);
+    const southwest=this.content.presentation.proceduralScenery==='southwest-study',year=currentYear(state);
+    this.settlementPaths=generateSettlementAccess(this.terrain,state,plots,this.buildingAccess,southwest);
     group.add(createVillageRoads(this.terrain,this.settlementPaths.paths.map(path=>({points:path.points,width:path.width,surface:path.kind==='street'&&(southwest||path.townId!==state.towns[1]?.id)?(year>=1950?'asphalt':southwest?'dirt':'cobbles'):'dirt'}))));
+    const oldCourts=group.getObjectByName('station-forecourts');if(oldCourts){group.remove(oldCourts);disposeObject(oldCourts);}const courts=new THREE.Group();courts.name='station-forecourts';for(const court of this.settlementPaths.forecourts)courts.add(createStationForecourt(court,this.terrain));group.add(courts);
     group.userData.roadEra=streetEra(currentYear(state));group.userData.roadTerrainRevision=state.operations.terrain.revision;
   }
   private authoredArizonaSettlements(state:Readonly<GameState>):THREE.Group {
@@ -384,7 +384,7 @@ export class FjordRenderer implements WorldRenderer {
     });
     group.renderOrder=10;this.preview=group;this.scene.add(group);
   }
-  setStationPreview(site:StationSite|null,valid=true):void {
+  setStationPreview(site:StationSite|null,valid=true,access?:StationAccessPreview):void {
     if(this.preview){this.scene.remove(this.preview);disposeObject(this.preview);this.preview=null;}
     if(!site)return;
     const color=valid?'#edc879':'#d7795f',group=new THREE.Group(),local=new THREE.Group();local.position.set(site.center.x,site.center.y+.2,site.center.z);local.rotation.y=site.orientationRad;group.add(local);
@@ -394,9 +394,10 @@ export class FjordRenderer implements WorldRenderer {
     const rails=new THREE.MeshBasicMaterial({color:valid?'#e8eee4':'#f5b49b',depthTest:false});
     for(const x of [-.7175,.7175])box(x,.7,0,.18,.22,site.lengthM,rails);
     const sleeper=new THREE.InstancedMesh(new THREE.BoxGeometry(2.7,.16,.28),solid,Math.ceil(site.lengthM/1.9)),matrix=new THREE.Matrix4();for(let i=0;i<sleeper.count;i++){matrix.makeTranslation(0,.48,-site.lengthM/2+i*1.9);sleeper.setMatrixAt(i,matrix);}local.add(sleeper);
-    box(3.6,.65,0,3.8,1,Math.max(12,site.lengthM-12),solid);
-    // A small transparent shelter makes the platform side legible before purchase.
-    box(4,2.8,0,3.2,3.4,7,ghost);box(4,4.65,0,4,.25,8,solid);
+    box(STATION_MODEL_OFFSET_M,.35,0,7.5,1,site.lengthM,solid);
+    // Match the actual building footprint and public entrance before purchase.
+    box(10.4,3.4,-1.5,8.5,6.8,15,ghost);box(10.4,7.05,-1.5,9.5,.5,16,solid);box(14.72,1.6,-1.5,.18,3.2,1.65,rails);
+    if(access){group.add(createStationForecourt(access.court,this.terrain,true));for(const path of access.paths){const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(path.map(p=>new THREE.Vector3(p.x,p.y+.2,p.z))),new THREE.LineDashedMaterial({color:'#c5e9dd',dashSize:2,gapSize:1,depthTest:false}));line.computeLineDistances();group.add(line);}}
     for(const point of [site.portA,site.portB]){const ring=new THREE.Mesh(new THREE.TorusGeometry(5,.8,8,32),new THREE.MeshBasicMaterial({color,depthTest:false}));ring.rotation.x=Math.PI/2;ring.position.set(point.x,point.y+1.2,point.z);group.add(ring);}
     group.renderOrder=10;this.preview=group;this.scene.add(group);
   }

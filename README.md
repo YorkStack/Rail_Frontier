@@ -6,6 +6,16 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — see the station entrance before buying
+
+Station placement now previews the building, public entrance, paved forecourt and a checked footpath to the town. A visible status above **Build station** explains whether access is connected, missing or unsuitable. Turning or moving the station recalculates the preview in the background; cancelled or outdated results cannot enable the purchase.
+
+![German station planner showing the public entrance, proposed path and access status before purchase](docs/screenshots/station-access-preview.png)
+
+![The built station entrance and supported paved forecourt beside the town path](docs/screenshots/station-forecourt-close.png)
+
+**230 core tests and 15 distinct Chrome journeys verified**, including preview/build agreement, saving and reloading, rapid rotation, cancellation, failed-worker recovery, and 150% interfaces. [Exact validation history and limits](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md). The forecourt adds supported visual paving; station costs and passenger catchment rules remain unchanged. Navigable crossings and moving residents are the next settlement work. Local test servers and browsers are stopped afterwards.
+
 ## September 22 — connected streets and visible station access
 
 Village paths now reach the actual authored house doors and connect to a shared local street network. They check terrain, water, buildings and railway tracks instead of hiding overlapping pieces. Stations have a visible public-side entrance, a connecting path where feasible, and a German/English access status. Farm lanes and doorstep paths stay unpaved; town streets retain their era-based surfaces.
@@ -14,7 +24,7 @@ Village paths now reach the actual authored house doors and connect to a shared 
 
 ![Arizona residential and commercial entrances connected to local streets](docs/screenshots/arizona-connected-paths.png)
 
-**227 core checks passed; eight distinct browser journeys verified**, including station construction, exact path reconstruction after saving, German/English inspection and Arizona access. [Scope, validation history and all four settlement views](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md). Passenger demand still uses catchment rules. Access preview before purchase, graded forecourts, explicit crossings and moving residents remain planned. Test servers are stopped after verification.
+**227 core checks passed; eight distinct browser journeys verified**, including station construction, exact path reconstruction after saving, German/English inspection and Arizona access. [Scope, validation history and all four settlement views](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md). Passenger demand still uses catchment rules. The later LIV-01b checkpoint above adds preview-time review and supported forecourts. Explicit crossings, separately priced grading and moving residents remain planned. Test servers are stopped after verification.
 
 ## September 22 — broader playtesting and safer recovery
 
