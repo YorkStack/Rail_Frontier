@@ -1,3 +1,4 @@
+import {emptySettlementNavigation} from '../world/settlement-navigation.js';
 import {streetSurface,settlementEra,stationAssetFor,stationConstructionYear} from '../world/settlement-era.js';
 import {readBuildingAccess,type BuildingAccess} from './building-access.js';
 import {generateSettlementAccess,type SettlementAccess} from '../world/settlement-access.js';
@@ -69,7 +70,7 @@ export class FjordRenderer implements WorldRenderer {
   private trees:THREE.Group;
   private buildings=new THREE.Group();
   private buildingAccess=new Map<string,BuildingAccess>();
-  private settlementPaths:SettlementAccess={paths:[],access:{},forecourts:[]};
+  private settlementPaths:SettlementAccess={paths:[],access:{},hubs:{},forecourts:[],navigation:emptySettlementNavigation()};
   settlementPresentation():{era:string;stationAsset:string|null;platforms:string[];streets:string[];stationAssets:string[]} {
     const platforms:string[]=[],streets:string[]=[];this.trackGroup.traverse(o=>{if(o instanceof THREE.Mesh&&o.name==='platform-slab')platforms.push((o.material as THREE.Material[])[2]!.name);});this.buildings.traverse(o=>{if(o.name.startsWith('village-road-'))streets.push(o.name);});return {era:this.platformEra,stationAsset:this.content.presentation.assetRoles.station??null,platforms,streets,stationAssets:[...this.stationModels.values()].filter(m=>m.visible).map(m=>m.userData.assetId as string)};
   }

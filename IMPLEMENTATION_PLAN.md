@@ -1,6 +1,14 @@
 # Implementation plan
 
-## Current checkpoint: regional station and surface art — 2026-09-22
+## Current checkpoint: navigable settlement paths — 2026-09-22
+
+LIV-01c adds explicit junctions, entrance nodes, town hubs and route queries on the checked road geometry. Collinear overlaps and T junctions connect correctly; nearby disconnected paths do not. Real rail builds recalculate the graph, retaining safe detours and blocked access rather than adding invisible crossings. Preview and built state agree, and reload reconstructs the same network. [Contract, crossing decision and validation](docs/world/SETTLEMENT_NAVIGATION_CHECKPOINT.md).
+
+238 core tests, TypeScript/production build and all seven focused browser journeys pass. Schema 11, costs and passenger catchment remain unchanged. This is navigation infrastructure; moving people are not added yet. Local test services are stopped after validation.
+
+**Next: LIV-02a**, surface-aware public-door/forecourt/platform walking links and waiting locations, followed by a small 1900 Norwegian resident set driven by actual demand/train activity. Managed rail crossings, underpasses and STX physical expansion remain explicit later components. Keep regular pushes to both remote branches and clean up test processes afterwards.
+
+## Previous checkpoint: regional station and surface art — 2026-09-22
 
 The requested art refinement is implemented: original repeating road/platform materials and six regional construction-era station families generated with local Blender, each in two LODs. Buildings retain their original construction-era identity across save/load; surfaces advance with the current year. Actual placement ghosts, public entrances, platform dimensions, rail clearance, costs and schema 11 remain consistent. [Images, sources, regeneration and validation](docs/world/REGIONAL_STATION_ART.md).
 

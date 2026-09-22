@@ -1,3 +1,7 @@
+import {SettlementNavigator} from '../../src/world/settlement-navigation.js';
+import {pathValidator} from '../../src/world/settlement-paths.js';
+import {Heightfield} from '../../src/world/terrain.js';
+import {compileGraph} from '../../src/rail/graph.js';
 import {test,expect} from '@playwright/test';
 import {mkdirSync} from 'node:fs';
 
@@ -10,7 +14,12 @@ for(const reverse of [false,true])test(`untouched default station orientation bu
  expect(await page.evaluate(()=>window.__railProbe.snapshot().company.cash)).toBe(before.company.cash);const cost=Number(await page.locator('#quote-cost').getAttribute('data-cost'));
  if(reverse){await page.mouse.move(50,80);mkdirSync('artifacts/evidence/station-approaches',{recursive:true});await page.screenshot({path:'artifacts/evidence/station-approaches/granli-sundvik.png'});}
  await page.locator('#commit-track').click();await expect(page.locator('#planner')).toBeHidden();const after=await page.evaluate(()=>window.__railProbe.snapshot());expect(after.railway.revision).toBe(before.railway.revision+1);expect(after.company.cash).toBe(before.company.cash-cost);expect(after.stations.map(s=>s.layout)).toEqual(before.stations.map(s=>s.layout));
- await page.evaluate(()=>window.__railProbe.save());await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.locator('#continue-game').click();await expect(page.locator('#main-menu')).toBeHidden();expect((await page.evaluate(()=>window.__railProbe.snapshot())).railway).toEqual(after.railway);expect(errors).toEqual([]);
+ const access=await page.evaluate(()=>window.__railProbe.settlementAccess()),navigator=new SettlementNavigator(access.navigation),rails=[...compileGraph(after.railway).values()].map(g=>g.samples.map(s=>s.position));
+ // Flat validation isolates the rail-clearance rule; terrain/building checks run in the generator.
+ const railClear=pathValidator(new Heightfield(2,2,20000,new Float64Array([10,10,10,10])),[],rails),nodes=new Map(access.navigation.nodes.map(n=>[n.id,n]));
+ for(const edge of access.navigation.edges)expect(railClear(nodes.get(edge.from)!,nodes.get(edge.to)!,2.2),edge.id).toBe(true);
+ for(const [id,status] of Object.entries(access.access))if(status==='connected')expect(navigator.routeToTown(id),id).not.toBeNull();
+ await page.evaluate(()=>window.__railProbe.save());await page.reload();await page.waitForFunction(()=>window.__railProbe?.ready);await page.locator('#continue-game').click();await expect(page.locator('#main-menu')).toBeHidden();expect((await page.evaluate(()=>window.__railProbe.snapshot())).railway).toEqual(after.railway);expect(await page.evaluate(()=>window.__railProbe.settlementAccess())).toEqual(access);expect(errors).toEqual([]);
  if(reverse){
   await page.locator('#operations').click();await page.locator('#purchase-station').selectOption(after.stations[0]!.id);await page.locator('#purchase-train .office-action').click();await page.locator('#close-operations').click();
   const station=after.stations[0]!;if(station.layout.kind!=='single-platform')throw new Error('Expected platform');
