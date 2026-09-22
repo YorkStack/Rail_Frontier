@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — clearer construction targets
+
+Reopening a built railway no longer labels every internal alignment point as a destination. Real station connections, open ends and junctions remain selectable; nearby names avoid overlapping and appear when their target is focused or hovered.
+
+![Construction after building: one clear destination instead of stacked connection signs](docs/screenshots/construction-targets.png)
+
+Validated with 211 core tests and eight drawing, connection-selection and keyboard browser journeys.
+
 ## September 22 — take your new railway into service
 
 After building a practice route, continue in the same company: **assemble a train → choose its stops → assign the service → resume and follow**. The next action updates from the real game state and resumes correctly after saving and loading. Existing trains and routes are reused; opening the guide spends no money.

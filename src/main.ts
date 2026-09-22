@@ -1,3 +1,4 @@
+import {railConnectionNodes} from './ui/rail-connections.js';
 import {practiceService} from './ui/practice-service.js';
 import {comparisonBaseline,comparisonRange,routeDifference} from './ui/route-comparison.js';
 import {diagnoseSketch,type SketchIssue} from './rail/sketch-diagnostics.js';
@@ -285,7 +286,7 @@ if(selectedStation)element<HTMLSelectElement>('#station-class').value=selectedSt
   const syncMapLabels = () => element('#map-labels').classList.toggle('interactive', interaction === 'none');
   const stationPorts = () => state.stations.flatMap((station) => station.layout.kind === 'single-platform' ? station.layout.ports : []);
   const portAt = (point: Vec3) => stationPorts().find((port) => {const node = state.railway.nodes.find((item) => item.id === port.nodeId);return node && Math.hypot(node.position.x - point.x, node.position.y - point.y, node.position.z - point.z) <= .001;});
-  const railSnapNodes = () => {const stopIds = new Set(state.stations.flatMap((station) => station.layout.kind === 'single-platform' ? [station.layout.stopNodeId] : [])),ports = new Map(stationPorts().map((port) => [port.nodeId, port]));return state.railway.nodes.filter((node) => !stopIds.has(node.id) && (!ports.has(node.id) || state.railway.edges.filter((edge) => edge.from === node.id || edge.to === node.id).length < 2));};
+  const railSnapNodes = () => railConnectionNodes(state);
   // A station is one labelled destination; select its available end facing the draft.
   const routeConnections = (): RouteConnection[] => {
     const nodes = railSnapNodes(),stationNodeIds = new Set(stationPorts().map((p) => p.nodeId));
@@ -295,7 +296,7 @@ if(selectedStation)element<HTMLSelectElement>('#station-class').value=selectedSt
       if (freePoints.length && station.layout.ports.some((p) => {const n = state.railway.nodes.find((n) => n.id === p.nodeId)!;return Math.hypot(n.position.x - freePoints[0]!.x, n.position.z - freePoints[0]!.z) < 1;})) continue;
       const center = state.railway.nodes.find((n) => n.id === station.nodeId)!,other = state.stations.find((s) => s.id !== station.id),target = freePoints[0] ?? state.railway.nodes.find((n) => n.id === other?.nodeId)?.position;
       const port = [...station.layout.ports].filter((p) => nodes.some((n) => n.id === p.nodeId)).sort((a, b) => target ? (b.outward.x - a.outward.x) * (target.x - center.position.x) + (b.outward.z - a.outward.z) * (target.z - center.position.z) : 0)[0];
-      if (port) connections.push({ point: state.railway.nodes.find((n) => n.id === port.nodeId)!.position, label: stationName(station.id) });
+      if (port) connections.push({ point: state.railway.nodes.find((n) => n.id === port.nodeId)!.position, label: stationName(station.id), station: true });
     }
     for (const node of nodes) {if (stationNodeIds.has(node.id) || freePoints[0] && Math.hypot(node.position.x - freePoints[0].x, node.position.z - freePoints[0].z) < 1) continue;connections.push({ point: node.position, label: 'Rail connection' });}
     return connections;

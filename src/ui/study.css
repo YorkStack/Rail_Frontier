@@ -133,3 +133,7 @@ body.construction-practice :is(.field-notes,.chapter,.objective-card){display:no
 #planner:has(#route-comparison:not([hidden])) #planner-copy{display:none}
 
 #planner:has(#route-comparison:not([hidden])) #alignment-steps{display:none}
+
+/* Names never turn adjacent construction targets into a wall of overlapping cards. */
+.route-port span{pointer-events:auto;max-width:calc(100vw - 16px);white-space:normal;width:max-content}
+.route-port.label-collapsed span{visibility:hidden}
