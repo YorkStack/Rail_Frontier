@@ -15,7 +15,17 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — construction-to-service guidance, 2026-09-22
+# Current status — station direction, visible calendar and living settlements, 2026-09-22
+
+## Station direction and living-settlement foundation — 2026-09-22
+
+- Added explicit left/right 15° station-preview controls and a selectable settlement bearing. The initial 0° direction is not automatically optimal; the bearing helper is a starting point, not a certified or cheapest route. Existing terrain/cost validation remains authoritative, and built stations retain their saved orientation.
+- Moved the existing day/year readout beside the simulation controls so construction and office panels cannot hide it. Panel clearance now follows both actual control-deck heights, including scaled and wrapped layouts. All new controls and explanations support DE/EN.
+- Documented the requested connected streets, station entrances, residents, period traffic and animals in `docs/world/LIVING_SETTLEMENTS.md`. These remain planned. Existing roads are textured visual surfaces, not a guaranteed pedestrian network; station demand still uses catchment coverage. The 360-day calendar advances vehicle availability, but multi-century pacing/content remains unfinished.
+- Validation: 217 core tests, TypeScript and production build pass. Seventeen distinct browser cases pass: fifteen existing journeys in the focused sweep, then both new DE/EN station/time journeys after correcting a test that read state before the asynchronous Continue action completed. The new cases verify orientation, unchanged preview cash, actual construction, save/reload and a visible date while switching tools. The production build retains the known chunk-size advisory.
+- New screenshot: `docs/screenshots/station-direction-time.png`. No road, pedestrian, vehicle or animal simulation was added in this checkpoint.
+
+Next implementation priority: LIV-01, connected settlement paths and truthful station access, reusing the existing road rendering. Then residents, era traffic and proportional animals, each with simulation consistency and visual/performance checks. First-freight guidance and human/Safari/accessibility acceptance remain open.
 
 ## Independent player and UX review — 2026-09-22
 
@@ -215,7 +225,7 @@ Still open: full ordered-corridor search, connected campaign progression, railwa
 
 ## Currently working
 
-The simpler drawing loop was accepted by the player; the inlet/ridge progression and first local decisions now await their trial. Next: refine those choices and decision retention with Astra. Read IMPLEMENTATION_PLAN.md and the implementation checkpoint in DRAWN_ROUTE_PLANNING.md. Do not resume the earlier SOL-pause instruction.
+The current user priority is living settlements: connected textured paths and station entrances before pedestrians, era traffic and animals. Station-direction controls and persistent day/year are complete; follow `docs/world/LIVING_SETTLEMENTS.md`, starting with LIV-01. The drawn-route player review and human acceptance remain open. Do not resume the earlier SOL-pause instruction.
 
 Norway V3 and Arizona V2 remain current. Arizona remains a terrain study; campaign expansion and further graphics work wait behind the track-planning review. Existing built saves remain schema 9; unbuilt route sketches are transient and not persisted.
 
@@ -248,4 +258,4 @@ Checks: npm run check; npm test; npm run validate:assets; npm run test:browser.
 Benchmarks: npm run spike; npm run spike:network. Browser tests use installed Google Chrome.
 Blender generator: see ASSET_PIPELINE.md; generated GLBs are tracked so running the app does not require Blender.
 
-Next: user playtest of inlet/ridge decisions, then Astra refinement and retained engineering choices. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.
+Next: LIV-01 settlement paths and station access; keep the construction/service acceptance suite passing. Commit and push each completed checkpoint to both branches and verify their remote hashes. Great River and advanced signaling remain later systems.

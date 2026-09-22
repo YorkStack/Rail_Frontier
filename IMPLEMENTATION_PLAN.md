@@ -378,3 +378,14 @@ For each later task: inspect → implement → tests → run browser where relev
 ### QA-PLAYER-01 — Independent first-play and UX review, 2026-09-22
 
 Three novice-player agents followed by two UX agents completed bounded, isolated browser journeys. Consolidated findings and individual reports are in `docs/qa/PLAYER_REVIEW_2026-09-22.md`. Fixes cover native keyboard activation, paused/loaded service guidance, current-step focus, retained route comparisons, responsive scaled controls, accessible names and localized cargo/operation copy. Durable UX cases join construction, passenger/mail, freight and persistence journeys in `npm run test:acceptance`; its fresh port-5180 build keeps tests away from the player's preview. 215 core tests and production build pass; 34 distinct browser cases passed across the broad sweep and corrected-assertion follow-ups, with exact accounting in CURRENT_STATUS.md and the consolidated QA report. This agent review does not close the human unassisted-play or cross-browser acceptance gates.
+
+
+### LIV-00 — Station direction and visible calendar, 2026-09-22
+
+Complete: explicit ±15° preview controls, optional bearing toward a selected settlement, clear pre-build-only guidance, and a day/year readout beside time controls that remains visible with tools open. Existing station geometry, quoting, calendar cadence and persistence semantics remain authoritative. The helper does not promise a cheapest route or rotate built stations.
+
+Validation: 217 core tests, TypeScript/production build and 17 distinct focused browser journeys pass. The focused sweep passed 15 existing cases; both new DE/EN cases passed after correcting synchronization with asynchronous company loading. They cover real construction, unchanged cash during preview, orientation persistence and visible time across tools. Screenshot: `docs/screenshots/station-direction-time.png`.
+
+### LIV-01–05 — Living settlements, access and era progression
+
+Planned, with LIV-01 as the next implementation priority requested by the player. Detailed contracts, file map, visual budgets, archival references and acceptance gates are in [LIVING_SETTLEMENTS.md](docs/world/LIVING_SETTLEMENTS.md). Sequence: connected building paths and station forecourts → residents driven by real demand → gradual period-appropriate road traffic → habitat-based proportional animals → balanced playable era progression. Current textured roads do not guarantee access; residents and animals are not implemented. Reuse the existing road system, preserve aggregate economic accounting, and benchmark close/far views before claiming performance acceptance. Earlier first-freight guidance and cross-browser/human acceptance remain pending.

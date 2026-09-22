@@ -26,6 +26,7 @@ Inspect a trace with `npx playwright show-trace <trace.zip>` or the report with 
 | Choose a company, interface size/language, named saves and archive errors | `menu`, `localization-exit` |
 | Begin, dismiss, repeat and resume the introduction | `tutorial` |
 | Place real stations and connect their platforms | `construction`, `station-approaches` |
+| Rotate a station preview, align toward a town, preserve built orientation on reload and see time with tools open in DE/EN | `ux-station-time` |
 | Draw, drag, repair, undo and price a real railway | `drawn-route`, `draft-persistence` |
 | Compare water/ridge alternatives and keep the previous company | `construction-lessons` |
 | Reopen a built railway without confusing internal-node markers | `route-connections` |

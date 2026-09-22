@@ -713,6 +713,13 @@
     "Running cost": "Running cost",
     "Terrain variant": "Terrain variant",
     "Current": "Current",
-    "Add at least two ordered stops": "Add at least two ordered stops"
+    "Add at least two ordered stops": "Add at least two ordered stops",
+    "Rotate station": "Rotate station",
+    "↶ Rotate left 15°": "↶ Rotate left 15°",
+    "↷ Rotate right 15°": "↷ Rotate right 15°",
+    "Face a settlement": "Face a settlement",
+    "Align toward settlement": "Align toward settlement",
+    "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.": "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.",
+    "The game calendar has 360 days per year. Vehicle availability follows the year.": "The game calendar has 360 days per year. Vehicle availability follows the year."
   }
 }

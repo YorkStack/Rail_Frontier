@@ -6,6 +6,16 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — orient your station and keep track of the year
+
+Before building, use the **left/right 15° buttons** or **Align toward settlement** to turn the station preview. The latter points toward your selected town; terrain, curves and construction cost still need checking. Built stations keep their orientation. The current **day and year now remain beside the time controls**, including while planning track or managing trains.
+
+![Station direction controls and the persistent calendar in German](docs/screenshots/station-direction-time.png)
+
+Checked with **217 core tests and 17 distinct focused browser cases**, including DE/EN construction and orientation after save/reload. Exact run accounting is in [CURRENT_STATUS.md](CURRENT_STATUS.md).
+
+Next: connected textured town paths and station entrances, followed by people, period traffic and animals visible at close zoom. These features are **planned**, not yet simulated. The [living-settlement plan](docs/world/LIVING_SETTLEMENTS.md) explains the sequence, historical references and performance checks. The calendar already unlocks vehicles by year; multi-century content and pacing still need work.
+
 ## September 22 — independent player and UX checks
 
 Three first-play agents tested onboarding, track construction and train operations; two subsequent agents audited navigation, keyboard behavior and small/scaled layouts. The review resulted in fixes for misleading paused-service messages, loaded-service guidance, lost route comparisons, Space activating the wrong action, missing icon names and overlapping enlarged controls. Cargo totals and the reviewed German operational text are clearer, and reopening the office reveals the relevant next action.
