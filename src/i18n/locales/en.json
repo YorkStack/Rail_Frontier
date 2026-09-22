@@ -644,6 +644,20 @@
     "Whole-route comparison. Full-route prices.": "Whole-route comparison. Full-route prices.",
     "Bright: comparison · muted: unchanged": "Bright: comparison · muted: unchanged",
     "Selection previews; Build buys the route.": "Selection previews; Build buys the route.",
-    "Following the selected train.": "Following the selected train."
+    "Following the selected train.": "Following the selected train.",
+    "Construction practice progress": "Construction practice progress",
+    "Your railway is connected. Assemble a train here, then give it the two stops.": "Your railway is connected. Assemble a train here, then give it the two stops.",
+    "Your train is ready. Choose the two practice stations as stops and create a shuttle.": "Your train is ready. Choose the two practice stations as stops and create a shuttle.",
+    "Train and stops are ready. Assign the service to put the train on your railway.": "Train and stops are ready. Assign the service to put the train on your railway.",
+    "Your service is assigned. Resume time to see the train travel along your railway.": "Your service is assigned. Resume time to see the train travel along your railway.",
+    "Your train is serving this railway. Keep building here or try another construction lesson.": "Your train is serving this railway. Keep building here or try another construction lesson.",
+    "These stations serve towns. Passengers can use the service when demand is available.": "These stations serve towns. Passengers can use the service when demand is available.",
+    "These practice stops are outside town catchments. You can run a test service here; connect town stations to carry passengers.": "These practice stops are outside town catchments. You can run a test service here; connect town stations to carry passengers.",
+    "Assemble a train": "Assemble a train",
+    "Choose the stops": "Choose the stops",
+    "Assign the service": "Assign the service",
+    "Resume and follow train": "Resume and follow train",
+    "Follow this service": "Follow this service",
+    "New company · this railway is saved first": "New company · this railway is saved first"
   }
 }

@@ -6,6 +6,18 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — take your new railway into service
+
+After building a practice route, continue in the same company: **assemble a train → choose its stops → assign the service → resume and follow**. The next action updates from the real game state and resumes correctly after saving and loading. Existing trains and routes are reused; opening the guide spends no money.
+
+Remote mountain practice stops explain that they support test running and need town connections for passenger traffic. Moving to the next construction lesson remains optional and saves the current company first. New guidance is available in German and English, including a compact layout.
+
+![A purchased train on the player's railway, with the next service action in German](docs/screenshots/practice-first-service.png)
+
+Checked with **209 core tests and eight browser journeys**, including saving midway through service setup, real train movement and a 390 px viewport.
+
+Try [the valley construction exercise](http://127.0.0.1:5173/?draw-practice=1&lang=de). After building, choose **Zug zusammenstellen**.
+
 ## September 22 — follow a real train, explore a fuller woodland
 
 **Follow train** now appears only when a service has a valid route. Without a commissioned train, neither the button nor the F shortcut can send the camera into an unrelated mountain. Paused trains and trains boarding at a station remain followable; the camera stays with the chosen train.
