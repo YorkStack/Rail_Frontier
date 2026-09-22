@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — exact missing railway links
+
+Creating a service now names every disconnected leg in travel order, for example **Sundvik → Granli**, instead of showing a generic rejection. The notice uses normal interface text size, stays fully visible in the Railway Office and preserves the chosen stops so the missing track can be built without entering the line again.
+
+![The German Railway Office listing the exact missing track connection](docs/screenshots/missing-track-connections.png)
+
+The helper is checked at the rail-graph level for shuttle and loop services and through the real German browser flow, including focus, minimum text size and panel visibility.
+
 ## September 22 — Middle Rhine, Tyne/Wear and the Arizona ranch
 
 Two new 32 km playable regions can now be selected when starting a company. **Middle Rhine** follows a real elevation corridor around Boppard, St. Goar and Bacharach; **Tyne & Wear** covers Newcastle, North Shields and Sunderland. Each has its own locally generated Blender catalogue for regional houses, period stations, mines, steelworks, ports, vegetation, props, four locomotive eras and eight coach/wagon types. Coal, ore, steel and oil work through the existing inventory and train-service simulation. The year and region limit which vehicles may be bought. Interpolated shore geometry removes the former square water steps; a reconstructed shallow Rhine channel bridges gaps where the elevation source measures the water surface instead of the river bed.

@@ -111,6 +111,15 @@ body:has(.floating-panel:not([hidden])) .company-strip,body:has(.floating-panel:
 .service-workflow #service-guidance,#service-running-detail,.consist-summary span,.consist-summary strong{font-size:calc(.875rem * var(--ui-scale));line-height:1.45}
 .consist-unit b{font-size:calc(.75rem * var(--ui-scale))}
 .operations-panel form #operations-valid{grid-column:1/-1;margin:8px 0;padding:12px;border:1px solid currentColor;border-radius:4px}
+.operations-panel .route-builder>button:not(.office-action){min-height:44px;padding:10px 12px;font-size:calc(.8125rem * var(--ui-scale));line-height:1.25;letter-spacing:.02em;text-transform:none}
+.operations-panel .route-builder #route-draft li{min-height:40px;padding:7px 9px;font-size:calc(.9375rem * var(--ui-scale));line-height:1.35}
+.operations-panel .route-builder #route-draft li button{min-height:36px;padding:6px 8px;font-size:calc(.75rem * var(--ui-scale));line-height:1.2;letter-spacing:.03em}
+.operations-panel .service-stage.current>.office-heading:after{font-size:calc(.6875rem * var(--ui-scale));line-height:1.2}
+.operations-panel form #operations-valid{scroll-margin-block:12px;background:#302f27;color:#ffd1ba;font-size:calc(1rem * var(--ui-scale));line-height:1.5;overflow-wrap:anywhere}
+.operations-panel form #operations-valid strong,.operations-panel form #operations-valid span{display:block}
+.operations-panel form #operations-valid strong{font-size:calc(1.0625rem * var(--ui-scale));color:#ffe0a3}
+.operations-panel form #operations-valid ul{margin:8px 0;padding-left:1.35rem}
+.operations-panel form #operations-valid li{margin:6px 0;color:#fff4d4;font-size:calc(.9375rem * var(--ui-scale));font-weight:600}
 
 .station-access-review{padding-block:12px;border-block:1px solid var(--line,#577465);font-size:calc(14px * var(--ui-scale,1));line-height:1.5}.station-access-review strong{font-family:var(--font-ui, sans-serif);font-size:inherit}.station-access-review p{margin:6px 0 0;font-size:inherit}.station-access-review button{margin-top:10px}
 

@@ -2,6 +2,7 @@ import type {GameState,Id} from '../domain/model.js';
 import {vehicleDefinition,freightCapacityOf} from '../content/vehicles.js';
 import {stationDefinition} from '../content/stations.js';
 import {stationHasExternalConnection,stationInternalEdges} from '../rail/station-layout.js';
+import {RailNetwork} from '../rail/graph.js';
 
 export interface ConsistDraft {
   stationId:Id<'station'>|null;
@@ -23,6 +24,23 @@ export interface ConsistPreview {
   runningCostPerKm:number;
   maintenancePerDay:number;
   maxSpeedKmh:number;
+}
+
+export interface MissingRouteLeg {
+  from:Id<'station'>;
+  to:Id<'station'>;
+}
+
+/** Lists the exact consecutive station pairs that the current rail graph cannot connect. */
+export function missingRouteLegs(state:Pick<GameState,'stations'|'railway'>,stops:readonly Id<'station'>[],mode:'shuttle'|'loop'):MissingRouteLeg[] {
+  if(stops.length<2)return [];
+  const network=new RailNetwork(state.railway),nodes=new Map(state.stations.map(station=>[station.id,station.nodeId])),missing:MissingRouteLeg[]=[];
+  const legCount=mode==='loop'?stops.length:stops.length-1;
+  for(let index=0;index<legCount;index++){
+    const from=stops[index]!,to=stops[(index+1)%stops.length]!,fromNode=nodes.get(from),toNode=nodes.get(to);
+    if(!fromNode||!toNode||!network.findPath(fromNode,toNode))missing.push({from,to});
+  }
+  return missing;
 }
 
 const empty=(reason:string):ConsistPreview=>({valid:false,reason,purchaseCost:0,lengthM:0,platformLengthM:0,passengers:0,mail:0,freight:0,runningCostPerKm:0,maintenancePerDay:0,maxSpeedKmh:0});

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createNorwayPreviewState} from '../src/content/norway-preview.js';
 import {norway} from '../src/content/norway.js';
 import {norwayV3WorldGenerator} from '../src/world/norway-generators.js';
-import {previewConsist} from '../src/ui/service-builder.js';
+import {missingRouteLegs,previewConsist} from '../src/ui/service-builder.js';
 
 const state=()=>createNorwayPreviewState(norwayV3WorldGenerator.generate(norway.world));
 
@@ -32,4 +32,13 @@ test('consist preview explains budget and electric-power requirements before pur
   assert.match(previewConsist(poor,{stationId,locomotiveId:'nord-2-6-0',wagonId:'fjord-passenger-coach',wagonCount:1,year:1900}).reason,/cannot afford/);
   const electric=state();
   assert.match(previewConsist(electric,{stationId:electric.stations[0]!.id,locomotiveId:'nord-el-1',wagonId:'fjord-passenger-coach',wagonCount:1,year:1922}).reason,/overhead line/);
+});
+
+test('route validation identifies every disconnected station pair in travel order',()=>{
+  const game=state(),stops=game.stations.slice(0,3).map(station=>station.id);game.railway.edges=[];
+  assert.deepEqual(missingRouteLegs(game,stops,'shuttle'),[
+    {from:stops[0],to:stops[1]},
+    {from:stops[1],to:stops[2]},
+  ]);
+  assert.deepEqual(missingRouteLegs(game,stops,'loop').at(-1),{from:stops[2],to:stops[0]});
 });
