@@ -713,6 +713,13 @@
     "Running cost": "Fahrtkosten",
     "Terrain variant": "Geländevariante",
     "Current": "Aktuell",
-    "Add at least two ordered stops": "Füge mindestens zwei Halte in der gewünschten Reihenfolge hinzu"
+    "Add at least two ordered stops": "Füge mindestens zwei Halte in der gewünschten Reihenfolge hinzu",
+    "Rotate station": "Bahnhof drehen",
+    "↶ Rotate left 15°": "↶ 15° nach links",
+    "↷ Rotate right 15°": "↷ 15° nach rechts",
+    "Face a settlement": "Richtung eines Ortes",
+    "Align toward settlement": "Zum Ort ausrichten",
+    "Rotate before building. Facing a settlement is a starting direction, not a guaranteed cheapest route. Built stations keep their direction.": "Drehe den Bahnhof vor dem Bau. Die Richtung zum Ort dient als Ausgangspunkt, sie garantiert keine günstigste Strecke. Gebaute Bahnhöfe behalten ihre Ausrichtung.",
+    "The game calendar has 360 days per year. Vehicle availability follows the year.": "Der Spielkalender hat 360 Tage pro Jahr. Das Jahr bestimmt, welche Fahrzeuge verfügbar sind."
   }
 }
