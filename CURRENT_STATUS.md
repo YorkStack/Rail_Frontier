@@ -15,7 +15,16 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — expanded player review and recovery fixes, 2026-09-22
+# Current status — connected visual settlement paths, 2026-09-22
+
+## LIV-01a: connected visual paths — 2026-09-22
+
+- Replaced clipped decorative street pieces with a deterministic corridor planner. Actual authored door/threshold meshes and footprint markers provide entrances; rotation and scale remain consistent. All 45 residential plots in the tested new Norway world connect, as do Arizona buildings with authored doors.
+- Paths avoid buildings, water, steep terrain and rails. A street-side door/canopy and checked path connect a station when feasible. DE/EN station inspection reports connected/blocked/remote status and explicitly preserves the existing catchment rule. No cash, demand or save-schema changes.
+- Connected surfaces have rounded joins, world-space textures and grouped geometry. Farm lanes and house/station paths stay dirt; town-street paving follows the existing presentation eras. Railway/terrain edits rebuild paths; a station build no longer triggers duplicate road generation.
+- Validation: 227 core tests, six focused geometry/path/migration tests, production build and eight distinct browser cases. Expanded run first passed 7/8 (toast test assumption); the follow-up exposed missing locale messages, which were fixed. Four affected browser cases then passed; both visual cases were repeated after the texture refinement and Norway again after preserving dirt farm lanes. Exact scope and limitations: [checkpoint](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md).
+- Four new verified settlement screenshots are included, with Sundvik and Arizona in README. Cleanup verified: no listeners on 5173/5180/5190, no test browser/driver processes; temporary acceptance build removed. The game preview remains stopped.
+- Next: LIV-01b access preview before purchase, graded forecourts, navigable junction contracts and deliberate crossing design. Only then LIV-02 residents or road-dependent demand. STX-01 physical station expansion follows the shared access contract. LIV-01 overall is not complete.
 
 ## Expanded play, adversarial and UX review — 2026-09-22
 

@@ -736,6 +736,11 @@
     "Cycle: {progress}%": "Arbeitsgang: {progress}%",
     "Produces {cargo} per cycle": "Erzeugt {cargo} je Arbeitsgang",
     "Recipe": "Verarbeitung",
-    "stored": "gelagert"
+    "stored": "gelagert",
+    "access.label": "Weg zum Ort",
+    "access.connected": "Mit dem Ortswegenetz verbunden",
+    "access.blocked": "Kein durchgehender Weg zum Ort gefunden",
+    "access.remote": "Kein Ortsweg in Anschlussnähe",
+    "access.note": "Der Wegeanschluss ist vorerst eine Darstellung. Fahrgäste werden weiterhin über den Einzugsbereich berechnet."
   }
 }

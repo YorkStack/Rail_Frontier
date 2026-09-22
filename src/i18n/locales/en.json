@@ -736,6 +736,11 @@
     "Cycle: {progress}%": "Cycle: {progress}%",
     "Produces {cargo} per cycle": "Produces {cargo} per cycle",
     "Recipe": "Recipe",
-    "stored": "stored"
+    "stored": "stored",
+    "access.label": "Town access",
+    "access.connected": "Connected to the town paths",
+    "access.blocked": "No continuous path to the town found",
+    "access.remote": "No town path within connection range",
+    "access.note": "Paths are currently visual. Passenger demand still uses the station catchment."
   }
 }

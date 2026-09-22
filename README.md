@@ -6,6 +6,16 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — connected streets and visible station access
+
+Village paths now reach the actual authored house doors and connect to a shared local street network. They check terrain, water, buildings and railway tracks instead of hiding overlapping pieces. Stations have a visible public-side entrance, a connecting path where feasible, and a German/English access status. Farm lanes and doorstep paths stay unpaved; town streets retain their era-based surfaces.
+
+![Sundvik houses linked by lanes and door paths, with a connection to the rotated station](docs/screenshots/connected-town-paths.png)
+
+![Arizona residential and commercial entrances connected to local streets](docs/screenshots/arizona-connected-paths.png)
+
+**227 core checks passed; eight distinct browser journeys verified**, including station construction, exact path reconstruction after saving, German/English inspection and Arizona access. [Scope, validation history and all four settlement views](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md). Passenger demand still uses catchment rules. Access preview before purchase, graded forecourts, explicit crossings and moving residents remain planned. Test servers are stopped after verification.
+
 ## September 22 — broader playtesting and safer recovery
 
 Eighteen review roles covered novice/experienced play, large interfaces, four construction lessons, passenger/freight services, deliberate input mistakes and critical UX review. Eleven agent workers ran the roles; seven roles reused workers with fresh browsers after a tool limit. These are simulated perspectives, not tests with actual age groups.

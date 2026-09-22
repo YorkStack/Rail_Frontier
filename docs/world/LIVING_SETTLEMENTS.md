@@ -1,12 +1,12 @@
 # Lebendige Orte, Bahnhofszugänge und Epochen
 
-Stand: 22. September 2026. Produktentscheidung und umsetzbare Arbeitspakete aus dem Nutzerwunsch. Die Ausrichtungshilfe und dauerhafte Zeitanzeige sind in diesem Schritt umgesetzt; Straßennetz, Bewohner und Tiere unten sind geplante Erweiterungen.
+Stand: 22. September 2026. Produktentscheidung und umsetzbare Arbeitspakete aus dem Nutzerwunsch. Die Ausrichtungshilfe, dauerhafte Zeitanzeige und LIV-01a (zusammenhängende dargestellte Wege) sind umgesetzt. LIV-01b, Bewohner und Tiere bleiben geplant. Details und Grenzen: [SETTLEMENT_PATHS_CHECKPOINT.md](SETTLEMENT_PATHS_CHECKPOINT.md).
 
 ## Was das Spiel heute tatsächlich kann
 
 - Bahnhöfe sind vor dem Bau in 5°-Schritten drehbar. Die Ausgangsrichtung ist 0°, nicht das Ergebnis einer Optimierung. Neue Links-/Rechtsknöpfe drehen um 15°; eine Ortsauswahl kann die Vorschau auf die direkte Richtung zum Ziel drehen. Das ist eine Orientierungshilfe, kein Nachweis für die günstigste oder baubare Strecke. Geländeprüfung und Baupreis bleiben verbindlich. Bestehende Bahnhöfe lassen sich nicht nachträglich mitsamt angeschlossenen Gleisen drehen.
-- Die bisherigen Ortsstraßen sind Geländeoberflächen mit prozeduralen Erd-, Pflaster- und Asphalttexturen. Sie orientieren sich an Häuserreihen und Hofgruppen. Sie enthalten weder ein vollständiges Wegenetz noch garantierte Haus- oder Bahnhofszugänge. Bei Gebäudeüberschneidungen lässt die Darstellung einzelne Straßenstücke aus; das löst keine Erreichbarkeit. Personen und Fuhrwerke können darauf noch nicht zuverlässig navigieren.
-- Bahnhofsnutzung wird derzeit über Einzugsradius und Zugverbindung bestimmt, nicht über eine Straßenverbindung. Ein Bahnhof hat deshalb heute nicht zwingend einen Straßenanschluss.
+- Die bisherigen Ortsstraßen sind Geländeoberflächen mit prozeduralen Erd-, Pflaster- und Asphalttexturen. Sie orientieren sich an Häuserreihen und Hofgruppen. LIV-01a verbindet vorhandene Haustüren über ein geprüftes lokales Wegenetz und umgeht Gebäude, Wasser und Gleise. Nicht gefundene Bahnhofszugänge werden angezeigt; durch Bahnen getrennte Ortsteile bekommen keinen erfundenen Übergang. Navigierbare Kreuzungsknoten, Vorplatz-Stufen und Personenverkehr fehlen noch.
+- Bahnhofsnutzung wird derzeit über Einzugsradius und Zugverbindung bestimmt, nicht über eine Straßenverbindung. Ein Bahnhof erhält einen sichtbaren Weg, wenn die lokale Anschlussprüfung gelingt; seine Nutzung hängt noch nicht von diesem Weg ab.
 - Der gespeicherte Kalender startet regulär 1900: 1.200 Simulationstakte = ein Wirtschaftstag, 360 Tage = ein Spieljahr. Ein Jahr dauert bei 1× sechs Stunden, bei 8× theoretisch 45 Minuten ohne Pausen/Leistungslimit. Ein Jahrhundert würde bei 8× etwa 75 Stunden benötigen. Die Zeit kann technisch weiterlaufen, aber Inhalt und Balance über mehrere Jahrhunderte sind nicht fertig.
 - Fahrzeuge werden jahresabhängig freigeschaltet; der aktuelle Katalog reicht bis zur El-18-Epoche ab 1996. Texturwechsel für Ortsstraßen erfolgt bisher grob ab 1950; das ist eine Gestaltungsvorgabe und keine historisch exakte Modernisierungssimulation.
 - Bevölkerung, wartende Fahrgäste, Post, Holz, Bretter und Industrieproduktion existieren als aggregierte Simulation. Es gibt noch keine dargestellten Bewohner, Karren, Straßenfahrzeuge oder Nutztiere.
@@ -19,7 +19,7 @@ Bahnhöfe erhalten eine erkennbare öffentliche Zugangsseite und eine Gleisseite
 
 ## LIV-01: Zusammenhängende Ortswege und echte Zugänge
 
-**Nächste Implementierungspriorität.**
+**LIV-01a umgesetzt; LIV-01b bleibt nächste Priorität.** Der folgende vollständige Vertrag ist noch nicht insgesamt erfüllt. Siehe [aktuellen Teilstand](SETTLEMENT_PATHS_CHECKPOINT.md).
 
 1. Gebäudemanifest/Blender-Objekte um tatsächliche Eingangspunkte, Hofflächen und optionale Ladepunkte ergänzen. Keine Verbindung zum geometrischen Hausmittelpunkt. Bestehende Hausausrichtung berücksichtigen.
 2. Ein deterministisches lokales Wegenetz erzeugen: Hauptgasse → Nebengassen → kurze Hauszugänge. Hafenreihen, Bergterrassen und Bauernhöfe behalten verschiedene Grundrisse. Jede bewohnte Parzelle besitzt einen prüfbaren Weg bis zu einem Ortsknoten.
