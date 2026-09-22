@@ -406,3 +406,10 @@ Planning requested 2026-09-22. See [STATION_EXPANSION_AND_YARDS.md](docs/constru
 Complete 2026-09-22: 18 review roles (10 players, 4 adversarial, 4 critical UX), 11 distinct workers with 7 disclosed reuses after the tool thread limit. Reports, outcomes, priorities and cleanup: [RESULTS.md](docs/qa/swarm-2026-09-22/RESULTS.md). Thirteen meaningful issue clusters corrected, 10 P3 items documented, one concurrent 8× symptom not reproduced with a single browser. No real-demographic or full-century-play claim.
 
 Validation: 224 core tests and production build; 49 distinct browser cases passed across the broad 48/49 run and one corrected-locator follow-up, with no intervening application change. Five new core tests, 11 new browser cases and stale-worker validation in acceptance. Earlier test-assertion corrections are disclosed. All test browsers, servers 5173/5180/5190 and temporary build sites cleaned up. Resume LIV-01, then the STX expansion sequence; keep periodic pushes to both main and implementation/passenger-slice.
+
+
+### LIV-01a — Connected visual settlement paths
+
+Implemented after the expanded swarm review. One deterministic corridor planner replaces clipped decorative road pieces, uses actual authored door/threshold and footprint geometry, and validates water, slope, buildings and railway obstacles. Public station entrance/connection follows the saved orientation; DE/EN inspection reports visual access without changing catchment or costs. Street/house-path surfaces are batched, joined and terrain-conforming. [Contract, validation and remaining LIV-01b work](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md).
+
+Next: preview-time access review, graded forecourts and explicit navigable junctions/crossings before residents or economic road dependence. STX-01 remains the subsequent physical station-expansion work. Do not mark LIV-01 overall complete.

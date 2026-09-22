@@ -1,6 +1,8 @@
+import {readBuildingAccess,placedBuildingAccess,placedStationAccess,type BuildingAccess} from './building-access.js';
+import {connectSettlementPaths,type PathObstacle,type PathEntrance,type SettlementPaths} from '../world/settlement-paths.js';
 import {createStationPlatform,STATION_MODEL_OFFSET_M} from './station-platform.js';
 import {followTarget} from './follow-target.js';
-import {createVillageRoads,villageRoads,streetEra} from './settlement-roads.js';
+import {createVillageRoads,villageRoadSeeds,streetEra} from './settlement-roads.js';
 import {currentYear} from '../simulation/calendar.js';
 import {setTerrainPortalOpenings} from './terrain-material.js';
 import * as THREE from 'three';
@@ -63,6 +65,10 @@ export class FjordRenderer implements WorldRenderer {
   private waterfall:THREE.Mesh<THREE.BufferGeometry,THREE.ShaderMaterial>;
   private trees:THREE.Group;
   private buildings=new THREE.Group();
+  private buildingAccess=new Map<string,BuildingAccess>();
+  private settlementPaths:SettlementPaths={paths:[],access:{}};
+  settlementAccess():SettlementPaths {return structuredClone(this.settlementPaths);}
+  stationAccess(id:string):string {return this.settlementPaths.access[id]??'remote';}
   private preview:THREE.Object3D|null=null;
   private marker:THREE.Object3D|null=null;
   private portHandles:THREE.Object3D|null=null;
@@ -135,7 +141,7 @@ export class FjordRenderer implements WorldRenderer {
       if(asset.lods.length!==2)throw new Error(`Asset ${asset.id} is missing an LOD`);
       const levels:THREE.Object3D[]=[];
       for(let lod=0;lod<loaded.length;lod++) {
-        const group=loaded[lod]!.scene;group.updateMatrixWorld(true);const dimensions=new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3());let normalsFinite=true,triangles=0;const materials=new Set<THREE.Material>();
+        const group=loaded[lod]!.scene;group.updateMatrixWorld(true);if(lod===0){const access=readBuildingAccess(group);if(access)this.buildingAccess.set(asset.id,access);}const dimensions=new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3());let normalsFinite=true,triangles=0;const materials=new Set<THREE.Material>();
         group.traverse(object=>{if(object instanceof THREE.Mesh){object.castShadow=true;object.receiveShadow=true;const normal=object.geometry.getAttribute('normal');if(!normal)normalsFinite=false;else for(let index=0;index<normal.count;index++)if(!Number.isFinite(normal.getX(index)+normal.getY(index)+normal.getZ(index)))normalsFinite=false;triangles+=(object.geometry.index?.count??object.geometry.getAttribute('position').count)/3;for(const material of Array.isArray(object.material)?object.material:[object.material]){const binding=(manifest.materialBindings??[]).find(item=>material.name.startsWith(item.materialPrefix));if(binding&&material instanceof THREE.MeshStandardMaterial){material.map=textures.get(binding.map)??null;material.normalMap=textures.get(binding.normalMap)??null;material.roughnessMap=textures.get(binding.roughnessMap)??null;material.normalScale.set(.22,.22);for(const texture of [material.map,material.normalMap,material.roughnessMap])texture?.repeat.set(...binding.repeat);material.needsUpdate=true;}materials.add(material);}}});
         if(!normalsFinite)throw new Error(`Asset ${asset.id} has invalid normals`);this.assets.push({name:asset.id,lod,sizeM:dimensions.toArray(),normalsFinite,materials:materials.size,triangles});const optimized=this.optimizedAssetLevel(group,asset.id);levels.push(optimized);this.assetLibrary.add(optimized);disposeObject(group);
       }
@@ -193,7 +199,13 @@ export class FjordRenderer implements WorldRenderer {
   private addVillageRoads(group:THREE.Group,state:Readonly<GameState>):void {
     const plots=group.userData.roadPlots;if(!plots)return;
     const old=group.getObjectByName('village-roads');if(old){group.remove(old);disposeObject(old);}
-    group.add(createVillageRoads(this.terrain,villageRoads(state,plots,this.content.presentation.proceduralScenery==='southwest-study',currentYear(state)),plots));
+    const southwest=this.content.presentation.proceduralScenery==='southwest-study',year=currentYear(state),obstacles:PathObstacle[]=[],entrances:PathEntrance[]=[];
+    for(const plot of plots){const asset=this.buildingAccess.get(plot.assetId);if(asset){const placed=placedBuildingAccess(plot,asset);obstacles.push(placed.obstacle);if(placed.entrance)entrances.push(placed.entrance);}else obstacles.push({id:plot.id,x:plot.x,z:plot.z,halfX:plot.footprintRadiusM,halfZ:plot.footprintRadiusM,rotationY:plot.rotationY});}
+    for(const station of state.stations){const node=state.railway.nodes.find(n=>n.id===station.nodeId);if(!node)continue;const edge=state.railway.edges.find(e=>e.from===node.id||e.to===node.id),other=edge?state.railway.nodes.find(n=>n.id===(edge.from===node.id?edge.to:edge.from)):undefined,yaw=station.layout.kind==='single-platform'?station.layout.orientationRad:other?Math.atan2(-(other.position.x-node.position.x),-(other.position.z-node.position.z)):0;
+      const placed=placedStationAccess(station.id,station.townId??'',node.position,yaw);obstacles.push(placed.obstacle);entrances.push(placed.entrance);}
+    const rails=[...compileGraph(structuredClone(state.railway)).values()].map(track=>track.samples.map(s=>({x:s.position.x,z:s.position.z}))),seeds=villageRoadSeeds(state,plots,southwest,year).map(r=>({townId:r.townId!,points:r.points}));
+    this.settlementPaths=connectSettlementPaths(this.terrain,obstacles,rails,entrances,seeds);
+    group.add(createVillageRoads(this.terrain,this.settlementPaths.paths.map(path=>({points:path.points,width:path.width,surface:path.kind==='street'&&(southwest||path.townId!==state.towns[1]?.id)?(year>=1950?'asphalt':southwest?'dirt':'cobbles'):'dirt'}))));
     group.userData.roadEra=streetEra(currentYear(state));group.userData.roadTerrainRevision=state.operations.terrain.revision;
   }
   private authoredArizonaSettlements(state:Readonly<GameState>):THREE.Group {
@@ -473,7 +485,7 @@ export class FjordRenderer implements WorldRenderer {
   regional():void {this.showWorld();if(this.terrain.widthM>4000){this.setCameraPreset('regional');return;}this.follow=false;this.controls.target.set(1850,80,1970);this.camera.position.set(3500,1750,3900);this.controls.update();}
   resize():void {const {width,height}=this.canvas.getBoundingClientRect();this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
   update(previous:Readonly<GameState>,current:Readonly<GameState>,alpha:number):void {
-    this.modelState=current;this.syncLabels(current);if(this.buildings.userData.roadEra!==streetEra(currentYear(current))||this.buildings.userData.roadTerrainRevision!==current.operations.terrain.revision)this.addVillageRoads(this.buildings,current);if(current.operations.terrain.revision!==this.terrainRevision)this.rebuildTerrain(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);this.updateTrainModels(current);this.syncStationModels(current);
+    this.modelState=current;this.syncLabels(current);if(current.operations.terrain.revision!==this.terrainRevision)this.rebuildTerrain(current);if(current.railway.revision!==this.railwayRevision||railwayKey(current)!==this.railwaySignature||this.electrificationKey(current)!==this.electrificationSignature)this.rebuildTracks(current);else if(this.buildings.userData.roadEra!==streetEra(currentYear(current))||this.buildings.userData.roadTerrainRevision!==current.operations.terrain.revision)this.addVillageRoads(this.buildings,current);this.updateTrainModels(current);this.syncStationModels(current);
     this.syncOverlay(current);this.syncSelectionMarker(current);
     if(this.follow){const lead=followTarget(current,this.followedTrainId);if(!lead)this.follow=false;else{const old=this.trainPosition.clone(),position=motionPosition(lead.motion,this.geometry);this.trainPosition.set(position.x,position.y,position.z);const delta=this.trainPosition.clone().sub(old);this.controls.target.add(delta);this.camera.position.add(delta);}}
     const shift=new THREE.Vector3((this.keys.has('KeyD')?1:0)-(this.keys.has('KeyA')?1:0),0,(this.keys.has('KeyS')?1:0)-(this.keys.has('KeyW')?1:0));
