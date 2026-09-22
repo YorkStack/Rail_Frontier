@@ -6,7 +6,8 @@
     "script": "tools/blender/generate_norway_pack.py",
     "sceneryScript": "tools/blender/generate_norway_scenery.py",
     "architectureScript": "tools/blender/generate_norway_architecture.py",
-    "rollingStockDetail": "GFX-006B+VEHICLE-002+VEHICLE-003+VEHICLE-004+VEHICLE-005"
+    "rollingStockDetail": "GFX-006B+VEHICLE-002+VEHICLE-003+VEHICLE-004+VEHICLE-005",
+    "stationScript": "tools/blender/generate_station_architecture.py"
   },
   "assets": [
     {
@@ -457,31 +458,6 @@
         },
         {
           "path": "/models/norway/fjord-freight-wagon_lod1.glb",
-          "maxTriangles": 3000,
-          "maxBytes": 140000
-        }
-      ]
-    },
-    {
-      "id": "norway-station",
-      "kind": "station",
-      "requiredNodes": [
-        "platform_origin",
-        "track_side"
-      ],
-      "maxDimensionsM": [
-        16,
-        10,
-        31
-      ],
-      "lods": [
-        {
-          "path": "/models/norway/norway-station_lod0.glb",
-          "maxTriangles": 12000,
-          "maxBytes": 350000
-        },
-        {
-          "path": "/models/norway/norway-station_lod1.glb",
           "maxTriangles": 3000,
           "maxBytes": 140000
         }
@@ -955,6 +931,93 @@
           "path": "/models/norway/norway-timber-yard_lod1.glb",
           "maxTriangles": 1800,
           "maxBytes": 120000
+        }
+      ]
+    },
+    {
+      "id": "norway-station",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-station_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/norway/norway-station_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
+        }
+      ]
+    },
+    {
+      "id": "norway-station-interwar",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-station-interwar_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/norway/norway-station-interwar_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
+        }
+      ]
+    },
+    {
+      "id": "norway-station-modern",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/norway/norway-station-modern_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/norway/norway-station-modern_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
         }
       ]
     }

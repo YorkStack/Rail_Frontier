@@ -1,12 +1,12 @@
 import type {GameState} from '../domain/model.js';
 export interface Plot {x:number;z:number;townId:string|null;footprintRadiusM?:number}
-export type RoadSurface='dirt'|'cobbles'|'asphalt';
+export type RoadSurface=import('./settlement-era.js').SurfaceKind;
 interface Point {x:number;z:number}
 export interface VillageRoad {points:Point[];width:number;surface:RoadSurface;townId?:string}
 /** Art-direction eras: paving reaches town streets first; farm access remains unpaved. */
-export const streetEra=(year:number)=>year>=1950?'motor':'horse';
+export {settlementEra as streetEra} from './settlement-era.js';
 export function villageRoadSeeds(state:Pick<GameState,'towns'>,plots:readonly Plot[],southwest:boolean,year:number):VillageRoad[]{
- const roads:VillageRoad[]=[],modern=streetEra(year)==='motor';
+ const roads:VillageRoad[]=[],modern=year>=1960;
  for(const [index,town] of state.towns.entries()){
   const houses=plots.filter(p=>p.townId===town.id);if(!houses.length)continue;
   const add=(points:Point[],width:number,central=false)=>roads.push({points,width,townId:town.id,surface:modern?'asphalt':central&&!southwest?'cobbles':'dirt'});

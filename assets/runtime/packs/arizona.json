@@ -4,7 +4,8 @@
   "generator": {
     "blender": "4.0.2",
     "script": "tools/blender/generate_arizona_architecture.py",
-    "referenceEra": "Arizona circa 1900 interpretation"
+    "referenceEra": "Arizona circa 1900 interpretation",
+    "stationScript": "tools/blender/generate_station_architecture.py"
   },
   "textures": [
     {
@@ -367,6 +368,93 @@
           "path": "/models/arizona/arizona-mine-headframe_lod1.glb",
           "maxTriangles": 1800,
           "maxBytes": 170000
+        }
+      ]
+    },
+    {
+      "id": "arizona-station",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-station_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/arizona/arizona-station_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
+        }
+      ]
+    },
+    {
+      "id": "arizona-station-interwar",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-station-interwar_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/arizona/arizona-station-interwar_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
+        }
+      ]
+    },
+    {
+      "id": "arizona-station-modern",
+      "kind": "station",
+      "requiredNodes": [
+        "platform_origin",
+        "track_side",
+        "public_entrance",
+        "roof_ridge",
+        "roof_eave_left",
+        "roof_eave_right"
+      ],
+      "maxDimensionsM": [
+        17,
+        10,
+        19
+      ],
+      "lods": [
+        {
+          "path": "/models/arizona/arizona-station-modern_lod0.glb",
+          "maxTriangles": 3000,
+          "maxBytes": 800000
+        },
+        {
+          "path": "/models/arizona/arizona-station-modern_lod1.glb",
+          "maxTriangles": 1600,
+          "maxBytes": 800000
         }
       ]
     }

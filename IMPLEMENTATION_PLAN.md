@@ -1,6 +1,14 @@
 # Implementation plan
 
-## Current checkpoint: station access before purchase — 2026-09-22
+## Current checkpoint: regional station and surface art — 2026-09-22
+
+The requested art refinement is implemented: original repeating road/platform materials and six regional construction-era station families generated with local Blender, each in two LODs. Buildings retain their original construction-era identity across save/load; surfaces advance with the current year. Actual placement ghosts, public entrances, platform dimensions, rail clearance, costs and schema 11 remain consistent. [Images, sources, regeneration and validation](docs/world/REGIONAL_STATION_ART.md).
+
+Verified with 234 core checks, TypeScript/production build, asset budgets and all six focused browser journeys. README contains new actual-renderer pictures. Arizona remains an art/scenery study. Preserve original station purchase provenance if the ledger is ever compacted.
+
+**Next: LIV-01c**, navigable junctions/entrances and deliberate path/rail crossing rules, followed by LIV-02 representative residents and STX-01 real platform/yard expansion. This visual task does not complete those features. Continue regular pushes to both remote branches and stop temporary browsers/servers after tests.
+
+## Previous checkpoint: station access before purchase — 2026-09-22
 
 LIV-01b adds a DE/EN access review, actual building/entrance preview and supported paved forecourt. The worker privately runs the real station command, derives the post-build terrain and regional settlement geometry, and returns the exact access network. Rotation/class/site changes cancel older jobs; failure offers Retry; tool/company changes and disposal stop pending work. Purchase waits for the current result. Blocked/remote visual access remains buildable with an explanation. Existing station costs, catchment and schema 11 remain unchanged.
 

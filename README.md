@@ -6,6 +6,16 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — regional station architecture and period surfaces
+
+Stations now have pitched roofs, detailed windows and doors, canopies and textured timber, brick or plaster facades. New buildings reflect their construction period and region; older stations keep their original architecture. Cobbled streets, dusty paths and later asphalt are distinct. Platforms gain gravel, timber or paving, textured stone edges, benches and lamps instead of a single grey slab.
+
+![Norway in 1900: timber station, gravel platform and cobbled streets](docs/screenshots/station-era-norway-1900.png)
+
+![Arizona art fixture in 1900: brick depot and timber platform](docs/screenshots/station-era-arizona-1900.png)
+
+**234 core tests and six focused Chrome journeys pass**, including actual year transitions, later station purchases and save/reload. [Period comparisons, references, generation instructions and test scope](docs/world/REGIONAL_STATION_ART.md). Arizona remains a scenery study; its picture uses an explicitly enabled art-test construction fixture. Test servers and browsers are stopped afterwards.
+
 ## September 22 — see the station entrance before buying
 
 Station placement now previews the building, public entrance, paved forecourt and a checked footpath to the town. A visible status above **Build station** explains whether access is connected, missing or unsuitable. Turning or moving the station recalculates the preview in the background; cancelled or outdated results cannot enable the purchase.
