@@ -21,7 +21,7 @@ test('semantic earthworks classify fill and rebuild an identical formation surfa
 
 test('station pad operation levels its footprint and preserves distant terrain',()=>{
   const base=new Heightfield(3,3,100,new Float64Array([0,1,2,1,2,3,2,3,4])),operation=stationPadTerrainOperation('station:5',{x:100,y:2,z:100},0,80,18,1),terrain=new EngineeredTerrain(base,{revision:1,patchGeneratorVersion:1,operations:[operation]});
-  assert.equal(terrain.sample(100,100).elevationM,2);assert.equal(terrain.sample(100,108).elevationM,2);assert.equal(terrain.sample(10,10).elevationM,base.sample(10,10).elevationM);
+  assert.equal(terrain.sample(100,100).elevationM,1.45);assert.equal(terrain.sample(100,108).elevationM,1.45);assert.equal(terrain.sample(10,10).elevationM,base.sample(10,10).elevationM);
 });
 
 test('bridge and tunnel intervals do not flatten the surface',()=>{

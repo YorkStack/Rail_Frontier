@@ -1,3 +1,4 @@
+import {RAIL_TO_FORMATION_M} from '../rail/station-layout.js';
 import type {TerrainEngineeringState,TerrainOperation} from '../domain/operations.js';
 import {compileCurve,sampleDistance} from '../rail/geometry.js';
 import type {CubicCurve} from '../domain/model.js';
@@ -39,7 +40,7 @@ export class EngineeredTerrain implements GridTerrain {
         for(const point of cache.points){const dx=x-point.x,dz=z-point.z,distance2=dx*dx+dz*dz;if(best===null||distance2<best.distance2)best={distance2,point};}
         if(!best)continue;const distance=Math.sqrt(best.distance2),section=operation.sections.find(item=>best!.point.distanceM>=item.startM-1e-6&&best!.point.distanceM<=item.endM+1e-6);if(!section)continue;
         if(original.waterLevelM!==null&&original.elevationM<original.waterLevelM)continue;
-        const target=best.point.y-.55,depth=Math.abs(target-elevation),inner=operation.formationWidthM/2,outer=inner+operation.shoulderWidthM+depth*1.5;if(distance>=outer)continue;const weight=distance<=inner?1:1-smooth((distance-inner)/(outer-inner));elevation=elevation+(target-elevation)*weight;
+        const target=best.point.y-RAIL_TO_FORMATION_M,depth=Math.abs(target-elevation),inner=operation.formationWidthM/2,outer=inner+operation.shoulderWidthM+depth*1.5;if(distance>=outer)continue;const weight=distance<=inner?1:1-smooth((distance-inner)/(outer-inner));elevation=elevation+(target-elevation)*weight;
       }
     }
     return elevation;
