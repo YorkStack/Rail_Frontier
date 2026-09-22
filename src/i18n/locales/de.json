@@ -644,6 +644,20 @@
     "Whole-route comparison. Full-route prices.": "Vergleich der ganzen Strecke. Gesamtpreise.",
     "Bright: comparison · muted: unchanged": "Hell: Vergleich · dezent: unverändert",
     "Selection previews; Build buys the route.": "Auswahl zeigt die Vorschau. „Bauen“ kauft die Strecke.",
-    "Following the selected train.": "Die Kamera folgt dem ausgewählten Zug."
+    "Following the selected train.": "Die Kamera folgt dem ausgewählten Zug.",
+    "Construction practice progress": "Fortschritt der Bauschule",
+    "Your railway is connected. Assemble a train here, then give it the two stops.": "Deine Strecke ist verbunden. Stelle jetzt einen Zug zusammen und lege seine beiden Halte fest.",
+    "Your train is ready. Choose the two practice stations as stops and create a shuttle.": "Dein Zug steht bereit. Wähle die beiden Übungsbahnhöfe als Halte und erstelle einen Pendelverkehr.",
+    "Train and stops are ready. Assign the service to put the train on your railway.": "Zug und Halte stehen bereit. Weise dem Zug die Linie zu, damit er deine Strecke bedienen kann.",
+    "Your service is assigned. Resume time to see the train travel along your railway.": "Die Linie ist zugewiesen. Setze die Zeit fort und begleite den Zug auf deiner Strecke.",
+    "Your train is serving this railway. Keep building here or try another construction lesson.": "Dein Zug bedient diese Strecke. Baue hier weiter oder probiere eine andere Bauaufgabe.",
+    "These stations serve towns. Passengers can use the service when demand is available.": "Diese Bahnhöfe erschließen Orte. Bei vorhandener Nachfrage können Fahrgäste die Verbindung nutzen.",
+    "These practice stops are outside town catchments. You can run a test service here; connect town stations to carry passengers.": "Diese Übungshalte erschließen keine Orte. Hier kannst du Probefahrten machen. Für Fahrgäste brauchst du Bahnhöfe mit Ortsanbindung.",
+    "Assemble a train": "Zug zusammenstellen",
+    "Choose the stops": "Halte festlegen",
+    "Assign the service": "Linie zuweisen",
+    "Resume and follow train": "Zeit fortsetzen und Zug folgen",
+    "Follow this service": "Diesen Zug begleiten",
+    "New company · this railway is saved first": "Neue Firma · diese Bahn wird vorher gesichert"
   }
 }

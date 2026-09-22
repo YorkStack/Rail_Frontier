@@ -54,3 +54,11 @@ body:has(.floating-panel:not([hidden])) .company-strip,body:has(.floating-panel:
 .station-help{margin:16px 0;color:var(--muted)}.station-help summary{cursor:pointer;min-height:44px;padding:10px 0;font-size:15px}
 .station-purchase-bar{flex-shrink:0;border-top:1px solid var(--line);padding-top:10px;margin-top:12px}
 #station-planner #commit-station{position:static;box-shadow:none;width:100%}
+
+/* One optional next step after real construction, clear of the world tools. */
+#practice-progress{left:24px;bottom:152px;max-height:calc(100dvh - 240px);overflow:auto;padding:16px;font-size:calc(.9375rem * var(--ui-scale))}
+#practice-progress #practice-service-note{font-size:calc(.8125rem * var(--ui-scale));color:var(--muted);line-height:1.5}
+#practice-progress #next-practice{margin-top:10px;background:transparent;color:var(--ink);border-color:var(--line);font-weight:400}
+@media(max-width:800px){#practice-progress{left:12px;bottom:202px;width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 292px)}}
+
+#practice-progress #next-practice small{display:block;font-size:12px;line-height:1.45;margin-top:4px;color:var(--muted)}

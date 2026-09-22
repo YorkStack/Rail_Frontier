@@ -15,7 +15,21 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — train follow, woodland and drawing input, 2026-09-22
+# Current status — construction-to-service guidance, 2026-09-22
+
+## From construction practice to a working service — 2026-09-22
+
+- A completed practice railway now offers the next real action: assemble a train, choose stops, assign the service, then resume and follow it. Buying still uses the normal catalogue, platform and cash checks; guidance never purchases or starts time implicitly.
+- Progress is derived from connected practice stations, a train parked at either platform, routes serving both stops and actual assigned services. It survives save/load without a save-schema change and reuses a route created before the train. Unrelated routes or idle trains away from those platforms are excluded.
+- The Railway Office opens on the appropriate step with the practice stations proposed only when the stop draft is empty. A guided purchase, route creation or assignment transfers keyboard focus to the next control. Existing custom stop drafts remain intact when opening guidance. Switching companies clears transient train/route selection so reused entity IDs cannot attach the office to another company's workflow.
+- Town coverage controls the explanation: valley stations may carry available passenger demand; remote practice stops are described as a test service until town stations are connected. The secondary next-lesson button explicitly says it starts another company and saves the current railway first.
+- The progress card stays clear of construction/office panels and the lower controls. All new copy is present in German and English.
+
+Validation: 209 core tests, TypeScript/production build and eight distinct Chrome journeys. The new 1280×720 journey builds track, purchases a train, saves/reloads before creating the route, assigns it and verifies actual train distance with no duplicate purchase or railway change. A 390×844 check covers remote-stop copy and usable controls; existing practice transitions, train follow, Railway Office, language switching and exit/save journeys also pass.
+
+Next: unassisted player review of construction-to-service guidance and fuller connected campaign progression. Physical-device/accessibility coverage, adaptive longitudinal subdivision and managed road/rail crossings remain open. This checkpoint does not turn the four separate construction companies into one campaign; DRAW acceptance remains open.
+
+
 
 ## Train follow, woodland and drawing input — 2026-09-22
 
