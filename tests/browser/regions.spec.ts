@@ -46,3 +46,13 @@ test('Arizona exposes windpump and expanded desert vegetation in the scenery stu
   mkdirSync('artifacts/evidence/regions',{recursive:true});await page.screenshot({path:'artifacts/evidence/regions/arizona-windpump.png'});
   expect(errors).toEqual([]);
 });
+
+test('Tyne station-to-station planning automatically widens its search and shows buildable rails',async({page})=>{
+  await page.goto('/?skip-menu=1&world=tyne&lang=de');await page.waitForFunction(()=>window.__railProbe?.ready,{timeout:90000});await page.evaluate(()=>window.__railProbe.setSpeed(0));
+  for(let index=0;index<2;index++){await page.locator('#place-station').click();await page.locator('#commit-station').click();}
+  await page.locator('#plan').click();await page.locator('#route-ports button').first().click();await page.locator('#route-ports button').first().click();
+  await expect(page.locator('#quote-valid')).toContainText('Keine direkte Strecke gefunden',{timeout:20000});
+  await expect(page.locator('#commit-track')).toBeEnabled({timeout:20000});await expect(page.locator('#quote-valid')).toContainText('Ausgewählt');
+  await page.locator('#frame-route').click();await expect(page.locator('#route-draft-overlay .route-proposal path').first()).toHaveAttribute('d',/L/);await expect(page.locator('#commit-track')).toContainText('£');
+  const before=await page.evaluate(()=>window.__railProbe.snapshot());await page.locator('#commit-track').click();await expect(page.locator('#planner')).toBeHidden();const after=await page.evaluate(()=>window.__railProbe.snapshot());expect(after.railway.revision).toBe(before.railway.revision+1);expect(after.railway.edges.length).toBeGreaterThan(before.railway.edges.length);
+});

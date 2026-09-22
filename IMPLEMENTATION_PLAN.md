@@ -1,6 +1,12 @@
 # Implementation plan
 
-## Current UX correction: exact missing service links — 2026-09-22
+## Current correction: automatic wider route search — 2026-09-22
+
+When the quick 60 m station-to-station search returns no certified route, planning now continues automatically with the existing 300 m corridor and larger search budget. This fixes the Tyne/Wear case where valid bridge routes existed but the player saw only the dashed wish line and had to understand a manual retry link. Pending copy explains the automatic detour search, and invalid drafts no longer retain an old price on the disabled build button.
+
+The browser regression covers two real Tyne stations, automatic fallback, visible coloured proposal, purchase and persisted rail edges. Engineering certificates, prices and the player's drawn path remain unchanged.
+
+## Previous UX correction: exact missing service links — 2026-09-22
 
 The Railway Office now derives disconnected consecutive legs from the live rail graph and lists each pair as **origin → destination**. Shuttle services check adjacent stops; loop services also check the return to the first stop. The larger status treatment and end-aligned focus keep the complete correction visible. The route draft remains intact after rejection.
 
