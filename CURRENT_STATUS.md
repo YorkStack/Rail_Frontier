@@ -15,7 +15,17 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — connected visual settlement paths, 2026-09-22
+# Current status — station access preview and supported forecourts, 2026-09-22
+
+## LIV-01b: check access before buying — 2026-09-22
+
+- The placement preview now shows the real building footprint, street-side entrance, paved forecourt and checked town connection. A short DE/EN access status remains above the purchase button; the scrollable body explains connected, blocked, remote and unsuitable terrain. Rural construction remains possible with a missing visual connection.
+- A dedicated cancellable worker runs the actual build command against a private state copy, including engineered terrain and region-specific house placement. The same function generates the built network. Rapid rotation, close, tool/company switches, failure/retry and disposal cannot reuse an older result. Purchase waits for the current result.
+- The forecourt is a supported paving/landing and short apron with terrain, slope, building and rail checks. It is not new separately priced grading. No save-schema, fare/demand, cash or track contract changes; schema 11 remains current.
+- Validation: 230 core tests, production build and 15 distinct Chrome journeys. Initial browser sweep passed 11/13; the two new locale assertions expected wording that differed from the correct catalogue text. Corrected assertions passed alongside cancellation/retry and the narrow 150% layout. Desktop 150% layout also passed. New final close-up capture is part of the repeated German construction/reload journey. Full accounting and images: [checkpoint](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md).
+- README now includes the purchase preview and a close view of the built entrance/forecourt. Test workers, browsers and local servers are stopped after verification; diagnostic logs remain in ignored `artifacts/liv-01b/`.
+- Next: LIV-01c explicit navigable junctions/entrances and deliberate path/rail crossing rules. Then representative residents and the STX station-expansion work. LIV-01 overall and cross-browser/human accessibility gates remain open.
+
 
 ## LIV-01a: connected visual paths — 2026-09-22
 

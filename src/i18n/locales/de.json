@@ -741,6 +741,20 @@
     "access.connected": "Mit dem Ortswegenetz verbunden",
     "access.blocked": "Kein durchgehender Weg zum Ort gefunden",
     "access.remote": "Kein Ortsweg in Anschlussnähe",
-    "access.note": "Der Wegeanschluss ist vorerst eine Darstellung. Fahrgäste werden weiterhin über den Einzugsbereich berechnet."
+    "access.note": "Der Wegeanschluss ist vorerst eine Darstellung. Fahrgäste werden weiterhin über den Einzugsbereich berechnet.",
+    "access.preview.short.pending": "Zugang wird geprüft …",
+    "access.preview.short.connected": "Zugang: mit dem Ort verbunden",
+    "access.preview.short.blocked": "Zugang: kein durchgehender Weg",
+    "access.preview.short.remote": "Zugang: kein Ort in der Nähe",
+    "access.preview.short.terrain": "Zugang: Vorplatz hier nicht möglich",
+    "access.preview.short.failed": "Zugangsprüfung fehlgeschlagen; Details oben",
+    "access.preview.title": "Eingang und Weg zum Ort",
+    "access.preview.pending": "Prüfe Vorplatz und Ortsweg …",
+    "access.preview.connected": "Vorplatz und Ortsanschluss möglich. Die helle gestrichelte Linie zeigt den Fußweg; Gold zeigt den geplanten Bahnhof.",
+    "access.preview.blocked": "Kein durchgehender Ortsweg gefunden. Versuche einen anderen Standort oder drehe den Bahnhof. Du kannst ihn auch ohne Ortsweg bauen.",
+    "access.preview.remote": "Kein Ortswegenetz in der Nähe. Ein ländlicher Bahnhof ist hier trotzdem möglich.",
+    "access.preview.terrain": "Der Eingang liegt ungünstig am Hang oder vor einem Hindernis. Verschiebe oder drehe den Bahnhof für einen sicheren Vorplatz. Bau ohne Vorplatz bleibt möglich.",
+    "access.preview.failed": "Die Anschlussprüfung ist fehlgeschlagen. Prüfe den Standort erneut. Es wurde nichts gebaut.",
+    "access.preview.retry": "Anschluss erneut prüfen"
   }
 }

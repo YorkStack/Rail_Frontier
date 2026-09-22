@@ -1,5 +1,15 @@
 # Implementation plan
 
+## Current checkpoint: station access before purchase — 2026-09-22
+
+LIV-01b adds a DE/EN access review, actual building/entrance preview and supported paved forecourt. The worker privately runs the real station command, derives the post-build terrain and regional settlement geometry, and returns the exact access network. Rotation/class/site changes cancel older jobs; failure offers Retry; tool/company changes and disposal stop pending work. Purchase waits for the current result. Blocked/remote visual access remains buildable with an explanation. Existing station costs, catchment and schema 11 remain unchanged.
+
+The forecourt is a checked landing/apron with solid support, not separately priced terrain grading. [Implementation, validation and limits](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md).
+
+**Next: LIV-01c**, explicit navigable junction/entrance contracts and deliberate handling of paths cut by new railways. Then LIV-02 representative residents; STX-01 physical station expansion reuses the same access contract. Keep regular pushes to both `main` and `implementation/passenger-slice`, and stop test servers/browsers after validation. LIV-01 overall remains open.
+
+Earlier checkpoints below retain their original validation history; this section is the current continuation point.
+
 ## Feasible departures from default station orientation — 2026-09-22
 
 - Reproduced the reported valley failure with two stations placed at the default 0° angle. Both directions failed despite the terrain allowing a railway: the fixed fitting points forced an excessively tight station departure. Two bounded fallback fits now reserve longer endpoint sections when ordinary candidates fail.
@@ -412,4 +422,4 @@ Validation: 224 core tests and production build; 49 distinct browser cases passe
 
 Implemented after the expanded swarm review. One deterministic corridor planner replaces clipped decorative road pieces, uses actual authored door/threshold and footprint geometry, and validates water, slope, buildings and railway obstacles. Public station entrance/connection follows the saved orientation; DE/EN inspection reports visual access without changing catchment or costs. Street/house-path surfaces are batched, joined and terrain-conforming. [Contract, validation and remaining LIV-01b work](docs/world/SETTLEMENT_PATHS_CHECKPOINT.md).
 
-Next: preview-time access review, graded forecourts and explicit navigable junctions/crossings before residents or economic road dependence. STX-01 remains the subsequent physical station-expansion work. Do not mark LIV-01 overall complete.
+LIV-01b now supplies preview-time access review and supported forecourts. Next: LIV-01c explicit navigable junctions/crossings before residents or economic road dependence. STX-01 remains the subsequent physical station-expansion work. Do not mark LIV-01 overall complete.

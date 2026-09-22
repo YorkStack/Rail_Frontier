@@ -3,7 +3,7 @@ import type {Terrain} from './terrain.js';
 export interface PathPoint {x:number;z:number}
 export interface PathObstacle extends PathPoint {id:string;halfX:number;halfZ:number;rotationY:number}
 export interface PathEntrance {id:string;townId:string;door:PathPoint;approach:PathPoint;kind:'house'|'station'}
-export interface SettlementPath {points:PathPoint[];width:number;kind:'street'|'door'|'station';townId:string}
+export interface SettlementPath {points:PathPoint[];width:number;kind:'street'|'door'|'station';townId:string;entranceId?:string}
 export interface SettlementPaths {paths:SettlementPath[];access:Record<string,'connected'|'blocked'|'remote'>}
 export const pathDistance=(a:PathPoint,b:PathPoint)=>Math.hypot(a.x-b.x,a.z-b.z);
 export function localToWorld(origin:PathPoint,rotation:number,x:number,z:number):PathPoint {return {x:origin.x+Math.cos(rotation)*x+Math.sin(rotation)*z,z:origin.z-Math.sin(rotation)*x+Math.cos(rotation)*z};}
@@ -67,14 +67,14 @@ export function connectSettlementPaths(terrain:Terrain,obstacles:readonly PathOb
   const houses=entrances.filter(e=>e.townId===townId&&e.kind==='house'),townSeeds=seeds.filter(s=>s.townId===townId).flatMap(s=>s.points),root=townSeeds.find(p=>valid(p,p,3.4))??houses.find(h=>valid(h.approach,h.approach,3.4))?.approach;
   if(!root){for(const h of houses)access[h.id]='blocked';continue;}
   const network:PathPoint[]=[root];
-  const append=(points:PathPoint[],width:number,kind:SettlementPath['kind'])=>{paths.push({points,width,kind,townId});for(let i=1;i<points.length;i++){const a=points[i-1]!,b=points[i]!,n=Math.ceil(pathDistance(a,b)/8);for(let j=1;j<=n;j++)network.push({x:a.x+(b.x-a.x)*j/n,z:a.z+(b.z-a.z)*j/n});}network.push(points[0]!);};
+  const append=(points:PathPoint[],width:number,kind:SettlementPath['kind'],entranceId?:string)=>{paths.push({points,width,kind,townId,...(entranceId?{entranceId}:{})});for(let i=1;i<points.length;i++){const a=points[i-1]!,b=points[i]!,n=Math.ceil(pathDistance(a,b)/8);for(let j=1;j<=n;j++)network.push({x:a.x+(b.x-a.x)*j/n,z:a.z+(b.z-a.z)*j/n});}network.push(points[0]!);};
   // Existing harbour rows, farm courts and desert blocks guide the connected backbone.
   const pending=townSeeds.filter(p=>valid(p,p,3.4));while(pending.length){pending.sort((a,b)=>Math.min(...network.map(n=>pathDistance(a,n)))-Math.min(...network.map(n=>pathDistance(b,n))));const p=pending.shift()!,route=routeSettlementPath(p,network,valid);if(route&&pathDistance(route[0]!,route.at(-1)!)>.1)append(route,3.4,'street');}
   for(const e of [...houses,...entrances.filter(e=>e.townId===townId&&e.kind==='station')]){
    const distance=Math.min(...network.map(n=>pathDistance(e.approach,n)));if(distance>650){access[e.id]='remote';continue;}
    if(!valid(e.door,e.approach,2.2,e.id)){access[e.id]='blocked';continue;}
    const route=routeSettlementPath(e.approach,network,valid,2.2);if(!route){access[e.id]='blocked';continue;}
-   append(route,2.2,e.kind==='station'?'station':'door');append([e.door,e.approach],2.2,e.kind==='station'?'station':'door');access[e.id]='connected';
+   append(route,2.2,e.kind==='station'?'station':'door',e.id);append([e.door,e.approach],2.2,e.kind==='station'?'station':'door',e.id);access[e.id]='connected';
   }
  }
  for(const e of entrances)access[e.id]??='remote';return {paths,access};
