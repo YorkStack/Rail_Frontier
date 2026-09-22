@@ -14,6 +14,9 @@ import type {CorridorAlternativeRequest,CorridorCurveCandidate} from './corridor
  * Every emitted chain passes the production certificate and engineering quote.
  */
 export function generateWishCandidates(request:CorridorAlternativeRequest,allowRelaxation=true):CorridorCurveCandidate[] {
+  return generateCandidates(request,allowRelaxation,0);
+}
+function generateCandidates(request:CorridorAlternativeRequest,allowRelaxation:boolean,approachSpacingM:number):CorridorCurveCandidate[] {
   const {anchors,terrain,trackClass,tangents}=request;
   if(anchors.length<2||diagnoseSketch(anchors,terrain,trackClass.constraints.minRadiusM)?.blocking)return [];
   const result:CorridorCurveCandidate[]=[],signatures=new Set<string>(),baseSignatures=new Set<string>();
@@ -32,6 +35,14 @@ export function generateWishCandidates(request:CorridorAlternativeRequest,allowR
     let base:Vec3[];try{base=fitWishPoints(anchors,tolerance);}catch{continue;}
     // Add interior freedom even for a single long stroke. Endpoints stay exact.
     if(base.length===2){const [a,b]=base as [Vec3,Vec3],steps=Math.max(4,Math.min(16,Math.ceil(horizontalDistance(a,b)/250)));base=[a,...Array.from({length:steps-1},(_,i)=>(i+1)/steps).map(t=>({x:a.x+(b.x-a.x)*t,y:0,z:a.z+(b.z-a.z)*t})),b];}
+    // A fixed 250 m fitting grid can make a perfectly feasible station departure
+    // too tight. Give endpoint tangents room to turn; the original ordered wish
+    // corridor and exact curve certificate still decide whether this is allowed.
+    if(approachSpacingM>0) {
+      const distances=[0];for(let i=1;i<base.length;i++)distances.push(distances.at(-1)!+horizontalDistance(base[i-1]!,base[i]!));
+      const total=distances.at(-1)!;
+      base=base.filter((_,i)=>i===0||i===base.length-1||(!tangents?.start||distances[i]!>=approachSpacingM)&&(!tangents?.end||total-distances[i]!>=approachSpacingM));
+    }
     const baseKey=JSON.stringify(base.map(p=>[p.x,p.z]));if(baseSignatures.has(baseKey))continue;baseSignatures.add(baseKey);
     const lengths=[0];for(let i=1;i<base.length;i++)lengths.push(lengths.at(-1)!+horizontalDistance(base[i-1]!,base[i]!));const total=lengths.at(-1)!;
     for(const offset of [...new Set([0,-Math.min(90,width),Math.min(90,width),-width,width])])for(const follow of [0,.5,1])for(const smoothing of follow===0?[0]:[0,2,8]){
@@ -65,7 +76,17 @@ export function generateWishCandidates(request:CorridorAlternativeRequest,allowR
   }
 
   if(allowRelaxation&&anchors.length>2&&anchors.every(p=>distanceToSegment(p,anchors[0]!,anchors.at(-1)!)<=150)){
-    for(const candidate of generateWishCandidates({...request,anchors:[anchors[0]!,anchors.at(-1)!],maxOffsetM:0,searchExpansionBudget:0},false))if(followsOrderedCorridor(candidate.curves,anchors,150))result.push({...candidate,id:candidate.id.replace('wish:near','wish:relaxed')});
+    for(const candidate of generateWishCandidates({...request,anchors:[anchors[0]!,anchors.at(-1)!],maxOffsetM:0,searchExpansionBudget:0},false))if(followsOrderedCorridor(candidate.curves,anchors,150))result.push({...candidate,id:`wish:relaxed:${candidate.id}`});
+  }
+  // Only a failed ordinary fit pays for these two bounded retries. Coarser
+  // endpoint sections change fitting freedom, never the player's saved sketch.
+  if(!result.length&&approachSpacingM===0&&(tangents?.start||tangents?.end)) {
+    for(const factor of [4,7]) {
+      const spacing=trackClass.constraints.minRadiusM*factor;
+      const retry=generateCandidates({...request,searchExpansionBudget:0},false,spacing);
+      result.push(...retry.map(candidate=>({...candidate,id:`wish:approach:${factor}:${candidate.id}`})));
+      if(result.length)break;
+    }
   }
   return result;
 }

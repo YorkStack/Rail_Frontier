@@ -658,6 +658,10 @@
     "Assign the service": "Assign the service",
     "Resume and follow train": "Resume and follow train",
     "Follow this service": "Follow this service",
-    "New company · this railway is saved first": "New company · this railway is saved first"
+    "New company · this railway is saved first": "New company · this railway is saved first",
+    "Station approach": "Station approach",
+    "Station approach ·": "Station approach ·",
+    "The line is drawn. Checking station approaches, terrain and construction costs.": "The line is drawn. Checking station approaches, terrain and construction costs.",
+    "Your line is kept. Drag a point to adjust the route; station approaches need room for a bend.": "Your line is kept. Drag a point to adjust the route; station approaches need room for a bend."
   }
 }

@@ -6,6 +6,14 @@ Original browser-based single-player railroad strategy game. Build networks thro
 
 Astra and Sol refer to Codex models. The actual rendering engine is **Three.js**, with TypeScript and Vite. Current implementation and model-handoff decisions are documented in [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
+## September 22 — station approaches that fit
+
+A normal valley route now finds certified departure curves even when both stations keep their default orientation. This works from Sundvik to Granli and in reverse, with the same construction rules and quoted-price checks.
+
+![A buildable Granli–Sundvik route with unchanged station directions](docs/screenshots/station-approach.png)
+
+214 core tests and six construction/browser journeys pass, including real construction and save/reload in both directions.
+
 ## September 22 — clearer construction targets
 
 Reopening a built railway no longer labels every internal alignment point as a destination. Real station connections, open ends and junctions remain selectable; nearby names avoid overlapping and appear when their target is focused or hovered.

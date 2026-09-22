@@ -658,6 +658,10 @@
     "Assign the service": "Linie zuweisen",
     "Resume and follow train": "Zeit fortsetzen und Zug folgen",
     "Follow this service": "Diesen Zug begleiten",
-    "New company · this railway is saved first": "Neue Firma · diese Bahn wird vorher gesichert"
+    "New company · this railway is saved first": "Neue Firma · diese Bahn wird vorher gesichert",
+    "Station approach": "Bahnhofsbogen",
+    "Station approach ·": "Bahnhofsbogen ·",
+    "The line is drawn. Checking station approaches, terrain and construction costs.": "Der Verlauf ist gezeichnet. Bahnhofszufahrten, Gelände und Baukosten werden geprüft.",
+    "Your line is kept. Drag a point to adjust the route; station approaches need room for a bend.": "Dein Verlauf bleibt erhalten. Ziehe einen Punkt, um ihn anzupassen. Bahnhofszufahrten brauchen Platz für einen Bogen."
   }
 }

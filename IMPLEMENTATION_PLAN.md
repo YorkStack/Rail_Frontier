@@ -1,5 +1,14 @@
 # Implementation plan
 
+## Feasible departures from default station orientation — 2026-09-22
+
+- Reproduced the reported valley failure with two stations placed at the default 0° angle. Both directions failed despite the terrain allowing a railway: the fixed fitting points forced an excessively tight station departure. Two bounded fallback fits now reserve longer endpoint sections when ordinary candidates fail.
+- Every fallback retains exact station position, outward tangent and level approach, checks the original ordered drawing envelope and passes the unchanged curve/terrain certificate and live construction quote. No station is rotated and no engineering limit is weakened. Approach options are named in DE/EN; widened smoothing alternatives retain their explicit 150 m disclosure.
+- Failure/pending copy now acknowledges the completed drawing, rather than asking the player to finish it again. Failed plans return the step indicator to editing.
+- Validation: 214 core tests, TypeScript/production build and six distinct Chrome journeys. New forward/reverse journeys place default stations through the real UI, plan, build at the quoted price, save and reload. Additional regression checks cover a slightly bent wish path, exact endpoints/grades, impossible heights and backwards departures. Screenshot: `docs/screenshots/station-approach.png`.
+
+Next: user-requested independent novice-player and UX audit rounds, then implement confirmed findings with lasting tests. The planned first-freight continuation remains pending; no freight guidance was changed in this fix.
+
 ## Construction connection markers — 2026-09-22
 
 - Fixed the stack of “Finish here · Rail connection” signs reported after track construction. Degree-two nodes between alignment segments are implementation details and no longer become independent construction targets. Available platform ends, open rail ends and existing junctions remain selectable; the railway itself and saves are unchanged.
