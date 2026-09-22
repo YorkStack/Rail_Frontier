@@ -17,6 +17,19 @@ AWAITING_USER_PLAYTEST=true
 
 # Current status — construction-to-service guidance, 2026-09-22
 
+## Independent player and UX review — 2026-09-22
+
+- Completed the requested two rounds: three independent novice-player agents, followed by two UX agents. Reports, severity, reproduction steps, baseline limitations and disposition are collected in `docs/qa/PLAYER_REVIEW_2026-09-22.md`.
+- Corrected paused-service wording and the explicit resume/follow action; reconstruct the office's active service from saved entities instead of recommending an unnecessary new purchase. Opening or advancing setup brings the actual next action into view, including at 1280×720.
+- Preserve certified route comparisons across ordinary panel closing and switching; draft/railway/terrain changes still require fresh validation.
+- Native button Space activation no longer toggles the simulation. Compact camera controls have localized accessible names, and toolbar spacing follows the actual scaled/wrapped build-control height.
+- Aggregate cargo lots for readable localized totals, correct car plurals and fill the reviewed DE/EN operation/destination/success/terrain-option copy gaps.
+- Added `npm run test:acceptance`: an isolated build and server on port 5180, fresh contexts, one worker, no retries, retained failure traces/screenshots, HTML and JUnit reporting. It includes construction, real passenger/mail and timber/lumber delivery, save failures, language switching and the new UX regressions.
+
+Validation: 215 core tests and production build pass. 34 distinct browser cases verified: the broad sweep passed 33/34; the remaining stale fixed-pixel layout assertion was replaced by a real control-clearance check, and both practice-service journeys passed on rerun. The final four service/localization cases passed after correcting the last CSS-generated translation labels. Detailed run accounting and preserved reports are in `docs/qa/PLAYER_REVIEW_2026-09-22.md`.
+
+Next: human first-play/Safari/screen-reader checks, then first-freight guidance and wider campaign progression. Small secondary office typography, collapsing completed setup sections and a destination-bearing cue remain design follow-ups. No claim of mobile/touch gameplay or human usability acceptance is made.
+
 ## Feasible departures from default station orientation — 2026-09-22
 
 - Reproduced the reported valley failure with two stations placed at the default 0° angle. Both directions failed despite the terrain allowing a railway: the fixed fitting points forced an excessively tight station departure. Two bounded fallback fits now reserve longer endpoint sections when ordinary candidates fail.
@@ -24,7 +37,7 @@ AWAITING_USER_PLAYTEST=true
 - Failure/pending copy now acknowledges the completed drawing, rather than asking the player to finish it again. Failed plans return the step indicator to editing.
 - Validation: 214 core tests, TypeScript/production build and six distinct Chrome journeys. New forward/reverse journeys place default stations through the real UI, plan, build at the quoted price, save and reload. Additional regression checks cover a slightly bent wish path, exact endpoints/grades, impossible heights and backwards departures. Screenshot: `docs/screenshots/station-approach.png`.
 
-Next: user-requested independent novice-player and UX audit rounds, then implement confirmed findings with lasting tests. The planned first-freight continuation remains pending; no freight guidance was changed in this fix.
+The independent player and UX audit rounds are recorded above. The planned first-freight continuation remains pending; no freight guidance was changed in the station-approach fix.
 
 ## Construction connection markers — 2026-09-22
 
