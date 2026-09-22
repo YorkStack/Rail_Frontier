@@ -187,7 +187,10 @@ bindings=[
     {'materialPrefix':'RF_AZ_Masonry_','map':'masonry-base','normalMap':'masonry-normal','roughnessMap':'masonry-roughness','repeat':[3,3]},
     {'materialPrefix':'RF_AZ_Roof_','map':'weathered-roof-base','normalMap':'weathered-roof-normal','roughnessMap':'weathered-roof-roughness','repeat':[3,4]}
 ]
+previous=json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
+assets += [a for a in previous.get('assets',[]) if a['id'].startswith('arizona-station')]
 manifest={'version':1,'campaignId':'arizona-terrain-study','generator':{'blender':bpy.app.version_string,'script':'tools/blender/generate_arizona_architecture.py','referenceEra':'Arizona circa 1900 interpretation'},'textures':textures,'materialBindings':bindings,'assets':assets}
+if 'stationScript' in previous.get('generator',{}):manifest['generator']['stationScript']=previous['generator']['stationScript']
 MANIFEST.write_text(json.dumps(manifest,indent=2)+'\n')
 
 reset()

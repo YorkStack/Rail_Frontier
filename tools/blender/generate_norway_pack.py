@@ -288,15 +288,6 @@ def electric_el18(lod):
         pipe_between('RF_El18_ContactBar',(-1.15,center,6.82),(1.15,center,6.82),.055,'electric_copper',6)
     box('RF_El18_RoofEquipment',(0,0,4.72),(1.0,1.3,.22),'electric_dark');vehicle_markers(9.25,-9.25)
 
-def station(lod):
-    box('RF_Station_Platform',(0,0,.28),(7.5,28,.55),'stone');box('RF_Station_Body',(4.9,1.5,3.4),(8.5,15,6.8),'cream');box('RF_Station_Roof',(4.9,1.5,7.05),(9.5,16,.5),'roof',(0,0,math.radians(5)))
-    box('RF_Station_Canopy',(0,-1,4.0),(7.8,15,.28),'green')
-    for y in (-6,-2,2,6): cylinder('RF_Station_Post',(0,y,2.15),.13,4.3,'iron',8)
-    if not lod:
-        for y in (-4.8,-1.6,1.6,4.8): box('RF_Station_Window',(0.62,y,4.0),(.08,1.35,1.35),'glass')
-        box('RF_Station_Sign',(0,-7.2,5.0),(.18,3.6,1.0),'red')
-    empty('platform_origin',(0,0,0));empty('track_side',(-4.2,0,0))
-
 def house(lod):
     box('RF_House_Body',(0,0,3.0),(8,10,6),'red');box('RF_House_Roof_A',(-2.2,0,7.0),(5.4,11,.45),'roof',(0,math.radians(45),0));box('RF_House_Roof_B',(2.2,0,7.0),(5.4,11,.45),'roof',(0,math.radians(-45),0))
     if not lod:
@@ -322,10 +313,10 @@ def portal(lod):
         for x in (-4.7,-2.3,2.3,4.7): box('RF_Portal_Block',(x,-1.3,7.8),(1.9,.35,.8),'cream')
     empty('track_center',(0,0,0))
 
-BUILDERS={'nord-2-6-0':locomotive,'nord-el-1':electric_el1,'nord-di-3b':diesel_di3b,'nord-di-4':diesel_di4,'nord-el-18':electric_el18,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-station':station,'norway-house':house,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
-KINDS={'nord-2-6-0':'vehicle','nord-el-1':'vehicle','nord-di-3b':'vehicle','nord-di-4':'vehicle','nord-el-18':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-station':'station','norway-house':'building','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
-NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-1':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-4':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-18':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-station':['platform_origin','track_side'],'norway-house':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
-MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-el-1':[4,7.5,14.5],'nord-di-3b':[4,5.5,20.5],'nord-di-4':[4,5.5,22.5],'nord-el-18':[4,7.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-station':[16,10,31],'norway-house':[12,11,13],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
+BUILDERS={'nord-2-6-0':locomotive,'nord-el-1':electric_el1,'nord-di-3b':diesel_di3b,'nord-di-4':diesel_di4,'nord-el-18':electric_el18,'fjord-passenger-coach':passenger,'fjord-freight-wagon':freight,'norway-house':house,'norway-bridge-span':bridge,'norway-tunnel-portal':portal}
+KINDS={'nord-2-6-0':'vehicle','nord-el-1':'vehicle','nord-di-3b':'vehicle','nord-di-4':'vehicle','nord-el-18':'vehicle','fjord-passenger-coach':'vehicle','fjord-freight-wagon':'vehicle','norway-house':'building','norway-bridge-span':'infrastructure','norway-tunnel-portal':'infrastructure'}
+NODES={'nord-2-6-0':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-1':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-3b':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-di-4':['coupler_front','coupler_rear','forward_probe','up_probe'],'nord-el-18':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-passenger-coach':['coupler_front','coupler_rear','forward_probe','up_probe'],'fjord-freight-wagon':['coupler_front','coupler_rear','forward_probe','up_probe'],'norway-house':['ground_origin'],'norway-bridge-span':['span_start','span_end'],'norway-tunnel-portal':['track_center']}
+MAX_DIMS={'nord-2-6-0':[4,7,17],'nord-el-1':[4,7.5,14.5],'nord-di-3b':[4,5.5,20.5],'nord-di-4':[4,5.5,22.5],'nord-el-18':[4,7.5,20.5],'fjord-passenger-coach':[4,6,20],'fjord-freight-wagon':[4,5,14],'norway-house':[12,11,13],'norway-bridge-span':[9,8,26],'norway-tunnel-portal':[12,10,4]}
 
 assets=[]
 for asset_id,builder in BUILDERS.items():

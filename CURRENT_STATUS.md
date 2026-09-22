@@ -15,7 +15,15 @@ DRAW_IMPLEMENTATION_STARTED=true
 DRAW_IMPLEMENTATION_COMPLETE=false
 AWAITING_USER_PLAYTEST=true
 
-# Current status — station access preview and supported forecourts, 2026-09-22
+# Current status — regional station architecture and period surfaces, 2026-09-22
+
+## Requested art refinement: regional stations, roads and platforms — 2026-09-22
+
+- Local Blender generated three construction-era station families for Norway and Arizona, with pitched roofs, textured walls, windows, doors, canopies and two LODs. Existing buildings retain their construction-era look; placement ghosts use the corresponding real model.
+- Streets now use distinct repeating colour/normal/roughness tiles for dirt, cobbles, gravel and asphalt. Platforms retain exact rail clearance and full saved length, with period surfaces, coping, walking strips, benches and lamps. Rural/door paths stay unpaved. Era boundaries are art-direction choices rather than exact historical dates.
+- Schema 11, cash, rail geometry and access rules remain unchanged. Architecture derives from original construction receipts; future ledger compaction must preserve that provenance. Both regional base generators preserve the separately generated station assets.
+- Final verification: 234 core tests, TypeScript, production build, embedded/external asset budgets and 6/6 focused Chrome journeys. Initial art-fixture timeout and the subsequent successful runs are disclosed in [REGIONAL_STATION_ART.md](docs/world/REGIONAL_STATION_ART.md). New actual-renderer README images and period comparisons included. Arizona remains a scenery study.
+- Cleanup: test browsers/server stopped, generated acceptance site removed from workspace; logs retained in ignored artifacts. Resume **LIV-01c**, then representative residents and STX physical station expansion. No claim of full-century balance or new cross-browser/performance acceptance.
 
 ## LIV-01b: check access before buying — 2026-09-22
 
